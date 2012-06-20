@@ -1,0 +1,145 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Boost Function Object Adapter Library</title>
+</head>
+
+<body bgcolor="#FFFFFF" text="#000000">
+
+<table border="1" bgcolor="#007F7F" cellpadding="2">
+  <tr>
+    <td bgcolor="#FFFFFF"><img src="../../c++boost.gif" alt="c++boost.gif (8819 bytes)" WIDTH="277" HEIGHT="86"></td>
+    <td><a href="../../index.htm"><font face="Arial" color="#FFFFFF"><big>Home </big></font></a></td>
+    <td><a href="../libraries.htm"><font face="Arial" color="#FFFFFF"><big>Libraries </big></font></a></td>
+    <td><a href="../../people/people.htm"><font face="Arial" color="#FFFFFF"><big>People </big></font></a></td>
+    <td><a href="../../more/faq.htm"><font face="Arial" color="#FFFFFF"><big>FAQ </big></font></a></td>
+    <td><a href="../../more/index.htm"><font face="Arial" color="#FFFFFF"><big>More </big></font></a></td>
+  </tr>
+</table>
+
+<h1>Function Pointer Adapters</h1>
+
+<p><nobr><a href="../../boost/functional.hpp">functional.hpp</a></nobr>
+ヘッダは C++ 標準 <nobr>(&sect 20.3.7):</nobr> 由来の関数ポインタアダプ
+タの両方の強化バージョンを提供する:</p>
+
+<ul>
+<li><tt>pointer_to_unary_function</tt></li>
+<li><tt>pointer_to_binary_function</tt></li>
+</ul>
+
+<p>同様に対応するヘルパ関数も提供する。</p>
+
+<ul>
+<li><tt>ptr_fun</tt></li>
+</ul>
+
+<p>しかし、<a href="function_traits.html">function object traits</a> を
+使用しているおかげで、このライブラリのアダプタと接続する場合、このアダプ
+タを使う必要は無い。しかしながら、あなたの実装が我々の特性クラスと共
+にきちんと働かない場合 (部分特殊化版が欠けていることによる) や、サードパー
+ティの関数オブジェクトアダプタと共に使いたい場合に、使う必要があるかもし
+れない。</p>
+
+<h3>Usage</h3>
+
+<p>これらのアダプタを使う必要がある場合、使い方は標準関数ポインタアダプ
+タと同様である。例えば、</p>
+
+<blockquote><pre>
+bool bad(std::string foo) { ... }
+...
+std::vector&lt;std::string&gt; c;
+...
+std::vector&lt;std::string&gt;::iterator it
+     = std::find_if(c.begin(), c.end(), std::not1(boost::ptr_fun(bad)));
+</pre></blockquote>
+
+<p>しかしながら、このライブラリは関数オブジェクト特性をサポートする、強
+化された <a href="negators.html">ネゲータ</a> を含んでいることに注意しな
+さい。それで、以上のソースと同様に以下のように書ける。</p>
+
+<blockquote><pre>
+std::vector&lt;std::string&gt;::iterator it
+     = std::find_if(c.begin(), c.end(), boost::not1(bad));
+</pre></blockquote>
+
+<h3>Argument Types</h3>
+
+<p>標準は <nobr><tt>pointer_to_unary_function</tt></nobr> をこのように定
+義する<nobr>(&sect;20.3.8 &para;2):</nobr></p>
+
+
+<blockquote><pre>
+template &lt;class Arg, class Result&gt;
+class pointer_to_unary_function : public unary_function&lt;Arg, Result&gt; {
+public:
+  explicit pointer_to_unary_function(Result (* f)(<strong>Arg</strong>));
+  Result operator()(<strong>Arg</strong> x) const;
+};
+</pre></blockquote>
+
+<p><nobr><tt>operator()</tt></nobr> の引数はラップされる関数の引数と厳密
+に等しい型であることに注意しなさい。もしこれが値型であれば、引数は値渡し
+され、二度コピーされる。<nobr><tt>pointer_to_binary_function</tt></nobr>
+も同様の問題を持っている。
+
+<p>しかしながら、引数を代わりに <nobr><tt>const Arg&amp;</tt></nobr> と宣言
+することによって非効率を削除しようとすると、Arg が参照型であった場合、現
+在では非合法な (ただし <a
+href="http://anubis.dkuug.dk/jtc1/sc22/wg21/docs/cwg_active.html#106">C++
+言語中核の問題点 106 番目</a> を参照せよ)、参照の参照ができてしまう。
+
+<p>つまり、<nobr><tt>operator()</tt></nobr> の引数を宣言する望ましい方法
+は、ラップされる関数の引数が参照であるかないかに依っている。もしそれが参
+照であるならば、単純に <nobr><tt>Arg</tt></nobr> と宣言したいのであり、
+もし値であれば <nobr><tt>const Arg&amp;</tt></nobr> と宣言したいのである。
+
+<p>Boost の <nobr><a
+href="../utility/call_traits.htm">call_traits</a></nobr> クラステンプレー
+トは <tt><nobr>param_type</nobr></tt> typedef を含んでいて、それは部分特
+殊化版を用いて正確にこの判断をを行う。<nobr><tt>operator()</tt></nobr> を
+以下のように宣言することによって。</p>
+
+<blockquote><pre>
+Result operator()(typename call_traits&lt;Arg&gt;::param_type x) const
+</pre></blockquote>
+
+<p>我々は望ましい結果を引き出した - 参照の参照を生み出すことなく、効率性
+を得たのだ。</p>
+
+<h3>Limitations</h3>
+
+<p>call traits テンプレートはこの改良を実現するために使われる関数オブジェ
+クト特性と call_traits の両方が部分特殊化版に頼っているので、この改良は部
+分特殊化の機能を持つコンパイラでのみ有効である。そうでないコンパイラでは、
+関数に渡される引数は常に参照渡しとなるので、参照の参照の可能性を生みだす
+ことになる。</p>
+
+<hr>
+
+<p>Copyright &copy; 2000 Cadenza New Zealand Ltd.  Permission to copy,
+use, modify, sell and distribute this document is granted provided
+this copyright notice appears in all copies. This document is provided
+"as is" without express or implied warranty, and with no claim as to
+its suitability for any purpose.</p>
+
+<p>Revised 28 June 2000</p>
+
+<hr>
+
+<p>
+Japanese Translation Copyright (C) 2003 shinichiro.h
+&lt;g940455@mail.ecc.u-tokyo.ac.jp&gt;.
+</p>
+
+<p>
+オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の
+複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」
+に提供されており、いかなる明示的、暗黙的保証も行わない。また、
+いかなる目的に対しても、その利用が適していることを関知しない。
+</p>
+
+</body>
+</html>

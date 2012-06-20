@@ -1,0 +1,234 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="Keywords" content="array, block, carray, c_array, array wrapper, adapter, adaptor, STL, C++ Standard Library, array.hpp">
+<title>array.hpp, an STL Array Wrapper</title>
+<style type="text/css">
+<!--
+.mytitle {  font-family: "Arial", "Helvetica", "sans-serif"; font-size: larger; font-weight: bold}
+.keyword {  font-family: "Courier New", "Courier", "mono"}
+.bkeyword {  font-family: "Courier New", "Courier", "mono"; font-weight: bold}
+.honbun {  font-family:"sans-serif"; }
+.tbd {  color: #FF3366}
+-->
+</style>
+</head>
+<body text="#000000" bgcolor="#FFFFFF" link="#186ABF">
+
+<p><a href="http://www.boost.org/libs/array/array.html">オリジナル</a></p>
+
+<table width="100%" height="40">
+  <tr>
+    <td BGCOLOR="#DDDDDD" class="mytitle">
+    Class <span class="keyword">array</span>, an STL Container (as Wrapper) for Arrays of Constant Size
+    </td>
+  </tr>
+</table>
+
+<p class="honbun"> [<a href="#intro">intro</a>] [<a href="#interface">interface</a>] [<a href="#discussion">discussion</a>] [<a href="#code">code</a>]</p>
+
+<p class="honbun"><a name="intro"></a>C++ 標準ライブラリの一部である C++ 標準テンプレートライブラリ STL は、さまざまな種類のコンテナに対してアルゴリズムを適用するためのフレームワークを提供している。しかしながら、通常の配列は STL コンテナのインターフェイスには備わっていない(STL コンテナのイテレータとしてのインターフェイスは用意されているけれども)。</p>
+
+<p class="honbun">通常の配列を置き換えるものとして、STL では <span class="keyword">vector<></span>が提供されているが、<span class="keyword">vector<></span> 
+  は動的配列のセマンティクスを持つので、要素数が変化する可能性を持つデータを管理対象とする。静的なサイズさえあれば充分な場面では、このことはいくぶんかのオーバーヘッドを生じさせることとなる。</p>
+
+<p class="honbun">Matthew H. Austern は彼の本、<i>Generic Programming and the STL</i> の中で、<span class="bkeyword">block</span> と名づけられた、静的サイズの通常の配列を扱うとても便利なラッパクラスを紹介している。これは通常の配列よりも安全であり、パフォーマンスもひけを取らない。<i>The C++ Programming Language, 3rd edition</i> で、Bjarne Stroustrup は <span class="bkeyword">c_array</span> という同じようなクラスを紹介しているが、これは私(<a href="http://www.josuttis.com">Nicolai Josuttis</a>)が、私の本 <i>The C++ Standard Library - A Tutorial and Reference</i> の中で <span class="bkeyword">carray</span> と呼んでいるものを少々変更して提供したものだ。ここに紹介するのは、これらのアプローチのエッセンスを、<a href="http://www.boost.org/">boost</a> からのたくさんのフィードバックで味付けしたものである。</p>
+
+<p class="honbun">いろいろな名前を考えたすえ、このクラスの名前はシンプルに <span class="bkeyword">array</span> と決定した。</p>
+
+<p class="honbun"><a name="interface"></a>このクラスは以下のインターフェイスを提供する。</p>
+<table border="0" class="honbun">
+  <tr> 
+    <td><b>型:</b></td><td></td>
+  </tr>
+  <tr> 
+    <td class="keyword">value_type</td><td>要素の型</td>
+  </tr>
+  <tr> 
+    <td class="keyword">iterator</td><td>イテレータの型(ランダムアクセス・イテレータ)</td>
+  </tr>
+  <tr> 
+    <td class="keyword">const_iterator</td><td>定数とされる要素へのイテレータの型</td>
+  </tr>
+  <tr>
+    <td class="keyword">reference</td><td>要素の参照の型</td>
+  </tr>
+  <tr> 
+    <td class="keyword">const_reference</td><td>定数とされる要素への参照の型</td>
+  </tr>
+  <tr> 
+    <td class="keyword">size_type</td><td>符号付のサイズの型</td>
+  </tr>
+  <tr>
+    <td class="keyword">difference_type</td><td>符号なしの距離(差分)の型</td>
+  </tr>
+  <tr> 
+    <td><b>操作:</b></td><td></td>
+  </tr>
+  <tr> 
+    <td class="keyword">array&lt;<i>type</i>,<i>num</i>&gt;</td>
+    <td>デフォルトコンストラクタ。<span class="keyword"><i>num</i></span> (要素数)個の<span class="keyword"><i>type</i></span> (型)を要素とする配列を作成する。下のコメントを参照。</td>
+  </tr>
+  <tr> 
+    <td class="keyword">array&lt;<i>type</i>,<i>num</i>&gt;(<i>a</i>)</td>
+    <td>コピーコンストラクタ<span class="keyword"><i>a</i></span> のすべての要素をコピーする。(<span class="keyword"><i>a</i></span> は同じ <span class="keyword"><i>type</i></span> と <span class="keyword"><i>num</i></span> でなければならない)。</td>
+  </tr>
+  <tr> 
+    <td class="keyword">operator=</td><td> 代入。すべての要素を代入する。</td>
+  </tr>
+  <tr>
+    <td class="keyword">assign(<i>val</i>)</td>
+    <td>すべての要素に <span class="keyword"><i>val</i></span> を代入する。</td>
+  </tr>
+  <tr> 
+    <td class="keyword">begin()</td><td>最初の要素へのイテレータを返す。</td>
+  </tr>
+  <tr> 
+    <td class="keyword">end()</td><td>最後の要素の次の位置へのイテレータを返す。</td>
+  </tr>
+  <tr> 
+    <td class="keyword">rbegin()</td>
+    <td>逆イテレーションでの最初の要素を指す逆イテレータを返す。</td>
+  </tr>
+  <tr>
+    <td class="keyword">rend()</td><td>逆イテレーションでの最後の要素のひとつ後ろ(behind)を指す逆イテレータを返す。</td>
+  </tr>
+  <tr> 
+    <td class="keyword">operator[<i>i</i>]</td>
+    <td>インデックス <span class="keyword"><i>i</i></span> の要素を返す(範囲チェックなし)</td>
+  </tr>
+  <tr> 
+    <td class="keyword">at(<i>i</i>)</td>
+    <td>インデックス <span class="keyword"><i>i</i></span> の要素を返す(<span class="keyword"><i>i</i></span> が不正な場合は std::range_error を送出する)</td>
+  </tr>
+  <tr>
+    <td class="keyword">front()</td>
+    <td>最初の要素を返す(要素が存在することを呼び出し側で保証しなければならない)</td>
+  </tr>
+  <tr> 
+    <td class="keyword">back()</td>
+    <td>最後の要素を返す(要素が存在することを呼び出し側で保証しなければならない)</td>
+  </tr>
+  <tr> 
+    <td class="keyword">data()</td><td> 生の配列を読み取り専用として返す。</td>
+  </tr>
+  <tr>
+    <td class="keyword">size()</td><td>要素数を返す。</td>
+  </tr>
+  <tr> 
+    <td class="keyword">empty()</td><td>配列が空かどうかを返す。</td>
+  </tr>
+  <tr> 
+    <td class="keyword">max_size()</td>
+    <td>格納可能な要素数の最大値を返す(<span class="keyword">size()</span> と同じ)。</td>
+  </tr>
+  <tr> 
+    <td class="keyword">swap(<i>a</i>)</td>
+    <td><span class="keyword">array <i>a</i></span> と要素を交換する。</td>
+  </tr>
+  <tr> 
+    <td class="keyword">==, !=</td><td>等値性を調べる。</td>
+  </tr>
+  <tr> 
+    <td class="keyword">&lt;, &lt;=, &gt;, &gt;=</td>
+    <td><span class="keyword">array</span> の比較演算。</td>
+  </tr>
+  <tr> 
+    <td><b>値:</b></td><td></td>
+  </tr>
+  <tr> 
+    <td class="keyword">static_size</td><td>コンパイル時の要素数</td>
+  </tr>
+</table>
+
+<p class="honbun"><a name="discussion"></a>array クラスは"reversible container"(C++ 標準 Section 23.1, [lib.container.requirements] を参照)の要件のほとんどを満たしているが、完全にではない。array が reversible な STL コンテナではない理由は以下のとおりである。<br>
+- 提供されるべきコンストラクタがない<br>
+- 要素が不確定な初期値を持つ可能性がある(以下を参照)。<br>
+- swap() の計算量が定数ではない。<br>
+- size() が常に一定で、型の第2テンプレート引数によって決定される。<br>
+- アロケータのサポートを提供しないコンテナである。<br>
+</p>
+
+<p class="honbun">また、"sequence"(C++標準Section 23.1.1, [lib.sequence.reqmts]参照)であるための要件を、以下のものを除いて満たしていない。<br>
+- front() と back() が提供されている。<br>
+- operator[] と at() が提供されている。<br>
+
+<p class="honbun">コンストラクタの点に関しては、重要な設計上のトレードオフを行い、(それによって)"<b>aggregate</b>"( C++ 標準 Section 8.5.1, [dcl.init.aggr] を参照)として array を実装することができた。つまり、</p>
+
+<ul class="honbun">
+  <li>array は、ブレースで囲まれ、要素番号の昇順に並べられ、カンマで区切られたコンテナの要素への初期値のリストによって初期化することができる。
+    <blockquote> 
+      <p>boost::array&lt;int,4&gt; a = { { 1, 2, 3 } };</p>
+    </blockquote>
+    <p>リスト内の初期値の数が足りない場合、残りの要素はデフォルト値のままになる(したがって定義された値を持つ)ことに注意しよう。</p>
+  </li>
+  <li>しかしながら、<b>初期値のリストをないままにすると、要素は不確定の初期値をもつことになる。</b></li>
+  <li>ユーザー定義のコンストラクタを持たない。</li>
+  <li>private あるいは protected な 非 static データメンバをもたない。</li>
+  <li>基底クラスを持たない。</li>
+  <li>仮想関数を持たない。</li>
+</ul>
+
+<p class="honbun">現在の実装はこのようなアプローチをとっているが、不確定な初期値を持つ可能性があることは大きな問題点である。そこで、この点に関してこのようにすべきだというあなたの考えを、ぜひフィードバックしてほしい。ここから導かれる<b>未解決の問題点</b>は以下のようなものだ。</p>
+
+<ul class="honbun">
+  <li>初期化リストをサポートするべきか、あるいは次のようなものでOKか？
+    <blockquote> 
+      <p><span class="keyword">int data[] = { 1, 2, 3, 4 }</span></p>
+      <p><span class="keyword">array&lt;int,5&gt; x(data);</span> あるいは&nbsp;&nbsp;<span class="keyword">array&lt;int,data&gt; x;</span></p>
+    </blockquote>
+  </li>
+  <li>可搬性のために、初期化リストとして、"<span class="keyword">{ { ... } }</span>"のかわりに、"<span class="keyword">{ ... }</span> "を使えるようにするべきだろうか？</li>
+  <blockquote> 
+    <p>規格の 8.5.1 (11) ではこれは許されているようだが、gcc 2.95.2 では警告メッセージを表示する。</p>
+  </blockquote>
+  <li>初期値の決定と、初期化リストのサポートのための、別の方法があるだろうか？</li>
+  <li class="tbd">逆イテレータのstuffのための Static_casts はどうするか？<br>
+  <span class="tbd">原文は「Static_casts for reverse iterator stuff?」。よくわかりません…</span>
+  </li>
+</ul>
+
+<p class="honbun">建設的な<a href="mailto:solutions@josuttis.com">フィードバック</a>はどのようなものでも歓迎する。<b>注意してほしいのは、boostメーリングリストのすべてのメールを読むだけの時間が、私にはないという点だ。というわけで、確実にフィードバックが私に届くようにするため、このクラスに関するメールについては、私にコピーを送ってほしい。</b></p>
+
+<p class="honbun"><a name="code"></a>以下のコードは「このままの形(as is)」で提供され、明示的あるいは暗黙的な保証はない。</p>
+
+<p class="honbun"><b>array.hpp</b>, <span class="keyword">array&lt;&gt;</span> の実装ファイル<b>:</b></p>
+<li class="honbun"><a href="array.hpp.html">HTML ファイル</a></li>
+<li class="honbun"><a href="../../boost/array.hpp">通常のファイル</a></li>
+
+<p class="honbun"><b>array1.cpp</b>, <span class="keyword">array&lt;&gt;</span>を使った簡単な例<b>:</b>
+<li class="honbun"><a href="array1.cpp.html">HTML ファイル</a></li>
+<li class="honbun"><a href="array1.cpp">通常のファイル</a></li>
+
+<p class="honbun"><b>array2.cpp</b>, <span class="keyword">array&lt;&gt;</span>を使った別の例<b>:</b>
+<li class="honbun"><a href="array2.cpp.html">HTML ファイル</a></li>
+<li class="honbun"><a href="array2.cpp">通常のファイル</a></li>
+
+<p class="honbun"><b>array3.cpp</b>, <span class="keyword">array&lt;&gt;</span>を使った三つ目の例<b>:</b>
+<li class="honbun"><a href="array3.cpp.html">HTML ファイル</a></li>
+<li class="honbun"><a href="array3.cpp">通常のファイル</a></li>
+
+<p class="honbun"><b>array4.cpp</b>, <span class="keyword">array&lt;&gt;</span> の <span class="keyword">array&lt;&gt;</span> を使った例<b>:</b>
+<li class="honbun"><a href="array4.cpp.html">HTML ファイル</a></li>
+<li class="honbun"><a href="array4.cpp">通常のファイル</a></li>
+
+<p class="honbun"><b>array5.cpp</b>, <span class="keyword">array&lt;&gt;</span> の他の操作をテストする例<b>:</b>
+<li class="honbun"><a href="array5.cpp.html">HTML ファイル</a></li>
+<li class="honbun"><a href="array5.cpp">通常のファイル</a></li>
+
+<br>
+<br>
+<p class="honbun">C++ での通常の配列の扱いと、STL フレームワークについてのさらなる詳細について知るには、例えば以下のようなものを参照してほしい。<br>
+  <i>&nbsp;&nbsp;&nbsp;&nbsp; <a href="http://www.josuttis.com/libbook/">The C++ Standard Library - A Tutorial and Reference</a></i> <br>
+  &nbsp;&nbsp;&nbsp;&nbsp; by <a href="http://www.josuttis.com" target="_top">Nicolai M. Josuttis</a><br>
+  &nbsp;&nbsp;&nbsp;&nbsp; Addison Wesley Longman, 1999<br>
+  &nbsp;&nbsp;&nbsp;&nbsp; ISBN 0-201-37926-0
+</p>
+
+<p class="honbun"><a href="http://www.josuttis.com/" TARGET="_top">Home Page of Nicolai Josuttis</a></p>
+
+<p class="honbun"> [<a href="#intro">intro</a>] [<a href="#interface">interface</a>] [<a href="#discussion">discussion</a>] [<a href="#code">code</a>]</p>
+
+</body>
+</html>

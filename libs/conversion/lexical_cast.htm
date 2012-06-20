@@ -1,0 +1,206 @@
+<!doctype html public "-//W3C//DTD HTML Transitional 4.0//EN">
+<html>
+
+<head>
+	<title>lexical_cast</title>
+	<meta name="author" content="Kevlin Henney, mailto:kevlin@curbralan.com">
+</head>
+
+<body bgcolor="#FFFFFF" text="#000000">
+
+<a href="http://www.boost.org/libs/conversion/lexical_cast.htm">原文</a>
+
+<h1>
+	<img src="../../c++boost.gif" alt="c++boost.gif (8819 bytes)" align="center" width="277" height="86">Header
+	<a href="../../boost/lexical_cast.hpp">boost/lexical_cast.hpp</a>
+</h1>
+
+<ul>
+	<li><a href="#motivation">Motivation</a></li>
+	<li><a href="#examples">Examples</a></li>
+	<li><a href="#synopsis">Synopsis</a></li>
+	<li><a href="#lexical_cast"><code>lexical_cast</code></a></li>
+	<li><a href="#bad_lexical_cast"><code>bad_lexical_cast</code></a></li>
+	<li><a href="#portability">Portability</a></li>
+	<li><a href="#future">Future directions</a></li>
+</ul>
+
+<hr />
+
+<h2><a name="motivation">Motivation</a></h2>
+
+<p>
+	　例えば、<code>int</code>型のデータを<code>string</code>型で表現させるときや、逆に<code>string</code>型のインスタンスに格納された数値表現を<code>int</code>型に変換するなど、値を文字列の表現に変換しなければならないことがしばしばある。これらは、画面上の表示と設定ファイルの関係のように、プログラムの内部構造を外部に出力する際に良く用いられる手法である。
+</p><p>
+	　C/C++標準ライブラリは、先に述べた変換機能の数々を提供するが、それらは使いやすさや拡張性、安全性の面においてまちまちである。
+</p><p>
+	例として、<code>atoi</code>に代表されるC標準関数における多くの制限について述べてみよう ：
+</p>
+
+<ul>
+	<li>
+		変換は文字列から内部データ型への一方向に限られる。Cライブラリを用いた別の変換方法としては、sprintf関数が存在するが不便で安全性も低い。<br />
+		また、itoa関数のような非標準の機能を用いる方法もあるが、それでは移植性の低下を招いてしまう。
+	</li>
+	<li>
+		サポートする型がプリミティブな数値型の一部(<code>int</code>, <code>long</code>, <code>double</code>)のみである。
+	</li>
+	<li>
+		文字列表現から複素数や有理数への変換のように、サポートする型を増やすことは通常できない。
+	</li>
+</ul>
+
+<p>
+	　<code>strtol</code>に代表される標準C関数では、いくつかの基本的な制限が存在するものの、変換に関する素晴らしい制御方法を提供してくれる。しかし、普通、そのような制御方法は必要ではないし、使われることもない。<code>scanf</code>とその関連する関数では、さらに優れた制御方法を提供してくれるものの、安全性と使いやすさにおいて優秀とは言い難い。
+</p><p>
+　C++標準ライブラリは、ここで問題になっている種類のin-core 整形のためにstringstream を提供している。これは、文字列による、任意の型と入出力との間の変換と整形に関して幅広く管理する。しかし単純な変換に関して言えば、stringstream を直接利用するのは不格好(余計なローカル変数を取る必要があり、中置記法の利便性を失う)であるか、或いは不明瞭になりうる(stringstream オブジェクトが式の中で一時的オブジェクトとして作成される場合)。これは多くの面で、包括的な概念及びテキスト表現の管理能力を提供するが、これらは比較的高水準なので、単純な変換のためにも極端に多くのことを巻き込まなければならない。
+</p><p>
+	　<code>lexical_cast</code>テンプレート関数はテキストで表現可能な任意の型同士の変換を便利で一貫性のある形、簡単に言えば式レベルでの便利な変換を提供する。<br />
+	　精度や書式において<code>lexical_cast</code>が標準で行うより柔軟な操作を必要とするとき、<code>stringstream</code>の使用を推奨する。また、数値型間の変換を行う場合、<code><a href="cast.htm#numeric_cast">numeric_cast</a></code>の方が適している。
+</p><p>
+	　文字列ベースの表現に関する問題点等に関する議論を扱ったものとして、Herb Sutterの記事<a href="http://www.gotw.ca/publications/mill19.htm"> <i>The String Formatters of Manor Farm</i></a>を紹介しておこう。これには、<code>stringstream</code>や<code>lexical_cast</code>等の比較も含まれている。
+</p>
+
+<hr />
+
+<h2><a name="examples">Examples</a></h2>
+
+以下のサンプルではコマンドラインから与えられた複数の引数を数値の列に変換している。
+
+<blockquote>
+<pre>
+int main(int argc, char * argv[])
+{
+    using boost::lexical_cast;
+    using boost::bad_lexical_cast;
+
+    std::vector&lt;short&gt; args;
+
+    while(*++argv)
+    {
+        try
+        {
+            args.push_back(lexical_cast&lt;short&gt;(*argv));
+        }
+        catch(bad_lexical_cast &amp;)
+        {
+            args.push_back(0);
+        }
+    }
+    ...
+}
+</pre>
+</blockquote>
+
+以下のサンプルでは文字列の中に数値を埋め込んでいる。
+
+<blockquote>
+<pre>
+void log_message(const std::string &amp;);
+
+void log_errno(int yoko)
+{
+    log_message(&quot;Error &quot; + boost::lexical_cast&lt;std::string&gt;(yoko) + &quot;: &quot; + strerror(yoko));
+}
+</pre>
+</blockquote>
+
+<hr />
+
+<h2><a name="synopsis">Synopsis</a></h2>
+
+ライブラリの詳細：<a href="../../boost/lexical_cast.hpp"><code>&quot;boost/lexical_cast.hpp&quot;</code></a>
+
+<blockquote>
+<pre>
+namespace boost
+{
+    class <a href="#bad_lexical_cast">bad_lexical_cast</a>;
+    template&lt;typename Target, typename Source&gt;
+      Target <a href="#lexical_cast">lexical_cast</a>(Source arg);
+}
+</pre>
+</blockquote>
+
+テストコード：<a href="lexical_cast_test.cpp"><code>&quot;lexical_cast_test.cpp&quot;</code></a>
+
+<hr />
+
+<h2><a name="lexical_cast"><code>lexical_cast</code></a></h2>
+
+<blockquote>
+<pre>
+template&lt;typename Target, typename Source&gt;
+  Target lexical_cast(Source arg);
+</pre>
+</blockquote>
+
+引数として受け取った<code>arg</code>を<code>std::stringstream</code>に流し込み、<code>Target</code>のデータに変換して返す。もし変換が失敗した場合、例外<a href="#bad_lexical_cast"><code>bad_lexical_cast</code></a>が発生する。<br />
+<br />
+引数と戻り値の型の条件：
+
+<ul>
+	<li>
+		<code>Source</code>は<i>OutputStreamable</i>（streamに出力可能）でなければならない。<br />
+		つまり、<code>std::ostream</code>のオブジェクトを左辺に取り、引数の型（<code>Source</code>）のインスタンスを右辺に取る<code>operator&lt;&lt;</code>が定義されていなければならない。
+	</li>
+	<li>
+		<code>Source</code>と<code>Target</code>は<i>CopyConstructible</i>（コピーコンストラクト可能）でなければならない。[20.1.3]
+	</li>
+	<li>
+		<code>Target</code>は<i>InputStreamable</i>（streamから入力可能）でなければならない。<br />
+		つまり、<code>std::istream</code>のオブジェクトを左辺に取り、戻り値の型（<code>Target</code>）のインスタンスを右辺に取る<code>operator&gt;&gt;</code>が定義されていなければならない。
+	</li>
+	<li>
+		<code>Target</code>は<i>DefaultConstructible</i>（デフォルトコンストラクト可能）でなければならない。<br />
+		つまり、Targetのオブジェクトの<i>default-initialize</i>が可能でなければならない。[8.5, 20.1.4]
+	</li>
+	<li>
+		<code>Target</code>は<i>Assignable</i>でなければならない。[23.1]
+	</li>
+</ul>
+
+<p>
+	streamにおけるベースの文字型は、特にワイド文字を利用した変換を必要としない場合、<code>char</code>型を利用し、そうで無ければ、<code>wchar_t</code>型を利用する。ベースにワイド文字を必要とするのは、<code>wchar_t</code>、<code>wchar_t *</code>、<code>std::wstring</code>である。
+</p><p>
+	より高度な変換を必要とする場合、<code>std::stringstream</code>および<code>std::wstringstream</code>を利用することをお勧めする。streamの機能の必要のない変換が要求されているのならば、<code>lexical_cast</code>を利用することは適さない。そのような特殊なケースための準備を<code>lexical_cast</code>は用意してないからである。
+</p>
+
+<hr />
+
+<h2><a name="bad_lexical_cast"><code>bad_lexical_cast</code></a></h2>
+
+<blockquote>
+<pre>
+class bad_lexical_cast : public std::bad_cast
+{
+public:
+    ... // std::exception<i>と同様のメンバ関数を持つ</i>
+};
+</pre>
+</blockquote>
+
+この例外は<a href="#lexical_cast"><code>lexical_cast</code></a>が失敗したことを示すために使用される。
+
+<hr />
+
+<h2><a name="changes">Changes</a></h2>
+<p>
+<ul type="square">
+<li>
+	前バージョンの<code>lexical_cast</code>は、浮動小数型の変換のためにstreamのデフォルトの精度を利用していたが、現行版においては、<code>std::numeric_limits</code>を特殊化している型に関しては、それを元に変換を行うようになった。
+<li>
+	前バージョンの<code>lexical_cast</code>は、任意のワイド文字型の変換をサポートしていなかった。ワイド文字型の完全な言語、ライブラリのサポートがなされているコンパイラにおいては、<code>lexical_cast</code>は<code>wchar_t</code>、<code>wchar_t *</code>、および<code>std::wstring</code>の変換をサポートする。
+<li>
+	前バージョンの<code>lexical_cast</code>は、従来型のストリーム抽出演算子が値を読むために充分であると仮定していた。しかしながら、文字列入出力は、その空白文字が、文字列の内容ではなく、入出力セパレータの役目を演じてしまうという結果、非対称なのである。現在のバージョンでは<code>std::string</code>と<code>std::wstring</code>(サポートされているところでは) でのこの誤りが修正されている。例えば、<code>lexical_cast&lt;std::string&gt;("Hello, World")</code> は、<code>bad_lexical_cast</code>例外で失敗することなく、成功する。
+<li>
+	前バージョンの<code>lexical_cast</code>は、ポインタへの危険なもしくは無意味な変換を許していたが、現行版においては、ポインタへの変換は例外<code>bad_lexical_cast</code>を投げるようになっている：コード<code>lexical_cast&lt;char *&gt;("Goodbye, World")</code>は未定義の振る舞いをする代わりに、例外を投げる。
+</ul>
+</p>
+
+<hr />
+
+<div align="right"><small><i>&copy; Copyright Kevlin Henney, 2000, 2002</i></small></div>
+
+</body>
+</html>

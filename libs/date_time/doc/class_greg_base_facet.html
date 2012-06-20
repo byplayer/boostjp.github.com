@@ -1,0 +1,100 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<title>Date I/O Documentation</title>
+<link href="doxygen.css" rel="stylesheet" type="text/css">
+<meta http-equiv="content-style-type" content="text/css">
+<!-- 入口 -->
+<style type="text/css"><!--
+  .original {color: #808080;}
+  .draft {color: green;}
+  .note {color: #ff8080;}
+--></style>
+</head>
+
+<body>
+<a href="../../../index.htm">
+<img align="left" src="../../../c++boost.gif" alt="C++ Boost">
+</a>  
+<h1>Date Input/Output</h1>
+<hr style="clear: left;">
+<p>
+<a href="index.html">Overall Index</a> --
+<a href="gregorian.html">Gregorian Index</a> --
+<a href="posix_time.html">Posix Time Index</a>
+</p>
+<p>
+<a href="#intro">Introduction</a> --
+<a href="#classoverview">Class Overview</a>
+</p>
+
+<h2><a name="intro">Introduction</a></h2>
+<p>
+<div class="original">
+The library provides for localized stream-based I/O of dates and times.
+Note that this support is not supported for all compilers.  See the
+<a href="BuildInfo.html">build information</a> page for details.
+</div>
+  <span class="draft">ライブラリは日付と時間についてローカライズされたストリームベースの I/O を供給する。</span>
+  これは、全てのコンパイラでサポートされているわけではないので注意が必要である。
+  詳細は <a href="BuildInfo.html">build information</a> を参照されたい。
+</p>
+
+
+<h2><a name="classoverview">Class Overview</a></h2>
+<table border=1 cellspacing=3 cellpadding=3>
+<tr><th>Class</th>
+    <th>Construction Parameters</th>
+    <th>Description</th></tr>
+<tr><td>date_iterator</td>
+    <td></td>
+    <!-- 
+    <td>Common base class for all day level iterators.</td></tr>
+      -->
+    <td>日付レベルのイテレータに共通な基底クラス</td></tr>
+<tr><td>day_iterator</td>
+    <td>date start_date, int day_count=1</td>
+    <!-- 
+    <td>Iterate day_count days at a time.</td></tr>
+      -->
+    <td>day_count 日単位で反復する</td></tr>
+<tr><td>week_iterator</td>
+    <td>date start_date, int week_offset=1</td>
+    <!-- 
+    <td>Iterate week_offset weeks at a time.</td></tr>
+      -->
+    <td>week_offset 周単位で反復する</td></tr>
+<tr><td>month_iterator</td>
+    <td>date start_date, int month_offset=1</td>
+    <!-- 
+    <td>Iterate month_offset months.  There are special rules for 
+        handling the end of the month. These are: if start date is last 
+        day of the month, always adjust to last day of the month.
+	if date is beyond the end of the month (eg: jan 31 + 1 month) 
+        adjust back to end of month.
+      -->
+    <td>
+      month_offset 月単位で反復する。<br>
+      月末の取り扱いについては特別な規則がある。<br>
+      始点となる日が月の最終日であった場合、反復毎にその月の最終日に調整される。
+      日付がその月の最終日を超える場合(例えば1月31日+1ヶ月)、月末に合わせて調整される。
+    </td></tr>
+<tr><td>year_iterator</td>
+    <td>date start_date, int year_offset=1</td>
+    <!-- 
+    <td>Iterate year_offset years</td></tr>
+      -->
+    <td>year_offset 年単位で反復する</td></tr>
+</table>
+
+
+<hr><address><small>
+<!-- hhmts start -->
+Last modified: Thu Sep  5 07:26:05 MST 2002
+<!-- hhmts end -->
+ by <a href="mailto:jeff&#64;crystalclearsoftware.com">Jeff Garland</a> &copy; 2000-2002
+<br>
+  Japanese Translation Copyright (C) 2003 <a href="mailto:sshino@cppll.jp">Shoji Shinohara</a>.
+</small></address>
+
+</body>
+</html>

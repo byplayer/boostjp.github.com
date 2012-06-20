@@ -1,0 +1,186 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<title>Boost Date-Time Build-Compiler Information</title>
+<link href="doxygen.css" rel="stylesheet" type="text/css">
+<meta http-equiv="content-style-type" content="text/css">
+<!-- 入口 -->
+<style type="text/css"><!--
+  .original {color: #808080;}
+  .draft {color: green;}
+  .note {color: #ff8080;}
+--></style>
+</head>
+
+<body>
+<a href="../../../index.htm">
+<img align="left" src="../../../c++boost.gif" alt="C++ Boost">
+</a>
+<h1>Date-Time Build-Compiler Information</h1>
+<hr style="clear: left;">
+<a href="index.html">Overall Index</a> --
+<a href="gregorian.html">Gregorian Index</a> --
+<a href="posix_time.html">Posix Time Index</a>
+<p>
+<a href="#overview">Overview</a>  -- 
+<a href="#options">Compilation Options</a> -- 
+<a href="#portability">Compiler/Portability Notes</a> -- 
+<a href="#directory">Directory Structure</a>  -- 
+<a href="#required">Required Boost Libraries</a> 
+</p>
+
+<h2><a name="overview">Overview</a></h2>
+<p>
+<div class="original">
+The library has several functions that require the creation of a library file.
+The Jamfile in the build directory will produce a library 
+(<font class="bold">libboost_date_time</font>) that contains these functions.
+</div>
+  ライブラリ関数のいくつかはライブラリファイルを作成する必要がある。
+  これらの関数を含むライブラリ(<strong class="bold">libboost_date_time</strong>)を作成するには、buildディレクトリにあるJamfileを使う。
+  <!-- 意訳 -->
+</p>
+
+<p>
+<div class="original">
+The variable <b>DATE_TIME_INLINE</b> is used to control the inlining of
+certain core functions.  By default this variable is defined by
+in the compilation of the library.  All <b>compiles using the 
+library must also include this define or linking errors will
+result</b>.
+</div><div class="draft">
+  変数<strong>DATE_TIME_INLINE</strong>は、ある特定のコア関数のインライン化を制御する。
+  デフォルトでこの変数はライブラリのコンパイル時に定義されている。
+  ライブラリを使っている全てのコンパイル単位でこの定義を含んでいなければ、リンクエラーになるだろう。
+</div>
+</p>
+
+<H2><a name="options">Compilation Options</a></H2>
+<!-- 訳注:もう１段落上ではないでしょうか -->
+<p>
+<div class="original">
+By default the posix_time system uses a 64 bit integer and a 32 bit
+integer internally to provide nano-second level resolutions.  As
+an alternative, a single 64 bit integer can be used to provide a
+microsecond level resolution.  This alternative implementation 
+may provide better performance and more compact memory usage
+for many applications that do not require nano-second resolutions.
+</div><div class="draft">
+  デフォルトでは posix_time はナノ秒レベルの精度を提供するために内部で 64bit整数と32bit整数を使う。
+  選択肢として、一つの 64bit整数でマイクロ秒レベルの精度を提供することもできる。  この代替実装は、ナノ秒精度を必要としない多くのアプリケーションでパフォーマンスの向上と省メモリが期待できる。
+</div>
+</p>
+
+<p>
+<div class="original">
+The variable BOOST_DATE_TIME_POSIX_TIME_STD_CONFIG, as defined in 
+build/Jamfile, selects between these options.  To select the 64 bit
+integer implementation simply remove this define from the Jamfile.
+</div><div class="draft">
+  変数<b>BOOST_DATE_TIME_POSIX_TIME_STD_CONFIG</b>はbuild/Jamfileで定義されており、これらのオプションを選択する。
+  64bit整数版を使う場合、単にJamfileからこの定義を削除する。
+</div>
+</p>
+
+<H2><a name="portability">Compiler/Portability Notes</a></H2>
+<p>
+<div class="original">
+The Boost Date-Time library has been built and tested with many compilers. 
+However, some compilers and standard libraries have issues.  While some
+of these issues can be worked around, others are difficult to work 
+around. The following compilers fully support all aspects of the library:
+</div>
+  Boost Date-Time libraryは、多くのコンパイラでビルドされテストされた。
+  しかしながら、いくつかのコンパイラと標準ライブラリで問題がある。
+  これらの問題のいくつかは回避可能であるが、回避できない問題も残っている。
+  以下のコンパイラはライブラリの機能を完全にサポートしている。
+<ul>
+  <li>GCC 3.0.3 on Linux
+  <li>GCC 3.1 (cygwin) 
+  <li>MSVC 7           
+</ul>
+<p>
+<div class="original">
+In particular, a lack of support for standard locales limits the ability 
+of the library to support iostream based input output.  For these
+compilers a set of more limited string based input-output is provided.
+</div>
+  特に、標準ロケールに対するサポートが完全でないと iosteam ベースの入出力サポートが制約される事がある。そういったコンパイラのために、より限定された文字列ベースの入出力を提供している。
+
+<div class="original">
+The compilers/stadard libraries with this limitation include:
+</div>
+  以下のコンパイラ及び標準ライブラリはこの制約を含む
+</p>
+<ul>
+ <li>GCC 2.9x on Linux
+ <li>Borland 5.1.1 and 5.6
+ <li>MSVC 6 SP5
+</ul>
+
+
+<p>
+<div class="original">
+Other compilers such as Comeau and Metroworks have been tested 
+sucessfully with earlier versions of the library. 
+</div>
+  ComeauやMetroworksといった他のコンパイラでは、ライブラリの初期バージョンでテストに成功している。
+</p>
+
+<H2><a name="directory">Directory Structure</a></H2>
+<p>
+<div class="original">
+The date_time directory structure has been changed for boost submission.
+</div>
+  date_timeのディレクトリ構成はBoostに合わせて変更された。
+</p>
+
+<p>
+<div class="original">
+The directory tree has the following structure:
+</div>
+  ディレクトリ構成は次のようになっている
+<pre>
+  /boost/date_time                    -- <span class="original">common headers and template code </span>共通ヘッダ及びテンプレート
+  /boost/date_time/gregoran           -- <span class="original">gregorian calendar system header files </span>グレゴリオ暦 system header files
+  /boost/date_time/posix_time         -- <span class="original">posix time system headers </span>
+  /libs/date_time/build               -- <span class="original">build files and output directory </span>
+  /libs/date_time/test                -- <span class="original">test battery for generic code </span>ジェネリックコードに関するテスト一式
+  /libs/date_time/test/gregorian      -- <span class="original">test battery for the gregorian system </span>グレゴリオ暦に関するテスト一式
+  /libs/date_time/examples/gregorian  -- <span class="original">nifty example programs </span>nifty example programs
+  /libs/date_time/src/gregorian       -- <span class="original">cpp files for libboost_date_time </span>libboost_date_time用のcppファイル
+  /libs/date_time/test/posix_time     -- <span class="original">test battery for the posix_time system </span>posix_time 系に関するテスト一式
+  /libs/date_time/examples/posix_time -- <span class="original">time example programs </span>time example programs
+  /libs/date_time/src/posix_time      -- <span class="original">empty (one file, but no source code...) </span>空 (ファイルが一つあるが、ソースコードではない)
+</pre>
+</p>
+
+<H2><a name="required">Required Boost Libraries</a></H2>
+
+<p>
+<div class="original">
+The library depends on
+</div>
+  このライブラリは以下のライブラリに依存している。
+<ul>
+  <li><a href="../../tokenizer/index.htm">boost.tokenizer</a>
+  <li><a href="../../integer/cstdint.htm">boost.integer(cstdint)</a>
+  <li><a href="../../utility/operators.htm">boost.operators</a>
+  <li><a href="../../conversion/lexical_cast.htm">boost::lexical_cast</a>
+</ul>
+<div class="original">
+ so at least these libraries need to be installed. 
+</div>
+  よって、最低限これらのライブラリがインストールされている必要がある。
+</p>
+
+<hr>
+<address><small>
+<!-- hhmts start -->
+Last modified: Sun Oct  6 15:55:53 MST 2002
+<!-- hhmts end -->
+ by <a href="mailto:jeff&#64;crystalclearsoftware.com">Jeff Garland</a> &copy; 2000-2002
+<br>
+  Japanese Translation Copyright (C) 2003 <a href="mailto:sshino@cppll.jp">Shoji Shinohara</a>.
+</small></address>
+</body>
+</html>

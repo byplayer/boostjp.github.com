@@ -1,0 +1,292 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<title>posix_time::time_duration Documentation</title>
+<link href="doxygen.css" rel="stylesheet" type="text/css">
+<meta http-equiv="content-style-type" content="text/css">
+<!-- 入口 -->
+<style type="text/css"><!--
+  .original {color: #808080;}
+  .draft {color: green;}
+  .note {color: #ff8080;}
+--></style>
+</head>
+
+<body>
+<a href="../../../index.htm">
+<img align="left" src="../../../c++boost.gif" alt="C++ Boost">
+</a>
+<h1>posix_time::time_duration</h1>
+<hr style="clear: left;">
+<p>
+<a href="index.html">Overall Index</a> -- 
+<a href="gregorian.html">Gregorian Index</a> --
+<a href="posix_time.html">Posix Time Index</a>
+</p>
+<h3>Time Duration Documentation</h3>
+<p>
+<a href="class_time_duration.html#header">Header</a> -- 
+<a href="class_time_duration.html#construct">Construction</a> -- 
+<a href="class_time_duration.html#countbasedconstruct">Count Based Construction</a> -- 
+<a href="class_time_duration.html#constructfromstring">Construct from String</a> -- 
+<a href="class_time_duration.html#accessors">Accessors</a> -- 
+<a href="class_time_duration.html#conversiontostring">Conversion To String</a> -- 
+<a href="class_time_duration.html#operators">Operators</a>
+</p>
+
+<h2><a name="intro">Introduction</a></h2>
+<p>
+<div class="original">
+The class boost::posix_time::time_duration the base type reponsible for representing a length of time.  A duration can be either positive or negative.
+</div>
+  boost::posix_time::time_duration クラスは時間の長さを確実に表現できる基底型である。
+  時間長(duration)は正あるいは負の値を取り得る。
+<div class="note" id="typo">reponsible は responsible のtypoと思われる</div>
+</p>
+<p>
+<div class="original">
+Several small helper classes that derive from a base time_duration, as
+shown below, to adjust for different resolutions.  These classes can 
+shorten code and make the intent clearer.
+</div>
+  以下に示すように、異なった分解能を調整するために基底の time_duration から継承するいくつかの小さなヘルパークラスがある。
+  これらのクラスによって、コードを短く、意図をより明確にすることができる。
+</p>
+<p>
+<img align="middle" src="time_duration_inherit.png" alt="inherit">
+</p>
+<p>
+<!--
+As an example:
+-->
+  例: 
+<div class="fragment"><pre>
+
+  <font class="keyword">using namespace</font> boost::gregorian;
+  <font class="keyword">using namespace</font> boost::posix_time;
+
+  time_duration td = hours(1) + seconds(10); <font class="comment">//01:00:01</font>
+  td = hours(1) + nanosec(5); <font class="comment">//01:00:00.000000005</font>
+</pre></div>
+</p>
+
+<h2><a name="header">Header</a></h2>
+<pre>
+#include "boost/date_time/posix_time/posix_time.hpp" //include all types plus i/o
+or
+#include "boost/date_time/posix_time/posix_time/posix_time_types.hpp" //no i/o just types
+</pre>
+
+
+<h2><a name="construct">Construction</a></h2>
+<table border=1 cellspacing=3 cellpadding=3>
+<tr><th>Syntax</th><th>Description</th><th>Example</th></tr>
+<tr>
+  <td>time_duration(hours,minutes,seconds,fractional_seconds)</td>
+    <!-- 
+        <td>Construct ad duration from the counts</td>
+    -->
+  <td>
+    <span class="original">Construct ad duration from the counts</span><br>
+    <span class="draft">数値から時間長(duration)を生成する</span><br>
+    <span class="note" id="typo">ad は as のtypo と思われる</span>
+  </td>
+  <td>time_duration td(1,2,3,9); //1 hr 2 min 3 sec 9 nanoseconds</td>
+</tr>
+</table>
+<br>
+
+<h2><a name="countbasedconstruct">Construction By Count</a></h2>
+<table border=1 cellspacing=3 cellpadding=3>
+<tr><th>Syntax</th><th>Description</th><th>Example</th></tr>
+<tr>
+  <td>hours(long)</td>
+  <!--
+        <td>Number of hours</td>
+  -->
+  <td>時間単位で生成</td>
+  <td>time_duration td = hours(3);</td></tr>
+<tr>
+  <td>minutes(long)</td>
+  <!--
+        <td>Number of minutes</td>
+  -->
+  <td>分単位で生成</td>
+  <td>time_duration td = minutes(3);</td></tr>
+<tr>
+  <td>seconds(long)</td>
+  <!--
+        <td>Number of seconds</td>
+  -->
+  <td>秒単位で生成</td>
+  <td>time_duration td = seconds(3);</td></tr>
+<tr>
+  <td>millisec(long)</td>
+  <!--
+        <td>Number of millisec</td>
+  -->
+  <td>ミリ秒単位で生成</td>
+  <td>time_duration td = millisec(3);</td></tr>
+<tr>
+  <td>nanosec(long)</td>
+  <!--
+        <td>Number of nanosec</td>
+  -->
+  <td>ナノ秒単位で生成</td>
+  <td>time_duration td = nanosec(3);</td></tr>
+</table>
+<br>
+
+<h2><a name="constructfromstring">Construction From String</a></h2>
+<table border=1 cellspacing=3 cellpadding=3>
+<tr><th>Syntax</th><th>Description</th><th>Example</th></tr>
+<tr>
+  <td>time_duration <strong class="func">duration_from_string</strong>(const std::string&amp;)</td>
+  <!--
+        <td>From delimited string.</td>
+  -->
+  <td>区切られた文字列から生成</td>
+  <td>
+    std::string ts("23:59:59.000");<br>
+    time_duraton td(duration_from_string(ts))
+  </td>
+</tr>
+</table>
+<br>
+
+<h2><a name="accessors">Accessors</a></h2>
+
+<table border=1 cellspacing=3 cellpadding=3>
+<tr><th>Syntax</th><th>Description</th><th>Example</th></tr>
+<tr>
+  <td>long <strong class="func">hours</strong>() const</td>
+  <!--
+        <td>Get the number of hours.</td>
+  -->
+  <td>時間の部分を取得</td>
+  <td>time_duration td(1,2,3); td.hours() --&gt; 1</td></tr>
+<tr>
+  <td>long <strong class="func">minutes</strong>() const</td>
+  <!--
+        <td>Get the number of minutes normalized.</td>
+  -->
+  <td>正規化された分の部分を取得</td>
+  <td>time_duration td(1,2,3); td.minutes() --&gt; 2</td></tr>
+<tr>
+  <td>long <strong class="func">seconds</strong>() const</td>
+  <!--
+        <td>Get the number of seconds.</td>
+  -->
+  <td>秒の部分を取得</td>
+  <td>time_duration td(1,2,3); td.hours() --&gt; 3</td></tr>
+<tr><td>long <strong class="func">fractional_seconds</strong>() const</td>
+  <!--
+        <td>Get the number of fractional seconds.</td>
+  -->
+  <td>秒の小数部を取得</td>
+  <td>time_duration td(1,2,3, 1000); td.fractional_seconds() --&gt; 1000</td></tr>
+<tr>
+  <td>bool <strong class="func">is_negative</strong>() const</td>
+  <!--
+        <td>True if duration is negative.</td>
+  -->
+  <td>時間長(duration)が負の時 true</td>
+  <td>time_duration td(-1,0,0); td.is_negative() --&gt; true</td></tr>
+<tr>
+  <td>time_duration <strong class="func">invert_sign</strong>() const</td>
+  <!--
+        <td>Generate a new duration with the sign inverted/</td>
+  -->
+  <td>符号を反転させた時間長(duration)を新たに生成</td>
+  <td>time_duration td(-1,0,0); td.invert_sign() --&gt; 01:00:00</td></tr>
+<tr>
+  <td>static gdtl::time_resolutions <strong class="func">resolution</strong>()</td>
+  <!--
+        <td>Describes the resolution capability of the time_duration class.</td>
+  -->
+  <td>time_duration クラスが表現可能な分解能</td>
+  <td>time_duration::resolution() --&gt; nano</td></tr>
+<tr>
+  <td>boost::int64_t <strong class="func">ticks</strong>()</td>
+  <!--
+        <td>Return the raw count of the duration type.</td>
+  -->
+  <td><span class="original">Return the raw count of the duration type.</span><br><span class="draft">時間長(duration)型の生の数を返す</span></td>
+  <td>time_duration td(0,0,0, 1000); td.ticks() --&gt; 1000</td></tr>
+<tr>
+  <td>static time_duration <strong class="func">unit</strong>()</td>
+  <!--
+        <td>Return smallest possible unit of duration type (1 nanosecond).</td>
+  -->
+  <td>時間長(duration)型の扱える最小単位を返す(1ナノ秒)</td>
+  <td>time_duration::unit() --&gt; time_duration(0,0,0,1)</td></tr>
+</table>
+<br>
+
+<h2><a name="conversiontostring">Conversion To String</a></h2>
+<table border=1 cellspacing=3 cellpadding=3>
+<tr><th>Syntax</th><th>Description</th><th>Example</th></tr>
+<tr>
+  <td>std::string <strong class="func">to_simple_string</strong>(time_duration)</td>
+  <!--
+        <td>To HH:MM:SS.fffffffff were fff is fractional seconds that are only included if non-zero.</td>
+  -->
+  <td>HH:MM:SS.fffffffff 形式に変換する(fff...部は、秒の小数部が0でないときのみ含まれる)</td>
+  <td>10:00:01.123456789</td></tr>
+<tr>
+  <td>std::string <strong class="func">to_iso_string</strong>(time_duration)</td>
+  <!--
+        <td>Convert to form HHMMSS,fffffffff.</td>
+  -->
+  <td>HHMMSS,fffffffff 形式に変換する</td>
+  <td>100001,123456789</td></tr>
+
+</table>
+<br>
+
+<h2><a name="operators">Operators</a></h2>
+<table border=1 cellspacing=3 cellpadding=3>
+<tr><th>Syntax</th><th>Description</th><th>Example</th></tr>
+<tr>
+  <td>
+    operator==, operator!=,<br> 
+	operator&gt;, operator&lt; <br> 
+    operator&gt;=, operator&lt;=</td>
+  <!--
+        <td>A full complement of comparison operators</td>
+  -->
+  <td>サポートする比較演算子</td>
+  <td>dd1 == dd2, etc</td></tr>
+<tr>
+  <td>time_duration operator+(time_duration) const</td>
+  <!--
+        <td>Add durations.</td>
+  -->
+  <td>時間長(durations)を加算する</td>
+  <td>
+    time_duration td1(hours(1)+minutes(2)); <br>
+    time_duration td2(seconds(10)); time_duration td3 = td1 + td2;
+  </td></tr>
+<tr>
+  <td>time_duration operator-(time_duration) const</td>
+  <!--
+        <td>Subtract durations.</td>
+  -->
+  <td>時間長(durations)を減算する</td>
+  <td>
+    time_duration td1(hours(1)+nanosec(2)); <br>
+    time_duration td2 = td1 - minutes(1);
+  </td></tr>
+</table>
+<br>
+
+<hr>
+<address><small>
+<!-- hhmts start -->
+Last modified: Wed Aug 21 15:29:45 MST 2002
+<!-- hhmts end -->
+ by <a href="mailto:jeff&#64;crystalclearsoftware.com">Jeff Garland</a> &copy; 2000-2002
+<br>
+  Japanese Translation Copyright (C) 2003 <a href="mailto:sshino@cppll.jp">Shoji Shinohara</a>.
+</small></address>
+</body>
+</html>

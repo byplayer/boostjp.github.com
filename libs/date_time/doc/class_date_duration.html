@@ -1,0 +1,144 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<title>gregorian::date_duration Documentation</title>
+<link href="doxygen.css" rel="stylesheet" type="text/css">
+<meta http-equiv="content-style-type" content="text/css">
+<!-- 入口 -->
+<style type="text/css"><!--
+  .original {color: #808080;}
+  .draft {color: green;}
+  .note {color: #ff8080;}
+--></style>
+</head>
+
+<body>
+<a href="../../../index.htm">
+<img align="left" src="../../../c++boost.gif" alt="C++ Boost">
+</a>  
+
+<h1>gregorian::date_duration</h1>
+<hr style="clear: left;">
+<p>
+<a href="index.html">Overall Index</a> -- 
+<a href="gregorian.html">Gregorian Index</a> --
+<a href="posix_time.html">Posix Time Index</a>
+</p>
+<h3>Date Documentation</h3>
+<p>
+<a href="class_date_duration.html#header">Header</a> -- 
+<a href="class_date_duration.html#construct">Construction</a> -- 
+<a href="class_date_duration.html#accessors">Accessors</a> -- 
+<a href="class_date_duration.html#operators">Operators</a>
+</p>
+
+<h2><a name="intro">Introduction</a></h2>
+<p>
+<div class="original">
+The class boost::gregorian::date_duration is a simple day count used for arithmetic with <a href="class_date.html">gregorian::date</a>.  A duration can be either positive or negative.
+</div>
+  boost::gregorian::date_duration は，<a href="class_date.html">gregorian::date</a>の演算で使うシンプルな日数を表すクラスである。
+</p>
+
+<h2><a name="header">Header</a></h2>
+<pre>
+#include "boost/date_time/gregorian/gregorian.hpp" //include all types plus i/o
+or
+#include "boost/date_time/gregorian/gregorian_types.hpp" //no i/o just types
+</pre>
+
+<h2><a name="construct">Construction</a></h2>
+<table border=1 cellspacing=3 cellpadding=3>
+<tr><th>Syntax</th><th>Description</th><th>Example</th></tr>
+<tr>
+  <td>date_duration(long)</td>
+<!--
+        <td>Create a duration count.</td>
+	<td>date_duration dd(3); //3 days</td></tr>
+-->
+  <td>日数を生成</td>
+  <td>date_duration dd(3); //3 日</td>
+</tr>
+</table>
+<br>
+
+<h2><a name="accessors">Accessors</a></h2>
+<table border=1 cellspacing=3 cellpadding=3>
+<tr><th>Syntax</th><th>Description</th><th>Example</th></tr>
+<tr>
+  <td>long <font class="func">days</font>() const</td>
+<!--
+        <td>Get the day count.</td>
+-->
+  <td>日数を取得</td>
+  <td>date_duration dd(3); dd.days() --&gt; 3</td>
+</tr>
+<tr>
+  <td>bool  <font class="func">is_negative</font>() const</td>
+<!--
+        <td>True if number of days is less than zero..</td>
+-->
+  <td>日数が0より小さいときtrue</td>
+  <td>date_duration dd(-1); dd.is_negative() --&gt; true</td>
+</tr>
+<tr>
+  <td>static date_duration <font class="func">unit</font>()</td>
+<!--
+        <td>Return smallest possible unit of duration type.</td>
+-->
+  <td>duration type の取りうる最小単位を返す</td>
+  <td>date_duration::unit() --&gt; date_duration(1)</td>
+</tr>
+</table>
+<br>
+
+<h2><a name="operators">Operators</a></h2>
+<table border=1 cellspacing=3 cellpadding=3>
+<tr><th>Syntax</th><th>Description</th><th>Example</th></tr>
+<tr>
+  <td>
+    operator==, operator!=,<br> 
+	operator&gt;, operator&lt; <br> 
+    operator&gt;=, operator&lt;=
+  </td>
+<!--
+        <td>A full complement of comparison operators</td>
+-->
+  <td>サポートする比較演算子</td>
+  <td>dd1 == dd2, etc</td>
+</tr>
+<tr>
+  <td>date_duration operator+(date_duration) const</td>
+<!--
+        <td>Add date durations.</td>
+-->
+  <td>日数を加算する</td>
+  <td>
+    date_duration dd1(3); <br>
+    date_duration dd2(5); 
+    date_duration dd3 = dd1 + dd2;</td>
+</tr>
+<tr>
+  <td>date_duration operator-(date_duration) const</td>
+<!--
+        <td>Subtract durations.</td>
+-->
+  <td>日数の差を取る</td>
+  <td>
+    date_duration dd1(3); <br>
+    date_duration dd2(5); <br>
+    date_duration dd3 = dd1 - dd2;</td>
+</tr>
+</table>
+<br>
+
+<hr>
+<address><small>
+<!-- hhmts start -->
+Last modified: Wed Aug 21 15:12:43 MST 2002
+<!-- hhmts end -->
+ by <a href="mailto:jeff&#64;crystalclearsoftware.com">Jeff Garland</a> &copy; 2000-2002
+<br>
+  Japanese Translation Copyright (C) 2003 <a href="mailto:sshino@cppll.jp">Shoji Shinohara</a>.
+</small></address>
+</body>
+</html>

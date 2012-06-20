@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html
+   PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">
+
+<!--
+ - Copyright (c) Jeremy Siek and Andrew Lumsdaine 2000
+ -
+ - Permission to use, copy, modify, distribute and sell this software
+ - and its documentation for any purpose is hereby granted without fee,
+ - provided that the above copyright notice appears in all copies and
+ - that both that copyright notice and this permission notice appear
+ - in supporting documentation. We make no
+ - representations about the suitability of this software for any
+ - purpose. It is provided "as is" without express or implied warranty.
+ -->
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>コンセプト・チェックの利用</title>
+</head>
+
+<body bgcolor="white" text="black" link="#0000ee" vlink="#551a8b" alink="red">
+
+<p><img src="../../c++boost.gif"  alt="C++ Boost" width="277" height="86" />
+<br clear="all" /></p>
+
+<h2><a name="using-concept-checks" id="using-concept-checks">Using Concept Checks</a></h2>
+
+<p>
+各コンセプトに対して、与えられた型 (あるいは型の集合) がコンセプトをモデル化していることを確かめるために使用することができる、何らかのコンセプト・チェック用クラスが存在する。
+Boost コンセプト・チェック・ライブラリ (BCCL) は、C++ 標準ライブラリの中で使用される全てのコンセプト＋αを対象とした、コンセプト・チェック用クラスを含んでいる。
+<a href="./reference.htm">Reference</a> セクションに、このコンセプト・チェック用クラスをリストしてある。
+さらに、他の Boost ライブラリも、ライブラリ独自の特別なコンセプトに対応するコンセプト・チェック用クラスを付随している。
+例えば、<a href="../graph/doc/graph_concepts.html">graph concept</a> および <a href="../property_map/property_map.html">property map concept</a> がある。
+さらに、クラス・テンプレートや関数テンプレートを記述する者は、既存のコンセプトでカバーされていない要求事項を表現する必要のある場合は常に、新しいコンセプト・チェック用クラスを作成すべきである。
+その方法は <a href="creating_concepts.htm">Creating Concept Checking Classes</a> で説明する。</p>
+
+<p>
+BCCL のコンセプト・チェック用クラスの例として、EqualityComparableConcept クラスを挙げる。
+このクラスは、C++ 標準 20.1.1 に記述されている EqualityComparable (等値比較可能) 要求事項および、SGI STL で文書化されている <a href="http://www.sgi.com/tech/stl/EqualityComparable.html" charset="us-ascii" hreflang="en-US">EqualityComparable (等値比較可能)</a> コンセプトに相当する。</p>
+
+<pre>
+  template &lt;class T&gt;
+  struct EqualityComparableConcept;
+</pre>
+
+<p>テンプレート引数 <code>T</code> はチェック対象の型と意図されている。
+すなわち、<code>EqualityComparableConcept</code> の目的は、<code>T</code> に対して与えられたテンプレート引数が 等値比較可能コンセプトをモデル化しているかどうか確認することである。</p>
+
+<p>
+個々のコンセプト・チェック用クラスには、該当するコンセプトにおいて有効な式を内包する <code>constraints()</code> という名前のメンバー関数がある。
+ある型が EqualityComparable (等値比較可能) であるかどうかチェックするためには、その型でコンセプト・チェック用クラスのインスタンスを生成し、次に、コンパイラに、実際に <code>constraints()</code> 関数を実行することなくコンパイルさせる方法を見つける必要がある。
+Boost コンセプト・チェック・ライブラリは、これを容易にする2つのユーティリティ： <code>function_requires()</code> と <code>BOOST_CLASS_REQUIRE</code> を定義している。</p>
+
+<h4><code>function_requires()</code></h4>
+
+<p>
+<code>function_requires()</code> 関数は関数本体の中で使用できる。また、<code>BOOST_CLASS_REQUIRE</code> マクロはクラス定義本体で使用できる。
+<code>function_requires()</code> 関数は引数をとらないが、コンセプト・チェック用クラスを受けるためのテンプレート・パラメータを有する。
+これは、以下に示すように、インスタンス化されたコンセプト・チェック用クラスを明示的にテンプレート引数として与えられなければならないことを意味する。</p>
+
+<pre>
+  // In my library:
+  template &lt;class T&gt;
+  void generic_library_function(T x)
+  {
+    function_requires&lt; EqualityComparableConcept&lt;T&gt; &gt;();
+    // ...
+  };
+
+  // In the user's code:  
+  class foo {
+    //... 
+  };
+
+  int main() {
+    foo f;
+    generic_library_function(f);
+    return 0;
+  }
+</pre>
+
+<h4><code>BOOST_CLASS_REQUIRE</code></h4>
+
+<p>
+<code>BOOST_CLASS_REQUIRE</code> マクロは、ある型がコンセプトをモデル化しているかどうかチェックするために、クラス定義の内部で使用することができる。</p>
+
+<pre>
+  // In my library:
+  template &lt;class T&gt;
+  struct generic_library_class
+  {
+    BOOST_CLASS_REQUIRE(T, boost, EqualityComparableConcept);
+    // ...
+  };
+
+  // In the user's code:  
+  class foo {
+    //... 
+  };
+
+  int main() {
+    generic_library_class&lt;foo&gt; glc;
+    // ...
+    return 0;
+  }
+</pre>
+
+<h4>Example</h4>
+
+<p>
+以前の <a href="./concept_check.htm#motivating-example">Motivating Example</a> に対してコンセプト・チェックを応用する場合、良いやり方として、テンプレート・パラメータ型が <a href="http://www.sgi.com/tech/stl/RandomAccessIterator.html" charset="us-ascii" hreflang="en-US">RandomAccessIterator</a> をモデル化していることを確認するために <code>std::stable_sort()</code> の一番上に <code>function_requires()</code> を挿入することが一つ挙げられる。
+さらに、<code>std::stable_sort()</code> は、イレテータの <code>value_type</code> が<a href="http://www.sgi.com/tech/stl/LessThanComparable.html" charset="us-ascii" hreflang="en-US">LessThanComparable (未満比較可能)</a> を満足することが必要であるから、これをチェックするために、重ねて <code>function_requires()</code> を使用する。</p>
+
+<pre>
+  template &lt;class RandomAccessIter&gt;
+  void stable_sort(RandomAccessIter first, RandomAccessIter last)
+  {
+    function_requires&lt; RandomAccessIteratorConcept&lt;RandomAccessIter&gt; &gt;();
+    typedef typename std::iterator_traits&lt;RandomAccessIter&gt;::value_type value_type;
+    function_requires&lt; LessThanComparableConcept&lt;value_type&gt; &gt;();
+    ...
+  }
+</pre>
+
+<!-- SGI STL 文書と、C++ 標準に記述された対応する要求事項との間には、異なる部位が少しながらある。こういう場合は、C++ 標準の定義を使用する。-->
+
+<p>
+コンセプトによっては複数の型を処理するものがある。
+この場合、対応するコンセプト・チェック用クラスは複数のテンプレート・パラメータを持つことになる。
+以下の例は、<code>function_requires()</code> を、２つの型パラメータ（プロパティ・マップ型とそのキーとなる型）をとる <a href="../property_map/ReadWritePropertyMap.html">ReadWritePropertyMap</a> コンセプトに対して使用する方法を示す。</p>
+
+<pre>
+  template &lt;class IncidenceGraph, class Buffer, class BFSVisitor, 
+            class ColorMap&gt;
+  void breadth_first_search(IncidenceGraph&amp; g, 
+    typename graph_traits&lt;IncidenceGraph&gt;::vertex_descriptor s, 
+    Buffer&amp; Q, BFSVisitor vis, ColorMap color)
+  {
+    typedef typename graph_traits&lt;IncidenceGraph&gt;::vertex_descriptor Vertex;
+    function_requires&lt; ReadWritePropertyMap&lt;ColorMap, Vertex&gt; &gt;();
+    ...
+  }
+</pre>
+
+<p>
+<code>BOOST_CLASS_REQUIRE</code> の使用例として、<code>std::vector</code> が有すべきコンセプト・チェックを考察する。
+要素型に対して当てはめる要求事項の一つは、それが <a href="http://www.sgi.com/tech/stl/Assignable.html" charset="us-ascii" hreflang="en-US">Assignable (割当可能)</a>でなければならない、ということである。
+これは、<code>std::vector</code> の定義の一番上に<code>class_requires&lt;AssignableConcept&lt;T&gt; &gt;</code><sup>(<a href="#trans_note_01" id="trans_note_01">訳注1</a>)</sup>を挿入することにより、チェックすることができる。</p>
+
+<pre>
+  namespace std {
+    template &lt;class T&gt;
+    struct vector {
+      BOOST_CLASS_REQUIRE(T, boost, AssignableConcept);
+      ...
+    };
+  }
+</pre>
+
+<p>
+コンセプト・チェックは、ジェネリック・ライブラリの実装者が使用するために設計されているが、エンドユーザーにおいても有用である。
+往々にして、ある型が特定のコンセプトをモデル化しているかどうか、不明確な場合がある。
+こういうケースでは、問題の型とコンセプトを対象として <code>function_requires()</code> を使用する、小さなプログラムを作成することで容易にチェックできる。
+ファイル <a href="./stl_concept_check.cpp">stl_concept_checks.cpp</a> は、STL コンテナにコンセプト・チェックを適応する実例となっている。</p>
+
+<p>
+<a href="./creating_concepts.htm">次へ： Creating Concept Checking Classes</a> <br />
+<a href="./concept_check.htm">前へ： Concept Checking Introduction</a> 
+</p>
+
+<hr />
+
+<h4>訳注</h4>
+<ol>
+  <li><a name="trans_note_01" id="trans_note_01">原文まま。</a>正しくは <code>BOOST_CLASS_REQUIRE(T, boost, AssignableConcept)</code> と思われる。詳しくは、<a href="implementation.htm">implementation.htm</a> のコメント内を参照されたい。</li>
+</ol>
+<hr />
+
+<table xml:lang="en-US" lang="en-US">
+  <tr valign="top">
+    <td nowrap="nowrap">Copyright &copy; 2000</td><td>
+      <a href="../../people/jeremy_siek.htm">Jeremy Siek</a>,
+      Univ.of Notre Dame (<a href="mailto:jsiek@lsc.nd.edu">jsiek@lsc.nd.edu</a>)
+    </td>
+  </tr>
+</table>
+</body>
+</html>

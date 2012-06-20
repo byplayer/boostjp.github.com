@@ -1,0 +1,576 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>I/O Stream-State Saver Library</title>
+</head>
+<body text="black" bgcolor="white" link="blue" vlink="purple" alink="red">
+<h1><IMG height=86 alt="c++boost.gif (8819 bytes)"
+ src="../../../c++boost.gif" width=277 align=middle >Header &lt;<cite><A
+ href="../../../boost/io/ios_state.hpp" >boost/io/ios_state.hpp</a></cite>
+&gt;</h1>
+
+<!--
+<p>The header <cite><a
+href="../../../boost/io/ios_state.hpp">boost/io/ios_state.hpp</a></cite>
+covers saving the stream state of objects in the C++ IOStreams
+system.</p>
+-->
+<p>
+<cite><A href="../../../boost/io/ios_state.hpp">boost/io/ios_state.hpp</a></cite>
+は、C++の入出力ストリームシステムにおけるオブジェクトのストリーム状態を保持する
+ことを保証する。</p>
+
+<h2><a name="contents">Contents</a></h2>
+
+<ol>
+	<li><A href="#contents">Contents</a>
+	<li><A href="#rationale">Rationale</a>
+	<li><A href="#header">Header Synopsis</a>
+	<li><A href="#base_savers">Savers for Basic Standard Attributes</a>
+	<li><A href="#adv_savers">Savers for Advanced Standard Attributes</a>
+	<li><A href="#user_savers">Savers for User-Defined Attributes</a>
+	<li><A href="#combo_savers">Savers for Combined Attributes</a>
+	<li><A href="#example">Example</a>
+	<li><A href="#refer">References</a>
+	<li><A href="#credits">Credits</a>
+		<ul>
+			<li><A href="#contributors">Contributors</a>
+			<li><A href="#history">History</a></li>
+		</ul></li>
+</ol>
+
+<h2><a name="rationale">Rationale</a></h2>
+
+<!--
+<p>Sometimes a certain value has to change only for a limited scope. 
+Saver classes save a copy of the current state of some object (or an
+aspect of an object), and reset the object's state at destruction time,
+undoing any change the object may have gone through.</p>
+-->
+<p>時々、ある値が制限されたスコープ内でのみ変化しなければならない時がある。セーバー
+クラス群は、オブジェクトの現在の状態（またはオブジェクトの様相）のコピーを保持し、
+デストラクト時にスコープ内で発生した変更を全て元通りにして、そのオブジェクトの状
+態を回復する。</p>
+
+<!--
+<p>The saver class strategy is helpful when using I/O stream objects. 
+Manipulator objects can change some aspect of a stream during input or
+output.  The state changed by the manipulator usually sticks to its new
+value after the I/O transaction.  This can be a problem if manipulators
+are used in a function that is not supposed to externally change a
+stream's state.</p>
+-->
+<p>セーバークラスの戦略は、入出力ストリームオブジェクトを使う時に有効である。マ
+ニピュレータオブジェクトは、入力または出力時のストリームの様相を変更できる。普通
+マニピュレータによって入出力ストリームの状態を変更すると、処理が終わった後の次の
+値に対しても影響が残ってしまう。これは、マニピュレータを外面的にはストリームの状
+態を変更しないと仮定している関数の中で使う場合に問題になるかもしれない。</p>
+
+<blockquote><pre>#include &lt;ostream&gt;
+#include &lt;ios&gt;
+
+void  hex_my_byte( std::ostream &amp;os, char byte )
+{
+    os &lt;&lt; std::hex &lt;&lt; static_cast&lt;unsigned&gt;(byte);
+}
+</pre></blockquote>
+
+<!--
+<p>The <var>os</var> stream will retain its new hexadecimal printing
+mode after the call to <code>hex_my_byte</code>.  The stream's printing
+mode can be saved and restored with manual calls to the stream's state
+inspecting and mutating member functions.  The manual method becomes
+unwieldy if the main functionality is complex and/or needs to be
+exception safe.  A saver class can implement the better &quot;resource
+acquisition is initialization&quot; strategy.</p>
+-->
+<p><var>os</var> ストリームは、<code>hex_my_byte</code> を呼んだ後も16進表記モー
+ドを保持し続ける。ストリームの表記モードは、ストリームの状態を調べたり、変更する
+ためのメンバー関数を手動で呼び出すことで変更されたり、元に戻されたりする。この手
+動による方法は、メインとなる関数の性質が複雑、且つ／または例外安全である必要があ
+る場合には扱いにくいものになってしまう。セーバークラスを使うことで、「リソースの
+確保は初期化時に」というより優れた戦略を採ることができるようになる。</p>
+
+<!--
+<p>See the <a href="#example">example</a> below for better code, using
+saver classes.</p>
+-->
+<p>セーバークラスを使ったより優れたコードの<A href="#example">例</a>
+を下の方に示す。</p>
+
+<h2><a name="header">Header Synopsis</a></h2>
+
+<blockquote><pre>#include &lt;iosfwd&gt;  <i>// for std::char_traits (declaration)</i>
+
+namespace boost
+{
+namespace io
+{
+
+class ios_flags_saver;
+class ios_precision_saver;
+class ios_width_saver;
+class ios_base_all_saver;
+
+template &lt; typename Ch, class Tr = ::std::char_traits&lt;Ch&gt; &gt;
+    class basic_ios_iostate_saver;
+template &lt; typename Ch, class Tr = ::std::char_traits&lt;Ch&gt; &gt;
+    class basic_ios_exception_saver;
+template &lt; typename Ch, class Tr = ::std::char_traits&lt;Ch&gt; &gt;
+    class basic_ios_tie_saver;
+template &lt; typename Ch, class Tr = ::std::char_traits&lt;Ch&gt; &gt;
+    class basic_ios_rdbuf_saver;
+template &lt; typename Ch, class Tr = ::std::char_traits&lt;Ch&gt; &gt;
+    class basic_ios_fill_saver;
+template &lt; typename Ch, class Tr = ::std::char_traits&lt;Ch&gt; &gt;
+    class basic_ios_locale_saver;
+template &lt; typename Ch, class Tr = ::std::char_traits&lt;Ch&gt; &gt;
+    class basic_ios_all_saver;
+
+typedef basic_ios_iostate_saver&lt;char&gt;        ios_iostate_saver;
+typedef basic_ios_iostate_saver&lt;wchar_t&gt;    wios_iostate_saver;
+typedef basic_ios_exception_saver&lt;char&gt;      ios_exception_saver;
+typedef basic_ios_exception_saver&lt;wchar_t&gt;  wios_exception_saver;
+typedef basic_ios_tie_saver&lt;char&gt;            ios_tie_saver;
+typedef basic_ios_tie_saver&lt;wchar_t&gt;        wios_tie_saver;
+typedef basic_ios_rdbuf_saver&lt;char&gt;          ios_rdbuf_saver;
+typedef basic_ios_rdbuf_saver&lt;wchar_t&gt;      wios_rdbuf_saver;
+typedef basic_ios_fill_saver&lt;char&gt;           ios_fill_saver;
+typedef basic_ios_fill_saver&lt;wchar_t&gt;       wios_fill_saver;
+typedef basic_ios_locale_saver&lt;char&gt;         ios_locale_saver;
+typedef basic_ios_locale_saver&lt;wchar_t&gt;     wios_locale_saver;
+typedef basic_ios_all_saver&lt;char&gt;            ios_all_saver;
+typedef basic_ios_all_saver&lt;wchar_t&gt;        wios_all_saver;
+
+class ios_iword_saver;
+class ios_pword_saver;
+class ios_all_word_saver;
+
+}
+}
+</pre></blockquote>
+
+<h2><a name="base_savers">Savers for Basic Standard Attributes</a></h2>
+
+<!--
+<p>The basic saver classes have this format:</p>
+-->
+<p>基本セーバークラスは、次のようなフォーマットを持っている。:</p>
+
+<blockquote><pre>class <var>saver_class</var>
+{
+    typedef std::ios_base           state_type;
+    typedef <i>implementation_defined</i>  aspect_type;
+
+    explicit  saver_class( state_type &amp;s );
+              saver_class( state_type &amp;s, <var>aspect_type</var> const &amp;new_value );
+             ~saver_class();
+};
+</pre></blockquote>
+
+<!--
+<p>The <var>state_type</var> is the IOStreams base class
+<code>std::ios_base</code>.  The user would usually place an actual
+input, output, or combined stream object for the state-type parameter,
+and not a base class object.  The first constructor takes a stream
+object and saves a reference to the stream and the current value of a
+particular stream attribute.  The second constructor works like the
+first, and uses its second argument to change the stream's attribute to
+the new <var>aspect_type</var> value given.  The destructor changes the
+stream's attribute back to the saved value.</p>
+-->
+<p><var>state_type</var>は、入出力ストリーム基本クラスの<code>std::ios_base</code>
+のことである。ユーザが通常 state-type パラメータに置くのは、実際の入力(ストリーム)、
+出力(ストリーム)、または入出力ストリームオブジェクトであって、基底クラスのオブジェク
+トではないだろう。最初のコンストラクタは、ストリームオブジェクトを１つ取り、
+そのストリームへの参照とストリーム固有の属性とを保持する。２番目
+のコンストラクタは一つ目のと同様に働くが、さらにそれに加えて第２引数に新しい
+<var>aspect_type</var>を指定することでストリームの属性を変更できる。デストラクタ
+はストリームの属性を保持しておいた状態に戻す。</p>
+
+<table border="1" align="center">
+	<caption>Basic IOStreams State Saver Classes</caption>
+	<tr>
+		<th>Class</th>
+		<th>Saved Attribute</th>
+		<th>Attribute Type</th>
+		<th>Reading Method</th>
+		<th>Writing Method</th>
+	</tr>
+	<tr>
+		<td><code>boost::io::ios_flags_saver</code></td>
+		<td>Format control flags</td>
+		<td><code>std::ios_base::fmtflags</code></td>
+		<td><code>flags</code></td>
+		<td><code>flags</code></td>
+	</tr>
+	<tr>
+		<td><code>boost::io::ios_precision_saver</code></td>
+		<td>Number of digits to print after decimal point</td>
+		<td><code>std::streamsize</code></td>
+		<td><code>precision</code></td>
+		<td><code>precision</code></td>
+	</tr>
+	<tr>
+		<td><code>boost::io::ios_width_saver</code></td>
+		<td>Minimum field width for printing objects</td>
+		<td><code>std::streamsize</code></td>
+		<td><code>width</code></td>
+		<td><code>width</code></td>
+	</tr>
+</table>
+
+<h2><a name="adv_savers">Savers for Advanced Standard Attributes</a></h2>
+
+<!--
+<p>The saver class templates have this format:</p>
+-->
+<p>セーバークラステンプレートは次のようなフォーマットを持つ:</p>
+
+<blockquote><pre>template &lt; typename Ch, class Tr &gt;
+class <var>saver_class</var>
+{
+    typedef std::basic_ios&lt;Ch, Tr&gt;  state_type;
+    typedef <i>implementation_defined</i>  aspect_type;
+
+    explicit  saver_class( state_type &amp;s );
+              saver_class( state_type &amp;s, <var>aspect_type</var> const &amp;new_value );
+             ~saver_class();
+};
+</pre></blockquote>
+
+<!--
+<p>The <var>state_type</var> is a version of the IOStreams base class
+template <code>std::basic_ios&lt;Ch, Tr&gt;</code>, where
+<code>Ch</code> is a character type and <code>Tr</code> is a character
+traits class.  The user would usually place an actual input, output, or
+combined stream object for the state-type parameter, and not a base
+class object.  The first constructor takes a stream object and saves a
+reference to the stream and the current value of a particular stream
+attribute.  The second constructor works like the first, and uses its
+second argument to change the stream's attribute to the new
+<var>aspect_type</var> value given.  The destructor changes the stream's
+attribute back to the saved value.</p>
+-->
+<p><var>state_type</var>は、入出力ストリーム基本クラステンプレート
+<code>std::basic_ios&lt;Ch, Tr&gt;</code>のことである。ここで <code>Ch</code> は、
+文字タイプ、<code>Tr</code> は文字特性のことである。ユーザが通常 state-type 
+パラメータに置くのは、実際の入力(ストリーム)、出力(ストリーム)、または入出力スト
+リームオブジェクトであって、基底クラスのオブジェクトではないだろう。最初の
+コンストラクタは、ストリームオブジェクトを１つ取り、そのストリームへの参照とスト
+リーム固有の属性とを保持する。２番目のコンストラクタは一つ目のと同様に働くが、さ
+らにそれに加えて第２引数に新しい<var>aspect_type</var>を指定することでストリーム
+の属性を変更できる。デストラクタはストリームの属性を保持しておいた状態に戻す。</p>
+
+<table border="1" align="center">
+	<caption>Advanced IOStreams State Saver Class Templates</caption>
+	<tr>
+		<th>Class Template</th>
+		<th>Saved Attribute</th>
+		<th>Attribute Type</th>
+		<th>Reading Method</th>
+		<th>Writing Method</th>
+	</tr>
+	<tr>
+		<td><code>boost::io::basic_ios_iostate_saver&lt;Ch, Tr&gt;</code></td>
+		<td>Failure state of the stream <A href="#Note1">[1]</a></td>
+		<td><code>std::ios_base::iostate</code></td>
+		<td><code>rdstate</code></td>
+		<td><code>clear</code></td>
+	</tr>
+	<tr>
+		<td><code>boost::io::basic_ios_exception_saver&lt;Ch, Tr&gt;</code></td>
+		<td>Which failure states trigger an exception <A href="#Note1">[1]</a></td>
+		<td><code>std::ios_base::iostate</code></td>
+		<td><code>exceptions</code></td>
+		<td><code>exceptions</code></td>
+	</tr>
+	<tr>
+		<td><code>boost::io::basic_ios_tie_saver&lt;Ch, Tr&gt;</code></td>
+		<td>Output stream synchronized with the stream</td>
+		<td><code>std::basic_ostream&lt;Ch, Tr&gt; *</code></td>
+		<td><code>tie</code></td>
+		<td><code>tie</code></td>
+	</tr>
+	<tr>
+		<td><code>boost::io::basic_ios_rdbuf_saver&lt;Ch, Tr&gt;</code></td>
+		<td>Stream buffer associated with the stream <A href="#Note2">[2]</a></td>
+		<td><code>std::basic_streambuf&lt;Ch, Tr&gt; *</code></td>
+		<td><code>rdbuf</code></td>
+		<td><code>rdbuf</code></td>
+	</tr>
+	<tr>
+		<td><code>boost::io::basic_ios_fill_saver&lt;Ch, Tr&gt;</code></td>
+		<td>Character used to pad oversized field widths</td>
+		<td><code>Ch</code></td>
+		<td><code>fill</code></td>
+		<td><code>fill</code></td>
+	</tr>
+	<tr>
+		<td><code>boost::io::basic_ios_locale_saver&lt;Ch, Tr&gt;</code></td>
+		<td>Locale information associated with the stream <A href="#Note3">[3]</a></td>
+		<td><code>std::locale</code></td>
+		<td><code>getloc</code> (from <code>std::ios_base</code>)</td>
+		<td><code>imbue</code> (from <code>std::basic_ios&lt;Ch, Tr&gt;</code>)</td>
+	</tr>
+</table>
+
+<h3>Notes</h3>
+
+<ol>
+<!--
+	<li>When the failure state flags and/or the failure state exception
+		watching flags are changed, an exception is thrown if a match
+		occurs among the two sets of flags.  This could mean that
+		the <a name="Note1">constructor or destructor of these class
+		templates may throw</a>. 
+-->
+	<li>失敗状態フラグとフラグを監視している失敗状態例外の両方またはどちらかが変
+		化した場合、もし２つのフラグが一致したら例外が投げられる。これは、<a name="Note1">
+		これらのクラステンプレートのコンストラクタまたはデストラクタが例外を投げ
+		ることを意味するかもしれない。</a>
+
+<!--
+	<li>When the associated stream buffer is changed, the stream's
+		failure state set is reset to "good" if the given stream
+		buffer's address is non-NULL, but the "bad" failure
+		state is set if that address is NULL.  Given a NULL stream
+		buffer address, an exception is thrown if the "bad"
+		failure state is being watched.  This could mean that the 
+		<a name="Note2">constructor or destructor of this class template may throw</a>. 
+-->
+	<li>関連ストリームバッファが変化した場合、もし指定したストリームバッファのア
+		ドレスがNULLでないならばストリームの失敗状態は"good"にリセットされるが、
+		NULLだった場合には"bad"失敗状態がセットされる。NULLストリームバッファアド
+		レスを指定した場合、もし"bad"失敗状態が監視されていると例外が投げられる。
+		これは、<a name="Note1">このクラステンプレートのコンストラクタまたはデス
+		トラクタが例外を投げることを意味するかもしれない。</a>
+
+<!--
+	<li>The <a name="Note3">saver for the locale uses the
+		<code>std::basic_ios&lt;Ch, Tr&gt;</code> class to extract their
+		information</a>, although it could have used the functionality
+		in <code>std::ios_base</code>.  The problem is that the versions
+		of the needed member functions in <code>ios_base</code> are not
+		polymorphically related to the ones in <code>basic_ios</code>. 
+		The stream classes that will be used with the saver classes
+		should use the versions of the member functions closest to them
+		by inheritance, which means the ones in
+		<code>basic_ios</code>.</li>
+-->
+	<li><a name="Note3">ロケール用のセーバーは、<code>std::ios_base</code>の関数
+		をロケール情報を取り出すために使用できたかもしれないが、そうはせずに
+		<code>std::basic_ios&lt;Ch, Tr&gt;</code>クラスを使用して情報を取り出し
+		ている。</a>この問題は、<code>basic_ios</code>の中の必要とするメンバ関数
+		が多態的に<code>basic_ios</code>のそれに結びついていないためである。セー
+		バークラスと共に使用されるストリームクラスは継承によってそれらに最も近い
+		メンバ関数を使用するべきである。</li>
+</ol>
+
+<h2><a name="user_savers">Savers for User-Defined Attributes</a></h2>
+
+<!--
+<p>The saver classes for user-defined formatting information have this
+format:</p>
+-->
+<p>ユーザー定義の情報の為のセーバークラスは、次のようなフォーマットを持つ。</p>
+
+<blockquote><pre>#include &lt;iosfwd&gt;  <i>// for std::ios_base (declaration)</i>
+
+class <var>saver_class</var>
+{
+    typedef std::ios_base           state_type;
+    typedef int                     index_type;
+    typedef <i>implementation_defined</i>  aspect_type;
+
+    explicit  saver_class( state_type &amp;s, index_type i );
+              saver_class( state_type &amp;s, index_type i, <var>aspect_type</var> const &amp;new_value );
+             ~saver_class();
+};
+</pre></blockquote>
+
+<!--
+<p>The index <var>i</var> differentiates between specific user-defined
+formatting attributes.  The index can only be determined at run-time
+(most likely with the class-static <code>std::ios_base::xalloc</code>
+member function).</p>
+-->
+<p>インデックス <var>i</var> は、ユーザー定義の属性を区別するのに使用される。
+インデックスは、実行時にのみ決定できる。（それはおそらく静的
+メンバ関数<code>std::ios_base::xalloc</code>と同時だろう。）</p>
+
+<!--
+<p>The <var>state_type</var> is the base class of the IOStreams system,
+<code>std::ios_base</code>.  The user would usually place an actual
+input, output, or combined stream object for the state-type parameter,
+and not a base class object.  The first constructor takes a stream
+object and index and saves a reference to the stream and the current
+value of a particular stream attribute.  The second constructor works
+like the first, and uses its third argument to change the stream's
+attribute to the new <var>aspect_type</var> value given.  The destructor
+changes the stream's attribute back to the saved value.</p>
+-->
+<p><var>state_type</var> は、入出力ストリームシステムの基本クラス 
+<code>std::ios_base</code> である。ユーザが通常 state-type パラメータに置くのは、
+実際の入力(ストリーム)、出力(ストリーム)、または入出力ストリームオブジェクトであって、
+基底クラスのオブジェクトではないだろう。最初の
+コンストラクタは、ストリームオブジェクトを１つ取り、そのストリームへの参照とスト
+リーム固有の属性とを保持する。２番目のコンストラクタは一つ目のと同様に働くが、さ
+らにそれに加えて第３引数に新しい<var>aspect_type</var>を指定することでストリーム
+の属性を変更できる。デストラクタはストリームの属性を保持しておいた状態に戻す。</p>
+
+<table border="1" align="center">
+	<caption>IOStream User-Defined State Saver Classes</caption>
+	<tr>
+		<th>Class</th>
+		<th>Saved Attribute</th>
+		<th>Attribute Type</th>
+		<th>Reference Method</th>
+	</tr>
+	<tr>
+		<td><code>boost::io::ios_iword_saver</code></td>
+		<td>Numeric user-defined format flag</td>
+		<td><code>long</code></td>
+		<td><code>iword</code></td>
+	</tr>
+	<tr>
+		<td><code>boost::io::ios_pword_saver</code></td>
+		<td>Pointer user-defined format flag</td>
+		<td><code>void *</code></td>
+		<td><code>pword</code></td>
+	</tr>
+</table>
+
+<h2><a name="combo_savers">Savers for Combined Attributes</a></h2>
+
+<!--
+<p>There are three class (templates) for combined attribute savers.  The
+<code>boost:io::ios_base_all_saver</code> saver class combines the
+functionality of all the basic attribute saver classes.  It has a
+constructor that takes the stream to have its state preserved.  The
+<code>boost::io::basic_ios_all_saver</code> combines the functionality
+of all the advanced attribute saver class templates and the combined
+basic attribute saver class.  It has a constructor that takes the stream
+to have its state preserved.  The
+<code>boost::io::ios_all_word_saver</code> saver class combines the
+saver classes that preserve user-defined formatting information.  Its
+constructor takes the stream to have its attributes saved and the index
+of the user-defined attributes.</p>
+-->
+<p>属性セーバークラスを統合するために３つのクラス（テンプレート）がある。
+<code>boost:io::ios_base_all_saver</code> セーバークラスは、全ての基本属性セーバ
+ークラスの機能を統合している。このクラスには引数に状態を保持させたいストリームを
+取ることのできるコンストラクタが一つある。
+<code>boost::io::basic_ios_all_saver</code> セーバークラスは、全ての高等属性セー
+バークラステンプレートの機能と基本属性セーバークラスを統合している。このクラスに
+は引数に状態を保持させたいストリームを取ることのできるコンストラクタが一つある。
+<code>boost::io::ios_all_word_saver</code> セーバークラスは、ユーザー定義の情報を
+保持するクラスを結合する。このコンストラクタは、属性を保持させたいストリームと
+ユーザーが定義した属性のインデックスを引数に取る。</p>
+
+
+<h2><a name="example">Example</a></h2>
+
+<!--
+<p>The code used in the <A href="#rationale">rationale</a> can be
+improved at two places.  The printing function could use a saver around
+the code that changes the formatting state.  Or the calling function can
+surround the call with a saver.  Or both can be done for paranoia's
+sake.</p>
+-->
+<p><A href="#rationale">rationale</a> で使用したコードは２つの点で改善できる。
+表示出力関数は書式設定状態を変更するコードの周りでセーバーを使えるかもしれない。
+または関数の呼び出し側でその関数の周りをセーバーで囲むこともできる。または両方を
+偏執症患者のために行うこともできる。
+</p>
+
+<blockquote><pre>#include &lt;boost/io/ios_state.hpp&gt;
+#include &lt;ios&gt;
+#include &lt;iostream&gt;
+#include &lt;ostream&gt;
+
+void  new_hex_my_byte( std::ostream &amp;os, char byte )
+{
+    boost::io::ios_flags_saver  ifs( os );
+
+    os &lt;&lt; std::hex &lt;&lt; static_cast&lt;unsigned&gt;(byte);
+}
+
+int  main()
+{
+    using std::cout;
+
+    //...
+
+    {
+        boost::io::ios_all_saver  ias( cout );
+
+        new_hex_my_byte( cout, 'A' );
+    }
+
+    //...
+}
+</pre></blockquote>
+
+<h2><a name="refer">References</a></h2>
+
+<ul>
+	<li>The I/O state saver library header itself: <cite><A
+		 href="../../../boost/io/ios_state.hpp" >boost/io/ios_state.hpp</a></cite>
+	<li>Some test/example code: <cite><A
+		 href="../test/ios_state_test.cpp" >ios_state_test.cpp</a></cite></li>
+</ul>
+
+<h2><a name="credits">Credits</a></h2>
+
+<h3><a name="contributors">Contributors</a></h3>
+
+<dl>
+	<dt><A href="../../../people/daryle_walker.html">Daryle Walker</a>
+<!--
+	<dd>Started the library.  Contributed the initial versions of the
+		format flags, precision, width, and user-defined format flags
+		saver classes.  Contributed the initial versions of the success
+		state, success state exception flags, output stream tie, stream
+		buffer, character fill, and locale saver class templates. 
+		Contributed the combined attribute classes and class template. 
+		Contributed the test file <cite><A
+		 href="../test/ios_state_test.cpp" >ios_state_test.cpp</a></cite>.</dd>
+-->
+	<dd>このライブラリを開始した。フォーマットフラグ、精度、幅、そしてユーザー定
+		義のフォーマットフラグを保持するクラスの初期バージョンに貢献した。成功状
+		態、成功状態例外フラグ、出力ストリームタイ、ストリームバッファ、文字埋め、
+		そしてロケールをセーブするクラステンプレートの初期バージョンに貢献した。
+		属性クラスとクラステンプレートを統合するのに貢献した。テストファイル
+		<cite><A href="../test/ios_state_test.cpp" >ios_state_test.cpp</a></cite>
+		に貢献した。</dd>
+</dl>
+
+<h3><a name="history">History</a></h3>
+
+<dl>
+	<dt>13 Mar 2002, Daryle Walker
+	<dd>Initial version</dd> 
+</dl>
+
+<hr>
+
+<p>Revised: 13 March 2002</p>
+
+<p>Copyright c Daryle Walker 2002.  Permission to copy, use,
+modify, sell and distribute this document is granted provided this
+copyright notice appears in all copies.  This document is provided
+"as is" without express or implied warranty, and with no claim
+as to its suitability for any purpose.</p>
+
+
+<p>
+Japanese Translation Copyright (C) 2003 MINAMI Takeshi.
+オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の
+複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」
+に提供されており、いかなる明示的、暗黙的保証も行わない。また、
+いかなる目的に対しても、その利用が適していることを関知しない。
+</p>
+
+</body>
+</html>

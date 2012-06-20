@@ -1,0 +1,99 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<title>posix_time::time iterators Documentation</title>
+<link href="doxygen.css" rel="stylesheet" type="text/css">
+<meta http-equiv="content-style-type" content="text/css">
+<!-- 入口 -->
+<style type="text/css"><!--
+  .original {color: #808080;}
+  .draft {color: green;}
+  .note {color: #ff8080;}
+--></style>
+</head>
+
+<body>
+<a href="../../../index.htm">
+<img align="left" src="../../../c++boost.gif" alt="C++ Boost">
+</a>  
+
+<h1>posix_time::time iterators</h1>
+<hr style="clear: left;">
+<p>
+<a href="index.html">Overall Index</a> --
+<a href="gregorian.html">Gregorian Index</a> --
+<a href="posix_time.html">Posix Time Index</a>
+</p>
+<h3>Time Iterators</h3>
+<p>
+<a href="#intro">Introduction</a> --
+<a href="#header">Header</a> --
+<a href="#classoverview">Class Overview</a>
+</p>
+
+<h2><a name="intro">Introduction</a></h2>
+<p>
+<div class="original">
+Time iterators provide a standard mechanism for iteration through times. Time iterators are a model of
+<a href="http://www.sgi.com/tech/stl/InputIterator.html">Input Iterator</a> and can be used to populate collections with times.  The following example 
+iterates using a 15 minute interation interval.
+</div><div class="draft">
+  時間イテレータは、時間単位で反復するための標準的なメカニズムを提供する。
+  時間イテレータは(STLの)<a href="http://www.sgi.com/tech/stl/InputIterator.html">入力イテレータ</a>のモデルであり、時間の集合の代入に用いることができる。
+  次の例は、15分間隔で反復する。
+</div>
+</p>
+<div class="fragment"><pre>
+
+  <font class="keyword">using namespace</font> boost::gregorian;
+  <font class="keyword">using namespace</font> boost::posix_time;
+  date d(2000,Jan,20);
+  ptime start(d);<font class="comment">//2000-Jan-20 00:00:00</font>
+  time_iterator titr(start,minutes(15)); <font class="comment">//iterate on 15 minute intervals</font>
+  <font class="comment">//produces 00:00:00, 00:15:00, 00:30:00, 00:45:00</font>
+  <font class="keyword">for</font> (; titr &lt; ptime(d,hour(1)); ++titr) {
+    std::cout &lt;&lt; to_simple_string(*titr) &lt;&lt; std::endl;
+  }
+</pre></div>
+<p>
+<div class="original">
+The <a href="exp-print_hours.html">print hours</a> 
+example iterates through the remainder of the day incrementing by an hour.
+</div><div class="draft">
+  <a href="exp-print_hours.html">print hours</a> の例は、1時間増加させ、その日の残りを繰り返す
+</div>
+</p>
+
+<h2><a name="header">Header</a></h2>
+<pre>
+#include "boost/date_time/posix_time/posix_time.hpp" //include all types plus i/o
+or
+#include "boost/date_time/posix_time/posix_time_types.hpp" //no i/o just types
+</pre>
+
+<h2><a name="classoverview">Class Overview</a></h2>
+<p>
+<table border=1 cellspacing=3 cellpadding=3>
+<tr><th>Class</th>
+    <th>Construction Parameters</th>
+    <th>Description</th></tr>
+<tr><td>time_iterator</td>
+    <td>ptime start_time, time_duration increment</td>
+    <!-- 
+    <td>Iterate incrementing by the specified duration.</td></tr>
+      -->
+    <td>指定された期間(time_duration)を増分として反復する</td></tr>
+</table>
+<br>
+
+
+<hr><address><small>
+<!-- hhmts start -->
+Last modified: Thu Sep  5 07:23:04 MST 2002
+<!-- hhmts end -->
+ by <a href="mailto:jeff&#64;crystalclearsoftware.com">Jeff Garland</a> &copy; 2000-2002
+<br>
+  Japanese Translation Copyright (C) 2003 <a href="mailto:sshino@cppll.jp">Shoji Shinohara</a>.
+</small></address>
+
+</body>
+</html>

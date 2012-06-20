@@ -1,0 +1,116 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<title>Date-Time Concepts - Calculation</title>
+<link href="doxygen.css" rel="stylesheet" type="text/css">
+<meta http-equiv="content-style-type" content="text/css">
+<!-- 入口 -->
+<style type="text/css"><!--
+  .original {color: #808080;}
+  .draft {color: green;}
+  .note {color: #ff8080;}
+--></style>
+</head>
+
+<body>
+<a href="../../../index.htm">
+<img align="left" src="../../../c++boost.gif" alt="C++ Boost">
+</a>  
+
+<h1>Date-Time Concepts - Calculation</h1>
+<hr style="clear: left;">
+<a href="index.html">Overall Index</a> --
+<a href="gregorian.html">Gregorian Index</a> --
+<a href="posix_time.html">Posix Time Index</a>
+<p>
+<a href="#timepoints">Timepoints</a> --
+<a href="#durations">Durations</a> --
+<a href="#intervals">Interval</a> --
+<a href="#special">Special Cases</a>
+</p>
+
+<h2><a name="timepoints">Timepoints</a></h2>
+<p>
+<div class="original">
+This section describes some of basic arithmetic rules that can be performed with GDTL timepoints. 
+</div><div class="draft">
+  このセクションでは，GDTL timepoints で行える基本的な算術規則をいくつか示す。
+</div>
+</p>
+<pre>
+ Timepoint + Duration --&gt; Timepoint
+ Timepoint - Duration --&gt; Timepoint
+ 
+ Duration + Timepoint --&gt; Undefined 
+ Duration - Timepoint --&gt; Undefined
+ 
+ Timepoint + Timepoint --&gt; Undefined
+ Timepoint - Timepoint --&gt; Duration
+</pre>
+<p>
+<h2><a name="durations">Durations</a></h2>
+<p>
+<div class="original">
+This section describes standard operations for a time duration. 
+</div><div class="draft">
+  このセクションでは時間長(time duration)に関する標準的な演算を示す。
+</div>
+</p>
+<pre>
+ Duration + Duration  --&gt; Duration
+ Duration - Duration  --&gt; Duration
+
+ Duration * Integer   --&gt; Duration  
+ Integer  * Duration  --&gt; Duration  
+
+ Duration(&#8734;) * Integer --&gt; Duration(&#8734;) 
+ Duration(&#8734;)/Integer   --&gt; Duration(&#8734;) 
+</pre>
+
+<h2><a name="intervals">Intervals</a></h2>
+<p>
+<div class="original">
+Here are the "operations" supported by intervals. They are based on half-open 
+range. 
+</div><div class="draft">
+  ここに時間間隔(intervals)によって支援された"演算"がある。
+  それらは半開区間に基づいている。
+</div>
+</p>
+<pre>
+ //These can be defined by either of 2 Timepoints or a Timepoint and Duration
+ Timeinterval intersects Timeinterval --&gt; bool
+ Timeinterval intersection Timeinterval --&gt; Timeperiod //results undefined if no intersection 
+ Timeinterval contains  Timepoint    --&gt; bool
+ Timeinterval contains  Timeinterval --&gt; bool  
+ Timeinterval shift Duration         --&gt; shift start and end by duration amount
+</pre>
+
+<h2><a name="special">Special Cases</a></h2>
+<p>
+<div class="original">
+In general special values such as Not A Date Time (NADT) and infinity should follow rules like floating point values. Note that it should be possible to 
+configure NADT based systems to throw an exception instead of result in NADT. 
+</div><div class="draft">
+  一般に，非日時値(NADT;Not A Date Time)や無限大といった特別な値は，浮動小数点値のような規則に従うべきである。
+  戻り値として NADT を返す代わりに，例外を投げるNADTに基づいたシステムを形成することが可能であるべきであることに注意する必要がある。
+</div>
+</p>
+<pre>
+ Timepoint(NADT) + Duration --&gt; Timepoint(NADT)
+ Timepoint(&#8734;) + Duration --&gt; Timepoint(&#8734;)
+ Timepoint + Duration(&#8734;) --&gt; Timepoint(&#8734;)
+ Timepoint - Duration(&#8734;) --&gt; Timepoint(-&#8734;)
+<span class="note">&#8734; は &amp;#8734; にすべきか &amp;infin; にすべきか…</span>
+</pre>
+
+<hr>
+<address><small>
+<!-- hhmts start -->
+Last modified: Fri Aug 30 11:11:40 MST 2002
+<!-- hhmts end -->
+ by <a href="mailto:jeff&#64;crystalclearsoftware.com">Jeff Garland</a> &copy; 2000-2002
+<br>
+  Japanese Translation Copyright (C) 2003 <a href="mailto:sshino@cppll.jp">Shoji Shinohara</a>.
+</small></address>
+</body>
+</html>

@@ -1,0 +1,359 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<HTML lang="ja">
+<!--
+  - Copyright (c) Jeremy Siek, Lie-Quan Lee, and Andrew Lumsdaine 2000
+  -
+  - Permission to use, copy, modify, distribute and sell this software
+  - and its documentation for any purpose is hereby granted without fee,
+  - provided that the above copyright notice appears in all copies and
+  - that both that copyright notice and this permission notice appear
+  - in supporting documentation.  We make no
+  - representations about the suitability of this software for any
+  - purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<Title>Boost Disjoint Sets</Title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+	ALINK="#ff0000"> 
+	
+<p>
+原文：
+<a href="http://www.boost.org/libs/disjoint_sets/disjoint_sets.html">
+  http://www.boost.org/libs/disjoint_sets/disjoint_sets.html
+</a>
+<br>
+</p>
+
+<IMG SRC="../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear="all">
+
+
+<H1><A NAME="sec:disjoint-sets"></A>
+Distjoint Sets（互いに素な集合）
+</H1>
+
+<H2>
+</h2>
+<PRE>
+disjoint_sets&lt;Rank, Parent, FindCompress&gt;
+</PRE>
+
+<P>
+このクラスは、互いに素な集合（素集合）の演算に <i>順位による和集合</i> および 
+<I>パス圧縮</i> を提供する。disjoint-sets のデータ構造は、素集合の 
+<i>S = {S<sub>1</sub>, S<sub>2</sub>, ..., S<sub>k</sub>}</i> というコレクションを維持する。
+各集合は、集合のいくつかの要素である <I>代表値</i> によって識別される。
+集合は、<tt>Parent</tt> プロパティマップの中の符号化された有向木によって表わされる。
+2つの発見的手法: &quot;順位による和集合&quot; および &quot;パス圧縮&quot; は、
+演算を高速化するのに使われる&nbsp;
+[<a href="./bibliography.html#tarjan83:_data_struct_network_algo">1</a>, 
+<a href="./bibliography.html#clr90">2</a>]。
+</P>
+
+<h3>Where Defined</h3>
+
+<a href="../../boost/pending/disjoint_sets.hpp"><tt>boost/disjoint_sets.hpp</tt></a>
+
+<H3>Template Parameters</H3>
+
+<TABLE border="1">
+<TR>
+<th>パラメータ</th><th>説明</th>
+</tr>
+
+<TR><TD><TT>Rank</TT></TD> <TD>値型が整数型で、キー型が集合の要素型と等しい 
+<a href="../property_map/ReadWritePropertyMap.html">ReadWritePropertyMap</a> のモデルでなければならない。
+</TD>
+</TR>
+<TR><TD><TT>Parent</TT></TD> <TD><a href="../property_map/ReadWritePropertyMap.html">ReadWritePropertyMap</a> 
+のモデルで、かつ、キー型および値型は集合の要素型と等しくなければならない。</TD>
+</TR>
+<TR><TD><TT>FindCompress</TT></TD>
+<TD>代表値の検索およびパス圧縮関数オブジェクトのうちの 1つであるべきだ。</TD>
+</TR>
+</TABLE>
+
+<H3>Example</H3>
+
+<P>
+<tt>disjoint_sets</tt> に対する典型的な使用法の手本は
+<a href="../graph/doc/kruskal_min_spanning_tree.html"><tt>kruskal_minimum_spanning_tree()</tt></a> 
+アルゴリズムで見ることができる。
+この例では、<tt>union_set()</tt> の代わりに <tt>link()</tt> を呼び出す。
+なぜなら、<tt>u</tt> および <tt>v</tt> が <tt>find_set()</tt> から得られ、
+したがって、既にそれら集合の代表値であるからだ。
+</P>
+
+<PRE>
+  ...
+  disjoint_sets&lt;Rank, Parent, FindCompress&gt; dsets(rank, p);
+  
+  for (ui  = vertices(G).first; ui != vertices(G).second; ++ui)
+    dsets.make_set(*ui);
+  ...
+  while ( !Q.empty() ) {
+    e = Q.front();
+    Q.pop();
+    u = dsets.find_set(source(e));
+    v = dsets.find_set(target(e));
+    if ( u != v ) {
+      *out++ = e;
+      dsets.link(u, v);
+    }
+  }
+</PRE>
+
+<H3>Members</H3>
+
+<TABLE border="1">
+<tr>
+<th>メンバ</th><th>説明</th>
+</tr>
+
+<tr> 
+<td><tt>
+disjoint_sets(Rank r, Parent p)
+</tt></td>
+<td>
+コンストラクタ。
+</td>
+</tr>
+
+<tr>
+<td><tt>
+disjoint_sets(const disjoint_sets&amp; x)
+</tt></td>
+<td>
+コピーコンストラクタ。
+</td>
+</tr>
+
+<tr>
+<td><tt>
+template &lt;class Element&gt;<br>
+void make_set(Element x)
+</tt></td>
+<td>
+Element <TT>x</TT> を含む単集合を作成する。
+</td>
+</tr>
+
+<tr>
+<td><tt>
+template &lt;class Element&gt;<br>
+void link(Element x, Element y)
+</tt></td>
+<td>
+<TT>x</TT> および <TT>y</TT> で<I>表わされる</I> 2つの集合を結合する。
+</td>
+</tr>
+
+<tr>
+<td><tt>
+template &lt;class Element&gt;<br>
+void union_set(Element x, Element y)
+</tt></td>
+<td>
+要素 <TT>x</TT> および <TT>y</TT> を含む 2つの集合を結合する。
+これは、<TT>link(find_set(x),find_set(y))</TT> に相当する。
+</td>
+</tr>
+
+<tr>
+<td><tt>
+template &lt;class Element&gt;<br>
+Element find_set(Element x)
+</tt></td>
+<td>
+要素 <TT>x</TT> を含む集合のための代表値を返す。
+</td>
+</tr>
+
+<tr>
+<td><tt>
+template &lt;class ElementIterator&gt;<br>
+std::size_t count_sets(ElementIterator first, ElementIterator last)
+</tt></td>
+<td>
+素集合の個数を返す。
+</td>
+</tr>
+
+<tr>
+<td><tt>
+template &lt;class ElementIterator&gt;<br>
+void compress_sets(ElementIterator first, ElementIterator last)
+</tt></td>
+<td>
+すべての要素の親がその代表値であるように親ツリーを平滑化する。
+</td>
+</tr>
+
+</table>
+
+<H3>Complexity</H3>
+
+<P>
+時間計算量は、<i>O(m alpha(m,n))</i> である。<i>alpha</i> は逆アッカーマン関数、
+<i>m</i> は disjoint-set の演算（<TT>make_set()</TT>、<TT>find_set()</TT>、および
+<TT>link()</TT>)）の総数、<i>n</i> は要素数である。
+<i>alpha</i> 関数はとても遅く、<i>log</i> 関数よりもはるかに遅くなる。
+</P>
+
+<h3>See Also</h3>
+
+<a href="../graph/doc/incremental_components.html"><tt>incremental_connected_components()</tt></a>
+
+<hr>
+
+<H2>
+</h2>
+<PRE>
+disjoint_sets_with_storage&lt;ID,InverseID,FindCompress&gt;
+</PRE>
+
+<P>
+このクラスは、順位および親のプロパティのための記憶領域を内部で管理する。
+記憶領域は、要素IDにより索引付けされた配列の中にある。ゆえに、<TT>ID</TT> 
+および <TT>InverseID</TT> ファンクタを必要とする。
+順位および親のプロパティは、構築中に初期化される、
+したがって、各要素は自動的に集合の中にある（従って、このクラスのオブジェクトを 
+<a href="../graph/doc/incremental_components.html#sec:initialize-incremental-components">
+<TT>initialize_incremental_components()</TT></a> 関数で初期化することは必要でない。）。
+このクラスは、頂点プロパティを格納する場所を提供しない edge_list 
+グラフの（動的）接続している構成要素を計算する場合に特に有用である。
+</P>
+
+<H3>Template Parameters</H3>
+
+<TABLE border="1">
+<TR>
+<th>パラメータ</th><th>説明</th><th>デフォルト</th>
+</tr>
+
+<TR>
+<TD><TT>ID</TT></TD>
+<TD>0からN（集合中の要素の総数）までの整数に要素を対応付ける 
+<a href="../property_map/ReadablePropertyMap.html">ReadablePropertyMap</a> 
+のモデルでなければならない。</TD>
+<TD><TT>boost::identity_property_map</TT></TD>
+</TR>
+
+<TR>
+<TD><TT>InverseID</TT></TD>
+<TD>要素に整数を対応付ける 
+<a href="../property_map/ReadablePropertyMap.html">ReadablePropertyMap</a> 
+のモデルでなければならない。</TD>
+<TD><TT>boost::identity_property_map</TT></TD>
+</TR>
+
+<TR><TD><TT>FindCompress</TT></TD>
+<TD>代表値の検索およびパス圧縮関数オブジェクトのうちの 1つであるべきだ。</TD>
+<TD><TT>representative_with_full_path_compression</TT></TD>
+</TR>
+
+</TABLE>
+
+<H3>Members</H3>
+
+<P>
+このクラスは、以下のメンバだけでなく <TT>disjoint_sets</TT> のすべてのメンバも持っている。
+</P>
+ 
+ <PRE>
+disjoint_sets_with_storage(size_type n = 0,
+                           ID id = ID(),
+                           InverseID inv = InverseID())
+</PRE>
+
+<P>
+コンストラクタ。
+</P>
+
+ <PRE>
+template &lt;class ElementIterator&gt;
+void disjoint_sets_with_storage::
+  normalize_sets(ElementIterator first, ElementIterator last)
+</PRE>
+
+<P>
+各集合の代表値が最も小さな ID を備えた要素になるように代表値を再整理する。
+<BR>
+事後条件: <TT>v &gt;= parent[v]</TT> 
+<BR>
+前提条件: 素集合の構造は圧縮されていなければならない。
+<BR>
+</P>
+
+<hr>
+
+<H2><A NAME="sec:representative-with-path-halving"></A>
+</h2>
+<PRE>
+representative_with_path_halving&lt;Parent&gt;
+</PRE>
+
+<P>
+これは、要素 <TT>x</TT> と同じ構成要素のための代表的な頂点を検索するファンクタである。
+代表値木を横断している間、ファンクタは、さらに木の高さを短くするためにパス二分技術を適用する。
+</P>
+ 
+<PRE>
+Element operator()(Parent p, Element x)
+</PRE> 
+
+<hr>
+
+<H2>
+<A NAME="sec:representative-with-full-path-compression"></A>
+</h2>
+<PRE>
+representative_with_full_path_compression&lt;Parent&gt;
+</PRE>
+
+<P>
+これは、要素 <TT>x</TT> が属する集合のための代表的な要素を検索するファンクタである。
+</P>
+ 
+<PRE>
+Element operator()(Parent p, Element x)
+</PRE> 
+
+<br>
+<br>
+
+<HR>
+
+<TABLE>
+<TR valign="top">
+<TD nowrap>Copyright &copy; 2000</TD><TD>
+<a HREF="../../people/jeremy_siek.htm">Jeremy Siek</a>,
+Univ.of Notre Dame (<A
+HREF="mailto:jsiek@lsc.nd.edu">jsiek@lsc.nd.edu</A>)<br>
+<A HREF="http://www.lsc.nd.edu/~llee1/">Lie-Quan Lee</A>, Univ.of Notre Dame (<A HREF="mailto:llee1@lsc.nd.edu">llee1@lsc.nd.edu</A>)<br>
+<A HREF="http://www.lsc.nd.edu/~lums/">Andrew Lumsdaine</A>,
+Univ.of Notre Dame (<A
+HREF="mailto:lums@lsc.nd.edu">lums@lsc.nd.edu</A>)
+</TD></TR></TABLE>
+
+<br>
+
+<p>
+Japanese Translation Copyright (C) 2003 IKOMA Yoshiki
+&lt;<a href="mailto:ikoma@mb.i-chubu.ne.jp">ikoma@mb.i-chubu.ne.jp</a>&gt;
+<br>
+<small>
+オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の
+複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」
+に提供されており、いかなる明示的、暗黙的保証も行わない。また、
+いかなる目的に対しても、その利用が適していることを関知しない。
+</small>
+</p>
+
+</BODY>
+</HTML> 

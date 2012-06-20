@@ -1,0 +1,145 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Boost Function Object Adapter Library</title>
+</head>
+
+<body bgcolor="#FFFFFF" text="#000000">
+
+<table border="1" bgcolor="#007F7F" cellpadding="2">
+  <tr>
+    <td bgcolor="#FFFFFF"><img src="../../c++boost.gif" alt="c++boost.gif (8819 bytes)" WIDTH="277" HEIGHT="86"></td>
+    <td><a href="../../index.htm"><font face="Arial" color="#FFFFFF"><big>Home </big></font></a></td>
+    <td><a href="../libraries.htm"><font face="Arial" color="#FFFFFF"><big>Libraries </big></font></a></td>
+    <td><a href="../../people/people.htm"><font face="Arial" color="#FFFFFF"><big>People </big></font></a></td>
+    <td><a href="../../more/faq.htm"><font face="Arial" color="#FFFFFF"><big>FAQ </big></font></a></td>
+    <td><a href="../../more/index.htm"><font face="Arial" color="#FFFFFF"><big>More </big></font></a></td>
+  </tr>
+</table>
+
+<h1>Binders</h1>
+
+<p><nobr><a href="../../boost/functional.hpp">functional.hpp</a></nobr>
+ヘッダは C++ 標準 <nobr>(&sect;20.3.6):</nobr> 由来のバインダ関数オブジェ
+クトアダプタの両方の強化バージョンを提供する:</p>
+
+<ul>
+<li><tt>binder1st</tt></li>
+<li><tt>binder2nd</tt></li>
+</ul>
+
+<p>同様に対応するヘルパ関数も提供する。</p>
+
+<ul>
+<li><tt>bind1st</tt></li>
+<li><tt>bind2nd</tt></li>
+</ul>
+
+<p>標準ライブラリにあるそれらの代わりに、これらのアダプタを使う主な便益
+は、それらが <a href="#refref">参照の参照</a> 問題を回避することにある。
+</p>
+
+<h3>Usage</h3>
+
+<p>使い方は標準バインダと同様である。例えば、</p>
+
+<blockquote><pre>
+class Foo {
+public:
+  void bar(std::ostream &amp;);
+  // ...
+};
+// ...
+std::vector&lt;Foo&gt; c;
+// ...
+std::for_each(c.begin(), c.end(), 
+              boost::bind2nd(boost::mem_fun_ref(&amp;Foo::bar), std::cout));
+</pre></blockquote>
+
+<h3 id="refref">References to References</h3>
+
+<p>以下の使用例を考えなさい。</p>
+
+<blockquote><pre>
+class Foo {
+public:
+  void bar(<strong>std::ostream &amp;</strong>);
+  // ...
+};
+// ...
+std::for_each(c.begin(), c.end(), 
+              boost::bind2nd(boost::mem_fun_ref(&amp;Foo::bar), std::cout));
+</pre></blockquote>
+
+<p>これがもし <tt><nobr>std::bind2nd</nobr></tt> と
+<tt><nobr>std::mem_fun_ref</nobr></tt> を使って書かれているならば、コン
+パイルできないだろう。</p>
+
+<p>この問題は <tt><nobr>bar</nobr></tt> が参照引数を取ることが原因で起こ
+る。標準は <tt><nobr>std::mem_fun_ref</nobr></tt> を
+<tt><nobr>second_argument_type</nobr></tt> が
+<tt><nobr>std::ostream&amp;</nobr></tt> である関数オブジェクトを作るように定
+義する。</p>
+
+<p><tt><nobr>bind2nd</nobr></tt> 呼び出しは
+<tt><nobr>binder2nd</nobr></tt> を作り、それは標準が以下のように定義して
+いる:
+
+<blockquote><pre>
+template &lt;class Operation&gt;
+class binder2nd
+    : public unary_function&lt;typename Operation::first_argument_type,
+                            typename Operation::result_type&gt; {
+...
+public:
+  binder2nd(const Operation&amp; x,
+            <strong>const typename Operation::second_argument_type&amp; y</strong>);
+  ...
+</pre></blockquote>
+
+<p>我々の Operation の <tt><nobr>second_argument_type</nobr></tt> は
+<tt><nobr>std::ostream&amp;</nobr></tt> であるから、コンストラクタの中の
+<tt>y</tt> の型は <tt><nobr>std::ostream&amp;&amp;</nobr></tt> となるだろう。参
+照の参照を作ることはできないから、参照の参照は C++ では非合法であるとし
+てこの時点でコンパイルエラーになる。(ただし <a
+href="http://anubis.dkuug.dk/jtc1/sc22/wg21/docs/cwg_active.html#106">
+C++ 言語中核の問題点 106 番目</a> を参照せよ)。</p>
+
+<p>このライブラリのバインダは Boost <nobr><tt><a
+href="../utility/call_traits.htm">call_traits</a></tt></nobr> テンプレー
+トを使うことによってこの問題を回避している。</p>
+
+<p>コンストラクタは以下のように宣言される。
+
+<blockquote><pre>
+binder2nd(const Operation&amp; x,
+          <strong>typename call_traits&lt;
+             typename binary_traits&lt;Operation&gt;::second_argument_type
+          &gt;::param_type y</strong>)
+</pre></blockquote>
+
+<p>結果、<tt>y</tt> は <tt><nobr>std::ostream&amp;</nobr></tt> 型を持つ。そ
+して、我々の例はコンパイルされる。</p>
+
+<hr>
+<p>Copyright &copy; 2000 Cadenza New Zealand Ltd.  Permission to copy, use, modify, sell and distribute this document is granted provided this copyright notice appears in all copies. This document is provided "as is" without express or implied warranty, and with no claim as to its suitability for any purpose.</p>
+
+<p>Revised 28 June 2000</p>
+
+<hr>
+
+<p>
+Japanese Translation Copyright (C) 2003 shinichiro.h
+&lt;g940455@mail.ecc.u-tokyo.ac.jp&gt;.
+</p>
+
+<p>
+オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の
+複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」
+に提供されており、いかなる明示的、暗黙的保証も行わない。また、
+いかなる目的に対しても、その利用が適していることを関知しない。
+</p>
+
+</body>
+</html>

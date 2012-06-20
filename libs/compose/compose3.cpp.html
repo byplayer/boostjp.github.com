@@ -1,0 +1,58 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<HEAD>
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
+<META name="GENERATOR" content="IBM WebSphere Studio Homepage Builder Version 7.0.0.0 for Windows">
+<META http-equiv="Content-Style-Type" content="text/css">
+<TITLE>compose3.cpp</TITLE>
+</HEAD>
+
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF">
+&nbsp;
+<TABLE HEIGHT=40 WIDTH="100%">
+<TR> <TD ALIGN=LEFT WIDTH="100%" BGCOLOR="#DDDDDD">
+<FONT face="Arial,Helvetica" size=+2><B>
+&nbsp;compose3.cpp
+</B></FONT>
+</TD></TR></TABLE><BR>
+
+<FONT face="Arial,Helvetica"><B>
+ The following code example is taken from the book<BR>
+ <A HREF="http://www.josuttis.com/libbook/" TARGET="_top">
+  The C++ Standard Library - A Tutorial and Reference</A><BR>
+ by Nicolai M. Josuttis, Addison-Wesley, 1999<BR>
+ <A HREF="http://www.josuttis.com/libbook/copyright.html">
+  &copy; Copyright</A> Nicolai M. Josuttis 1999<BR>
+</B></FONT>
+
+<BR><BR><TT>
+#include&nbsp;&lt;iostream&gt;<BR>
+#include&nbsp;&lt;algorithm&gt;<BR>
+#include&nbsp;&lt;functional&gt;<BR>
+#include&nbsp;&lt;string&gt;<BR>
+#include&nbsp;&lt;cctype&gt;<BR>
+#include&nbsp;"<A href="compose.hpp.html">compose.hpp</A>"<BR>
+using&nbsp;namespace&nbsp;std;<BR>
+using&nbsp;namespace&nbsp;boost;<BR>
+<BR>
+int&nbsp;main()<BR>
+{<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;string&nbsp;s("Internationalization");<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;string&nbsp;sub("Nation");<BR>
+<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<I><FONT face="Arial,Helvetica" color="0000FF" size="-1">//&nbsp;大文字/小文字を区別なしに部分文字列を検索する</FONT></I><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;string::iterator&nbsp;pos;<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;pos&nbsp;=&nbsp;search&nbsp;(s.begin(),s.end(),&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<I><FONT face="Arial,Helvetica" color="0000FF" size="-1">//&nbsp;検索対象文字列</FONT></I><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sub.begin(),sub.end(),&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<I><FONT face="Arial,Helvetica" color="0000FF" size="-1">//&nbsp;検索する部分文字列</FONT></I><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;compose_f_gx_hy(equal_to&lt;int&gt;(),&nbsp;<I><FONT face="Arial,Helvetica" color="0000FF" size="-1">//&nbsp;一致条件</FONT></I><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ptr_fun(::toupper),<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ptr_fun(::toupper)));<BR>
+<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(pos&nbsp;!=&nbsp;s.end())&nbsp;{<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cout&nbsp;&lt;&lt;&nbsp;"\""&nbsp;&lt;&lt;&nbsp;sub&nbsp;&lt;&lt;&nbsp;"\"&nbsp;is&nbsp;part&nbsp;of&nbsp;\""&nbsp;&lt;&lt;&nbsp;s&nbsp;&lt;&lt;&nbsp;"\""<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;&lt;&nbsp;endl;<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;}<BR>
+}<BR>
+</TT>
+</BODY>
+</HTML>

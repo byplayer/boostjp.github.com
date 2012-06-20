@@ -1,0 +1,180 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Boost Function Object Adapter Library</title>
+</head>
+
+<body bgcolor="#FFFFFF" text="#000000">
+
+<table border="1" bgcolor="#007F7F" cellpadding="2">
+  <tr>
+    <td bgcolor="#FFFFFF"><img src="../../c++boost.gif" alt="c++boost.gif (8819 bytes)" WIDTH="277" HEIGHT="86"></td>
+    <td><a href="../../index.htm"><font face="Arial" color="#FFFFFF"><big>Home </big></font></a></td>
+    <td><a href="../libraries.htm"><font face="Arial" color="#FFFFFF"><big>Libraries </big></font></a></td>
+    <td><a href="../../people/people.htm"><font face="Arial" color="#FFFFFF"><big>People </big></font></a></td>
+    <td><a href="../../more/faq.htm"><font face="Arial" color="#FFFFFF"><big>FAQ </big></font></a></td>
+    <td><a href="../../more/index.htm"><font face="Arial" color="#FFFFFF"><big>More </big></font></a></td>
+  </tr>
+</table>
+
+<h1>Member Function Adapters</h1>
+
+<p><nobr><a href="../../boost/functional.hpp">functional.hpp</a></nobr>
+ヘッダは C++ 標準ライブラリ <nobr>(&sect 20.3.8):</nobr> 由来のメンバ関
+数アダプタの全ての強化バージョンを含んでいる:</p>
+
+<ul>
+<li><tt>mem_fun_t</tt></li>
+<li><tt>mem_fun1_t</tt></li>
+<li><tt>const_mem_fun_t</tt></li>
+<li><tt>const_mem_fun1_t</tt></li>
+<li><tt>mem_fun_ref_t</tt></li>
+<li><tt>mem_fun1_ref_t</tt></li>
+<li><tt>const_mem_fun_ref_t</tt></li>
+<li><tt>const_mem_fun1_ref_t</tt></li>
+</ul>
+
+<p>同様に対応するヘルパ関数も提供する。</p>
+<ul>
+<li><tt>mem_fun</tt></li>
+<li><tt>mem_fun_ref</tt></li>
+</ul>
+
+<p>標準のアダプタそれぞれから、以下の変更がなされている:</p>
+
+<ul>
+<li><tt><nobr>first_argument_type</nobr></tt> typedef は
+	<nobr><tt>const_</tt></nobr> ファミリーのメンバ関数アダプタのために
+	修正されている。(<a href="#firstarg">以下</a> を参照せよ)。</li>
+
+<li><tt><nobr>mem_fun1_t</nobr></tt>やその変種に渡される引数は、メンバ関
+	数の引数型として、<tt><nobr>call_traits::param_type</nobr></tt> を用
+	いて渡される。
+</ul>
+
+<h3 id="firstarg">first_argument_type</h3>
+
+<p>標準は <tt><nobr>const_mem_fun1_t</nobr></tt> を例えば、以下のように指
+	定する:
+
+<blockquote><pre>
+template &lt;class S, class T, class A&gt; class const_mem_fun1_t
+  : public binary_function&lt;<strong>T*</strong>, A, S&gt; {
+public:
+  explicit const_mem_fun1_t(S (T::*p)(A) const);
+  S operator()(<strong>const T*</strong> p, A x) const;
+};
+</pre></blockquote>
+
+<p><tt><nobr>binary_function</nobr></tt> への第一引数が実際には
+<tt><nobr><em>const</em> T*</nobr></tt> であるにも関わらず、
+<tt><nobr>T*</nobr></tt> になっている点に注意しなさい。
+
+<p>これはどういうことか？さて、我々が以下のように書くとき何が起こるかを
+考えなさい。
+
+<blockquote><pre>
+struct Foo { void bar(int) const; };
+const Foo *cp = new Foo;
+std::bind1st(std::mem_fun(&Foo::bar), cp);
+</pre></blockquote>
+
+<p>我々は以下のようなものを効果的に含む
+<tt><nobr>const_mem_fun1_t</nobr></tt> オブジェクトを作成した。
+
+<blockquote><pre>
+typedef Foo* first_argument_type;
+</pre></blockquote>
+
+<p>次に <tt><nobr>bind1st</nobr></tt> はこの
+<tt><nobr>typedef</nobr></tt> を <tt><nobr>cp</nobr></tt> によって初期化
+されるメンバ型として用いる <tt><nobr>binder1st</nobr></tt> オブジェクト
+を作成する。言い換えれば、我々は <tt><nobr>Foo*</nobr></tt> メンバを
+<tt><nobr>const Foo*</nobr></tt> メンバで初期化する必要がある! 明らかに
+これは不可能であるので、標準ライブラリのベンダはこれを実装するために
+<tt><nobr>cp</nobr></tt> の定数性を、たぶん
+<tt><nobr>bind1st</nobr></tt> の本体の中で、キャストして取り除かなければ
+ならなかっただろう。
+
+<p>このハックは改良された <a href="binders.html">バインダ</a> と共に用い
+る場合十分では無いので、我々はメンバ関数アダプタの修正されたバージョンも
+同様に提供しなければならなかった。
+
+<h3 id="args">Argument Types</h3>
+
+<p>標準は <nobr><tt>mem_fun1_t</tt></nobr> を例えば以下のように定義する
+<nobr>(&sect;20.3.8 &para;2)</nobr>:
+
+<blockquote><pre>
+template &lt;class S, class T, class A&gt; class mem_fun1_t
+  : public binary_function&lt;T*, A, S&gt; {
+public:
+  explicit mem_fun1_t(S (T::*p)(<strong>A</strong>));
+  S operator()(T* p, <strong>A</strong> x) const;
+};
+</pre></blockquote>
+
+<p><nobr><tt>operator()</tt></nobr> の第二引数はメンバ関数の引数と全く同
+じであることに注意しなさい。もしこれが値型であれば、引数は二度値渡しされ
+てコピーされる。
+
+<p>しかしながら、もし我々が引数を代わりに <nobr><tt>const A&</tt></nobr>
+として宣言することによってこの非効率性を削除しようとするならば、もし A
+が参照型であれば、我々は参照の参照を持ってしまう。そしてそれは現在のとこ
+ろ非合法である。 (ただし <a
+href="http://anubis.dkuug.dk/jtc1/sc22/wg21/docs/cwg_active.html#106">C++
+言語中核の問題点 106 番目</a> を参照せよ)
+
+<p>つまり、<nobr><tt>operator()</tt></nobr> の引数を宣言する望ましい方法
+は、メンバ関数の引数が参照であるかないかに依っている。もしそれが参照であ
+るならば、単純に <nobr><tt>A</tt></nobr> と宣言したいのであり、もし値で
+あれば <nobr><tt>const A&</tt></nobr> と宣言したいのである。
+
+<p>Boost の <nobr><a
+href="../utility/call_traits.htm">call_traits</a></nobr> クラステンプレー
+トは <tt><nobr>param_type</nobr></tt> typedef を含んでいて、それは部分特
+殊化版を用いて正確にこの判断をを行う。<nobr><tt>operator()</tt></nobr> を
+以下のように宣言することによって。
+
+<blockquote><pre>
+S operator()(T* p, typename call_traits&lt;A&gt;::param_type x) const
+</pre></blockquote>
+
+<p>我々は望ましい結果を引き出した - 参照の参照を生み出すことなく、効率性
+を得たのだ。</p>
+
+<h3>Limitations</h3>
+
+<p>call traits テンプレートはこの改良を実現するために使われる関数オブジェ
+クト特性と call_traits の両方が部分特殊化版に頼っているので、この改良は部
+分特殊化の機能を持つコンパイラでのみ有効である。そうでないコンパイラでは、
+メンバ関数に渡される引数は(<nobr><tt>mem_fun1_t</tt></nobr> ファミリの中
+で) 常に参照渡しとなるので、参照の参照の可能性を生みだすことになる。</p>
+
+<hr>
+
+<p>Copyright &copy; 2000 Cadenza New Zealand Ltd.  Permission to copy,
+use, modify, sell and distribute this document is granted provided
+this copyright notice appears in all copies. This document is provided
+"as is" without express or implied warranty, and with no claim as to
+its suitability for any purpose.</p>
+
+<p>Revised 28 June 2000</p>
+
+<hr>
+
+<p>
+Japanese Translation Copyright (C) 2003 shinichiro.h
+&lt;g940455@mail.ecc.u-tokyo.ac.jp&gt;.
+</p>
+
+<p>
+オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の
+複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」
+に提供されており、いかなる明示的、暗黙的保証も行わない。また、
+いかなる目的に対しても、その利用が適していることを関知しない。
+</p>
+
+</body>
+</html>

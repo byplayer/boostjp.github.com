@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html
+   PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">
+
+<!--
+ - Copyright (c) Jeremy Siek and Andrew Lumsdaine 2000
+ -
+ - Permission to use, copy, modify, distribute and sell this software
+ - and its documentation for any purpose is hereby granted without fee,
+ - provided that the above copyright notice appears in all copies and
+ - that both that copyright notice and this permission notice appear
+ - in supporting documentation. We make no
+ - representations about the suitability of this software for any
+ - purpose. It is provided "as is" without express or implied warranty.
+ -->
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>コンセプトの充当化と原型</title>
+</head>
+
+<body bgcolor="white" text="black" link="#0000ee" vlink="#551a8b" alink="red">
+
+<p><img src="../../c++boost.gif"  alt="C++ Boost" width="277" height="86" />
+<br clear="all" /></p>
+
+<h2><a name="concept-covering" id="concept-covering">Concept Covering and Archetypes</a></h2>
+
+<p>これまで、コンポーネントへの入力に対して、最小限の要求事項(コンセプト)を選択することの重要性を議論してきた。
+しかし、選択したコンセプトが対象のアルゴリズムを<em>充当 &quot;cover&quot;</em> していることを確認するのも、同様に重要である。
+すなわち、発生する可能性のあるユーザ・エラーは全てコンセプト・チェックによって漏れなく捕らえられるべきである。
+コンセプト充当性は、<em>原型クラス &quot;archetype class&quot;</em> を使用することで確認可能だ。
+原型クラスとは、特定のコンセプトに関連するインタフェースの正確な実装である。
+原型クラスの実行時の振舞いに重要性はなく、そのメンバ関数本体は空文のままでかまわない。
+そうすれば、コンポーネントへの入力として原型クラスを与えてコンパイルするだけで、簡単なテスト・プログラムが作成できる。
+そのプログラムがコンパイル可能であれば、対応するコンセプトがそのコンポーネントを充当していることが確認できたことになる。</p>
+
+<p>
+以下のコードは、<a href="http://www.sgi.com/tech/stl/trivial.html" charset="us-ascii" hreflang="en-US">TrivialIterator</a> コンセプトに対する原型クラスである。
+原型が対応するコンセプトと正確に一致していることを保証するために、いくつかの点で注意しなければならないことがある。
+例えば、コンセプトは <code>operator*()</code> の戻り値型が値型に変換可能でなければならない。
+だからといって、これはその戻り値型として、より厳格に <code>T&amp;</code> あるいは <code>const T&amp;</code> を要求している訳ではない。
+それは、原型クラスの戻り値型として <code>T&amp;</code> あるいは <code>const T&amp;</code> を使用することが、誤りとなることを意味する。
+正しいアプローチは、<code>T</code> 型に変換可能なユーザー定義の戻り値型を作成することで、この例では <code>input_proxy</code> として処理している。
+原型クラスを用いたテストの妥当性は、完全にコンセプトとの正確な一致に依存しており、それを確認するためには慎重な（人手による）検査を必要とする。</p>
+
+<pre>
+  template &lt;class T&gt;
+  struct input_proxy {
+    operator const T&amp;() {
+      return static_object&lt;T&gt;::get(); // Get a reference without constructing
+    }
+  };
+  template &lt;class T&gt;
+  class trivial_iterator_archetype
+  {
+    typedef trivial_iterator_archetype self;
+  public:
+    trivial_iterator_archetype() { }
+    trivial_iterator_archetype(const self&amp;) { }
+    self&amp; operator=(const self&amp;) { return *this;  }
+    friend bool operator==(const self&amp;, const self&amp;) { return true; }
+    friend bool operator!=(const self&amp;, const self&amp;) { return true; }
+    input_proxy&lt;T&gt; operator*() { return input_proxy&lt;T&gt;(); }
+  };
+
+  namespace std {
+    template &lt;class T&gt;
+    struct iterator_traits&lt; trivial_iterator_archetype&lt;T&gt; &gt;
+    {
+      typedef T value_type;
+    };
+  }
+</pre>
+
+<p>
+ジェネリック・アルゴリズムのテストとして、一般的な複数の入力型に対してインスタンスの生成を行う場合が往々にしてある。
+一例として、<code>std::stable_sort()</code> に対して、イテレータとして組み込みのポインタ型を適用することが考えられる。
+これは、アルゴリズムの実行時の振る舞いをテストするには適切であるが、コンセプト充当性の保証には有用ではない。
+なぜなら、C++ の組み込み型は特定のコンセプトとー致を見ることは決してなく、たいていの場合、それが提供する機能は何らかのコンセプトが単独で必要とする最小のそれを上回っている。
+すなわち、たとえ与えられた型で関数テンプレートがコンパイルできたとしても、そのコンセプトの要求事項は、その関数を充当する実際の要求事項に及ばないことがありうる。
+それ故に、一般的な入力型でテストすることに加えて、原型クラスでコンパイルすることは重要である。</p>
+
+<p>
+以下は、記載されている <a href="http://www.sgi.com/tech/stl/stable_sort.html" charset="us-ascii" hreflang="en-US"><code>std::stable_sort()</code></a> の要求事項をチェックするために原型を使用する方法を示す、<a href="./stl_concept_covering.cpp">stl_concept_covering.cpp</a> からの抜粋である。
+この場合、<a href="../utility/CopyConstructible.html">CopyConstructible（コピー・コンストラクト可能）</a> と <a href="../utility/Assignable.html">Assignable（割り当て可能）</a> 要求事項が、SGI STL 文書から無視されているように見える (試しに、その原型を削除してみるとよい) 。
+Boost の原型クラスは、階層構造が取れるように設計されている。
+この例において、イテレータの値型は３つの原型から構成される。
+下記で参照されている原型クラスでは、<code>Base</code> という名前のテンプレート・パラメータが、階層化された原型を使用可能であることを示している。</p>
+
+<pre>
+  {
+    typedef less_than_comparable_archetype&lt; 
+        sgi_assignable_archetype&lt;&gt; &gt; ValueType;
+    random_access_iterator_archetype&lt;ValueType&gt; ri;
+    std::stable_sort(ri, ri);
+  }
+</pre>
+
+<p><a href="prog_with_concepts.htm">次へ： Programming with Concepts</a><br />
+<a href="creating_concepts.htm">前へ： Creating Concept Checking Classes</a>
+</p>
+
+<hr />
+
+<table xml:lang="en-US" lang="en-US">
+<tr valign="top">
+  <td nowrap="nowrap">Copyright &copy; 2000</td>
+  <td>
+    <a href="../../people/jeremy_siek.htm">Jeremy Siek</a>,
+    Univ.of Notre Dame (<a href="mailto:jsiek@lsc.nd.edu">jsiek@lsc.nd.edu</a>)
+  </td>
+</tr>
+</table>
+
+</body>
+</html>

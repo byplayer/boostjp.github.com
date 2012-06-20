@@ -1,0 +1,50 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Boost.Function Frequently Asked Questions</title>
+  </head>
+
+  <body bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080">
+
+<h1><IMG SRC="../../../c++boost.gif" WIDTH="276" HEIGHT="86" alt="C++ Boost">boost::function Frequently Asked Questions</h1>
+
+<h2>Q: void ポインタを見かけたが、これはタイプセーフなのか？</h2>
+<p>はい。 <code>boost::function</code> は void ポインタや、戻り値も引数もない関数ポインタを使っているが、タイプセーフだ。関数ポインタや関数オブジェクトを管理/実行する関数の中には、全ての型の情報が書き込まれている。 void ポインタや void 関数ポインタが指す本当の型を知らされてインスタンス化されるのは、これらの管理/実行用関数だけなのだ。 void ポインタと void 関数ポインタの両方が必要な理由は、オブジェクトへのポインタと void ポインタは互いに安全にキャストでき、異なる型の関数ポインタ同士も安全にキャストできる事だ (ただし、異なる型で関数ポインタを呼び出してはならない) 。
+
+<h2>Q: 何故 void の return の回避手段を取っているのか？ C++ では許されているはずだ！</h2>
+<p>void の return は C++ 標準で許されている。以下はこれを使ったコードの一部だ。
+<pre>
+void f();
+void g() { return f(); }
+</pre>
+
+<p> void の return を使わない理由の 1 つとして、全てのコンパイラが void の return をサポートしているわけではない事が挙げられる。実際には、このちょっとした機能をサポートするコンパイラは極一部だ。さらに、 void の return を使わない事で、 <code>boost::function</code> はもっと柔軟になった。以下の例を考えてみよう。
+<pre>
+int do_something(int);
+
+boost::function&lt;void, int&gt; f;
+f = do_something;
+</pre>
+<p> この <code>boost::function</code> の使い方が有効なのは、 void の return が使われていないからだ。 void の return を使うと、以下のコードと同等の不正なコードをコンパイルしようとする事になる。
+<pre>
+int f();
+void g() { return f(); }
+</pre>
+<p> void の return を使わない事で、 <code>boost::function</code> は戻り値を飲み込めるようになる、というのが本質なのだ。この事は、「ぴったり一致しないパラメータを持つ関数や関数オブジェクトを代入/実行できる」事とも一貫している。
+
+<h2>Q: 何故 (関数を) コピーするのか？ </h2>
+<p> 2000 年の 11 ～ 12 月に、コピー vs. 参照の論争が長々と繰り広げられた。その結果、コピーの方が予測しやすいセマンティクスになるという結論になった。私はここでその議論を蒸し返すつもりはない。コピーが不適当な場合は、参照カウント式アロケータを使えばよい。 
+
+    <hr>
+    <address><a href="http://www.cs.rpi.edu/~gregod">Doug Gregor</a></address>
+<!-- Created: Fri Feb 16 09:30:41 EST 2001 -->
+<!-- hhmts start -->
+Last modified: Fri Oct 11 05:39:27 EDT 2002
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:gimite@mx12.freecom.ne.jp">Hiroshi Ichikawa</a><br>
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+<!-- hhmts end -->
+<p>このドキュメントの対象: Boost Version 1.29.0<br>
+<a href="http://www.boost.org/doc/html/function.faq.html">最新版ドキュメント (英語)</a></p>
+  </body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<title>Overall Design Goals</title>
+<link href="doxygen.css" rel="stylesheet" type="text/css">
+<meta http-equiv="content-style-type" content="text/css">
+<!-- 入口 -->
+<style type="text/css"><!--
+  .original {color: #808080;}
+  .draft {color: green;}
+  .note {color: #ff8080;}
+--></style>
+</head>
+
+<body>
+<a href="../../../index.htm">
+<img align="left" src="../../../c++boost.gif" alt="C++ Boost">
+</a>  
+
+<h1>Overall Design Goals</h1>
+<hr style="clear: left;">
+<p>
+<a href="index.html">Overall Index</a> --
+<a href="gregorian.html">Gregorian Index</a> --
+<a href="posix_time.html">Posix Time Index</a>
+</p>
+
+<table border="1" width="95%" > 
+ <tr><th>Category</th><th>Description</th><th>Functions</th></tr> 
+ <tr class="original"><td>Interfaces</td> 
+   <td>Provide concrete classes for manipulation of dates and times</td> 
+   <td> 
+     <ul>
+       <li>date, time, date_duration, time_duration, date_period, time_period, etc 
+       <li>support for infinity - positive infinity, negative infinity 
+       <li>iterators over time and date ranges 
+       <li>allow date and time implemenations to be separate as much as possible
+     </ul> 
+   </td> 
+ </tr> 
+ <tr>
+   <td>インタフェース</td>
+   <td>日付と時間の操作のための具体的なクラスを提供</td>
+   <td>
+     <ul>
+       <li>date, time, date_duration, time_duration, date_period, time_period, etc </li>
+       <li>無限数のサポート - 正の無限大, 負の無限大</li>
+       <li>日付と時間の範囲に渡るイテレータ</li>
+       <li>日付と時間の実装を可能な限り分離するよう考慮する</li>
+     </ul>
+   </td>
+ </tr>
+ <tr class="original"> 
+   <td>Calculation</td> 
+   <td>Provide a basis for performing efficient time calculations </td> 
+   <td> 
+     <ul> 
+       <li>days between dates 
+       <li>durations of times 
+       <li>durations of dates and times together 
+            </ul> 
+   </td></tr> 
+ <tr> 
+   <td>計算</td> 
+   <td>効率的な時間計算を行うための基盤を提供する</td> 
+   <td> 
+     <ul>
+       <li>日付の間の日数</li>
+       <li>時間の差</li>
+       <li>日付と時間を併せた時間長(durations)</li>
+     </ul> 
+   </td>
+ </tr>
+ <tr class="original"><td>Representation Flexibility</td> 
+   <td>Provide the maximum possible reusability and flexibility</td> 
+   <td> 
+     <ul> 
+       <li>traits based customization of internal 
+       representations for size versus resolution control 
+       <li>Allowing the use of different epochs and resolution
+       (eg: seconds versus microseconds, dates starting at the 
+       year 2000 versus dates starting in 1700)  
+       <li>Options for configuring unique calendar  
+  representations (Gregorian + others) 
+       <li> the use of Julian Day number and the conversion between this and the Gregorian/Julian calendar date
+       <li>Allow for flexible adjustments including 
+  leap seconds 
+     </ul> 
+   </td></tr>
+ <tr>
+   <td>表現の柔軟性</td>
+   <td>最大限の再利用性と柔軟性を提供する</td>
+   <td>
+     <ul>
+       <li>サイズと分解能を制御するための、traits に基づいた内部表現のカスタマイズ</li>
+       <li>異なるエポック(epoch)と分解能の使用が可能 (例:秒とマイクロ秒、2000年から始まる日付と1700年から始まる日付)</li>
+       <li>独特な暦法の内部表現を設定するためのオプション (グレゴリオ暦 + その他)</li>
+       <li>ユリウス通日(Julian Day Number)の使用、および、ユリウス通日とグレゴリオ暦/ユリウス暦との日付変換</li>
+       <!-- ユリウス日数とも -->
+       <li>うるう秒を含む柔軟な調整を考慮する</li>
+     </ul>
+   </td>
+ </tr>
+ <tr class="original"><td>Date Calculations</td> 
+   <td>Provide tools for date calculations</td> 
+   <td> 
+     <ul> 
+       <li>provide basis for calculation of complex event specs like holidays
+       <li>calendar to calendar conversions
+       <li>provide for ability to extend to new calendar systems
+     </ul> 
+   </td> 
+ </tr> 
+ <tr>
+   <td>日付の計算</td>
+   <td>日付計算用のツールを提供</td>
+   <td>
+     <ul>
+       <li>祝祭日のような複雑な行事予定を計算するための基盤を提供する</li>
+       <li>ある暦法から別の暦法への変換</li>
+       <li>新たな暦法系に拡張するための能力を提供</li>
+     </ul>
+   </td>
+ </tr>
+ <tr class="original"><td>Time Calculations</td> 
+   <td>Provide concrete classes for manipulation of time</td> 
+   <td> 
+     <ul> 
+       <li>provide the ability to handle cross time-zone issues
+       <li>provide adjustments for daylight savings time (summer time)
+     </ul> 
+   </td> 
+ </tr> 
+ <tr>
+   <td>時間の計算</td>
+   <td>時間を操作するための具体的なクラスを提供</td>
+   <td>
+     <ul>
+       <li>異なった時間帯にまたがる問題を取り扱うための能力を提供</li>
+       <li>昼時間の調整(サマータイム)</li>
+     </ul>
+   </td>
+ </tr>
+ <tr class="original"><td>Clock Interfaces</td> 
+   <td>Provide classes for retrieving time current time</td> 
+   <td> 
+     <ul> 
+       <li>access to a network / high resolution time sources 
+       <li>retrieving the current date time information to populate classes 
+     </ul> 
+   </td> 
+ </tr> 
+ <tr>
+   <td>クロックインタフェース</td>
+   <td>現在の時刻を取得するクラスを提供</td>
+   <td>
+     <ul>
+       <li>ネットワーク、高分解能時間源(time source)へのアクセス</li>
+       <li>クラスに代入するための、現在の日付時間情報を取得する</li>
+     </ul>
+   </td>
+ </tr>
+ <tr class="original"><td>I/O Interfaces</td> 
+   <td>Provide input and output for time including</td> 
+   <td> 
+     <ul> 
+       <li>multi-lingual support 
+       <li>provide ISO8601 compliant time facet 
+       <li>use I/O facets for different local behavior 
+     </ul> 
+   </td> 
+ </tr> 
+ <tr>
+   <td>I/O インタフェース</td>
+   <td>時間を含む入出力を提供</td>
+   <td>
+     <ul>
+       <li>多言語サポート</li>
+       <li>ISO8601 に準拠した時間面</li>
+       <li>異なるローカル(環境)での振る舞いのためにI/O面を使用</li>
+     </ul>
+   </td>
+ </tr>
+</table>
+<br>
+
+<hr>
+<address><small>
+<!-- hhmts start -->
+Last modified: Wed Aug 21 15:42:19 MST 2002
+<!-- hhmts end -->
+ by <a href="mailto:jeff&#64;crystalclearsoftware.com">Jeff Garland</a> &copy; 2000-2002
+<br>
+  Japanese Translation Copyright (C) 2003 <a href="mailto:sshino@cppll.jp">Shoji Shinohara</a>.
+</small></address>
+</body>
+</html>

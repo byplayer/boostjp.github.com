@@ -1,0 +1,78 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+
+<title>Boost.Compatibilty library</title>
+
+<div>
+
+<img src="../../c++boost.gif"
+     alt="c++boost.gif (8819 bytes)"
+     width="277" height="86">
+
+<hr>
+<h1>Boost.Compatibilty ライブラリ</h1>
+
+<p>
+このライブラリは、boostライブラリが規格に準拠していないプラットフォームでも利用できるようにするための回避手段を提供するものである。我々は、よりいっそう規格に準拠した標準ライブラリが提供され、いつかこのライブラリを削除できる日がくることを望んでいる。
+</p>
+<h2>C++標準ライブラリのCXXヘッダ(例 &lt;cstdio&gt;)が見当たらない場合の回避策</h2>
+
+<p>
+Pythonスクリプト
+<tt><a href="generate_cpp_c_headers.py">generate_cpp_c_headers.py</a> </tt>は、いくつかのプラットフォームでは見当たらない C++ の C ヘッダ(例 &lt;cstdio&gt;) を生成することができる。このスクリプトによって生成されたヘッダファイルは<tt><a href="../../boost/compatibility/cpp_c_headers/">boost/compatibility/cpp_c_headers</a></tt>ディレクトリの中に存在する。このヘッダを使うには、ファイル検索パスにこのディレクトリを追加すればよい。たとえば以下のようにする。
+</p>
+
+<pre>
+cxx -I/usr/local/boost/boost/compatibility/cpp_c_headers ...
+</pre>
+
+<p>
+サポートしているプラットフォーム:
+</p>
+
+<ul>
+<li>Compaq Alpha, RedHat 6.2 Linux, Compaq C++ V6.3 (cxx)
+<li>Compaq Alpha, Tru64 Unix V5.0, Compaq C++ V6.2 (cxx)
+<li>Silicon Graphics, IRIX 6.5, MIPSpro コンパイラ: Version 7.3.1.1m (CC)
+</ul>
+
+<p>
+<a href="http://www.stlport.org/">STLport</a> や <a href="http://www-pat.fnal.gov/personal/wb/boost/">ISOCXX</a> のように、Boost.Compatibility を用いるよりもっと強力な代替手段も存在する。しかし、これらの代替手段と比べ、<tt>generate_cpp_c_headers.py</tt> はたいへん軽量(コメント抜きで100行以下のPythonコード)で、まして大げさでもなく、きわめて簡単に維持できるため、一時的な回避手段としてはより適切である。
+</p>
+
+<p>以上は Ralf W. Grosse-Kunstleve によって寄稿されたものである。</p>
+
+<h2>
+C++標準ライブラリ&lt;limits&gt;ヘッダが見当たらない場合の回避手段、<a href="../../boost/limits.hpp">boost/limits.hpp</a></h2>
+
+<p>
+Boostライブラリのうちのいくつかは標準ライブラリ&lt;limits&gt;を必要とする。しかし、このヘッダは規格に準拠していないコンパイラやライブラリがいつでも提供しているとは限らない。<a href="../../boost/limits.hpp">boost/limits.hpp</a>は、標準ライブラリ&lt;limits&gt;が利用可能であるならそれを単純にインクルードしているが、そうでないなら<a href="../../boost/detail/limits.hpp">boost/detail/limits.hpp</a>をインクルードしている。<a href="../config/config.htm">boost/config.hpp</a>のBOOST_NO_LIMITSは&lt;limits&gt;ヘッダが利用可能か決定するために使われる。
+</p>  
+
+<p>テストプログラム <a href="../config/test/limits_test.cpp">limits_test.cpp</a> も参照せよ。
+</p>
+
+<p>以上は Jens Maurer によって寄稿されたものである。</p>
+
+<p>
+&nbsp;
+</p>
+
+<hr>
+
+<p>
+&copy; Copyright Ralf W. Grosse-Kunstleve 2001. Permission to copy,
+use, modify, sell and distribute this document is granted provided this
+copyright notice appears in all copies. This document is provided "as
+is" without express or implied warranty, and with no claim as to its
+suitability for any purpose.
+</p>
+
+<p>
+Updated: April 16, 2001
+</p>
+
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:samba@pal.tok2.com">kazu.y</a><br>
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+
+</div>

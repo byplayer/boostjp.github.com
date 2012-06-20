@@ -1,0 +1,192 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <title>Boost: ref.hpp documentation</title>
+    </head>
+    <body bgcolor="White">
+        <p>
+        原文：
+        <a href="http://www.boost.org/libs/bind/ref.html">
+        http://www.boost.org/libs/bind/ref.html
+        </a>
+        <br>
+        </p>
+        <table border="0" width="100%">
+            <tr>
+                <td width="277">
+                    <img src="../../c++boost.gif" alt="c++boost.gif (8819 bytes)" width="277" height="86">
+                </td>
+                <td align="center">
+                    <table border="0">
+                        <tr>
+                            <td nowrap><h1>ref.hpp</h1>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="right" nowrap><small>&nbsp;1.00.0004 (2002-01-27)</small></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" height="64">&nbsp;</td>
+            </tr>
+        </table>
+        <h2>Files</h2>
+        <ul>
+            <li>
+                <a href="http://www.boost.org/boost/ref.hpp">ref.hpp</a>
+        </ul>
+        <h2>Purpose</h2>
+        <p>
+            <a href="http://www.boost.org/boost/ref.hpp">boost/ref.hpp</a> ヘッダーでは、クラス テンプレートである <b>boost::reference_wrapper&lt;T&gt;</b> と、<b>boost::reference_wrapper&lt;T&gt;</b> のインスタンスを返す二つの関数 <b>boost::ref</b> と <b>boost::cref</b>、それに二つの特性クラス <b>boost::is_reference_wrapper&lt;T&gt;</b> と  <b>boost::unwrap_reference&lt;T&gt;</b> が定義されている。
+        </p>
+        <p>
+            <b>boost::reference_wrapper&lt;T&gt;</b> の目的は、<b>T</b> 型のオブジェクトへの参照を格納することにある。主に、値渡しの仮引数をとる関数のテンプレート (アルゴリズム) に参照を「食わせる (feed)」のに使われる。
+        </p>
+        <p>
+            この使い方をサポートするため、<b>boost::reference_wrapper&lt;T&gt;</b> は <b>T &amp;</b> への暗黙の型変換を提供する。このことにより、関数テンプレートが適合していない参照に対しても大抵はうまく働くようになる。
+        </p>
+        <p>
+            <b>boost::reference_wrapper&lt;T&gt;</b> は <b>CopyConstructible</b>（コピーコンストラクト可能) でかつ <b>Assignable</b> (代入可能) である (通常の参照は <b>Assignable</b> (代入可能) ではない)。
+        </p>
+        <p>
+            X が x の型である場合、<b>boost::ref(x)</b> という式は <b>boost::reference_wrapper&lt;X&gt;(x)</b> を返す。同様に、<b>boost::cref(x)</b> は <b>boost::reference_wrapper&lt;X const&gt;(x)</b> を返す.
+        </p>
+        <p>
+            <b>boost::is_reference_wrapper&lt;T&gt;::value</b> という式は、もし <b>T</b> が <b>reference_wrapper</b> であるときには <b>true</b> を返し、それ以外のときには <b>false</b> を返す。
+        </p>
+        <p>
+            <b>boost::unwrap_reference&lt;T&gt;::type</b>  という型式 (type-expression) は、<b>T</b> が <b>reference_wrapper</b> のときには <b>T::type</b> であり、それ以外のときには <b>T</b> である。
+        </p>
+            <h2>Interface</h2>
+            <h3>Synopsis</h3>
+            <pre>
+namespace boost
+{
+    template&lt;class T&gt; class <a href="#reference_wrapper">reference_wrapper</a>;
+    template&lt;class T&gt; reference_wrapper&lt;T&gt; <a href="#ref">ref</a>(T &amp; t);
+    template&lt;class T&gt; reference_wrapper&lt;T const&gt; <a href="#cref">cref</a>(T const &amp; t);
+    template&lt;class T&gt; class is_reference_wrapper&lt;T const&gt;;
+    template&lt;class T&gt; class unwrap_reference&lt;T const&gt;;
+}
+</pre>
+            <h3><a name="reference_wrapper">reference_wrapper</a></h3>
+            <pre>
+template&lt;class T&gt; class reference_wrapper
+{
+public:
+    typedef T type;
+
+    explicit <a href="#rt_construct">reference_wrapper</a>(T &amp; t);
+
+    <a href="#rt_operator">operator T &amp;</a> () const;
+
+    T &amp; <a href="#rt_get">get</a>() const;
+    T* <a href="#rt_get_pointer">get_pointer</a>() const;
+};
+</pre>
+            <h4><a name="rt_construct">explicit reference_wrapper(T &amp; t)</a></h4>
+            <blockquote>
+                <p>
+                    <b>作用:</b> <b>t</b> への参照を格納する <b>reference_wrapper</b> のオブジェクトを構築する。
+                </p>
+                <p>
+                    <b>例外:</b> なし。
+                </p>
+            </blockquote>
+            <h4><a name="rt_operator">operator T &amp; () const</a></h4>
+            <blockquote>
+                <p>
+                    <b>戻り値:</b> 格納した参照。
+                </p>
+                <p>
+                    <b>例外:</b> なし。
+                </p>
+            </blockquote>
+            <h4><a name="rt_get">T &amp; get() const</a></h4>
+            <blockquote>
+                <p>
+                    <b>戻り値:</b> 格納した参照。
+                </p>
+                <p>
+                    <b>例外:</b> なし。
+                </p>
+            </blockquote>
+<h4><a name="rt_get_pointer">T* get_pointer() const</a></h4>
+            <blockquote>
+                <p>
+                    <b>戻り値:</b> 格納したオブジェクトへのポインタ。
+                </p>
+                <p>
+                    <b>例外:</b> なし。
+                </p>
+            </blockquote>
+            <h3><a name="ref">ref</a></h3>
+            <pre>
+template&lt;class T&gt; reference_wrapper&lt;T&gt; ref(T &amp; t);
+</pre>
+            <blockquote>
+                <p>
+                    <b>戻り値:</b> <tt>reference_wrapper&lt;T&gt;(t)</tt>.
+                </p>
+                <p>
+                    <b>例外:</b> なし。
+                </p>
+            </blockquote>
+            <h3><a name="cref">cref</a></h3>
+            <pre>
+template&lt;class T&gt; reference_wrapper&lt;T const&gt; cref(T const &amp; t);
+</pre>
+            <blockquote>
+                <p>
+                    <b>戻り値:</b> <tt>reference_wrapper&lt;T const&gt;(t)</tt>.
+                </p>
+                <p>
+                    <b>例外:</b> なし。
+                </p>
+            </blockquote>
+            <h3><a name="is_reference_wrapper">is_reference_wrapper</a></h3>
+            <pre>
+template&lt;class T&gt; class is_reference_wrapper&lt;T const&gt;
+{
+ public:
+    static bool value = <i>unspecified</i>;
+};
+</pre>
+            もし <tt>T</tt> が <tt>reference_wrapper</tt> の特殊化版であれば値は <b>true</b>。
+            <h3><a name="unwrap_reference">unwrap_reference</a></h3>
+            <pre>
+template&lt;class T&gt; class unwrap_reference&lt;T const&gt;
+{
+ public:
+    typedef <i>unspecified</i> type;
+};
+</pre>
+             もし <tt>T</tt> が <tt>reference_wrapper</tt> の特殊化版であれば <tt>type</tt> は <tt>T::type</tt> と等価。そうでなければ <tt>type</tt> は <tt>T</tt> と等価。
+            <h2>Acknowledgements</h2>
+        <p>
+            <b>ref</b> と <b>cref</b> は元々は <a href="../../people/jaakko_jarvi.htm">Jaakko J&auml;rvi</a> 氏作の Boost.Tuple というライブラリの一部であった。それが、一般的に有用であるという理由で <a href="../../people/peter_dimov.htm">Peter Dimov</a> 氏の手によって「<b>boost::</b> に昇格」した。<a href="../../people/doug_gregor.html">Douglas Gregor</a> 氏と <a href="../../people/dave_abrahams.htm">Dave Abrahams</a> 氏が <tt>is_reference_wrapper</tt> と <tt>unwrap_reference</tt> を提供した。
+        </p>
+        <p><br>
+            <br>
+            <br>
+            <small>Copyright &copy; 2001 by Peter Dimov and Multi Media Ltd. Permission to
+                copy, use, modify, sell and distribute this document is granted provided this
+                copyright notice appears in all copies. This document is provided &quot;as
+                is&quot; without express or implied warranty, and with no claim as to its
+                suitability for any purpose.</small></p>
+
+    <hr>
+
+    <div>
+    <i>Japanese Translation Copyright &copy; 2003
+    <a href="mailto:f_kojima@fukuicompu.co.jp">Fujio Kojima</a></i>
+    <p>
+    オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。
+    </p>
+    </div>
+
+    </body>
+</html>

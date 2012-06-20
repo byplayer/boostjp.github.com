@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html
+   PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">
+
+<!--
+ - Copyright (c) Jeremy Siek and Andrew Lumsdaine 2000
+ -
+ - Permission to use, copy, modify, distribute and sell this software
+ - and its documentation for any purpose is hereby granted without fee,
+ - provided that the above copyright notice appears in all copies and
+ - that both that copyright notice and this permission notice appear
+ - in supporting documentation. We make no
+ - representations about the suitability of this software for any
+ - purpose. It is provided "as is" without express or implied warranty.
+ -->
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>コンセプト・チェック用クラスの作成</title>
+</head>
+
+<body bgcolor="#ffffff" text="#000000" link="#0000ee" vlink="#551a8b" alink="#ff0000">
+
+<p><img src="../../c++boost.gif"  alt="C++ Boost" width="277" height="86" />
+<br clear="all" /></p>
+
+<h2><a name="creating-concept-checks" id="creating-concept-checks">Creating Concept Checking Classes</a></h2>
+
+<p>コンセプト・チェック用クラスを作成する方法の例証として、<a href="http://www.sgi.com/tech/stl/RandomAccessIterator.html" charset="us-ascii" hreflang="en-US">RandomAccessIterator</a> コンセプトに対応するチェック用クラスを作成する方法を考察する。
+最初に、命名規約として、コンセプト・チェック用クラスの名前を、対象コンセプトの名称に接尾辞として &quot;<code>Concept</code>&quot; を加えて生成する。
+次に、コンセプトにおける有効式を試行する <code>constraints()</code> という名のメンバ関数を定義しなければならない。
+<code>function_requires()</code> 関数は、この関数のシグネチャが正確に次に示すとおりであることを前提にしている：非 const メンバ、パラメータ無し、戻り値型 <code>void</code> 。</p>
+
+<p>
+<code>constraints()</code> 関数の最初の部分は、<a href="http://www.sgi.com/tech/stl/RandomAccessIterator.html" charset="us-ascii" hreflang="en-US">RandomAccessIterator</a> と、それが基礎を置くコンセプト、<a href="http://www.sgi.com/tech/stl/BidirectionalIterator.html" charset="us-ascii" hreflang="en-US">BidirectionalIterator</a> 及び <a href="http://www.sgi.com/tech/stl/LessThanComparable.html" charset="us-ascii" hreflang="en-US">LessThanComparable</a> との間にある<em>発展形 &quot;refinement&quot;</em> の関係を表現する要求事項を含んでいる。
+そうする代わりに、<code>BOOST_CLASS_REQUIRE</code> マクロを使用して、クラス本体に要求事項を置くこともできる。しかし、<code>BOOST_CLASS_REQUIRE</code> マクロは、C++ 言語機能としてはやや移植性に欠けるものを使用しているので、ここでは避けた。</p>
+
+<p>
+次に、イテレータの <code>iterator_category</code> が <code>std::random_access_iterator_tag</code> あるいはその派生クラスのいずれかであることをチェックする。
+その後に、<a href="http://www.sgi.com/tech/stl/RandomAccessIterator.html" charset="us-ascii" hreflang="en-US">RandomAccessIterator</a> コンセプトにおいて有効な式に当たるコードを書き加える。
+<code>typedef</code> も、関連型のコンセプトを強要するために付加することができる。</p>
+
+<pre>
+  template &lt;class Iter&gt;
+  struct RandomAccessIterator_concept          //（<a href="#trans_note_01">訳注１</a>）
+  {
+    void constraints() {
+      function_requires&lt; BidirectionalIteratorConcept&lt;Iter&gt; &gt;();
+      function_requires&lt; LessThanComparableConcept&lt;Iter&gt; &gt;();
+      function_requires&lt; ConvertibleConcept&lt;
+        typename std::iterator_traits&lt;Iter&gt;::iterator_category,
+        std::random_access_iterator_tag&gt; &gt;();
+
+      i += n;
+      i = i + n; i = n + i;
+      i -= n;
+      i = i - n;
+      n = i - j;
+      i[n];
+    }
+    Iter a, b;
+    Iter i, j;
+    typename std::iterator_traits&lt;Iter&gt;::difference_type n;
+  };
+}
+</pre>
+
+<p>
+コンセプト・チェック用クラスの設計中に陥りやすい潜在的な落し穴は、<code>constraint()</code> 関数の中で必要よりも多くの式を使用することである。
+例えば、式で必要なオブジェクトを作成するために、意図せずデフォルト・コンストラクタを使用してしまうのは良くあることだ（それに、すべてのコンセプトがデフォルト・コンストラクタを必要とするとは限らない)。
+クラスのメンバ関数として我々が制約関数を記述するのは、この理由のためである。
+式に関与するオブジェクトは、クラスのデータ・メンバとして宣言する。
+制約クラス・テンプレートのオブジェクトはインスタンスとして生成されることは無いので、そのデフォルト・コンストラクタがインスタンス化されることはない。
+従って、データ・メンバのデフォルト・コンストラクタもインスタンス化されない (C++ 標準 14.7.1 9)。</p>
+
+<p>
+<a href="./concept_covering.htm">次へ： Concept Covering and Archetypes</a><br />
+<a href="./using_concept_check.htm">前へ： Using Concept Checks</a></p>
+
+<hr />
+<h4>訳注</h4>
+<ol>
+  <li><a name="trans_note_01" id="trans_note_01">いきなり命名規約に反してますが、ライブラリ内の正式版と被らないためだと思われます。よって、原文まま。</a></li>
+</ol>
+
+<hr />
+
+<table xml:lang="en-US">
+<tr valign="top">
+  <td nowrap="nowrap">Copyright &copy; 2000</td>
+  <td>
+    <a href="../../people/jeremy_siek.htm">Jeremy Siek</a>,
+    Univ.of Notre Dame (<a href="mailto:jsiek@lsc.nd.edu">jsiek@lsc.nd.edu</a>)
+  </td>
+</tr>
+</table>
+
+</body>
+
+</html>

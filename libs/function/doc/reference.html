@@ -1,0 +1,301 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Boost.Function Reference Manual</title>
+  </head>
+
+  <body bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080">
+
+  <h1><IMG SRC="../../../c++boost.gif" WIDTH="276" HEIGHT="86" alt="C++ Boost">Boost.Function Reference Manual</h1>
+
+<h2><a name="header">Header</a> <code>&lt;<a href="../../../boost/function.hpp">boost/function.hpp</a>&gt;</code> synopsis</h2>
+<p> 以下で、 <code><i>MAX_ARGS</i></code> は実装定義の定数であり、 Boost.Function でサポートされる引数の数の最大値 (少なくとも 10) である。このドキュメント中で参照される <code><i>MAX_ARGS</i></code> 定数は、ライブラリ中で直接的には定義されていない。
+
+<pre>
+<b>namespace</b> boost {
+  <b>class</b> <a href="#function_base">function_base</a>
+  {
+    <b>typedef</b> <em>implementation-defined</em> safe_bool;
+    <a href="#empty"><b>bool</b> empty() <b>const</b></a>;
+  };
+
+  // [0, <i>MAX_ARGS</i>] の範囲の全ての <i>N</i> について
+  <b>template</b>&lt;<b>typename</b> Signature,
+           <b>typename</b> Arg1,
+	   <b>typename</b> Arg2,
+           <i>...</i>
+           <b>typename</b> Arg<i>N</i>,
+	   <b>typename</b> Policy    = empty_function_policy, <em>// 推奨されない</em>
+	   <b>typename</b> Mixin     = empty_function_mixin, <em>// 推奨されない</em>
+	   <b>typename</b> Allocator = std::allocator&lt;function_base&gt; &gt;
+  <b>class</b> <a href="#functionN">function<i>N</i></a> : <b>public</b> <a href="#function_base">function_base</a>, <b>public</b> Mixin
+  {
+    <b>typedef</b> ResultType result_type; <em>// <a href="#novoid">[1]</a></em>
+    <b>typedef</b> Policy     policy_type; <em>// 推奨されない</em>
+    <b>typedef</b> Mixin      mixin_type; <em>// 推奨されない</em>
+    <b>typedef</b> Allocator  allocator_type;
+
+    <b>typedef</b> Arg1 argument_type;        <i>// N == 1 の場合</i>
+
+    <b>typedef</b> Arg1 first_argument_type;  <i>// N == 2 の場合</i>
+    <b>typedef</b> Arg2 second_argument_type; <i>// N == 2 の場合</i>
+
+    <b>typedef</b> Arg1 arg1_type;
+    <b>typedef</b> Arg2 arg2_type;
+             .
+             .
+             .
+    <b>typedef</b> Arg<em>N</em> arg<em>N</em>_type;
+
+    <b>enum</b> { arity = <em>N</em> };
+
+    <i>// 構築</i>
+    <a href="#functionN_default"><b>explicit</b> function<i>N</i>(<b>const</b> Mixin<b>&amp;</b> = Mixin())</a>;
+    <a href="#functionN_copy">function<i>N</i>(<b>const</b> function<i>N</i><b>&amp;</b>)</a>;
+    <a href="#functionN_target"><b>template</b>&lt;<b>typename</b> F&gt; function<i>N</i>(F, <b>const</b> Mixin<b>&amp;</b> = Mixin())</a>;
+    <a href="#functionN_target_ref"><b>template</b>&lt;<b>typename</b> F&gt; function<i>N</i>(reference_wrapper&lt;F&gt;)</a>;
+    
+    <i>// 代入</i>
+    <a href="#functionN_copy_assn">function<i>N</i><b>&amp;</b> <b>operator</b>=(<b>const</b> function<i>N</i><b>&amp;</b>)</a>;
+    <a href="#functionN_target_assn"><b>template</b>&lt;<b>typename</b> F&gt; function<i>N</i><b>&amp;</b> <b>operator</b>=(F)</a>;
+    <a href="#functionN_target_ref_assn"><b>template</b>&lt;<b>typename</b> F&gt; function<i>N</i><b>&amp;</b> <b>operator</b>=(reference_wrapper&lt;F&gt;)</a>;
+    <a href="#functionN_copy_set"><b>void</b> set(<b>const</b> function<i>N</i><b>&amp;</b>)</a>; <em>// 推奨されない</em>
+    <a href="#functionN_target_set"><b>template</b>&lt;<b>typename</b> F&gt; <b>void</b> set(F)</a>; <em>// 推奨されない</em>
+    <a href="#functionN_swap"><b>void</b> swap(function<i>N</i><b>&amp;</b>)</a>;
+    <a href="#functionN_clear"><b>void</b> clear()</a>;
+
+    <i>// bool 型の文脈</i>
+    <a href="#bool"><b>operator</b> safe_bool() <b>const</b></a>;
+    <a href="#not"><b>bool</b> <b>operator!</b>() <b>const</b></a>;
+
+    <i>// 呼び出し</i>
+    <a href="#functionN_call_const">result_type <b>operator</b>()(Arg1 a1, Arg2 a2, <i>...</i>, Arg<i>N</i> a<i>N</i>) <b>const</b></a>;
+  };
+
+  <b>template</b>&lt;<b>typename</b> ResultType,
+           <b>typename</b> Arg1,
+	   <b>typename</b> Arg2,
+           <i>...</i>
+	   <b>typename</b> Arg<i>N</i>,
+           <b>typename</b> Policy, <em>// 推奨されない</em>
+           <b>typename</b> Mixin, <em>// 推奨されない</em>
+           <b>typename</b> Allocator&gt;
+  <b>void</b> <a href="#swap_functionN">swap</a>(function<em>N</em>&lt;ResultType, Arg1, Arg2, <i>...</i>, Arg<i>N</i>, Policy, Mixin, Allocator&gt;<b>&amp;</b>,
+            function<em>N</em>&lt;ResultType, Arg1, Arg2, <i>...</i>, Arg<i>N</i>, Policy, Mixin, Allocator&gt;<b>&amp;</b>);
+
+  // [0, <i>MAX_ARGS</i>] の範囲の全ての <i>N</i> について
+  <b>template</b>&lt;<b>typename</b> Signature, <em>// 関数型: ResultType (Arg1, Arg2, ..., ArgN)</em>
+	   <b>typename</b> Policy    = empty_function_policy, <em>// 推奨されない</em>
+	   <b>typename</b> Mixin     = empty_function_mixin, <em>// 推奨されない</em>
+	   <b>typename</b> Allocator = std::allocator&lt;function_base&gt; &gt;
+  <b>class</b> <a href="#function">function</a> : <b>public</b> <a href="#functionN">function<i>N</i></a>&lt;ResultType, Arg1, Arg2, <i>...</i>, Arg<i>N</i>&gt;
+  {
+    <i>// 構築</i>
+    function();
+    function(<b>const</b> function<b>&amp;</b>);
+    function(<b>const</b> function<i>N</i>&lt;ResultType, Arg1, Arg2, ..., Arg<i>N</i>&gt;<b>&amp;</b>);
+    <b>template</b>&lt;<b>typename</b> F&gt; function<i>N</i>(F);
+    
+    <i>// 代入</i>
+    function<b>&amp;</b> <b>operator</b>=(<b>const</b> function<b>&amp;</b>);
+    function<b>&amp;</b> <b>operator</b>=(<b>const</b> function<i>N</i>&lt;ResultType, Arg1, Arg2, ..., Arg<i>N</i>&gt;<b>&amp;</b>);
+    <b>template</b>&lt;<b>typename</b> F&gt; function<b>&amp;</b> <b>operator</b>=(F);
+    <b>void</b> set(<b>const</b> function<b>&amp;</b>); <em>// 推奨されない</em>
+    <b>void</b> set(<b>const</b> function<i>N</i>&lt;ResultType, Arg1, Arg2, ..., Arg<i>N</i>&gt;<b>&amp;</b>); <em>// 推奨されない</em>
+    <b>template</b>&lt;<b>typename</b> F&gt; <b>void</b> set(F); <em>// 推奨されない</em>
+  };
+
+  <b>template</b>&lt;<b>typename</b> Signature, <b>typename</b> Policy, <b>typename</b> Mixin, <b>typename</b> Allocator&gt;
+  <b>void</b> <a href="#swap_function">swap</a>(function&lt;Signature, Policy, Mixin, Allocator&gt;<b>&amp;</b>,
+            function&lt;Signature, Policy, Mixin, Allocator&gt;<b>&amp;</b>);
+}	   
+</pre>
+
+<h2>Definitions</h2>
+<ul>
+  <li><a name="compatible"></a>引数型 <code>Arg1</code>, <code>Arg2</code>, ..., <code>Arg<em>N</em></code> と戻り値型 <code>ResultType</code> に対して、該当する以下の関数がウェルフォームドな時、関数オブジェクト <code>f</code> は「 <em>互換性がある</em> 」という。
+<pre>
+  <em>// 関数型が <b>void</b> 以外の場合</em>
+  ResultType foo(Arg1 arg1, Arg2 arg2, ..., Arg<em>N</em> arg<em>N</em>)
+  {
+    <b>return</b> f(arg1, arg2, ..., arg<em>N</em>);
+  }
+
+  <em>// 関数型が <b>void</b> の場合</em>
+  ResultType foo(Arg1 arg1, Arg2 arg2, ..., Arg<em>N</em> arg<em>N</em>)
+  {
+    f(arg1, arg2, ..., arg<em>N</em>);
+  }
+</pre>
+        <p> メンバ関数ポインタには、特別な規定がある。メンバ関数ポインタは関数オブジェクトではないが、 Boost.Function は内部的にメンバ関数ポインタを関数オブジェクトに作り変える。 <code>R (X::*mf)(Arg1, Arg2, ..., Arg<em>N</em>) <em>cv-quals</em></code> の形のメンバ関数ポインタは、以下のように関数呼出し演算子をオーバロードした関数オブジェクトに作り変えられる。
+<pre>
+  <b>template</b>&lt;<b>typename P</b>&gt;
+  R <b>operator</b>()(<em>cv-quals</em> P&amp; x, Arg1 arg1, Arg2 arg2, ..., Arg<em>N</em> arg<em>N</em>) <b>const</b>
+  {
+    <b>return</b> (*x).*mf(arg1, arg2, ..., arg<em>N</em>);
+  }
+</pre>
+  <li><a name="stateless"></a><code>F</code> が関数ポインタであるか、 <a href="../../type_traits/index.htm#properties"><code>boost::is_stateless&lt;T&gt;</code></a> が真の時、 <code>F</code> 型の関数オブジェクト <code>f</code> は「 <em>状態を持たない</em> 」という。状態を持たない関数オブジェクトの Boost.Function での構築/コピーは発生せず、例外は起きず、記憶域の割り当ても起きない。</li>
+</ul>
+
+<h2><a name="function_base">Class <code>function_base</code></a></h2>
+<p> クラス <code>function_base</code> は全ての Boost.Function オブジェクトの共通基底クラスだ。 <code>function_base</code> 型のオブジェクトが直接作られる事はないだろう。
+
+<p> <a name="empty"><code><b>bool</b> empty() <b>const</b></code></a>
+<ul>
+  <li><b>戻り値</b>: 関数オブジェクトを格納していれば <code>true</code> 、そうでなければ <code>false</code> 。</li>
+  <li><b>例外</b>: 例外を起こさない。</li>
+</ul>
+
+<h2><a name="functionN">Class template <code>function<i>N</i></code></a></h2>
+<p> クラステンプレート <code>function<i>N</i></code> は実際には、 <code>function0</code>, <code>function1</code>, ... と、ある実装定義の最大値まで続く、関連するクラス群である。以下の文では、 <code><i>N</i></code> はパラメータの数、 <code>f</code> は暗黙のオブジェクトパラメータを表す。
+
+<p> <a name="functionN_default"><code><b>explicit</b> function<i>N</i>(<b>const</b> Mixin<b>&amp;</b> = Mixin());</code></a>
+<ul>
+  <li><b>作用</b>: 与えられたミックスインから <code>Mixin</code> 型サブオブジェクトを構築する。</li>
+  <li><b>事後条件</b>: <code>f.<a href="#empty">empty</a>()</code></li>
+  <li><b>例外</b>: <code>Mixin</code> 型サブオブジェクトの構築で例外が起きない限り、例外を起こさない。</li>
+</ul>
+
+<p> <a name="functionN_copy"><code>function<i>N</i>(<b>const</b> function<i>N</i><b>&amp;</b> g);</code></a>
+<ul>
+  <li><b>事後条件</b>: <code>g</code> が空でなければ、 <code>f</code> は <code>g</code> が格納する関数オブジェクトのコピーを格納する。 <code>g.<a href="#empty">empty</a>()</code> ならば <code>f</code> も空になる。 <code>f</code> のミックスインは、 <code>g</code> のミックスインからコピーされる。</li>
+  <li><b>例外</b>: <code>g</code> が格納する関数オブジェクトのコピーや <code>Mixin</code> 型サブオブジェクトの構築で例外が起きない限り、例外を起こさない。</li>
+</ul>
+
+<p> <a name="functionN_target"><code><b>template</b>&lt;<b>typename</b> F&gt; function<i>N</i>(F g, <b>const</b> Mixin<b>&amp;</b> = Mixin());</code></a>
+<ul>
+  <li><b>必須事項</b>: <code>g</code> は<a href="#compatible">互換性がある</a>関数オブジェクトである事。</li>
+  <li><b>作用</b>: 与えられたミックスインから <code>Mixin</code> 型サブオブジェクトを構築する。</li>
+  <li><b>事後条件</b>: <code>g</code> が空でなければ、 <code>f</code> は <code>g</code> のコピーを格納する。 <code>g</code> が空ならば、 <code>f.<a href="#empty">empty</a>()</code> が真となる。</li>
+  <li><b>例外</b>: <code>Mixin</code> 型サブオブジェクトの構築で例外が起きず、 <code>g</code> が<a href="#stateless">状態を持たない</a>関数オブジェクトならば、例外を起こさない。</li>
+</ul>
+
+<p> <a name="functionN_target_ref"></a><code><b>template</b>&lt;<b>typename</b> F&gt; function<i>N</i>(<a href="../../bind/ref.html">reference_wrapper</a>&lt;F&gt; g);</code>
+<ul>
+  <li><b>必須事項</b>: <code>g.get()</code> は<a href="#compatible">互換性がある</a>関数オブジェクトである事。</li>
+  <li><b>作用</b>: 与えられたミックスインから <code>Mixin</code> 型サブオブジェクトを構築する。</li>
+  <li><b>事後条件</b>: <code>g.get()</code> が空でなければ、 <code>this</code> は <code>g</code> (<code>g.get()</code>のコピーでは<em>ない</em>) を格納する。 <code>g.get()</code> が空ならば、 <code>this-&gt;empty()</code> が真となる。</li>
+  <li><b>例外</b>: <code>Mixin</code> 型サブオブジェクトの構築で例外が起きない限り、例外を起こさない。</li>
+</ul>
+
+<p> <a name="functionN_copy_assn"><code>function<i>N</i><b>&amp;</b> <b>operator</b>=(<b>const</b> function<i>N</i><b>&amp;</b> g);</code></a>
+<ul>
+  <li><b>事後条件</b>: <code>g</code> が空でなければ、 <code>f</code> は <code>g</code> が格納する関数オブジェクトのコピーを格納する。 <code>g.<a href="#empty">empty</a>()</code> ならば、 <code>f</code> も空になる。 <code>f</code> のミックスインには <code>g</code> のミックスインが代入される。</li>
+  <li><b>戻り値</b>: <code>*this</code></li>
+  <li><b>例外</b>: <code>g</code> が<a href="#stateless">状態を持たない</a>関数オブジェクトを格納しているか、 <code>g</code> が関数オブジェクトへの参照を格納してる場合は、例外を起こさない。ただし、 <code>Mixin</code> 型サブオブジェクトのコピーで例外が起きた場合を除く。</li>
+</ul>
+
+<p> <a name="functionN_target_assn"><code><b>template</b>&lt;<b>typename</b> F&gt; function<i>N</i><b>&amp;</b> <b>operator</b>=(F g);</code></a>
+<ul>
+  <li><b>必須事項</b>: <code>g</code> は<a href="#compatible">互換性がある</a>関数オブジェクトである事。</li>
+  <li><b>事後条件</b>: <code>g</code> が空でなければ、 <code>f</code> は <code>g</code> のコピーを格納する。 <code>g</code> が空ならば、 <code>f.<a href="#empty">empty</a>()</code> が真となる。</li>
+  <li><b>戻り値</b>: <code>*this</code></li>
+  <li><b>例外</b>: <code>g</code> が<a href="#stateless">状態を持たない</a>関数オブジェクトを格納していれば、例外を起こさない。</li>
+</ul>
+
+<p> <a name="functionN_target_ref_assn"></a><code><b>template</b>&lt;<b>typename</b> F&gt; function<i>N</i><b>&amp;</b> <b>operator</b>=(<a href="../../bind/ref.html">reference_wrapper</a>&lt;F&gt; g);</code>
+<ul>
+  <li><b>必須事項</b>: <code>g.get()</code> が<a href="#compatible">互換性がある</a>関数オブジェクトである事。</li>
+  <li><b>事後条件</b>: <code>g.get()</code> が空でなければ、 <code>f</code> は <code>g.get()</code> ( <code>g.get()</code> のコピーではない) を格納する。 <code>g.get()</code> が空ならば、 <code>f.<a href="#empty">empty</a>()</code> が真となる。</li>
+  <li><b>戻り値</b>: <code>*this</code>.</li>
+  <li><b>例外</b>: <code>this</code> が格納していた関数オブジェクトの破棄で例外が起きた場合のみ、例外を起こす。</li>
+</ul>
+
+<p> <a name="functionN_copy_set"><code><b>void</b> set(<b>const</b> function<i>N</i><b>&amp;</b> g);</code></a>
+<ul>
+  <li><b>作用</b>: <code><a href="#functionN_copy_assn">*this = g</a></code></li>
+  <li><b>注意</b>: この関数の使用は推奨されない。この関数は Boost.Function の将来のバージョンで削除される。代わりに代入演算子を使って欲しい。</li>
+</ul>
+
+<p> <a name="functionN_target_set"><code><b>template</b>&lt;<b>typename</b> F&gt; <b>void</b> set(F g);</code></a>
+<ul>
+  <li><b>作用</b>: <code><a href="#functionN_target_assn">*this = g</a></code></li>
+  <li><b>注意</b>: この関数の使用は推奨されない。この関数は Boost.Function の将来のバージョンで削除される。代わりに代入演算子を使って欲しい。</li>
+</ul>
+
+<p> <a name="functionN_swap"><code><b>void</b> swap(function<i>N</i><b>&amp;</b> g);</code></a>
+<ul>
+  <li><b>作用</b>: <code>f</code> と <code>g</code> が格納する関数オブジェクトを交換し、 <code>f</code> と <code>g</code> のミックスインを交換する。</li>
+  <li><b>例外</b>: 例外は発生しない。</li>
+</ul>
+
+<p> <a name="functionN_clear"><code><b>void</b> clear(); </code></a>
+<ul>
+  <li><b>作用</b>: <code>!<a href="#empty">empty</a>()</code>ならば、格納する関数オブジェクトを破棄する。</li>
+  <li><b>事後条件</b>: <code><a href="#empty">empty</a>()</code>が真になる。</li>
+</ul>
+
+<p> <a name="bool"><code><b>operator</b> safe_bool() <b>const</b></code></a>
+<ul>
+  <li><b>戻り値</b>: <code>!<a href="#empty">empty</a>()</code>と等価な<code>safe_bool</code> 。</li>
+  <li><b>例外</b>: 例外は発生しない。</li>
+  <li><b>注意</b>: <code>safe_bool</code> 型は <b>bool</b> 型が予想される場所 (例:  <b>if</b> の条件) に使用できる。しかし、 <b>bool</b> 型で起きる暗黙の型変換 (例: <b>int</b>型への変換) は許されない。これによってユーザの間違いの元を減らせる事がある。
+</ul>
+
+<p> <a name="not"><code><b>bool</b> <b>operator!</b>() <b>const</b></code></a>
+<ul>
+  <li><b>戻り値</b>: <code>this-&gt;empty()</code></li>
+  <li><b>例外</b>: 例外は発生しない。</li>
+</ul>
+
+<p> <a name="functionN_call_const"><code> result_type <b>operator</b>()(Arg1 a1, Arg2 a2, <i>...</i>, Arg<i>N</i> a<i>N</i>) <b>const</b>;</code></a>
+<ul>
+  <li><b>必須事項</b>: <code>!<a href="#empty">empty</a>()</code></li>
+  <li><b>作用</b>: 以下で、 <i>target</i> は格納された関数オブジェクトである。 <i>target</i> 変数には <code><b>const</b></code> 修飾子や <code><b>volatile</b></code> 修飾子が付いていない (ので、関数呼出し演算子に <code><b>const</b></code> 修飾子や <code><b>volatile</b></code> 修飾子が付いている必要は無い) 。
+    <ol>
+      <li><code>policy_type policy;</code></li>
+      <li><code>policy.precall(this);</code></li>
+      <li><code><i>target</i>(a1, a2, <i>...</i>, a<i>N</i>);</code></li>
+      <li><code>policy.postcall(this);</code></li>
+    </ol>
+  <li><b>戻り値</b>: <i>target</i> の戻り値。</li>
+  <li><b>注意</b>: 呼び出しポリシーは推奨されなくなり、今後のリリースで削除される。</li>
+</ul>
+
+<h2><a name="function">Class template <code>function</code></a></h2>
+<p> クラステンプレート <code>function</code> は、番号付きクラステンプレート <code>function0</code>, <code>function1</code>, ... の薄いラッパである。 <i>MAX_ARGS</i> までの引数を受け付ける。 <i>N</i> 個の引数を渡されれば、 <code>function<i>N</i></code>  (引数 N 個専用のクラス) から派生する。
+
+<p> クラステンプレート <code>function</code> のメンバ関数のセマンティクスは、全て <code>function<i>N</i></code> オブジェクトと同じである。ただし、 <code>function</code> オブジェクトの正しいコピーコンストラクトやコピーの代入のために、追加のメンバ関数を定義している。
+
+<h2><a name="operations">Operations</a></h2>
+<pre>
+<b>template</b>&lt;<b>typename</b> ResultType,
+         <b>typename</b> Arg1,
+	 <b>typename</b> Arg2,
+         <i>...</i>
+	 <b>typename</b> Arg<i>N</i>,
+         <b>typename</b> Policy, <em>// 推奨されない</em>
+         <b>typename</b> Mixin, <em>// 推奨されない</em>
+         <b>typename</b> Allocator&gt;
+<b>void</b> <a name="swap_functionN">swap</a>(function<i>N</i>&lt;ResultType, Arg1, Arg2, <i>...</i>, Arg<i>N</i>, Policy, Mixin, Allocator&gt;<b>&amp;</b> f,
+          function<i>N</i>&lt;ResultType, Arg1, Arg2, <i>...</i>, Arg<i>N</i>, Policy, Mixin, Allocator&gt;<b>&amp;</b> g);
+</pre>
+<ul>
+  <li><b>作用</b>: <code>f.<a href="#functionN_swap">swap</a>(g);</code></li>
+</ul>
+
+<pre>
+<b>template</b>&lt;<b>typename</b> Signature, <b>typename</b> Policy, <b>typename</b> Mixin, <b>typename</b> Allocator&gt;
+<b>void</b> <a name="swap_function">swap</a>(function&lt;Signature, Policy, Mixin, Allocator&gt;<b>&amp;</b> f,
+          function&lt;Signature, Policy, Mixin, Allocator&gt;<b>&amp;</b> g);
+</pre>
+<ul>
+  <li><b>作用</b>: <code>f.<a href="#functionN_swap">swap</a>(g);</code></li>
+</ul>
+
+    <hr>
+<p><a name="novoid">[1]</a> コンパイラが void 型の return をサポートしていない場合、 <code>ReturnType</code> に <b>void</b> を指定すると、 Boost.Function オブジェクトの <code>result_type</code> は実装依存になる。
+    <hr>
+    <address><a href="http://www.cs.rpi.edu/~gregod">Doug Gregor</a></address>
+<!-- Created: Fri Jul 13 10:57:20 EDT 2001 -->
+<!-- hhmts start -->
+Last modified: Fri Oct 11 05:40:09 EDT 2002
+<!-- hhmts end -->
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:gimite@mx12.freecom.ne.jp">Hiroshi Ichikawa</a><br>
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+<p>このドキュメントの対象: Boost Version 1.29.0<br>
+<a href="http://www.boost.org/doc/html/function.reference.html">最新版ドキュメント (英語)</a></p>
+  </body>
+</html>

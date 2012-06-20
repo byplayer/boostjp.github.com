@@ -1,0 +1,250 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Boost.Function Tutorial</title>
+  </head>
+
+  <body bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080">
+
+    <h1><IMG SRC="../../../c++boost.gif" WIDTH="276" HEIGHT="86" alt="C++ Boost">Boost.Function Tutorial</h1>
+
+<p> Boost.Function には 2 種類の文法がある。推奨文法と互換文法である。推奨文法は C++ にフィットし、考慮するテンプレートパラメータの数も減り、可読性を高める事が多い。しかし、コンパイラのバグのせいで、推奨文法が使えないコンパイラも有る。互換文法は Boost.Function がサポートする全てのコンパイラで使える。どちらの文法を使うかは、下の表を見て決めて欲しい。
+
+    <center>
+      <table border=1 cellspacing=1 summary="Compilers support for Boost.Function syntactic constructs">
+          <tr><th bgcolor="#008080">推奨文法</th><th bgcolor="#008080">互換文法</th></tr>
+          <tr>
+            <td>
+              <ul>
+                <li>GNU C++ 2.95.x, 3.0.x, 3.1.x, 3.2</li>
+                <li>Comeau C++ 4.2.45.2</li>
+                <li>SGI MIPSpro 7.3.0</li>
+                <li>Intel C++ 5.0, 6.0</li>
+                <li>Compaq's cxx 6.2</li>
+              </ul>
+            </td>
+            <td>
+              <ul>
+                <li>Microsoft Visual C++ 6.0, 7.0</li>
+                <li>Borland C++ 5.5.1</li>
+                <li>Sun WorkShop 6 update 2 C++ 5.3</li>
+                <li>Metrowerks CodeWarrior 8.1</li>
+              </ul>
+            </td>
+          </tr>
+      </table>
+      </center>
+
+<p> あなたのコンパイラが表に無ければ、推奨文法を試してみて、結果を Boost MLに報告して欲しい。この表を最新に保つためだ。
+
+<h2><a name="preferred">Basic Usage</a></h2>
+<p> 関数オブジェクトのラッパを定義するには、 <code>function</code> クラステンプレートをインスタンス化するだけだ。テンプレート引数には、戻り値型と引数型を関数型形式で指定する。ある実装定義の最大値 (デフォルトは 10) までなら、引数は何個でも構わない。以下に、 2 つの <code>int</code> 型のパラメータを取り、<code>float</code> 型を返す関数オブジェクトのラッパ <code>f</code> の定義を示す。
+<center>
+<table border=1 cellspacing=1 summary="Declaring Boost.Function objects">
+        <tr><th bgcolor="#008080">推奨文法</th><th bgcolor="#008080">互換文法</th></tr>
+        <tr>
+          <td>
+            <pre>
+boost::<a href="reference.html#function">function</a>&lt;float (int x, int y)&gt; f;
+            </pre>
+          </td>
+          <td>
+            <pre>
+boost::<a href="reference.html#functionN">function2</a>&lt;float, int, int&gt; f;
+            </pre>
+          </td>
+        </tr>
+</table>
+</center>
+
+<p> デフォルトでは、関数オブジェクトのラッパは空である。 <code>f</code> に代入する関数オブジェクトを作ろう。
+
+<pre>
+struct int_div { 
+  float operator()(int x, int y) const { return ((float)x)/y; }; 
+};
+
+f = int_div();
+</pre>
+
+<p> これで、関数オブジェクト <code>int_div</code> を呼び出す代わりに <code>f</code> を使える。
+<pre>
+std::cout &lt;&lt; f(5, 3) &lt;&lt; std::endl;
+</pre>
+
+<p> <code>f</code> には、互換性があれば、どんな関数オブジェクトでも代入できる。 <code>int_div</code> が 2 つの <code>long</code> 型の引数をとると宣言されていれば、自動的に暗黙の型変換が適用される。引数型に対する唯一の制限は、コピーコンストラクト可能な事である。だから、参照や配列さえ使える。
+<center>
+<table border=1 cellspacing=1 summary="Declaring a more complex Boost.Function object">
+        <tr><th bgcolor="#008080">推奨文法</th><th bgcolor="#008080">互換文法</th></tr>
+          <tr>
+            <td>
+              <pre>
+boost::function&lt;void (int values[], int n, int&amp; sum, float&amp; avg)&gt; sum_avg;
+              </pre>
+            </td>
+            <td>
+              <pre>
+boost::function4&lt;void, int[], int, int&amp;, float&gt; sum_avg;
+              </pre>
+            </td>
+          </tr>
+</table>
+</center>
+
+<pre>
+void do_sum_avg(int values[], int n, int&amp; sum, float&amp; avg)
+{
+  sum = 0;
+  for (int i = 0; i &lt; n; i++)
+    sum += values[i];
+  avg = (float)sum / n;
+}
+
+sum_avg = &amp;do_sum_avg;
+</pre>
+
+<p> 関数オブジェクトを格納していないラッパを呼び出すのは事前条件違反である。ヌルの関数ポインタを呼び出そうとするようなものだ。関数オブジェクトのラッパが空かどうかは <code><a href="reference.html#empty">empty</a>()</code> メソッドでチェックできる。もっと簡潔なのは、 bool 型の文脈でラッパを使う方法だ。ラッパは、空でなければ true と評価される。例えば、
+<pre>
+if (f)
+  std::cout &lt;&lt; f(5, 3) &lt;&lt; std::endl;
+else
+  std::cout &lt;&lt; "f has no target, so it is unsafe to call" &lt;&lt; std::endl;
+</pre>
+
+<p> ラッパを空にするには、 <code><a href="reference.html#functionN_clear">clear</a>()</code> メンバ関数を使う。
+
+<h3>Free functions</h3>
+<p> 非メンバ関数へのポインタは、 const な関数呼出し演算子を持つ (インスタンスが1つだけ存在する) 関数オブジェクトの一種とみなせる。よって、関数オブジェクトのラッパに直接代入できる。
+<pre>
+  float mul_ints(int x, int y) { return ((float)x) * y; }
+  f = &amp;mul_ints;
+</pre>
+
+<p> Microsoft Visual C++ version 6 を使う場合を除けば、本当は <code>&amp;</code> は不要だ。
+
+<h3><a name="member_func">Member functions</a></h3>
+<p> 多くのシステムで、コールバックは特定のオブジェクトのメンバ関数を呼び出す事が多い。これは「引数の束縛」と呼ばれ、 Boost.Function の守備範囲外である。しかし、 Boost.Function には直接メンバ関数を扱う方法が有る。以下のコードのように使う。
+
+<center>
+<table border=1 cellspacing=1 summary="Member functions and Boost.Function">
+        <tr><th bgcolor="#008080">推奨文法</th><th bgcolor="#008080">互換文法</th></tr>
+          <tr>
+            <td>
+<pre>
+struct X {
+  int foo(int);
+};
+
+boost::function&lt;int (X*, int)&gt; f;
+
+f = &amp;X::foo;
+  
+X x;
+f(&amp;x, 5);
+</pre>
+            </td>
+            <td>
+<pre>
+struct X {
+  int foo(int);
+};
+
+boost::function2&lt;int, X*, int&gt; f;
+
+f = &amp;X::foo;
+  
+X x;
+f(&amp;x, 5);
+</pre>
+            </td>
+          </tr>
+</table>
+</center>
+
+<p> 引数の束縛をサポートするライブラリはいくつか有る。その内 3 つを以下に要約する。
+<ul>
+  <li> <a href="../../bind/bind.html">Boost.Bind</a>。このライブラリを使えば、あらゆる関数オブジェクトの引数を束縛できる。軽くて移植性が高い。</li>
+
+  <li> C++ 標準ライブラリ。 <code>std::bind1st</code> と <code>std::mem_fun</code> を一緒に使って、メンバ関数ポインタと (その対象となる) オブジェクトを束縛したものは、 Boost.Function で使える。
+<center>
+<table border=1 cellspacing=1 summary="Boost.Bind and Boost.Function">
+        <tr><th bgcolor="#008080">推奨文法</th><th bgcolor="#008080">互換文法</th></tr>
+          <tr>
+            <td>
+<pre>
+  struct X {
+    int foo(int);
+  };
+
+  boost::function&lt;int (int)&gt; f;
+  X x;
+  f = std::bind1st(std::mem_fun(&amp;X::foo), &amp;x);
+
+  f(5); // Call x.foo(5)</pre>
+            </td>
+            <td>
+<pre>
+  struct X {
+    int foo(int);
+  };
+
+  boost::function1&lt;int, int&gt; f;
+  X x;
+  f = std::bind1st(std::mem_fun(&amp;X::foo), &amp;x);
+
+  f(5); // Call x.foo(5)</pre>
+            </td>
+          </tr>
+</table>
+</center>
+</li>
+
+  <li><a href="../../lambda/doc/index.html">Boost.Lambda ライブラリ</a>。このライブラリは、自然な C++ の文法を使って関数オブジェクトを構築する強力な機構を提供する。 Lambda は、コンパイラが C++ 標準にかなり準拠していないと使えない。</li>
+</ul>
+
+<h3>References to Functions</h3>
+<p> Boost.Function による関数オブジェクトのコピーが高価 (または不正) な場合が有る。そんな場合は、 Boost.Function に実際の関数オブジェクトの「参照」を格納させる事ができる。<a
+href="../../bind/ref.html"><code>ref</code></a> や <a
+href="../../bind/ref.html"><code>cref</code></a> を使う事で、関数オブジェクトの参照のラッパを作成できる。
+<center>
+<table border=1 cellspacing=1 summary="ref and cref with Boost.Function">
+        <tr><th bgcolor="#008080">推奨文法</th><th bgcolor="#008080">互換文法</th></tr>
+          <tr>
+            <td>
+<pre>
+  stateful_type a_function_object;
+  boost::function&lt;int (int)&gt; f;
+  f = ref(a_function_object);
+
+  boost::function&lt;int (int)&gt; f2(f);
+</pre>
+            </td>
+            <td>
+<pre>
+  stateful_type a_function_object;
+  boost::function1&lt;int, int&gt; f;
+  f = ref(a_function_object);
+
+  boost::function1&lt;int, int&gt; f2(f);
+</pre>
+            </td>
+          </tr>
+</table>
+</center>
+
+こうすれば、 <code>f</code> も <code>f2</code> も
+<code>a_function_object</code> のコピーを作成しない。さらに、関数オブジェクトの参照を使えば、 Boost.Function は代入、構築時に例外を起こさない。
+ 
+    <hr>
+    <address><a href="http://www.cs.rpi.edu/~gregod">Doug Gregor</a></address>
+<!-- Created: Fri Jul 13 12:47:11 EDT 2001 -->
+<!-- hhmts start -->
+Last modified: Fri Oct 11 05:40:00 EDT 2002
+<!-- hhmts end -->
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:gimite@mx12.freecom.ne.jp">Hiroshi Ichikawa</a><br>
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+<p>このドキュメントの対象: Boost Version 1.29.0<br>
+<a href="http://www.boost.org/doc/html/function.tutorial.html">最新版ドキュメント (英語)</a></p>
+  </body>
+</html>

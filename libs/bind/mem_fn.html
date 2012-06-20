@@ -1,0 +1,414 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+        <head>
+                <title>Boost: mem_fn.hpp documentation</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        </head>
+	<body bgcolor="white" style="margin-left: 5%; margin-right: 5%;">
+<a href="http://www.boost.org/libs/bind/mem_fn.html">原文</a>
+		<table border="0" width="100%">
+			<tr>
+				<td width="277">
+					<img src="../../c++boost.gif" alt="c++boost.gif (8819 bytes)" width="277" height="86">
+				</td>
+				<td align="middle">
+					<h1>mem_fn.hpp</h1>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2" height="64">&nbsp;</td>
+			</tr>
+		</table>
+		<h2>Contents</h2>
+		<h3 style="margin-left: 20pt;"><a href="#Purpose">目的</a></h3>
+		<h3 style="margin-left: 20pt;"><a href="#FAQ">FAQ</a></h3>
+		<h4 style="margin-left: 40pt;"><a href="#Q1"><b>mem_fn</b>を、標準の
+				<b>std::mem_fun[_ref]</b>アダプタのかわりに使用できるか?</a></h4>
+		<h4 style="margin-left: 40pt;"><a href="#Q2">既に書いてしまったコード中の<b>std::mem_fun[_ref]</b>を、
+				全て<b>mem_fn</b>で置き換えるべきか?</a></h4>
+		<h4 style="margin-left: 40pt;"><a href="#Q3"><b>mem_fn</b>は COM のメソッドに使えるか?</a></h4>
+		<h4 style="margin-left: 40pt;"><a href="#Q4">何故 BOOST_MEM_FN_ENABLE_STDCALL 
+				は最初から有効になっていないのか?</a></h4>
+		<h3 style="margin-left: 20pt;"><a href="#Interface">インタフェース</a></h3>
+		<h4 style="margin-left: 40pt;"><a href="#Synopsis">Synopsis</a></h4>
+		<h4 style="margin-left: 40pt;"><a href="#CommonRequirements">必須事項</a></h4>
+		<h4 style="margin-left: 40pt;"><a href="#get_pointer">get_pointer</a></h4>
+		<h4 style="margin-left: 40pt;"><a href="#mem_fn">mem_fn</a></h4>
+		<h3 style="margin-left: 20pt;"><a href="#Implementation">実装</a></h3>
+		<h4 style="margin-left: 40pt;"><a href="#Files">ファイル</a></h4>
+		<h4 style="margin-left: 40pt;"><a href="#Dependencies">依存関係</a></h4>
+		<h4 style="margin-left: 40pt;"><a href="#NumberOfArguments">引数の上限個数</a></h4>
+		<h4 style="margin-left: 40pt;"><a href="#stdcall">"__stdcall" と 
+				"__fastcall" のサポート</a></h4>
+		<h3 style="margin-left: 20pt;"><a href="#Acknowledgements">謝辞</a></h3>
+		<h2><a name="Purpose">目的</a></h2>
+		<p>
+			<b>boost::mem_fn</b> は、標準関数である<b>std::mem_fun</b> と
+			<b>std::mem_fun_ref</b>の一般化である。<b>mem_fn</b>は、2つ以上の引数をとる
+                        メンバ関数へのポインタをサポートし、また<b>mem_fn</b>の戻す関数オブジェクトは第一引数に、
+                        (訳注: そのメンバ関数の属するクラスのインスタンスを指すような)
+			<!-- FIXME: to an object instance は何を指しているか -->
+                        ポインタ、参照、スマートポインタをとることができる。
+                        <strong>mem_fn</strong>は、メンバ変数へのポインタも、引数をとらず自身への定数参照を
+                        戻す関数とみなすことによってサポートする。
+			<!-- FIXME: data member は メンバ変数でよいのか -->
+		</p>
+		<p>
+			<b>mem_fn</b>の目的は2つある。一つ目は、コンテナにスマートポインタが格納されている場合であっても、
+                        次のような
+		</p>
+		<pre>    std::for_each(v.begin(), v.end(), boost::mem_fn(&amp;Shape::draw));
+</pre>
+		<p>
+                        見慣れた文法によって、メンバ関数の呼び出しを可能にすることである。
+		</p>
+		<p>
+                        二つ目は、メンバ関数へのポインタを関数オブジェクトのように取り扱いたいライブラリ開発者に、
+                        実装の道具として使用して貰うことである。例えば、あるライブラリは次のようにしてより便利な
+                        <b>for_each</b>アルゴリズムを提供することができ、
+		</p>
+		<pre>template&lt;class It, class R, class T&gt; void for_each(It first, It last, R (T::*pmf) ())
+{
+    std::for_each(first, last, boost::mem_fn(pmf));
+}
+</pre>
+		<p>
+                        このアルゴリズムは次のようにして手軽に利用することができる。
+		</p>
+		<pre>    for_each(v.begin(), v.end(), &amp;Shape::draw);
+</pre>
+		<p>
+                        このアルゴリズムの機能を文書化する際には、単に次のように書けば良い：
+		</p>
+		<h4 style="MARGIN-LEFT: 20pt">template&lt;class It, class R, class T&gt; void 
+			for_each(It first, It last, R (T::*pmf) ());</h4>
+		<p style="MARGIN-LEFT: 20pt">
+			<b>結果:</b> std::for_each(first, last, boost::mem_fn(pmf)); と同等。
+		</p>
+		<p>
+			ここで、 <b>boost::mem_fn</b> の部分はこのページへのリンクとするとよいだろう。
+                         <a href="bind.html"><b>bind</b>のドキュメント</a>
+                        にそのような例があるので参照のこと。
+		</p>
+		<p>
+			<b>mem_fn</b> は1つの引数(メンバ関数へのポインタ)をとり、標準あるいは独自の
+                        アルゴリズムに渡すのに適した関数オブジェクトを戻す：
+		</p>
+		<pre>struct X
+{
+    void f();
+};
+
+void g(std::vector&lt;X&gt; &amp; v)
+{
+    std::for_each(v.begin(), v.end(), boost::mem_fn(&amp;X::f));
+};
+
+void h(std::vector&lt;X *&gt; const &amp; v)
+{
+    std::for_each(v.begin(), v.end(), boost::mem_fn(&amp;X::f));
+};
+
+void k(std::vector&lt;boost::shared_ptr&lt;X&gt; &gt; const &amp; v)
+{
+    std::for_each(v.begin(), v.end(), boost::mem_fn(&amp;X::f));
+};
+</pre>
+		<p>
+                        戻される関数オブジェクトは、引数のメンバ関数ポインタと同じ引数をとることに加え、
+                        インスタンスを表すための「柔軟な」第一引数をとる。
+		</p>
+		<p>
+                        関数オブジェクトが、適切なクラス(上の例では <b>X</b>)を指すポインタでも参照でも
+                        ない第一引数<b>x</b>をもって呼ばれた場合、関数オブジェクトは<tt>get_pointer(x)</tt>
+                        を用いて<b>x</b>からポインタを得ようとする。
+                        スマートポインタの作者は、自分たちのスマートポインタ向けの適切な<b>get_pointer</b>関数
+                        を定義(overload)しておくことで、それを<b>mem_fn</b>対応とすることができる。
+		</p>
+		<p>
+			[注意: <b>get_pointer</b> の戻り値はポインタでなくともよい。
+                        <tt>(x-&gt;*pmf)(...)</tt>という形式でメンバ関数が呼び出せるなら、どんなオブジェクトでも問題ない。]
+		</p>
+		<p>
+			[注意: ライブラリは、<b>get_pointer</b> の非限定的 (訳注:名前空間を明示しない) 呼び出しを行なう。
+                        そのため、引数依存検索の過程では、オーバーロードされた<b>boost::get_pointer</b>関数群に加えて、
+                        そのスマートポインタが定義された名前空間内の<b>get_pointer</b>関数群も検索対象になる。]
+		</p>
+		<p>
+                        <b>mem_fn</b>が戻す全ての関数オブジェクトは、<b>result_type</b>なるtypedefを開示する。
+                        このtypederfは、メンバ関数の戻り型を表す。メンバ変数を渡した場合には、<strong>result_type</strong>
+                        はそのメンバ変数の型の定数参照として定義される。
+		</p>
+		<h2><a name="FAQ">FAQ</a></h2>
+		<h3><a name="Q1"><b>mem_fn</b>を、標準の
+				<b>std::mem_fun[_ref]</b>アダプタのかわりに使用できるか?</a></h3>
+		<p>
+			はい。単純な使い方では、<b>mem_fn</b> は標準のアダプタが提供しないいくつかの機能を提供する。
+                        <b>std::bind1st</b>、<b>std::bind2nd</b>、<a href="../compose/index.htm"><b>Boost.Compose</b></a> 
+                        と標準のアダプタを組み合わせるような複雑な使い方をしている場合は、
+                        <a href="bind.html"><b>boost::bind</b></a>
+                        を使用するように書き換えることで、<b>mem_fn</b>の恩恵を自動的に受けることができる。
+		</p>
+		<h3><a name="Q2">既に書いてしまったコード中の<b>std::mem_fun[_ref]</b>を、
+				全て<b>mem_fn</b>で置き換えるべきか?</a></h3>
+		<p>
+			いいえ。そうする強い理由がないならすべきではない。<b>mem_fn</b> は、標準のアダプタに
+                        非常に良く似ているが、100%の互換性があるわけではない。特に、<b>mem_fn</b>は、標準の
+                        アダプタとは違って <b>std::[const_]mem_fun[1][_ref]_t</b> 型のオブジェクトを戻さないので、
+                        標準の <b>argument_type</b> 及び <b>first_argument_type</b> という (nested) typedef を
+                        用いて第一引数の型を記述することが (完全には) できない。
+		</p>
+		<h3><a name="Q3"><b>mem_fn</b>は COM のメソッドに使えるか?</a></h4>
+		<p>
+			はい。<a href="#stdcall">#define BOOST_MEM_FN_ENABLE_STDCALL</a> とすれば可能である。
+		</p>
+		<h3><a name="Q4">何故 BOOST_MEM_FN_ENABLE_STDCALL 
+				は最初から有効になっていないのか?</a></h3>
+		<p>
+                        特定のベンダへの依存を避けるため、可搬性のない拡張は、一般にデフォルトでオフにされるべきである。
+                        もし BOOST_MEM_FN_ENABLE_STDCALL がデフォルトで有効であったなら、あなたはそうとは気づかずに
+                        その拡張を使ってしまい、結果としてあなたのコードの可搬性が損なわれるかもしれない。
+		</p>
+		<h2><a name="Interface">インタフェース</a></h2>
+		<h3><a name="Synopsis">Synopsis</a></h3>
+		<pre>namespace boost
+{
+
+template&lt;class T&gt; T * <a href="#get_pointer_1">get_pointer</a>(T * p);
+
+template&lt;class R, class T&gt; <i>unspecified-1</i> <a href="#mem_fn_1">mem_fn</a>(R (T::*pmf) ());
+
+template&lt;class R, class T&gt; <i>unspecified-2</i> <a href="#mem_fn_2">mem_fn</a>(R (T::*pmf) () const);
+
+template&lt;class R, class T&gt; <i>unspecified-2-1</i> <a href="#mem_fn_2_1">mem_fn</a>(R T::*pm);
+
+template&lt;class R, class T, class A1&gt; <i>unspecified-3</i> <a href="#mem_fn_3">mem_fn</a>(R (T::*pmf) (A1));
+
+template&lt;class R, class T, class A1&gt; <i>unspecified-4</i> <a href="#mem_fn_4">mem_fn</a>(R (T::*pmf) (A1) const);
+
+template&lt;class R, class T, class A1, class A2&gt; <i>unspecified-5</i> <a href="#mem_fn_5">mem_fn</a>(R (T::*pmf) (A1, A2));
+
+template&lt;class R, class T, class A1, class A2&gt; <i>unspecified-6</i> <a href="#mem_fn_6">mem_fn</a>(R (T::*pmf) (A1, A2) const);
+
+// 実際には、より多くの引数をとるような関数が、更にいくつかオーバーロードされている
+
+}
+</pre>
+		<h3><a name="CommonRequirements">必須事項</a></h3>
+		<p>
+			Synopsis で述べられた全ての <tt><i>unspecified-N</i></tt> 型は <b>CopyConstructible</b>
+                        (コピーコンストラクト可能)
+			かつ <b>Assignable</b> (代入可能) であること。そのためのコピーコンストラクタ及び代入演算子
+                        は例外を送出しないこと。<tt><i>unspecified-N</i>::result_type</tt> は <b>mem_fn</b>
+			に渡されたメンバ関数ポインタの戻り型、と定義されること
+			(Synopsis での <b>R</b>)。 <tt><i>unspecified-2-1</i>::result_type</tt> は 
+			<tt>R const &amp;</tt> 、と定義されること。
+		</p>
+		<h3><a name="get_pointer">get_pointer</a></h3>
+		<h4><a name="get_pointer_1">template&lt;class T&gt; T * get_pointer(T * p)</a></h4>
+		<blockquote>
+			<p>
+				<b>戻り値：</b> <tt>p</tt>.
+			</p>
+			<p>
+				<b>例外：</b> 送出しない。
+			</p>
+		</blockquote>
+		<h3><a name="mem_fn">mem_fn</a></h3>
+		<h4><a name="mem_fn_1">template&lt;class R, class T&gt; <i>unspecified-1</i> mem_fn(R 
+				(T::*pmf) ())</a></h4>
+		<blockquote>
+			<p>
+				<b>戻り値：</b> 関数オブジェクト <i>f</i> を戻す。ここで、式  <tt><i>f(t)</i></tt> は 
+                                <tt>(t.*pmf)()</tt> と等価である (t が Tあるいはその派生型の左辺値である場合)。
+                                あるいは  <tt>(get_pointer(t)-&gt;*pmf)()</tt> と等価である(それ以外の場合)。
+			</p>
+			<p>
+				<b>例外：</b> 送出しない。
+			</p>
+		</blockquote>
+		<h4><a name="mem_fn_2">template&lt;class R, class T&gt; <i>unspecified-2</i> mem_fn(R 
+				(T::*pmf) () const)</a></h4>
+		<blockquote>
+			<p>
+				<b>戻り値：</b> 関数オブジェクト <i>f</i> を戻す。ここで、式 <tt><i>f(t)</i></tt>
+				は <tt>(t.*pmf)()</tt> と等価である (<i>t</i> が <strong>T</strong>
+				<em>[const]<strong> </strong></em> あるいはその派生型である場合)。
+                                あるいは <tt>(get_pointer(t)-&gt;*pmf)()</tt> と等価である(それ以外の場合)。
+			</p>
+			<p>
+				<b>例外：</b> 送出しない。
+			</p>
+		</blockquote>
+		<h4><a name="mem_fn_2_1">template&lt;class R, class T&gt; <i>unspecified-2-1</i> mem_fn(R 
+				T::*pm)</a></h4>
+		<blockquote>
+			<p>
+				<b>戻り値：</b> 関数オブジェクト <i>f</i> を戻す。ここで、式 <tt><i>f(t)</i></tt> 
+				は <tt>t.*pm</tt> と等価である (<i>t</i> が <strong>T</strong>
+				<em>[const]<strong> </strong></em> あるいはその派生型である場合)。
+				あるいは <tt>get_pointer(t)-&gt;*pm</tt> と等価である（それ以外の場合）。
+			</p>
+			<p>
+				<b>例外：</b> 送出しない。
+			</p>
+		</blockquote>
+		<h4><a name="mem_fn_3">template&lt;class R, class T, class A1&gt; <i>unspecified-3</i> mem_fn(R 
+				(T::*pmf) (A1))</a></h4>
+		<blockquote>
+			<p>
+				<b>戻り値：</b> 関数オブジェクト <i>f</i> を戻す。ここで、式 <tt><i>f(t, a1)</i></tt>
+				は <tt>(t.*pmf)(a1)</tt> と等価である (<i>t</i> が <strong>T</strong>
+				あるいはその派生型の左辺値である場合)。
+				あるいは <tt>(get_pointer(t)-&gt;*pmf)(a1)</tt> と等価である（それ以外の場合）。
+			</p>
+			<p>
+				<b>例外：</b> 送出しない。
+			</p>
+		</blockquote>
+		<h4><a name="mem_fn_4">template&lt;class R, class T, class A1&gt; <i>unspecified-4</i> mem_fn(R 
+				(T::*pmf) (A1) const)</a></h4>
+		<blockquote>
+			<p>
+				<b>戻り値：</b> 関数オブジェクト <i>f</i> を戻す。ここで、式 <tt><i>f(t, a1)</i></tt>
+				は <tt>(t.*pmf)(a1)</tt> と等価である (<i>t</i> が <strong>T</strong>
+				<em>[const]<strong> </strong></em> あるいはその派生型である場合)。
+				あるいは <tt>(get_pointer(t)-&gt;*pmf)(a1)</tt> と等価である（それ以外の場合）。
+			</p>
+			<p>
+				<b>例外：</b> 送出しない。
+			</p>
+		</blockquote>
+		<h4><a name="mem_fn_5">template&lt;class R, class T, class A1, class A2&gt; <i>unspecified-5</i>
+				mem_fn(R (T::*pmf) (A1, A2))</a></h4>
+		<blockquote>
+			<p>
+				<b>戻り値：</b> 関数オブジェクト <i>f</i> を戻す。ここで、式 <tt><i>f(t, a1, a2)</i></tt>
+				は <tt>(t.*pmf)(a1, a2)</tt> と等価である (<i>t</i> が <strong>T</strong>
+				あるいはその派生型の左辺値である場合)。
+				あるいは <tt>(get_pointer(t)-&gt;*pmf)(a1, a2)</tt> と等価である（それ以外の場合）。
+			</p>
+			<p>
+				<b>例外：</b> 送出しない。
+			</p>
+		</blockquote>
+		<h4><a name="mem_fn_6">template&lt;class R, class T, class A1, class A2&gt; <i>unspecified-6</i>
+				mem_fn(R (T::*pmf) (A1, A2) const)</a></h4>
+		<blockquote>
+			<p>
+				<b>戻り値：</b> 関数オブジェクト <i>f</i> を戻す。ここで、式 <tt><i>f(t, a1, a2)</i></tt>
+				は <tt>(t.*pmf)(a1, a2)</tt> と等価である (<i>t</i> が <strong>T</strong>
+				<em>[const]<strong> </strong></em> あるいはその派生型である場合)。
+				あるいは <tt>(get_pointer(t)-&gt;*pmf)(a1, a2)</tt> と等価である（それ以外の場合）。
+			</p>
+			<p>
+				<b>例外：</b> 送出しない。
+			</p>
+		</blockquote>
+		<h2><a name="Implementation">実装</a></h2>
+		<h3><a name="Files">ファイル</a></h3>
+		<ul>
+			<li>
+				<a href="../../boost/mem_fn.hpp">boost/mem_fn.hpp</a>
+			(メインヘッダ)
+			</li><li>
+				<a href="../../boost/bind/mem_fn_cc.hpp">boost/bind/mem_fn_cc.hpp</a>
+			(mem_fn.hpp より使用される。直接インクルードしないこと。)
+			</li><li>
+				<a href="../../boost/bind/mem_fn_vw.hpp">boost/bind/mem_fn_vw.hpp</a>
+			(mem_fn.hpp より使用される。直接インクルードしないこと。)
+			</li><li>
+				<a href="../../boost/bind/mem_fn_template.hpp">boost/bind/mem_fn_template.hpp</a>
+			(mem_fn.hpp より使用される。直接インクルードしないこと。)
+			</li><li>
+				<a href="test/mem_fn_test.cpp">libs/bind/test/mem_fn_test.cpp</a>
+			(テスト)
+			</li><li>
+				<a href="test/mem_fn_derived_test.cpp">libs/bind/test/mem_fn_derived_test.cpp</a>
+			(派生オブジェクトでのテスト)
+			</li><li>
+				<a href="test/mem_fn_fastcall_test.cpp">libs/bind/test/mem_fn_fastcall_test.cpp</a>
+			(__fastcallのテスト)
+                        </li><li>
+				<a href="test/mem_fn_stdcall_test.cpp">libs/bind/test/mem_fn_stdcall_test.cpp</a>
+			(__stdcallのテスト)
+			</li><li>
+				<a href="test/mem_fn_void_test.cpp">libs/bind/test/mem_fn_void_test.cpp</a> 
+                        (戻りがvoidであるケースのテスト)
+                        </li>
+		</ul>
+		<h3><a name="Dependencies">依存関係</a></h3>
+		<ul>
+			<li>
+				<a href="../config.htm">Boost.Config</a></li>
+		</ul>
+		<h3><a name="NumberOfArguments">引数の上限個数</a></h3>
+		<p>
+			この実装では、8つまでの引数をとるメンバ関数がサポートされている。これは、設計に固有の
+                        制限という訳ではなく、実装の詳細である。
+		</p>
+		<h3><a name="stdcall">"__stdcall" と "__fastcall" のサポート</a></h3>
+		<p>
+			いくつかのプラットフォームでは、
+                        <b>呼び出し規則</b> (どのように関数が起動されるかの規則:
+                        引数はどのように渡されるのか、戻り値はどのように扱われるのか、もしスタックを使用したなら、
+                        誰がそれを奇麗にするのか)
+                        の異なるような何種類かのメンバ関数を作成できる。
+		</p>
+		<p>
+                        例えば、Windows API の関数と、COMインタフェースのメンバ関数は、 <b>__stdcall</b> という呼び出し規則を用いるし、
+                        Borland の VCL コンポーネントは  <STRONG>__fastcall</STRONG> を用いる。
+		</p>
+		<p>
+			<b>mem_fn</b> を <b>__stdcall</b> メンバ関数に用いるには、mem_fn.hpp が (直接、あるいは間接的に)
+                        インクルードされる前に 
+			マクロ <b>BOOST_MEM_FN_ENABLE_STDCALL</b> を <b>#define</b> する。
+		</p>
+
+		<p>
+			<b>mem_fn</b> を <b>__fastcall</b> メンバ関数に用いるには、mem_fn.hpp が (直接、あるいは間接的に)
+                        インクルードされる前に 
+			マクロ <b>BOOST_MEM_FN_ENABLE_FASTCALL</b> を <b>#define</b> する。
+		</p>
+		<p>[注意: これは可搬性のない拡張であり、インタフェースの一部ではない。]
+		</p>
+		<p>
+			[注意: いくつかのコンパイラは、 <b>__stdcall</b> キーワードに対して最小限のサポートしか提供していない。]
+		</p>
+		<h2><a name="Acknowledgements">謝辞</a></h2>
+<p>
+  get_pointerベースの設計は、Rene Jageによる、特性クラスを用いて mem_fnを ユーザ定義のスマートポインタに適合させるという提案に影響されたものである。
+</p>
+<p>
+  フォーマルレビューの期間に、Richard Crossley、 Jens Maurer、 Ed Brey、その他の方々の示唆によって、たくさんの
+  改良があった。レビューマネージャは Darin Adler であった。
+</p>
+<p>
+  Steve Anichini は、COMインタフェースが __stdcall を使用していることを指摘した。
+</p>
+<p>
+  Dave Abrahams は、不完全なコンパイラにおいても "戻り値なし" をサポートすべく、bind と mem_fn を改良した。
+</p>
+		<p><br>
+			<br>
+			<br>
+			<small>Copyright &#169; 2001, 2002&nbsp;by Peter Dimov and Multi Media Ltd. Permission 
+				to copy, use, modify, sell and distribute this document is granted provided 
+				this copyright notice appears in all copies. This document is provided "as is" 
+				without express or implied warranty, and with no claim as to its suitability 
+				for any purpose.</small></p>
+
+<p><small>
+Japanese Translation Copyright &#169; 2003 SATO Yusuke
+&lt;y-sato@y-sa.to&gt;.
+</small></p>
+
+<p><small>
+オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の
+複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」
+に提供されており、いかなる明示的、暗黙的保証も行わない。また、
+いかなる目的に対しても、その利用が適していることを関知しない。
+</small></p>
+
+	</body>
+</html>

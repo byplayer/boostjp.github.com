@@ -1,0 +1,118 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="keywords" content="Josuttis, C++, countedptr, counted reference, smart pointer, Code, examples, Beispiele, objektorientiert, Informatik, Nicolai Josuttis, Nicolai M. Josuttis">
+   <META name="GENERATOR" content="IBM WebSphere Studio Homepage Builder Version 7.0.0.0 for Windows">
+   <meta name="Keywords" content="compose1, compose2, compose_f_gx, compose_f_gxy, compose_f_gx_hx, compose_f_gx_hy, function object, adapter, adaptor, STL, C++ Standard Library">
+<META http-equiv="Content-Style-Type" content="text/css">
+   <title>Compose Function Object Adapters</title>
+</head>
+<body text="#000000" bgcolor="#FFFFFF">
+&nbsp;
+<table>
+<tr>
+    <td WIDTH="680" BGCOLOR="#DDDDDD"><b><font color="#000000" size="+1">Compose Function Object Adapters</font></b></td>
+</tr>
+</table>
+
+<p>標準C++ライブラリの一部であるStandard Template Library(STL) はいくつかの関数オブジェクトを提供している。
+しかし残念なことにSTLはそれら関数オブジェクトを合成する手段を持ち合わせてはいない。
+たとえば述語を表現した二つの単項演算AとBを基に、演算:&quot;AかつB&quot;を合成することができない。
+関数の合成というコンセプトに基づき、ソフトウェア・コンポーネントの組み合わせによって新たなコンポーネントを構築するのは重要なことといえよう。
+本ライブラリはソフトウェアからの要請と、それを満足できないライブラリとのギャップを埋めるアダプタを提供するものである。</p>
+
+<p>ここに提供するアダプタは以下に示す関数の合成を実現する:</p>
+
+<table>
+    <tr>
+      <th>機能</th>
+      <th>Boost での名前</th>
+      <th>SGI版 STL での名前</th>
+    </tr>
+    <tr>
+<td>&nbsp;<font face="Times New Roman,Times">f(g(<i>value</i>))</font></td>
+<td>&nbsp;<font face="Times New Roman,Times">compose_f_gx</font></td>
+<td>&nbsp;<font face="Times New Roman,Times">compose1</font></td>
+</tr>
+
+<tr>
+<td>&nbsp;<font face="Times New Roman,Times">f(g(<i>value</i>),h(<i>value</i>))</font></td>
+<td>&nbsp;<font face="Times New Roman,Times">compose_f_gx_hx</font></td>
+<td>&nbsp;<font face="Times New Roman,Times">compose2</font></td>
+</tr>
+
+<tr>
+<td>&nbsp;<font face="Times New Roman,Times">f(g(<i>value1</i>),h(<i>value2</i>))</font></td>
+<td>&nbsp;<font face="Times New Roman,Times">compose_f_gx_hy</font></td>
+<td></td>
+</tr>
+
+<tr>
+<td>&nbsp;<font face="Times New Roman,Times">f(g(<i>value1</i>,<i>value2</i>))</font></td>
+<td>&nbsp;<font face="Times New Roman,Times">compose_f_gxy</font></td>
+<td></td>
+</tr>
+
+<tr>
+<td>&nbsp;<font face="Times New Roman,Times">f(g())</font></td>
+<td>&nbsp;<font face="Times New Roman,Times">compose_f_g</font></td>
+<td></td>
+</tr>
+</table>
+
+<p>上の表にもあるとおり、二つのアダプタはSGI版STLですでに用意されている。
+が、我々はすべてのアダプタに統一した命名規則を適用するため、その既存のアダプタの名前を変更する。</p>
+
+<p>また、(既存の <tt>unary_function</tt> および <tt>binary_function</tt> を補完すべく)引数を持たない関数オブジェクト <tt>nullary_function</tt> を定義するとともに、
+引数を持たない関数に適用できるよう <tt>ptr_fun</tt> をオーバロードする。</p>
+
+<p>本ライブラリのコードは「あるがまま(as is)」に提供されており、いかなる明示的、暗黙的保証も行わない。</p>
+
+<p>ヘッダ <b>compose.hpp:</b>
+
+<ul>
+  <li><tt><a href="compose.hpp.html">HTML</a> ファイル</tt></li>
+  <li><tt><a href="../../boost/compose.hpp">テキスト</a> ファイル</tt></li>
+</ul>
+<b>compose_f_gx</b> のサンプル
+<ul>
+  <li><tt><a href="compose1.cpp.html">HTML</a> ファイル</tt></li>
+  <li><tt><a href="compose1.cpp">テキスト</a> ファイル</tt></li>
+</ul>
+<b>compose_f_gx_hx</b> のサンプル
+<ul>
+  <li><tt><a href="compose2.cpp.html">HTML</a> ファイル</tt></li>
+  <li><tt><a href="compose2.cpp">テキスト</a> ファイル</tt></li>
+</ul>
+<b>compose_f_gx_hy</b> のサンプル
+<ul>
+  <li><tt><a href="compose3.cpp.html">HTML</a> ファイル</tt></li>
+  <li><tt><a href="compose3.cpp">テキスト</a> ファイル</tt></li>
+</ul>
+引数を与えない、<b>compose_f_g</b> および <b>ptr_fun</b> のサンプル
+<ul>
+  <li><tt><a href="compose4.cpp.html">HTML</a> ファイル</tt></li>
+  <li><tt><a href="compose4.cpp">テキスト</a> ファイル</tt></li>
+</ul>
+<b>全ファイル</b>
+<ul>
+  <li><tt><a href="compose.zip">ZIP</a> ファイル</tt></li>
+  <li><tt><a href="compose.tgz">TGZ</a> ファイル</tt></li>
+</ul>
+関数オブジェクトと合成関数の詳細は以下を参照されたい:<br />
+<ul>
+  <li><i><a href="http://www.josuttis.com/libbook/">The 
+  C++ Standard Library - A Tutorial and Reference</a></i> <br>
+  &nbsp;&nbsp;&nbsp;&nbsp; by Nicolai M. Josuttis 
+  <br />
+  &nbsp;&nbsp;&nbsp;&nbsp; Addison Wesley Longman, 
+  1999 <br>
+  &nbsp;&nbsp;&nbsp;&nbsp; ISBN 0-201-37926-0 
+  <br /></li>
+  <li><a href="http://www.sgi.com/tech/stl/">SGI STL documentation</a></li>
+</ul>
+
+<p><a href="http://www.josuttis.com/" TARGET="_top">Home Page</a></p>
+</body>
+</html>

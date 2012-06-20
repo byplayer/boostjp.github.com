@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html
+   PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">
+
+<!--
+ - Copyright (c) Jeremy Siek and Andrew Lumsdaine 2000
+ -
+ - Permission to use, copy, modify, distribute and sell this software
+ - and its documentation for any purpose is hereby granted without fee,
+ - provided that the above copyright notice appears in all copies and
+ - that both that copyright notice and this permission notice appear
+ - in supporting documentation. We make no
+ - representations about the suitability of this software for any
+ - purpose. It is provided "as is" without express or implied warranty.
+ -->
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>コンセプトを用いたプログラミング</title>
+</head>
+
+<body bgcolor="white" text="black" link="#0000ee" vlink="#551a8b" alink="red">
+
+<p><img src="../../c++boost.gif"  alt="C++ Boost" width="277" height="86" />
+<br clear="all" /></p>
+
+<h2><a name="programming-with-concepts" id="programming-with-concepts">Programming with Concepts</a></h2>
+
+<p>
+要求事項をまとめてコンセプトにする方法の決定と、各アルゴリズムで使用するコンセプトを決定する過程は、恐らくジェネリック・ライブラリを構築する上で最も困難な(けれども最も重要な) 段階である。
+この過程を勤しむ際に使用する指針を、要求事項最小化原理と呼んでいる。</p>
+
+<p>
+<strong>要求事項最小化原理：</strong>より再利用しやすくなるように、コンポーネントの入力パラメータに対する要求事項を最小限にすること。</p>
+
+<p>
+この文言には、相反する問題が含まれている。
+定義によれば、コンポーネントは課されたタスクを遂行するために、入力パラメータを使用しなければならない(ここで「コンポーネント」とは、関数テンプレートもしくはクラス・テンプレートを意味する)。
+その上で、入力に関する仮定を最小に限定する(最小必要条件)ような方法でコンポーネントを実装することが求められる。</p>
+
+<p>
+<em>抽象</em> という従来からある概念は、最小要求事項というアイディアに直接結び付いている。
+入力が抽象的であるほど、要求事項は少なくなる。
+よって、コンセプトは、C++ テンプレート・プログラミングにおけるジェネリックな抽象データ型の単純な具象化である。</p>
+
+<p>
+ある問題領域に対するコンセプトを設計する場合、すなわち、コンポーネントへの入力に関する要求事項を表現するためには、その目的を念頭においておくことが重要である。
+要求事項最小化原理に関しては、これは、コンセプトの極小化を意味する。</p>
+
+<p>(<a href="#trans_note_01">訳注1</a>)</p>
+<!-- 以下の文章は、LessThanComparable の変更された標準定義およびニーズと一致しない。-Jeremy 
+
+<p>
+しかし、コンセプトの極小化が、コンセプト内で有効式の数を単純に減少させることに直結しないことは重要な注意点である。
+例えば、<code>std::stable_sort()</code>関数は、値型のイテレータが<a href="http://www.sgi.com/tech/stl/LessThanComparable.html" charset="us-ascii" hreflang="en-US">LessThanComparable</a> を満たすことを必要とするが、このコンセプトは <code>operator&lt;()</code> だけでなく、<code>operator&gt;()</code>、<code>operator&lt;=()</code>、<code>operator&gt;=()</code> を含んでいる。
+<code>std::stable_sort()</code> は <code>operator&lt;()</code> のみを使用することが判明している。
+そうなると、疑問が生じる：
+<code>std::stable_sort()</code> の特殊化は、<a href=" http://www.sgi.com/tech/stl/LessThanComparable.html" charset="us-ascii" hreflang="en-US">LessThanComparable</a> コンセプトに基づくべきなのか、あるいはただ<code>operator&lt;()</code> のみを必要とするコンセプトに基づくべきなのだろうか。</p>
+
+<p>
+<code>operator&lt;()</code> から他の演算子をすべて自明な形で実装できるので、<a href=" http://www.sgi.com/tech/stl/LessThanComparable.html" charset="us-ascii" hreflang="en-US">LessThanComparable</a> を用いても実際には要求事項最小化原理に触れてはいない、とまずは云うことができよう。
+ここで「自明」が意味するのは、一行のコードと実行時に課される一定のコストに過ぎない。
+とはいえ、より根源的に言えば、全ての比較演算子 (<code>&lt;</code>、<code>&gt;</code>、<code>&lt;=</code>、<code>&gt;=</code>) は (数学的な感覚において) 概念的に等価であるから、<a href=" http://www.sgi.com/tech/stl/LessThanComparable.html" charset="us-ascii" hreflang="en-US">LessThanComparable</a> を用いたとしても要求事項最小化原理を犯すことにはならない。
+概念的に等価な有効式を加えたとしても、セマンティクスの面からすれば、新しいものはなにも加わっていない――ただ新しい構文だけである――ので、要求事項最小化原理の侵害にはあたらない。
+こういった構文の追加は再利用性を高めるのだ。</p>
+
+<p>
+例えば、結局のところ比較演算子は等価であるから、<code>std::stable_sort()</code> の管理者がいつか <code>operator&lt;()</code> の代わりに <code>operator&gt;()</code> を使用するよう実装を変更するかもしれない。
+要求事項は公開インタフェースの一部であるから、そのような変更は潜在的にクライアント・コードを破壊しかねない。
+代わりに、<a href=" http://www.sgi.com/tech/stl/LessThanComparable.html" charset="us-ascii" hreflang="en-US">LessThanComparable</a> が<code>std::stable_sort()</code>の要求事項であれば、管理者がその仕事をこなす際に、妥当な程度の柔軟性を与えられることになる。-->
+
+<p>
+コンセプトにおける極小性は、表現されている問題領域の基礎的なセマンティックスに関連したプロパティである。
+基本コンテナの問題領域では、単一方向へのトラバースを必要とすることは、両方向へ必要とするより小さな要求事項である (つまりは <a href="http://www.sgi.com/tech/stl/ForwardIterator.html" charset="us-ascii" hreflang="en-US">ForwardIterator</a> と <a href="http://www.sgi.com/tech/stl/BidirectionalIterator.html" charset="us-ascii" hreflang="en-US">BidirectionalIterator</a> の相違である) 。
+セマンティクスの違いは、前方イテレータを有する具象データ型の集合と、双方向イテレータを持つ集合との間にある差異から、容易に見い出すことができる。
+例えば、単方向リンク・リストは、双方向イテレータではなく前方イテレータを有するデータ構造の集合に含まれるだろう。
+さらに、前方イテレータだけを使用して実装することができるアルゴリズムの集合は、双方向イテレータ無しにはインプリメントできないアルゴリズム集合とは全く重なることがない。
+このために、要求事項の一群をある程度きめ細かくコンセプト別に分類することが重要である。
+例えば、イテレータに対する要求事項は、STL における６つのイテレータ・コンセプト(自明、出力、入力、前方、双方向、ランダムアクセス)に分類される。</p>
+
+<p>
+<a href="implementation.htm">次へ： Implementation</a><br />
+<a href="concept_covering.htm">前へ： Concept Covering and Archetypes</a></p>
+
+<hr />
+
+<h4>訳注</h4>
+<ol>
+<li><a name="trans_note_01" id="trans_note_01">ここには、重要な論点について記したパラグラフがありましたが、標準との整合性の理由からコメントアウトされています。</a></li>
+</ol>
+
+<hr />
+
+<table xml:lang="en-US" lang="en-US">
+<tr valign="top">
+  <td nowrap="nowrap">Copyright &copy; 2000</td>
+  <td>
+    <a href="../../people/jeremy_siek.htm">Jeremy Siek</a>,
+    Univ.of Notre Dame (<a href="mailto:jsiek@lsc.nd.edu">jsiek@lsc.nd.edu</a>)
+  </td>
+</tr>
+</table>
+
+</body>
+
+</html>

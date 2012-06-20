@@ -1,0 +1,141 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Boost Function Object Adapter Library</title>
+</head>
+
+<body bgcolor="#FFFFFF" text="#000000">
+
+<table border="1" bgcolor="#007F7F" cellpadding="2">
+  <tr>
+    <td bgcolor="#FFFFFF"><img src="../../c++boost.gif" alt="c++boost.gif (8819 bytes)" WIDTH="277" HEIGHT="86"></td>
+    <td><a href="../../index.htm"><font face="Arial" color="#FFFFFF"><big>Home </big></font></a></td>
+    <td><a href="../libraries.htm"><font face="Arial" color="#FFFFFF"><big>Libraries </big></font></a></td>
+    <td><a href="../../people/people.htm"><font face="Arial" color="#FFFFFF"><big>People </big></font></a></td>
+    <td><a href="../../more/faq.htm"><font face="Arial" color="#FFFFFF"><big>FAQ </big></font></a></td>
+    <td><a href="../../more/index.htm"><font face="Arial" color="#FFFFFF"><big>More </big></font></a></td>
+  </tr>
+</table>
+
+<h1>Negators</h1>
+
+<p><nobr><a href="../../boost/functional.hpp">functional.hpp</a></nobr>
+ヘッダは C++ 標準 (&sect;20.3.5) 由来のネゲータアダプタの両方の強化バー
+ジョンを提供する:</p>
+
+<ul>
+<li><tt>unary_negate</tt></li>
+<li><tt>binary_negate</tt></li>
+</ul>
+
+<p>同様に対応するヘルパ関数も提供する。</p>
+
+<ul>
+<li><tt>not1</tt></li>
+<li><tt>not2</tt></li>
+</ul>
+
+<p>このライブラリのネゲータは標準バージョンを二つの方法で改良する。
+
+<ul>
+<li>適合関数オブジェクトではなく関数を否定する時、それらは
+	<tt><nobr>ptr_fun</nobr></tt> の必要を回避するために、<a
+	href="function_traits.html">function object traits</a> を用いる。
+</li>
+<li>それらは引数や適合された関数に渡す引数を宣言する最上の方法を決するた
+	め、Boost の <nobr><a href="../utility/call_traits.htm">call
+	traits</a></nobr> を用いる。(<a href="#arguments">下記</a>参照)
+</li>
+</ul>
+
+<h3>Usage</h3>
+
+<p>使い型は標準ネゲータと同様である。例えば、</p>
+
+<blockquote><pre>
+bool bad(const Foo &amp;foo) { ... }
+...
+std::vector&lt;Foo&gt; c;
+...
+std::find_if(c.begin(), c.end(), boost::not1(bad));
+</pre></blockquote>
+
+<h3 id="arguments">Argument Types</h3>
+
+<p>C++ 標準 <nobr>(&sect;20.3.5)</nobr> は unary negate をこのように定義
+している。(binary negate も似ている):</p>
+
+<blockquote><pre>
+template &lt;class Predicate&gt;
+  class unary_negate
+    : public unary_function&lt;typename Predicate::argument_type,bool&gt; {
+public:
+  explicit unary_negate(const Predicate&amp; pred);
+  bool operator()(<strong>const typename Predicate::argument_type&amp;</strong> x) const;
+};</pre></blockquote>
+
+<p>Predicate の <nobr><tt>argument_type</tt></nobr> が参照であった場合、
+<nobr><tt>operator()</tt></nobr> の引数の型は参照の参照になることに注
+意しなさい。これは、現在の C++ では非合法である。(ただし <a
+href="http://anubis.dkuug.dk/jtc1/sc22/wg21/docs/cwg_active.html#106">
+C++ 言語中核の問題点 106 番目</a> を参照せよ)。</p>
+
+<p>しかしながら、もし代わりに <nobr><tt>operator()</tt></nobr> を
+Predicate の argument_type を変更せずにそのまま採用して定義すると、それ
+が値型であった場合不必要に非効率になってしまう。それは引数が二度コピーさ
+れることによる。一度は <nobr><tt>unary_negate</tt></nobr> の
+<nobr><tt>operator()</tt></nobr> を呼ぶ時、さらに適合された関数で
+<nobr><tt>operator()</tt></nobr> を呼ぶ時にもう一度である。</p>
+
+<p>つまり<nobr><tt>operator()</tt></nobr> を宣言する望ましい方法は、
+Predicate の <nobr><tt>argument_type</tt></nobr> が参照であるか否かに依
+る。もしそれが参照であれば、単純に <nobr><tt>argument_type</tt></nobr>
+として宣言したいし、それが値であれば <nobr><tt>const
+argument_type&amp;</tt></nobr> として宣言したいのである。
+
+<p>Boost の <nobr><a
+href="../utility/call_traits.htm">call_traits</a></nobr> クラステンプレー
+トは <tt><nobr>param_type</nobr></tt> typedef を含んでいて、それは部分特
+殊化版を用いて正確にこの判断をを行う。<nobr><tt>operator()</tt></nobr> を
+以下のように宣言することによって。</p>
+
+<blockquote><pre>
+bool operator()(typename call_traits&lt;typename Predicate::argument_type&gt;::param_type x) const
+</pre></blockquote>
+
+<p>我々は望ましい結果を引き出した - 参照の参照を生み出すことなく、効率性
+を得たのだ。実のところ、実際の宣言は関数オブジェクト特性を使うためもう少
+し複雑である。しかし効果は同様である。</p>
+
+<h3>Limitations</h3>
+
+<p>この関数オブジェクト特性の両方と call traits はこの改良を実現するため
+に使われる関数オブジェクト特性と call_traits の両方が部分特殊化版に頼って
+いるので、この改良は部分特殊化版の機能を持つコンパイラでのみ有効である。
+そうでないコンパイラでは、このライブラリのネゲータは標準内のそれらと非常
+に似た振るまいをする - 関数に適合するために
+<nobr><tt>ptr_fun</tt></nobr> が必要であるし、参照の参照は避けられないだ
+ろう。
+
+<hr>
+<p>Copyright &copy; 2000 Cadenza New Zealand Ltd.  Permission to copy, use, modify, sell and distribute this document is granted provided this copyright notice appears in all copies. This document is provided "as is" without express or implied warranty, and with no claim as to its suitability for any purpose.</p>
+
+<p>Revised 28 June 2000</p>
+
+<hr>
+
+<p>
+Japanese Translation Copyright (C) 2003 shinichiro.h
+&lt;g940455@mail.ecc.u-tokyo.ac.jp&gt;.
+</p>
+
+<p>
+オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の
+複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」
+に提供されており、いかなる明示的、暗黙的保証も行わない。また、
+いかなる目的に対しても、その利用が適していることを関知しない。
+</p>
+
+</body>
+</html>

@@ -1,0 +1,261 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<title>posix_time::ptime Documentation</title>
+<link href="doxygen.css" rel="stylesheet" type="text/css">
+<meta http-equiv="content-style-type" content="text/css">
+<!-- 入口 -->
+<style type="text/css"><!--
+  .original {color: #808080;}
+  .draft {color: green;}
+  .note {color: #ff8080;}
+--></style>
+</head>
+
+<body>
+<a href="../../../index.htm">
+<img align="left" src="../../../c++boost.gif" alt="C++ Boost">
+</a>  
+
+<h1>posix_time::ptime Documentation</h1>
+<hr style="clear: left;">
+<a href="index.html">Overall Index</a> -- 
+<a href="gregorian.html">Gregorian Index</a> --
+<a href="posix_time.html">Posix Time Index</a>
+<h3>ptime Documentation</h3>
+<p>
+<a href="class_ptime.html#header">Header</a> -- 
+<a href="class_ptime.html#construct">Construction</a> -- 
+<a href="class_ptime.html#constructfromstring">Construct from String</a> -- 
+<a href="class_ptime.html#constructfromclock">Construct from Clock</a> -- 
+<a href="class_ptime.html#accessors">Accessors</a> -- 
+<a href="class_ptime.html#conversiontostring">Conversion To String</a> -- 
+<a href="class_ptime.html#operators">Operators</a>
+</p>
+
+
+<h2><a name="intro">Introduction</a></h2>
+<p>
+<div class="original">
+The class boost::posix_time::ptime is the primary interface for time
+point manipulation. In general, the ptime class is immutable once
+constructed although it does allow assignment.
+</div>
+  boost::posix_time::ptime クラスは時間位置(time point)を操作するための主要なインタフェースである。
+  一般に，ptime クラスは代入可能ではあるが，一度構築されると不変である事が多い。
+</p>
+<p>
+<div class="original">
+Class ptime is dependent on <a href="class_date.html">gregorian::date</a>
+for the interface to the date portion of a time point.
+</div>
+  クラス ptime は，時間位置(time point)の日付部分へのインタフェースである <a href="class_date.html">gregorian::date</a> に依存する。
+</p>
+<p>
+<div class="original">
+Other techniques for creating times include <a href="time_iterators.html">time iterators</a>.
+</div>
+  ptime を生成する別の手法が，<a href="time_iterators.html">time iterators</a> にある。
+</p>
+
+
+<h2><a name="header">Header</a></h2>
+<pre>
+#include "boost/date_time/posix_time/posix_time.hpp" //include all types plus i/o
+or
+#include "boost/date_time/posix_time/posix_time_types.hpp" //no i/o just types
+</pre>
+<br>
+
+
+<h2><a name="construct">Construction</a></h2>
+<table border=1 cellspacing=3 cellpadding=3>
+<tr><th>Syntax</th><th>Description</th><th>Example</th></tr>
+<tr><td>ptime(date,time_duration)</td>
+  <!-- 
+        <td>Construct from a date and offset   
+    -->
+  <td>日付とオフセットから構築</td>
+  <td>
+    ptime t1(date(2002,Jan,10), time_duration(1,2,3));<br>
+    ptime t2(date(2002,Jan,10), hours(1)+nanosec(5));
+  </td></tr>
+<tr><td>ptime(ptime)</td>
+  <!-- 
+        <td>Copy constructor</td>
+    -->
+  <td>コピーコンストラクタ</td>
+  <td>ptime t3(t1)</td></tr>
+</table>
+<br>
+
+
+<h2><a name="constructfromstring">Construction From String</a></h2>
+<table border=1 cellspacing=3 cellpadding=3>
+<tr><th>Syntax</th><th>Description</th><th>Example</th></tr>
+<tr><td>ptime time_from_string(const std::string&)</td>
+  <!-- 
+        <td>From delimited string.</td>
+    -->
+  <td>区切られた文字列から構築</td>
+  <td>
+    std::string ts("2002-01-20 23:59:59.000");<br>
+    date d(time_from_string(ts))</td></tr>
+</table>
+<br>
+
+
+<h2><a name="constructfromclock">Construction From Clock</a></h2>
+<table border=1 cellspacing=3 cellpadding=3>
+<tr><th>Syntax</th><th>Description</th><th>Example</th></tr>
+<tr><td>static ptime second_clock::local_time();</td>
+  <!-- 
+        <td>Get the local time, second level resolution, based on the time zone settings of the computer.</td>
+    -->
+  <td>計算機の時間帯設定に基づいた地域時間(秒レベル分解能)で初期化</td>
+  <td>ptime t(second_clock::local_time())</td></tr>
+<tr><td>static ptime second_clock::universal_time()</td>
+  <!-- 
+        <td>Get the UTC time.</td>
+    -->
+  <td>UTC 時間で初期化</td>
+  <td>ptime t(second_clock::universal_day())</td></tr>
+</table>
+<br>
+
+
+<h2><a name="accessors">Accessors</a></h2>
+<table border=1 cellspacing=3 cellpadding=3>
+<tr><th>Syntax</th><th>Description</th><th>Example</th></tr>
+<tr>
+  <td>date <span class="func">date</span>() const</td>
+  <!-- 
+        <td>Get the date part of a time.</td>
+    -->
+  <td>時間の日付部分を取得</td>
+  <td>
+    date d(2002,Jan,10);<br> 
+    ptime t(d, hour(1));<br>
+    t.date() --> 2002-Jan-10;
+  </td></tr>
+<tr>
+  <td>time_duration <span class="func">time_of_day</span>() const</td>
+  <!-- 
+        <td>Get the time offset in the day.</td>
+    -->
+  <td>その日の時間オフセットを取得</td>
+  <td>
+    date d(2002,Jan,10);<br>
+    ptime t(d, hour(1));<br>
+    t.time_of_day() --> 01:00:00;
+  </td></tr>
+</table>
+<br>
+
+
+<h2><a name="conversiontostring">Conversion To String</a></h2>
+<table border=1 cellspacing=3 cellpadding=3>
+<tr><th>Syntax</th><th>Description</th><th>Example</th></tr>
+<tr>
+  <td>std::string <span class="func">to_simple_string</span>(ptime)</td>
+  <!-- 
+        <td>To YYYY-mmm-DD HH:MM:SS.fffffffff string where mmm 3 char month name.  Fractional seconds only included if non-zero.</td>
+    -->
+  <td>YYYY-mmm-DD HH:MM:SS.fffffffff 形式の文字列(mmm は月名の3文字短縮名)に変換。  秒の小数部(.fffffffff)は0でないとき含まれる。</td>
+  <td>2002-Jan-01 10:00:01.123456789</td></tr>
+<tr>
+  <td>std::string <span class="func">to_iso_string</span>(ptime)</td>
+  <!-- 
+        <td>Convert to form YYYYMMDDTHHMMSS,fffffffff where T is the date-time separator</td>
+    -->
+  <td>YYYYMMDDTHHMMSS,fffffffff 形式(T は日付と時間の区切り) に変換</td>
+  <td>20020131T100001,123456789</td></tr>
+<tr>
+  <td>std::string <span class="func">to_iso_extended_string</span>(ptime)</td>
+  <!-- 
+        <td>Convert to form YYYY-MM-DDTHH:MM:SS,fffffffff where T is the date-time separator</td>
+    -->
+  <td>YYYY-MM-DDTHH:MM:SS,fffffffff 形式(T は日付と時間の区切り) に変換</td>
+  <td>2002-01-31T10:00:01,123456789</td></tr>
+</table>
+<br>
+
+
+<h2><a name="operators">Operators</a></h2>
+<table border=1 cellspacing=3 cellpadding=3>
+<tr><th>Syntax</th><th>Description</th><th>Example</th></tr>
+<tr><td>operator==, operator!=,<br> operator&gt;, operator&lt; 
+        <br> operator&gt;=, operator&lt;=</td>
+  <!-- 
+        <td>A full complement of comparison operators</td>
+    -->
+  <td>サポートする比較演算子</td>
+  <td>t1 == t2, etc</td></tr>
+<tr><td>ptime operator+(date_duration) const</td>
+  <!-- 
+        <td>Return a ptime adding a day offset</td>
+    -->
+  <td>オフセット日数(date_duration)を加えた ptime を返す</td>
+  <td>
+    date d(2002,Jan,1);<br>
+    ptime t(d,minutes(5));<br>
+    date_duration dd(1); <br>
+    ptime t2 = t + dd;
+  </td></tr>
+<tr><td>ptime operator-(date_duration) const</td>
+  <!-- 
+        <td>Return a ptime subtracting a day offset</td>
+    -->
+  <td>オフセット日数(date_duration)を差し引いた ptime を返す</td>
+  <td>
+    date d(2002,Jan,1);<br>
+    ptime t(d,minutes(5));<br>
+    date_duration dd(1); <br>
+    ptime t2 = t - dd;
+  </td></tr>
+<tr><td>ptime operator+(time_duration) const</td>
+  <!-- 
+        <td>Return a ptime adding a time duration</td>
+    -->
+  <td>時間長(time_duration)を加えた ptime を返す</td>
+	<td>
+      date d(2002,Jan,1);<br>
+      ptime t(d,minutes(5));<br>
+      ptime t2 = t + hours(1) + minutes(2);
+    </td></tr>
+<tr><td>ptime operator-(time_duration) const</td>
+  <!-- 
+        <td>Return a ptime subtracting a time duration</td>
+    -->
+  <td>時間長(time_duration)を差し引いた ptime を返す</td>
+  <td>
+    date d(2002,Jan,1);<br>
+    ptime t(d,minutes(5));<br>
+    ptime t2 = t - minutes(2);
+  </td></tr>
+<tr><td>time_duration operator-(ptime) const</td>
+  <!-- 
+        <td>Take the difference between two times.</td>
+    -->
+  <td>二つの時間の差を取る</td>
+  <td>
+    date d(2002,Jan,1);<br>
+    ptime t1(d,minutes(5));<br>
+    ptime t2(d,seconds(5));<br>
+    time_duration t3 = t2 - t1;//negative result
+  </td></tr>
+</table>
+<br>
+
+
+<hr>
+<address><small>
+<!-- hhmts start -->
+Last modified: Wed Aug 21 15:20:18 MST 2002
+<!-- hhmts end -->
+ by <a href="mailto:jeff&#64;crystalclearsoftware.com">Jeff Garland</a> &copy; 2000-2002
+<br>
+  Japanese Translation Copyright (C) 2003 <a href="mailto:sshino@cppll.jp">Shoji Shinohara</a>.
+</small></address>
+</body>
+</html>
+

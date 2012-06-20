@@ -1,0 +1,330 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+  <title>Date-Time Concepts - Theoretical Foundations</title>
+  <link href="doxygen.css" rel="stylesheet" type="text/css">
+<meta http-equiv="content-style-type" content="text/css">
+<!-- 入口 -->
+<style type="text/css"><!--
+  .original {color: #808080;}
+  .draft {color: green;}
+  .note {color: #ff8080;}
+--></style>
+</head>
+
+<body>
+<a href="../../../index.htm">
+<img align="left" src="../../../c++boost.gif" alt="C++ Boost">
+</a>  
+
+<h1>Tradeoffs: Stability, Predictability, and Approximations</h1>
+<hr style="clear: left;">
+<p>
+<a href="index.html">Overall Index</a> --
+<a href="gregorian.html">Gregorian Index</a> --
+<a href="posix_time.html">Posix Time Index</a>
+</p>
+
+<H2>Unavoidable Trade-offs</H2>
+<p>
+<div class="original">
+The library does its best to provide everything a user could want, but there are certain inherent constraints that limit what <i>any</i> temporal library can do.  Specifically, a user much choose which two of the following three capabilities are desired in any particular application:
+</div><div class="draft">
+  ライブラリは、ユーザが必要とするであろうすべてを提供するために最善を尽くす。しかし、<i>どの</i>時間ライブラリにも、できることを制限する固有の制約がある。
+  特に、ユーザはある特定のアプリケーションに、次の3つの能力の内どの2つが必要かを選ぶ:
+</div>
+<ul class="original">
+ <li>exact agreement with wall-clock time
+ <li>accurate math, e.g. duration calculations
+ <li>ability to handle timepoints in the future
+</ul>
+<ul class="draft">
+  <li>壁掛け時計の時刻との厳密な一致</li>
+  <li>正確な数学, 例: 時間長の計算</li>
+  <li>未来の時間位置(timepoints)を取り扱う能力</li>
+</ul>
+<div class="original">
+Some libraries may implicitly promise to deliver all three, but if you actually put them to the test, only two can be true at once.  This limitation is not a deficiency in the design or implementation of any particular library; rather it is a consequence of the way different time systems are defined by international standards.  Let's look at each of the three cases:
+</div><div class="draft">
+  あるライブラリは、3つすべてを与えると暗黙のうちに約束するかもしれない。しかし、実際にテストしてみれば、同時に2つだけが本当である。
+  この制限は、どんな特定のライブラリでも設計や実装の欠陥ではない;もっと正確に言えば、それは国際基準によって定義される時法系が非常に異なる結果である。
+  3つのケースについてそれぞれ見てみよう:
+</div>
+</p>
+<p>
+<div class="original">
+If you want exact agreement with wall-clock time, you must use either UTC or local time.  If you compute a duration by subtracting one UTC time from another and you want an answer accurate to the second, the two times must not be too far in the future because leap seconds affect the count but are only determined about 6 months in advance.  With local times a future duration calculation could be off by an entire hour, since legislatures can and do change DST rules at will.
+</div><div class="draft">
+  壁掛け時計の時刻との厳密な一致を望むなら、UTC あるいは地域時間のいずれかを使用しなければならない。
+  UTC 時刻同士の差を取って時間長(duration)を計算し、秒精度が必要な場合、2つの時間はあまり遠い未来にあってはならない。なぜなら、うるう秒が計算に影響するが、そればたったの約半年前に決定されるものだからである。
+  地域時間については、立法機関が思うままにDST規則を変えることができ、また(実際に)変えるので、未来の時間長(duration)計算は、いつでも異常になり得る。
+</div>
+</p>
+<p>
+<div class="original">
+If you want to handle wall-clock times in the future, you won't be able (in the general case) to calculate exact durations, for the same reasons described above.
+</div><div class="draft">
+  壁掛け時計の未来の時間を扱いたければ、(一般的なケースで)上述と同じ理由のために、正確な時間長(durations)を計算することができないであろう。
+</div>
+</p>
+<p>
+<div class="original">
+If you want accurate calculations with future times, you will have to use TAI or an equivalent, but the mapping from TAI to UTC or local time depends on leap seconds, so you will not have exact agreement with wall-clock time.  
+</div><div class="draft">
+  もし未来の時間について正確な計算を必要とするなら、TAI あるいは同等の物を使わなければならないだろう。しかし、TAI から UTC あるいは地域時間への写像はうるう秒に依存すため、壁掛け時計の時間と正確には一致しないであろう。
+</div>
+</p>
+
+<H2>Stability, Predictability, and Approximations</H2>
+<p>
+<div class="original">
+Here is some underlying theory that helps to explain what's going on.
+Remember that a temporal type, like any abstract data type (ADT),
+is a set of values together with operations on those values.
+</div><div class="draft">
+  ここに、何が起こっているのかを説明するのに役立つある基礎理論がある。
+  時間型が任意の抽象的なデータ型(ADT;Abstract Data Type)のように、それらの値に対する操作と一緒に1セットの値であることを忘れないで欲しい。
+</div>
+</p>
+
+<H3>Stability</H3>
+<p>
+<div class="original">
+The representation of a type is <i>stable</i> if the bit pattern associated with a given value does not change over time.
+A type with an unstable representation is unlikely to be of much
+use to anyone, so we will insist that any temporal library use
+only stable representations.
+</div><div class="draft">
+  与えられた値に関連付いたビットパターンが時間とともに変化しない場合、型の表現は<i>安定</i>している。
+  不安定な表現を備えた型は、おそらく誰の役にも立たない。したがって、我々はどんな時間ライブラリにも安定した表現だけを使用するよう要求するだろう。
+</div>
+</p>
+<p>
+<div class="original">
+An operation on a type is stable if the result of applying the operation to a particular operand(s) does not change over time.
+</div><div class="draft">
+  特定のオペランドに演算を適用する結果が時間とともに変化しない場合、型に対する演算は安定している。
+</div>
+</p>
+ 
+<H3>Predictability</H3>
+<p>
+<div class="original">
+Sets are most often classified into two categories: well-defined
+and ill-defined.  Since a type is a set, we can extend these definitions
+to cover types.  For any type T, there must be a predicate
+<i>is_member( x )</i>
+which determines whether a value x is a member of type T.
+This predicate must return <i>true</i>, <i>false</i>, or <i>dont_know</i>.
+</div><div class="draft">
+  集合は、よく明確(well-defined)であるか不明確(ill-defined)であるか、の 2つのカテゴリーに分類される。
+  型が集合であるので、型をカバーするためにこれらの定義を拡張することができる。<br>
+  任意の型 T について、値 x が型 T のメンバーかどうか決める述語 <i>is_member( x )</i> があるとする。
+  この述語は、<i>true</i>, <i>false</i>, あるいは <i>dont_know</i> を返すものとする。
+</div>
+</p>
+<p>
+<div class="original">
+If for all x, is_member( x ) returns either true or false, we
+say the set T is <i>well-defined</i>.
+</div><div class="draft">
+  すべての x について、is_member( x ) が true か false のどちらかを返す場合、集合 T は<i>明確(well-defined)</i>であるという。
+</div>
+</p>
+<p>
+<div class="original">
+If for any x, is_member( x ) returns dont_know, we say the
+set T is <i>ill-defined</i>.
+</div><div class="draft">
+  任意の x について、is_member( x ) が dont_know を返す場合、集合 T は<i>不明確(ill-defined)</i>であるという。
+</div>
+</p>
+<p>
+<div class="original">
+Those are the rules normally used in math.  However,
+because of the special characteristics of temporal
+types, it is useful to refine this view and create a third category
+as follows:
+</div><div class="draft">
+  それらは数学で通常使われる規則である。
+  しかしながら、時間型に特有な特性のために、この考察を洗練し、以下のように第3のカテゴリーを作ることは有用である:
+</div>
+</p>
+<p>
+<div class="original">
+For any temporal type T, there must be a predicate <i>is_member( x, t )</i>
+which determines whether a value x is a member of T.
+The parameter t represents the time when the predicate is evaluated.
+For each x<sub>i</sub>, there must be a time t<sub>i</sub> and a value v
+such that:
+</div><div class="draft">
+  任意の時間型 T について、値 x が T のメンバーかどうか決める述語 <i>is_member( x, t )</i> があるとする。
+  述語が評価されるとき、パラメータ t は時間に相当する。
+  x<sub>i</sub> それぞれに対して、以下のような時間 t<sub>i</sub> と値 v があるとする:
+</div>
+<ul class="original">
+<li>v = true or v = false, and
+<li>for all t &lt; t<sub>i</sub>, is_member( x<sub>i</sub>, t ) returns dont_know, and
+<li>for all t &gt;= t<sub>i</sub>, is_member( x<sub>i</sub>, t ) returns v.
+</ul>
+<ul class="draft">
+<li>v = true あるいは v = false
+<li>t &lt; t<sub>i</sub> である全ての t について、is_member( x<sub>i</sub>, t ) は dont_know を返す
+<li>t &gt;= t<sub>i</sub> である全ての t について、is_member( x<sub>i</sub>, t ) は v を返す
+</ul>
+<div class="original">
+t<sub>i</sub> is thus the time when we "find out" whether x<sub>i</sub> is a
+member of T.
+Now we can define three categories of temporal types:
+</div><div class="draft">
+  x<sub>i</sub> が T のメンバーであるかどうか「見つけ出す」とき、t<sub>i</sub> はこのように時間である。今、我々は時間型の 3つのカテゴリーを定義することができる:
+</div>
+</p>
+<p>
+<div class="original">
+If for all x<sub>i</sub>, t<sub>i</sub> = negative infinity,
+we say the type T is <i>predictable</i>.
+</div><div class="draft">
+  全ての x<sub>i</sub> について、t<sub>i</sub> = 負の無限大 のとき、型 T は<i>予測可能である</i>という。
+</div>
+</p>
+<p>
+<div class="original">
+If for some x<sub>i</sub>, t<sub>i</sub> = positive infinity,
+we say the type T is <i>ill-formed</i>.
+</div><div class="draft">
+  ある x<sub>i</sub> について、t<sub>i</sub> = 正の無限大 のとき、型 T は<i>不明確(ill-formed)である</i>という。
+</div>
+</p>
+<p>
+<div class="original">
+Otherwise we say the type T is <i>unpredictable</i> (this
+implies that for some x<sub>i</sub>, t<sub>i</sub> is finite).
+</div><div class="draft">
+  それ以外のとき、型 T は<i>予測不能である</i>という。
+  (これは、ある x<sub>i</sub> のために t<sub>i</sub> が有限であることを意味する)
+</div>
+</p>
+<p>
+<div class="original">
+Ill-formed sets are not of much practical use, so we will 
+not discuss them further.  In plain english the above
+simply says that all the values of a predictable type are
+known ahead of time, but some values of an unpredictable
+type are not known until some particular time.
+</div><div class="draft">
+  不明確(ill-formed)な集合には実用性がほとんど無いので、これ以上は議論しない。
+  上記について簡単に言えば、予測可能な型は全ての値が事前に分かっているが、予測不能な型ではいくつかの値がある特定の時間になるまで分からない。
+</div>
+</p>
+
+<H3>Stability of Operations</H3>
+<p>
+<div class="original">
+Predictable types have a couple of important properties:
+</div><div class="draft">
+  予測可能な型には2つの重要な特性がある:
+</div>
+<ul class="original">
+<li> there is an order-preserving mapping from their elements onto a set of consecutive integers, and
+<li> duration operations on their values are stable
+</ul>
+<ul class="draft">
+  <li>それらの要素から連続する整数への、順序を維持する写像が有る</li>
+  <li>それらの値に対する時間長(duration)の演算は安定している</li>
+</ul>
+<div class="original">
+The practical effect of this is that duration calculations
+can be implemented with simple integer subtraction.
+Examples of predictable types are TAI timepoints and
+Gregorian dates.
+</div><div class="draft">
+  この実用上の効果は時間長(duration)の計算を単純な整数の減算で実装できるということである。
+  予測可能な型の例は TAI timepoints およびグレゴリオ暦の日付である。
+</div>
+</p>
+<p>
+<div class="original">
+Unpredictable types have exactly the opposite properties:
+</div><div class="draft">
+  予測できない型は正反対の特性を持っている:
+</div>
+<ul class="original">
+<li> there is no order-preserving mapping from their elements onto a set of consecutive integers, and
+<li> duration operations on their values are not stable.
+</ul>
+<ul class="draft">
+  <li>それらの要素から連続する整数への、順序を維持する写像が無い</li>
+  <li>それらの値に対する時間長(duration)の演算は安定していない</li>
+</ul>
+<div class="original">
+Examples of unpredictable types are UTC timepoints and
+Local Time timepoints.
+</div><div class="draft">
+  予測できない型の例は UTC timepoints および地域時間 timepoints である。
+</div>
+</p>
+<p>
+<div class="original">
+We can refine this a little by saying that a range within
+an unpredicatable type can be predictable, and operations performed
+entirely on values within that range will be stable.
+For example, the range of UTC timepoints from 1970-01-01
+through the present is predictable, so calculations of durations within that range will be stable.
+</div><div class="draft">
+  予測不能な型の中の範囲が予測可能であり得ると示すことによって、これを少し改善することができる。また、完全にその範囲内で実行された演算は安定しているであろう。
+  例えば、UTC timepoints において 1970-01-01 から現在までの範囲は予測可能である。したがって、その範囲内での時間長(duration)の計算は安定しているであろう。
+</div>
+</p>
+
+<H3>Approximations</H3>
+<p>
+<div class="original">
+These limitations are problematical, because important temporal
+types like UTC and Local Time are in fact unpredictable, and
+therefore operations on them are sometimes unstable.  Yet as a practical matter we often want to perform this kind of operation, such as computing the duration between two timepoints in the future that are specified in Local Time.
+</div><div class="draft">
+  UTC と 地域時間のような重要な時間型が実際には予測不能なので、これらの制限は問題である。また、したがって、それらに対する演算は時々不安定である。しかし、実用上の問題として、地域時間で指定される将来の 2つの時間位置(timepoints)の間の時間長(duration)を計算するようなこの種の演算を実行したいことが多々ある。
+</div>
+</p>
+<p>
+<div class="original">
+The best the library can do is to provide an approximation,
+which is generally possible and for most purposes will be
+good enough.  Of course the documentation must specify when
+an answer will be approximate (and thus unstable) and how
+big the error may be.  In many respects calculating with unpredictable sets is analogous to the use of floating point numbers, for which results are expected to only be approximately correct.  Calculating with predictable sets would then be
+analagous to the user of integers, where results are expected
+to be exact.
+  <span class="note" id="typo">(analagous -&gt; analogous)</span>
+</div><div class="draft">
+  ライブラリにできる最善策は、近似値(一般に可能で、大抵の用途で十分である)を提供することである。
+  もちろん、文書は、答えが近似値(したがって不安定である)であること、そしてエラーがどの位の大きさになり得るのか明示しなくてはならない。
+  多くの点で、予測不能な集合での計算は浮動小数点数の使用(結果がほぼ正確だろうと期待されるだけ)に似ている。
+  予測可能な集合での計算は整数の使用と似ており、そして結果が正確であると期待される。
+</div>
+</p>
+<p>
+<div class="original">
+For situations where exact answers are required or instability cannot be tolerated, the user must
+be able to specify this, and then the library should throw an
+exception if the user requests a computation for which an
+exact, stable answer is not possible.
+</div><div class="draft">
+  正確な答えが要求されたり、不安定さを許容できない状況のために、ユーザがそれを明示できなければならない。
+  そして、ユーザが正確で安定した答えが得られないような計算を要求すれば、ライブラリは例外を投げるべきである。
+</div>
+</p>
+
+<hr>
+<address><small>
+<!-- hhmts start -->
+Last modified: Wed Aug 21 14:46:55 MST 2002
+<!-- hhmts end -->
+ by <a href="mailto:jeff&#64;crystalclearsoftware.com">Jeff Garland</a> &copy; 2000-2002
+<br>
+  Japanese Translation Copyright (C) 2003 <a href="mailto:sshino@cppll.jp">Shoji Shinohara</a>.
+</small></address>
+</body>
+</html>

@@ -1,0 +1,333 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<title>Boost Date-Time Library Documentation</title>
+<link href="doxygen.css" rel="stylesheet" type="text/css">
+<style type="text/css"><!--
+  .original {color: #808080;}
+  .draft {color: green;}
+  .note {color: #ff8080;}
+  dl { text-indent: 4%; }
+  dt { font-weight: bold; }
+  dd { text-indent: 2%; }
+--></style>
+<!-- 入口 -->
+</head>
+
+<body>
+<a href="../../../index.htm">
+<img align="left" src="../../../c++boost.gif" alt="C++ Boost">
+</a>  
+
+<h1>Boost Date-Time Library Documentation</h1>
+<br>
+<h3 align="center">Version 1.00</h3>
+<hr style="clear: left;">
+
+<h2><a name="contents">Contents</a></h2>
+<br>
+
+<h3>Overview</h3>
+<p>
+<a href="#intro">Introduction</a>  -- 
+<a href="#motivation">Motivation</a> -- 
+<a href="#usage">Usage Examples</a>  -- 
+<a href="#domain">Domain Concepts</a> -- 
+<a href="#test">Tests</a> --
+<a href="#design">Design and Extensions</a> -- 
+<a href="#acknowledge">Acknowledgements</a> --
+<a href="#more">More Info</a>
+</p>
+<p>
+<a href="BuildInfo.html">Build-Compiler Information</a> 
+</p>
+<h3>Date Programming</h3>
+<p>
+<a href="gregorian.html">Gregorian Date System</a><br>
+<ul>
+    <li><a href="class_date.html">Class date</a>
+    <li><a href="class_date_duration.html">Class date_duration</a> 
+    <li><a href="class_date_period.html">Class date_period</a>
+    <li><a href="date_iterators.html">Date Iterators</a> 
+    <li><a href="date_algorithms.html">Date Generators / Algorithms</a> 
+    <li><a href="class_gregorian_calendar.html">Class gregorian_calendar</a>
+    <li><a href="class_date.html#constructfromclock">Class day_clock</a>
+</ul>
+</p>
+<h3>Time Programming</h3>
+<p>
+<a href="posix_time.html">Posix Time System</a><br>
+<ul>
+    <li><a href="class_ptime.html">Class ptime</a>
+    <li><a href="class_time_duration.html">Class time_duration</a>
+    <li><a href="class_time_period.html">Class time_period</a>
+    <li><a href="time_iterators.html">Time Iterators</a> 
+    <li><a href="local_time_adjust.html">UTC / Local Time Adjustments</a>
+</ul>
+
+
+<h2><a name="intro">Introduction</a></h2>
+<p>
+<div class="original">
+A set of date-time libraries based on generic programming concepts.
+</div>
+  ジェネリックプログラミングの概念に基づいた日付・時間ライブラリ
+</p>
+
+<h2><a name="motivation">Motivation</a></h2>
+<p>
+<div class="original">
+The motivation for this library comes from working with and helping build several date-time libraries on several projects. Date-time libraries provide fundamental infrastructure for most development projects. However, most of them have limitations in their ability to calculate, format, convert, or perform some other functionality. For example, most libraries  do not correctly handle leap seconds, provide concepts such as infinity, or provide the ability to use high resolution or network time sources.  These libraries also tend to be rigid in their representation of dates and times. Thus customized policies for a project or subproject are not possible.
+</div><div class="draft">
+  このライブラリの開発動機は、多くのプロジェクトの多くの日付時間ライブラリで動作すること、また、それらの構築を手助けすることである。
+  日付時間ライブラリは多くの開発プロジェクトに対して、基礎的な構造を提供する。
+  しかしそれらの多くは、計算、書式化、変換、その他のいくつかの機能に限界がある。
+  例えば多くのライブラリは、うるう秒を正しく扱うこと、無限のような概念を提供すること、高分解能の時間資源やネットワーク上の時間資源を利用することが出来ない。
+  そのうえ、これらのライブラリは、どれも日付や時間の表現形式が厳密である傾向にあるため、プロジェクトやサブプロジェクトのためにカスタマイズすることが出来ない。
+</div>
+</p>
+
+<p>
+<div class="original">
+Programming with dates and times should be almost as simple and natural as programming with strings and integers.  Applications with lots of temporal logic can be radically  simplified by having a robust set of operators and calculation capabilities. Classes should provide the ability to compare dates and times, add lengths or time durations, retrieve dates and times from  clocks, and work naturally with date and time intervals.
+</div><div class="draft">
+  日付や時間に関するプログラミングは、文字列や整数に関するプログラミングと同じくらいシンプルで自然であるべきである。
+  多くの時間論理を備えたアプリケーションは、演算子と計算能力の頑健な集合により、根本的に単純化することができる。
+  クラスは日付時間の比較、時間の長さ(length)や期間(duration)の加算、時計からの日付時間の取得、日付時間間隔(interval)に関する自然な動作を提供すべきである。
+</div>
+</p>
+
+<h2><a name="usage">Usage Examples</a></h2>
+
+<p>
+<div class="original">
+The following shows examples of the sorts of code that can be written using the gregorian date system.  See  <a href="gregorian.html">Date Programming</a> for more details.
+</div><div class="draft">
+  次に，グレゴリオ暦システムの使用例を示す。
+  詳細は<a href="gregorian.html">Date Programming</a>で解説する。
+</div>
+</p>
+<div class="fragment"><pre>
+     <font class="keyword">using</font> <font class="keyword">namespace</font> boost::gregorian; 
+     date weekstart(2002,Feb,1);
+     date weekend  (2002,Feb,7);
+     date_duration fiveDays(5); 
+     date d3 = d1 + fiveDays;
+     date today = day_clock::local_day();
+     <font class="keywordflow">if</font> (d3 &gt;= today) {} <font class="comment">//date comparison operators</font>
+     
+     date_period thisWeek(d1,d2);
+     <font class="keywordflow">if</font> (thisWeek.contains(today)) {}<font class="comment">//do something</font>
+    
+     <font class="comment">//iterate and print the week</font>
+     day_iterator itr(weekstart);
+     <font class="keywordflow">for</font> (; itr &lt;= weekend; ++itr) {
+       std::cout &lt;&lt; to_iso_extended_string(*itr) &lt;&lt; std::endl;
+     }     
+</pre></div> 
+
+<p>
+<div class="original">
+And some time examples using the posix_time system. See <a href="posix_time.html">Time Programming</a> for more details.
+</div><div class="draft">
+  そして posix_time システムの使用例である。
+  詳細は<a href="posix_time.html">Time Programming</a>で解説する。
+</div>
+</p>
+<div class="fragment"><pre>
+     <font class="keyword">using</font> <font class="keyword">namespace </font>boost::posix_time; 
+     date d(2002,Feb,1); <font class="comment">//an arbitrary date</font>
+     ptime t1(d, hours(5)+nanosec(100));<font class="comment">//date + time of day offset</font>
+     ptime t2 = t1 - minutes(4)+seconds(2);
+     ptime now = second_clock::local_time(); <font class="comment">//use the clock</font>
+     <font class="comment">//Get the date part out of the time</font>
+     date today = now.date();
+     date tommorrow = today + date_duration(1);
+     ptime tommorrow_start(tommorrow); <font class="comment">//midnight </font>
+
+     <font class="comment">//starting at current time iterator adds by one hour</font>
+     time_iterator titr(now,hours(1)); 
+     <font class="keywordflow">for</font> (; titr &lt; tommorrow_start; ++titr) {
+       std::cout &lt;&lt; to_simple_string(*titr) &lt;&lt; std::endl;
+     }
+</pre></div>
+</p>
+
+<h2><a name="domain">Domain Concepts</a></h2>
+<p>
+<div class="original">
+The date time domain is rich in terminology and problems.  The following is a brief introduction to the concepts you will find reflected in the library.
+</div><div  class="draft">
+  日付・時間の分野には専門用語と問題が多い。以下はライブラリ中に見られる概念の簡単な紹介である。
+</div>
+</p>
+
+<p>
+<div class="original">
+The library supports 3 basic temporal types:
+</div>
+  ライブラリは3つの基本的な時間型をサポートする。
+</p>
+<dl>
+  <dt>Time Point</dt>
+  <dd class="original">Specifier for a location in the time continuum. </dd>
+  <dd class="draft">時間位置。時刻。連続する時間内での位置を示す</dd>
+  <dt>Time Duration</dt>
+  <dd class="original">A length of time unattached to any point on the time continuum. </dd>
+  <dd class="draft">時間長。時間連続体においてどの位置にも結びついていない時間の長さ</dd>
+  <dt>Time Interval</dt>
+  <dd class="original">A duration of time attached to a specific point in the time continuum.  Also known as a time period. </dd>
+  <dd class="draft">時間間隔。時間連続体の特定の位置に結びついた時間長。期間とも</dd>
+</dl>
+
+<p>
+<div class="original">
+Each of these temporal types has a <font class="bold">Resolution</font> which is defined by the smallest representable duration.  A <font class="bold">Time system</font> provides all these categories of temporal types as well as the rules for labeling and calculating with time points.  <font class="bold">Calendar Systems</font> are simply time systems with a maximum resolution of one day.  The <font class="bold">Gregorian</font> system is the most widely used calendar system today (the ISO system is basically a derivative of this).  However, there are many other calendar systems as well.  <font class="bold">UTC (Coordinated Universal Time)</font> is a widely used civil time system.  UTC is adjusted for earth rotation at longitude 0 by the use of leap seconds (This is not predictable, only as necessary).  Most <font class="bold">local time</font> systems are based on UTC but are also adjusted for earth rotation so that daylight hours are similar everywhere.  In addition, some local times include <font class="bold">daylight savings time (DST)</font> adjustments to provide additional daylight during the summer.
+</div><div class="draft">
+  これらの時間型にはそれぞれ表現可能な最小の時間間隔(duration)で定義される<strong class="bold">分解能</strong>がある。
+  <strong class="bold">時法系(Time system)</strong>は、時刻にラベルを付けて計算するための規則はもちろんのこと、これらすべての時間型も提供する。
+  <strong class="bold">暦法系(Calendar system)</strong>は最大の分解能(1日)を持っている簡素な時法系である。 <strong class="bold">グレゴリオ暦</strong>は今日最も広く使われている暦法系である(ISOシステムは基本的にこれの派生物である)。
+  しかし、他にも多くの暦法系がある。
+  <strong class="bold">UTC(Coordinated Universal Time;協定標準時)</strong>は広く使われている民間の時法系である。UTC がうるう秒（これは、必要に応じて適用されるもので、予測可能ではない）の使用によって経度0において地球自転に対して調整される。
+  たいていの<strong class="bold">地域時間</strong>システムが UTC に基づいているが、地球自転に対して同じように調整されるために、昼時間はどこでも同じである。 さらに、夏の昼時間を長くするためのサマータイム(DST)調整を含む地域時間もある。
+</div>
+</p>
+
+<p>
+<div class="original">
+A <font class="bold">Clock Device</font> is software component (tied to some hardware) that provides the current date or time with respect to a time system.
+</div>
+  <strong class="bold">クロックデバイス</strong> は時法系に関して現在の日付あるいは時刻を供給する(あるハードウェアに結び付けられた)ソフトウェアコンポーネントである。
+</p>
+
+<p>
+<div class="original">
+The library provides support for calculating with dates and times.  However, time calculations are not quite the same as calculating with integers.  If you are serious about the accuracy of your time calculations need to read about <a href="Tradeoffs.html">Stability, Predictability, and Approximations</a>. 
+</div>
+  ライブラリは日付と時間の計算をサポートする。しかしながら、時間の計算は整数の計算と全く同じというわけにはいかない。
+  もし、時間計算の正確度(accuracy)が重要ならば、<a href="Tradeoffs.html">Stability, Predictability, and Approximations(安定性、予測性と近似)</a>を読む必要がある。
+</p>
+
+<p>
+<div class="original">
+Additional reference materials can be found in the following:
+</div>
+  追加資料を以下に示す
+</p>
+
+<ul>
+  <li><a href="BasicTerms.html">Basic Terminology</a></li>
+  <li><a href="Calculations.html">Calculations</a></li>
+  <li><a href="Tradeoffs.html">Stability, Predictability, and Approximations</a></li>
+  <li><a href="References.html">References</a></li>
+</ul>
+
+<h2><a name="test">Tests</a></h2>
+<p>
+<div class="original">
+The library provides a large number of tests in the
+</div>
+  ライブラリは、以下のディレクトリで多数のテストを提供している。
+<pre>
+   libs/date_time/test 
+   libs/date_time/test/gregorian
+   libs/date_time/test/posix_time
+</pre>
+<div class="original">
+directories.  Building and executing these tests  assures that the installation is correct and that the library is functioning correctly. In addition, these tests facilitate the porting to new compilers. Finally, the tests provide examples of many functions not explicitly described in the usage examples.
+</div>
+  これらのテストをビルドして実行することで、ライブラリが正しくインストールされ、確実に機能していることを確認できる。
+  加えて、これらのテストは新しいコンパイラへの移植を容易にする。
+  最後に、テストは使用例で明示的に記述されない多くの機能の例を提供する。
+</p>
+
+<h2><a name="design">Design and Extensions</a></h2>
+<p>
+<div class="original">
+A large part of the genesis of this library has been the observation that
+few date-time libraries are built in a fashion that allows customization
+and extension.  A typical example, the calendar logic is built directly
+into the date class.  Or the clock retrieval functions are built directly
+into the time class.  These design decisions usually make it impossible to
+extend or change the library behavior.  At a more fundamental level, 
+there are usually assumptions about the resolution of time representation 
+or the gregorian calendar.  
+</div><div class="draft">
+  このライブラリの起源の大部分は（今まで）ほとんどの日付時間ライブラリがカスタマイズと拡張を許す方法で構築されないという観察であった。
+  典型的な例では、カレンダーロジックは直接日付クラスに構築される。
+  あるいは時計検索機能は直接時間クラスに作り上げられる。  これらのデザイン決定は通常、拡張したりライブラリの振る舞いを変更することを不可能にする。
+  もっと基本的なレベルにおいては、時間表現あるいはグレゴリオ暦の分解能について通常仮定がある。
+</div>
+</p>
+
+<p>
+<div class="original">
+Often times, the result is that a project must settle for a less
+than complete library because of a requirement for high resolution
+time representation or other assumptions that do not match the
+implementation of the library.  This is extremely unfortunate because
+development of a library of this sort is far from a trivial task.
+</div><div class="draft">
+  高分解能の時間表現やそれ以外の仮定からの要求を、時間ライブラリの実装が満たすことが出来ないために、結果的に不完全なライブラリを使わざるをえない、というのは、よくあることである。
+  この種のライブラリの開発は、まったく些細なことではないので、こういう結果は非常に残念なことである。
+</div>
+</p>
+
+<p>
+<div class="original">
+While the design is far from perfect the current design is far
+more flexible than any date-time library the author is aware of.  It
+is expected that the various aspects of extensibility will be better
+documented in future versions.  Information about the design goals 
+of the library is <a href="DesignGoals.html">summarized here.</a>
+</div><div class="draft">
+  （このライブラリの）設計は完璧というには程遠いが、それでも現在の設計は、著者の知るどんな時間ライブラリよりもはるかに柔軟である。
+  将来のバージョンでは、拡張性のさまざまな面について、さらに文書化されることが期待される。
+  ライブラリの設計目標についての情報は<a href="DesignGoals.html">ここ</a>に要約されている。
+</div>
+</p>
+
+
+<h2><a name="acknowledge">Acknowledgements</a></h2>
+
+<p>
+<div class="original">
+Many people have contributed to the development of this library.
+In particular Hugo Duncan and Joel de Guzman for help with porting to 
+various compilers.  For initial development of concepts and
+design Corwin Joy and Michael Kenniston deserve special thanks.
+Also extra thanks to Michael for writing up the theory and tradeoffs 
+part of the documentation. Dave Zumbro for initial inspiration 
+and sage thoughts.  Many thanks
+to boost reviewers and users including: 
+William Seymour, Kjell Elster, Beman Dawes, Gary Powell,
+Andrew Maclean, William Kempf, Peter Dimov, Chris Little,
+David Moore, Darin Adler, Gennadiy Rozental, Joachim Achtzehnter,
+Paul Bristow, Jan Langer, Mark Rodgers, Glen Knowles, Matthew Denman,
+and George Heintzelman.
+</div><div class="draft">
+</div>
+</p>
+
+<h2><a name="more">More Info</a></h2>
+<p>
+<div class="original">
+The design of the library is currently being evolved using Wiki and email  discussions. You can find more information at:
+</div>
+  現在、ライブラリの設計はWikiと電子メールによる議論によって発展している。
+  詳しい情報はこちらへ:
+<ul>
+<li><a href="http://www.crystalclearsoftware.com/cgi-bin/boost_wiki/wiki.pl?GDTL">Boost Wiki GDTL Start Page</a>
+<li><a href="http://www.crystalclearsoftware.com/libraries/gdtl/gdtl_ref_guide/index.html">Full Doxygen Reference Manual</a></ul>
+</p>
+
+<hr>
+<address><small>
+<!-- hhmts start -->
+Last modified: Thu Sep  5 07:22:00 MST 2002
+<!-- hhmts end -->
+ by <a href="mailto:jeff&#64;crystalclearsoftware.com">Jeff Garland</a> &copy; 2000-2002
+<br>
+  Japanese Translation Copyright (C) 2003 <a href="mailto:sshino@cppll.jp">Shoji Shinohara</a>.
+</small></address>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<title>Posix Time System Documentation</title>
+<link href="doxygen.css" rel="stylesheet" type="text/css">
+<meta http-equiv="content-style-type" content="text/css">
+<!-- 入口 -->
+<style type="text/css"><!--
+  .original {color: #808080;}
+  .draft {color: green;}
+  .note {color: #ff8080;}
+--></style>
+</head>
+
+<body>
+<a href="../../../index.htm">
+<img align="left" src="../../../c++boost.gif" alt="C++ Boost">
+</a>  
+
+<h1>Posix Time System Documentation</h1>
+<hr style="clear: left;">
+<p>
+<a href="index.html">Overall Index</a> -- 
+<a href="gregorian.html">Gregorian Index</a>
+</p>
+<h3>Temporal Types</h3>
+<p>
+<a href="class_ptime.html">Class ptime</a> -- 
+<a href="class_time_duration.html">Class time_duration</a> -- 
+<a href="class_time_period.html">Class time_period</a>
+</p>
+<h3>Other Topics</h3>
+<p>
+<a href="time_iterators.html">Time Iterators</a>  -- 
+<a href="local_time_adjust.html">UTC / Local Time Adjustments</a>
+</p>
+
+<h2><a name="intro">Introduction</a></h2>
+<p>
+<div class="original">
+Defines a non-adjusted time system with nano-second resolution and 
+stable calculation properties.  This time system uses the Gregorian
+calendar to implement the date portion of the time representation.
+</div>
+  ナノ秒分解能および安定した計算特性を備えた、調整されていない時間システムを定義する。
+  この時間システムは、時間表現における日付部分の実装にグレゴリオ暦を使用する。
+</p>
+
+<h2><a name="usage">Usage Examples</a></h2>
+<table border=1 cellspacing=3 cellpadding=3>
+<tr><th>Example</th><th>Description</th></tr>
+<!-- 
+<tr><td><a href="exp-time_math.html">Time Math</a></td><td>A few simple calculations using ptime and time_durations. </td></tr>
+  -->
+<tr>
+  <td><a href="exp-time_math.html">Time Math</a></td>
+  <td>ptime と time_durations を使ったいくつかの単純な計算</td></tr>
+<!-- 
+<tr><td><a href="exp-print_hours.html">Print Hours</a></td><td>Retrieve time from clock, use a time_iterator. </td></tr>
+  -->
+<tr>
+  <td><a href="exp-print_hours.html">Print Hours</a></td>
+  <td>time_iterator を使用してクロックから時刻を取得する</td></tr>
+<!-- 
+<tr><td><a href="exp-local_utc_conversion.html">Local to UTC Conversion</a></td><td>Demonstrates a couple different ways to convert a local to UTC time including daylight savings rules. </td></tr>
+  -->
+<tr>
+  <td><a href="exp-local_utc_conversion.html">Local to UTC Conversion</a></td>
+  <td>地域時間からUTC時間への夏時間規則を含んだ変換について、2つの異なる方法を実証する</td></tr>
+<!-- 
+<tr><td><a href="exp-time_periods.html">Time periods</a></td><td>Some simple examples of intersection and display of time periods. </td></table>
+  -->
+<tr>
+  <td><a href="exp-time_periods.html">Time periods</a></td>
+  <td>期間(time periods)の交差および表示の簡単な例</td></tr>
+</table>
+<br>
+
+
+<hr>
+<address><small>
+<!-- hhmts start -->
+Last modified: Thu Sep  5 06:19:36 MST 2002
+<!-- hhmts end -->
+ by Jeff Garland &copy 2000-2002
+<br>
+  Japanese Translation Copyright (C) 2003 <a href="mailto:sshino@cppll.jp">Shoji Shinohara</a>.
+</small></address>
+</body>
+</html>

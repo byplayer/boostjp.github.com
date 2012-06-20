@@ -1,0 +1,120 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<title>gregorian::gregorian_calendar Documentation</title>
+<link href="doxygen.css" rel="stylesheet" type="text/css">
+<meta http-equiv="content-style-type" content="text/css">
+<!-- 入口 -->
+<style type="text/css"><!--
+  .original {color: #808080;}
+  .draft {color: green;}
+  .note {color: #ff8080;}
+--></style>
+</head>
+
+<body>
+<a href="../../../index.htm">
+<img align="left" src="../../../c++boost.gif" alt="C++ Boost">
+</a>  
+
+<h1>gregorian::gregorian_calendar</h1>
+<hr style="clear: left;">
+<p>
+<a href="index.html">Overall Index</a> -- 
+<a href="gregorian.html">Gregorian Index</a> --
+<a href="posix_time.html">Posix Time Index</a>
+</p>
+<h3>Date Documentation</h3>
+<p>
+<a href="class_gregorian_calendar.html#header">Header</a> -- 
+<a href="class_gregorian_calendar.html#functions">Functions</a>
+</p>
+
+<h2><a name="intro">Introduction</a></h2>
+
+<p>
+<div class="original">
+The class boost::gregorian::gregorian_calendar implements the functions 
+necessary to create the gregorian date system.  It converts to
+the year-month-day form of a date to a day number representation
+and back.  
+</div><div class="draft">
+  boost::gregorian::gregorian_calendar クラスは、グレゴリオ暦の日付システムを生成するのに必要な機能を実装する。
+  これは、年-月-日 形式の日付と日付番号表現との相互変換を行う。
+</div>
+</p>
+<p>
+<div class="original">
+For most purposes this class is simply accessed by
+<a href="class_date.html">gregorian::date</a> and is not used directly
+by the user.  However, there are useful functions that 
+might be of use such as the <font class="func">end_of_month_day</font>
+function.  
+</div><div class="draft">
+  このクラスは、主に <a href="class_date.html">gregorian::date</a> によってアクセスされることを意図しており、ユーザによって直接使用される事はない。
+  しかしながら、<strong class="func">end_of_month_day</strong>機能に役に立つ、有用な機能がある。
+</div>
+</p>
+<p>
+<div class="original">
+The <a href="exp-print_month.html">print month</a> example demonstrates this.
+</div>
+サンプル <a href="exp-print_month.html">print month</a> で、この例を説明している。
+</p>
+
+<h2><a name="header">Header</a></h2>
+<pre>
+#include "boost/date_time/gregorian/gregorian.hpp" //include all types plus i/o
+or
+#include "boost/date_time/gregorian/gregorian_types.hpp" //no i/o just types
+</pre>
+
+
+<h2><a name="functions">Functions</a></h2>
+<table border=1 cellspacing=3 cellpadding=3>
+<tr><th>Syntax</th><th>Description</th><th>Example</th></tr>
+<tr><td>static short <font class="func">day_of_week</font>(ymd_type)</td>
+  <!-- 
+        <td>Return the day of the week (0==Sunday, 1==Monday, etc)</td>
+	<td>See also gregorian::date day_of_week</td></tr>
+    -->
+  <td>曜日を返す (0==Sunday, 1==Monday, etc)</td>
+  <td>参照: gregorian::date day_of_week</td></tr>
+<tr><td>static date_int_type <span class="func">day_number</span>(ymd_type)</td>
+  <!-- 
+        <td> Convert a ymd_type into a day number. The day number is an absolute number of days since the epoch start.</td>
+    -->
+  <td>ymd_type を日付番号に変換する。日付番号は、エポック(Epoch)からの通算日数の絶対値である</td>
+  <td></td></tr>
+<tr><td>static short <span class="func">end_of_month_day</span>(year_type, month_type)</td>
+  <!-- 
+        <td>Given a year and month determine the last day of the month.</td>
+    -->
+  <td>与えられた年と月から、その月の最終日を決定する</td>
+  <td></td></tr>
+<tr><td>static ymd_type <span class="func">from_day_number</span>(date_int_type)</td>
+  <!-- 
+        <td> Convert a day number to a ymd struct. </td>
+    -->
+  <td>日付番号を ymd 構造体に変換する</td>
+  <td></td></tr>
+<tr><td>static bool <span class="func">is_leap_year</span>(year_type)</td>
+  <!-- 
+        <td>Returns true if specified year is a leap year.</td>
+    -->
+  <td>指定した年がうるう年なら true を返す</td>
+  <td>gregorian_calendar::is_leap_year(2000) --&gt; true</td></tr>
+</table>
+<br>
+
+
+<hr>
+<address><small>
+<!-- hhmts start -->
+Last modified: Thu Sep  5 06:05:54 MST 2002
+<!-- hhmts end -->
+ by <a href="mailto:jeff&#64;crystalclearsoftware.com">Jeff Garland</a> &copy; 2000-2002
+<br>
+  Japanese Translation Copyright (C) 2003 <a href="mailto:sshino@cppll.jp">Shoji Shinohara</a>.
+</small></address>
+</body>
+</html>

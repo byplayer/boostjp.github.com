@@ -1,0 +1,299 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<title>gregorian::date_period Documentation</title>
+<link href="doxygen.css" rel="stylesheet" type="text/css">
+<meta http-equiv="content-style-type" content="text/css">
+<!-- 入口 -->
+<style type="text/css"><!--
+  .original {color: #808080;}
+  .draft {color: green;}
+  .note {color: #ff8080;}
+--></style>
+</head>
+
+<body>
+<a href="../../../index.htm">
+<img align="left" src="../../../c++boost.gif" alt="C++ Boost">
+</a>  
+
+<h1>gregorian::date_period</h1>
+<hr style="clear: left;">
+<p>
+<a href="index.html">Overall Index</a> -- 
+<a href="gregorian.html">Gregorian Index</a> --
+<a href="posix_time.html">Posix Time Index</a>
+</p>
+<h3>Date Period Documentation</h3>
+<p>
+<a href="class_date_period.html#header">Header</a> -- 
+<a href="class_date_period.html#construct">Construction</a> -- 
+<a href="class_date_period.html#accessors">Accessors</a> -- 
+<a href="class_date_period.html#conversiontostring">Conversion To String</a> -- 
+<a href="class_date_period.html#operators">Operators</a> -- 
+</p>
+
+<h2><a name="intro">Introduction</a></h2>
+<p>
+<div class="original">
+The class boost::gregorian::date_period provides direct representation
+for ranges between two dates.  Periods provide the ability to simplify
+some types of caculations by simplifing the conditional logic of the
+program.  For example, testing if a date is within an irregular
+schedule such as a weekend or holiday can be accomplished using
+collections of date periods.  This is facilitated by several methods
+that allow evaluation if a date_period intersects with another date
+period, and to generate the period resulting from the intersection.
+The <a href="exp-period_calc.html">period calculation
+example</a> provides an example of this.
+</div><div class="draft">
+  boost::gregorian::date_period クラスは、二つの日付の範囲(期間)を直接表現する。
+  プログラムの条件付きの論理を単純化することによって、ある種の計算を単純化する能力を提供する。
+  例えば、日付が週末あるいは休日のような不規則なスケジュールの中であるかどうか試すのは date_period のコレクションを使って達成され得る。
+  これは、date_period が別の期間(date period)と重複する場合に評価を許可する、あるいは重複している期間を生成する、といったいくつかの方法によって容易になる。
+  <a href="exp-period_calc.html">period calculation	example(期間計算の例)</a> はこの例を提供する。
+</div>
+</p>
+
+<p>
+<div class="original">
+Date periods used in combination with infinity values have the abilty
+to represent complex concepts such as 'until further notice'.
+</div><div class="draft">
+  無限値と組み合わせて使用される期間(date periods)は、「追って通知があるまで」といった複雑な概念を表現する能力を持っている。
+</div>
+</p>
+
+
+  <h2><a name="header">Header</a></h2>
+<pre>
+#include "boost/date_time/gregorian/gregorian.hpp" //include all types plus i/o
+or
+#include "boost/date_time/gregorian/gregorian_types.hpp" //no i/o just types
+</pre>
+<br>
+
+<h2><a name="construct">Construction</a></h2>
+<table border=1 cellspacing=3 cellpadding=3>
+<tr><th>Syntax</th><th>Description</th><th>Example</th></tr>
+<tr>
+  <td>date_period(date begin, date last)</td>
+  <td>
+<!--
+	  Create a period as [begin, last).  If last is &lt;= begin then
+          the period will be defined as null.
+-->
+    [begin, last) で表される期間(period)を生成する。<br>
+    last &lt;= begin のときは null となる。
+  </td>
+  <td>date_period dp(date(2002,Jan,10), date_duration(2));</td>
+</tr>
+<tr>
+  <td>date_period(date start, date end)</td>
+  <td>
+<!--
+	  Create a period as [begin, begin+len).  If len is &lt;= zero then
+          the period will be defined as null.
+-->
+    [begin, begin+len)で表される期間(period)を生成する。<br>
+    len &lt;= 0 のときは null となる。
+  </td>
+  <td>date_period dp(date(2002,Jan,10), date_duration(2));</td>
+</tr>
+<tr>
+  <td>date_period(date_period rhs)</td>
+<!--
+        <td>Copy constructor</td>
+-->
+  <td>コピーコンストラクタ</td>
+  <td>date_period dp1(dp)</td>
+</tr>
+</table>
+<br>
+
+<h2><a name="accessors">Accessors</a></h2>
+<table border=1 cellspacing=3 cellpadding=3>
+<tr><th>Syntax</th><th>Description</th><th>Example</th></tr>
+<tr>
+  <td>date <strong class="func">begin</strong>() const</td>
+<!--
+        <td>Return first day of period.</td>
+-->
+  <td>期間(period)の初日を返す</td>
+  <td>
+    date_period dp(date(2002,Jan,1), date(2002,Jan,10));<br>
+    dp.begin() --&gt; 2002-Jan-01
+  </td>
+</tr>
+<tr>
+  <td>date <strong class="func">last</strong>() const</td>
+<!--
+        <td>Return last date in the period</td>
+-->
+  <td>期間(period)の最終日を返す</td>
+  <td>
+    date_period dp(date(2002,Jan,1), date(2002,Jan,10));<br>
+    dp.last() --&gt; 2002-Jan-09
+  </td>
+</tr>
+<tr>
+  <td>date <strong class="func">end</strong>() const</td>
+<!--
+        <td>Return one past the last in period</td>
+-->
+  <td>期間(period)の最終日の翌日を返す</td>
+  <td>
+    date_period dp(date(2002,Jan,1), date(2002,Jan,10));<br>
+    dp.end() --&gt; 2002-Jan-10
+  </td>
+</tr>
+<tr>
+  <td>bool <strong class="func">is_null</strong>() const</td>
+<!--
+        <td>True if period is not well formed.  eg: start less than end </td>
+-->
+  <td>
+    期間(period)が正しい形式でないときtrue<br>
+    例: start less than end <span class="note" id="doubt">？逆では？</span>
+  </td>
+  <td>
+    date_period dp(date(2002,Jan,10), date(2002,Jan,1));<br>
+    dp.is_null() --&gt; true
+    <span class="note" id="doubt"><br>原文はたぶんコピペミス</span>
+  </td>
+</tr>
+<tr>
+  <td>bool <strong class="func">contains</strong>(date) const</td>
+<!--
+        <td>True if date is within the period</td>
+-->
+  <td>
+    日付が期間(period)の範囲内にあるとき true
+  </td>
+  <td>
+    date_period dp(date(2002,Jan,1), date(2002,Jan,10));<br>
+    dp.contains(date(2002,Jan,2)) --&gt; true
+  </td>
+</tr>
+<tr>
+  <td>bool <strong class="func">contains</strong>(date_period) const</td>
+<!--
+        <td>True if date period is within the period</td>
+-->
+  <td>date_period が期間(period)の範囲内にあるときtrue</td>
+  <td>
+    date_period dp1(date(2002,Jan,1), date(2002,Jan,10));<br>
+    date_period dp2(date(2002,Jan,2), date(2002,Jan,3));<br>
+    dp1.contains(dp2) --&gt; true<br>
+    dp2.contains(dp1) --&gt; false</td>
+</tr>
+<tr>
+  <td>bool <strong class="func">intersects</strong>(date_period) const</td>
+<!--
+        <td>True if periods overlap</td>
+-->
+  <td>期間(period)が重複するときtrue</td>
+	<td>
+      date_period dp1(date(2002,Jan,1), date(2002,Jan,10));<br>
+      date_period dp2(date(2002,Jan,2), date(2002,Jan,3));<br>
+      dp2.intersects(dp1) --&gt; true</td>
+  </tr>
+<tr>
+  <td>date_period <strong class="func">intersection</strong>(date_period) const</td>
+<!--
+        <td>Calculate the intersection of 2 periods.  Null if no intersection.</td>
+-->
+  <td>
+    2つの期間(period)から重複する期間(period)を計算する。
+    期間(period)が重複しないときは null が返る
+  </td>
+  <td>
+    date_period dp1(date(2002,Jan,1), date(2002,Jan,10));<br>
+    date_period dp2(date(2002,Jan,2), date(2002,Jan,3));<br>
+    dp2.intersects(dp1) --&gt; dp2
+  </td>
+</tr>
+<tr>
+  <td>date_period <strong class="func">merge</strong>(date_period) const</td>
+<!--
+        <td>Returns union of two periods. Null if no intersection.</td>
+-->
+  <td>
+    2つの期間(period)を結合して返す。期間(period)が重複しないときは null が返る
+  </td>
+  <td>
+    date_period dp1(date(2002,Jan,1), date(2002,Jan,10));<br>
+    date_period dp2(date(2002,Jan,9), date(2002,Jan,31));<br>
+    dp2.intersects(dp1) --&gt; 2002-Jan-01/2002-Jan-31
+  </td>
+</tr>
+<tr>
+  <td>date_period <strong class="func">shift</strong>(date_duration)</td>
+<!--
+        <td>Add duration to both start and end.</td>
+-->
+  <td>
+    初日と最終日に日数(date_duration)を加算する。
+  </td>
+  <td>
+    date_period dp1(date(2002,Jan,1), date(2002,Jan,10));<br>
+    dp1.shift(date_duration(1)); --&gt; 2002-Jan-02/2002-Jan-11
+  </td>
+</tr>
+</table>
+<br>
+
+<h2><a name="conversiontostring">Conversion To String</a></h2>
+<table border=1 cellspacing=3 cellpadding=3>
+<tr><th>Syntax</th><th>Description</th><th>Example</th></tr>
+<tr>
+  <td>std::string <strong class="func">to_simple_string</strong>(date_period dp)</td>
+<!--
+        <td>To [YYYY-mmm-DD/YYYY-mmm-DD] string where mmm is 3 char month name.</td>
+-->
+  <td>[YYYY-mmm-DD/YYYY-mmm-DD] (mmm は月名の3文字短縮形)形式の文字列に変換</td>
+  <td>[2002-Jan-01/2002-Jan-31]</td>
+</tr>
+</table>
+<br>
+
+<h2><a name="operators">Operators</a></h2>
+<table border=1 cellspacing=3 cellpadding=3>
+<tr><th>Syntax</th><th>Description</th><th>Example</th></tr>
+<tr>
+  <td>operator==, operator!=,<br> operator&gt;, operator&lt;</td>
+<!--
+        <td>A full complement of comparison operators</td>
+-->
+  <td>サポートする比較演算子</td>
+  <td>dp1 == dp2, etc</td>
+</tr>
+<tr>
+  <td>operator&lt;</td>
+<!--
+        <td>True if dp1.end() less than dp2.begin()</td>
+-->
+  <td>dp1.end()がdp2.begin()よりも小さいとき true</td>
+  <td>dp1 &lt; dp2, etc</td>
+</tr>
+<tr>
+  <td>operator&gt;</td>
+<!--
+        <td>True if dp1.begin() greater than dp2.end()</td>
+-->
+  <td>dp1.begin()がdp2.end()よりも大きいとき true</td>
+  <td>dp1 &gt; dp2, etc</td>
+</tr>
+</table>
+<br>
+
+<hr>
+<address><small>
+<!-- hhmts start -->
+Last modified: Tue Sep  3 16:15:21 MST 2002
+<!-- hhmts end -->
+ by <a href="mailto:jeff&#64;crystalclearsoftware.com">Jeff Garland</a> &copy; 2000-2002
+<br>
+  Japanese Translation Copyright (C) 2003 <a href="mailto:sshino@cppll.jp">Shoji Shinohara</a>.
+</small></address>
+</body>
+</html>

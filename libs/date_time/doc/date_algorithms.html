@@ -1,0 +1,121 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<title>Date Generators / Algorithms</title>
+<link href="doxygen.css" rel="stylesheet" type="text/css">
+<meta http-equiv="content-style-type" content="text/css">
+<!-- 入口 -->
+<style type="text/css"><!--
+  .original {color: #808080;}
+  .draft {color: green;}
+  .note {color: #ff8080;}
+--></style>
+</head>
+
+<body>
+<a href="../../../index.htm">
+<img align="left" src="../../../c++boost.gif" alt="C++ Boost">
+</a>  
+
+<h1>Date Generators / Algorithms</h1>
+<hr style="clear: left;">
+<p>
+<a href="index.html">Overall Index</a> -- 
+<a href="gregorian.html">Gregorian Index</a> --
+<a href="posix_time.html">Posix Time Index</a>
+</p>
+<h3>Date Generators / Algorithms</h3>
+<p>
+<a href="date_algorithms.html#header">Header</a> -- 
+<a href="date_algorithms.html#classoverview">Class Overview</a>
+</p>
+
+<h2><a name="intro">Introduction</a></h2>
+<p>
+<div class="original">
+Date algorithms or generators are tools for generating other dates or schedules of dates. A generator function starts with some part of a date such as a month and day and is supplied another part to then generate a concrete date.  This allows the programmer to represent concepts such as "The first Sunday in February" and then create a concrete set of dates when provided with one or more years.
+</div><div class="draft">
+  日付アルゴリズムあるいはジェネレータは、他の日付あるいは日付のスケジュールを生成するためのツールである。
+  生成関数は、月と日のような日付のある部分で始まり、その後、具体的な日付を生成するために残りの部分を供給される。
+  これは、プログラマが「2月の最初の日曜日」のような概念を表わし、次に、1つ以上の年を供給された時に日付の具体的なセットを生成することを想定している。
+</div>
+</p>
+<p>
+  <div class="fragment"><pre>  <font class="keyword">using</font> <font class="keyword">namespace </font>boost::gregorian; 
+  <font class="keyword">typedef</font> boost::date_time::nth_kday_of_month&lt;date&gt;</a> nkday;
+  nkday ldgen(nkday::first, Monday, Sep)); <font class="comment">//US labor day</font>
+  date labor_day = ldgen.get_date(2002); <font class="comment">//Calculate labor day for 2002</font>
+  </pre></div>
+</p>
+<p>
+  <!--
+ The <a href="exp-print_holidays.html">print holidays example</a> shows a detailed usage example.
+    -->
+  <a href="exp-print_holidays.html">print holidays example</a> に詳細な使い方の例を示す。
+</p>
+
+<h2><a name="header">Header</a></h2>
+<pre>
+#include "boost/date_time/date_generators.hpp" 
+</pre>
+
+<h2><a name="classoverview">Class Overview</a></h2>
+<table border=1 cellspacing=3 cellpadding=3>
+<tr><th>Class</th>
+    <th>Construction Parameters</th>
+    <th>get_date Parameter</th>
+    <th>Description</th>
+    <th>Example</th></tr>
+<tr><td><span class="el">first_kday_after</span></td>
+    <td><span class="el">greg_day_of_week</span> day_of_week</td>
+    <td><span class="el">date</span> start_day</td>
+    <!-- 
+    <td>Calculate something like First Sunday after Jan 1,2002</td>
+      -->
+    <td>2002年1月1日以降の最初の日曜日のといったものを計算する</td>
+    <td>first_kday_after fkaf(Monday);<br>date d = fkaf.get_date(date(2002,Jan,1));<font class="comment">//2002-Jan-07</font></td></tr>
+<tr><td><span class="el">first_kday_before</span></td>
+    <td><span class="el">greg_day_of_week</span> day_of_week</td>
+    <td><span class="el">date</span> start_day</td>
+    <!-- 
+    <td>Calculate something like First Monday before Feb 1,2002</td>
+      -->
+    <td>2002年2月1日以前の最初の月曜日といったものを計算する</td>
+    <td>first_kday_before fkbf(Monday);<br>date d = fkbf.get_date(date(2002,Feb,1));<font class="comment">//2002-Jan-28</font></td></tr>
+<tr><td><span class="el">last_kday_of_month</span></td>
+    <td><span class="el">greg_day_of_week</span> day_of_week<br><span class="el">greg_month</span> month</td>
+    <td><span class="el">greg_year</span> year</td>
+    <!-- 
+    <td>Calculate something like last Monday of January</td>
+      -->
+    <td>1月最後の月曜日といったものを計算する</td>
+    <td>last_kday_of_month lkm(Monday,Jan);<br>date d = lkm.get_date(2002);<font class="comment">//2002-Jan-28</font></td></tr>
+<tr><td><span class="el">first_kday_of_month</span></td>
+    <td><span class="el">greg_day_of_week</span> day_of_week<br><span class="el">greg_month</span> month</td>
+    <td><span class="el">greg_year</span> year</td>
+    <!-- 
+    <td>Calculate something like first Monday of January</td>
+      -->
+    <td>1月最初の月曜日といったものを計算する</td>
+    <td>first_kday_of_month fkm(Monday,Jan);<br>date d = fkm.get_date(2002);<font class="comment">//2002-Jan-07</font></td></tr>
+<tr><td><span class="el">partial_date</span></td>
+    <td><span class="el">greg_month</span> month<br><span class="el">greg_day</span> day_of_month</td>
+    <td><span class="el">greg_year</span> year</td>
+    <!-- 
+    <td>Generates a date by applying the year to the given month and day.</td>
+      -->
+    <td><span class="original">Generates a date by applying the year to the given month and day.</span><br><span class="draft">月および日を与えられた日付に、年を適用することにより日付を生成する</span></td>
+    <td>partial_date pd(Jan,1);<br>date d = pd.get_date(2002);<font class="comment">//2002-Jan-01</font></td></tr>
+</table>
+<br>
+
+<hr>
+<address><small>
+<!-- hhmts start -->
+Last modified: Tue Sep  3 16:02:55 MST 2002
+<!-- hhmts end -->
+ by <a href="mailto:jeff&#64;crystalclearsoftware.com">Jeff Garland</a> &copy; 2000-2002
+<br>
+  Japanese Translation Copyright (C) 2003 <a href="mailto:sshino@cppll.jp">Shoji Shinohara</a>.
+</small></address>
+</body>
+</html>

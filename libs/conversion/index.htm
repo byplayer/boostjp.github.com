@@ -1,0 +1,78 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+
+<!-- <meta http-equiv="Content-Type" content="text/html; charset=windows-1252"> -->
+<meta http-equiv="Content-Type" content="text/html">
+
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>Boost Conversion Library</title>
+</head>
+
+<body bgcolor="#FFFFFF" text="#000000">
+
+<h1><img border="0" src="../../c++boost.gif" align="center" width="277" height="86">Boost
+Conversion Library</h1>
+
+<a href="http://www.boost.org/libs/conversion/index.htm">原文</a>
+
+<p>
+
+<!--
+The Conversion Library improves program safety and clarity by performing
+otherwise messy conversions.&nbsp; It includes cast-style function templates designed to complement the C++
+Standard's built-in casts.
+-->
+Conversion Libraryは、他の扱いにくい変換機能を用いたプログラムを安全で扱いやすいものにする。
+このライブラリにはC++の組み込み変換演算子を補完する形の関数テンプレート群が含まれている。
+
+</p>
+<p>
+
+<!--
+To reduce coupling, particularly to standard library IOStreams, the Boost
+Conversion Library is
+supplied by several headers:
+-->
+
+特に、標準ライブラリ<code>iostream</code>への依存をできる限りなくすために、
+Boost Conversion Libraryは以下のいくつかのヘッダに分かれている。
+
+</p>
+<ul>
+  <li>
+
+<!--
+		The <a href="cast.htm">boost/cast</a> header provides <b>polymorphic_cast&lt;&gt;</b>
+    and <b>polymorphic_downcast&lt;&gt;</b> to perform safe casting between
+    polymorphic types, and <b> numeric_cast</b><i>&lt;&gt;</i> to perform safe casting
+    between numeric types.<br>
+-->
+		<a href="cast.htm">boost/cast</a>ヘッダはポリモフィックな型の間の安全な変換を行う
+		<b>polymorphic_cast&lt;&gt;</b>、<b>polymorphic_downcast&lt;&gt;</b>と、数値型の間の安全な変換を行う
+		<b> numeric_cast&lt;&gt;</b>を提供する。
+
+  </li>
+  <li>
+
+<!--
+		The <a href="lexical_cast.htm">boost/lexical_cast</a> header provides <b>lexical_cast&lt;&gt;</b>
+    general literal text conversions, such as an <code>int</code> represented as
+    a <code>string</code>, or vice-versa.
+-->
+		<a href="lexical_cast.htm">boost/lexical_cast</a>ヘッダは<code>int</code>を<code>string</code>
+		で表現したり、その逆変換を行うときのような、文字列で表現出来る型同士の変換を行う<b>lexical_cast&lt;&gt;</b>
+		を提供する。
+
+</li>
+</ul>
+<hr>
+<p>Revised <!--webbot bot="Timestamp" S-Type="EDITED"
+S-Format="%d %B, %Y" startspan -->06 January, 2001<!--webbot bot="Timestamp" endspan i-checksum="38320" -->
+</p>
+
+</body>
+
+</html>

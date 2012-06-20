@@ -1,0 +1,125 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<title>posix_time::local time adjust Documentation</title>
+<link href="doxygen.css" rel="stylesheet" type="text/css">
+<meta http-equiv="content-style-type" content="text/css">
+<!-- 入口 -->
+<style type="text/css"><!--
+  .original {color: #808080;}
+  .draft {color: green;}
+  .note {color: #ff8080;}
+--></style>
+</head>
+
+<body>
+<a href="../../../index.htm">
+<img align="left" src="../../../c++boost.gif" alt="C++ Boost">
+</a>  
+
+<h1>Local Time Adjustment</h1>
+<hr style="clear: left;">
+<p>
+<a href="index.html">Overall Index</a> -- 
+<a href="gregorian.html">Gregorian Index</a> --
+<a href="posix_time.html">Posix Time Index</a>
+</p>
+<h3>Local Time Adjustment</h3>
+<p>
+<a href="#header">Header</a> -- 
+<a href="#classoverview">Class Overview</a>
+</p>
+
+<h2><a name="intro">Introduction</a></h2>
+<p>
+<div class="original">
+A frequent problem in time representation is the conversion between
+various local time systems.  In general this is accomplished by
+using a reference time system.  The reference time system is typically
+UTC.  
+</div>
+  時間表現において頻繁にぶつかる問題が、様々な地域時間の間の変換である。
+  一般に、これは<span class="draft">参考時間システム</span>を用いて解決される。
+  <span class="draft">参考時間システム</span>には、典型的に UTC が用いられる。
+</p>
+<p>
+<div class="original">
+Since the posix_time system does no internal time adjustment it 
+can be used to represent both local times and UTC times.  However,
+the user is currently left to handle conversions and time zone
+knowledge explicitly.
+</div>
+  posix_time システムは内部で時間調整を行わないので、地域時間および UTC時間の両方を表わすために使用することができる。
+  <span class="draft">しかしながら、ユーザーには変換と時間帯についての知識を処理することが委ねられる。</span>
+</p>
+<p>
+<div class="original">
+The library offers two different ways to perform UTC to local conversions.  
+The first is using the time zone settings of the computer.  This is 
+a useful solution for converting a UTC time for a user machine.  This
+approach depends on the ctime API and will provide incorrect results
+if the environment is set incorrectly.
+The other approach allows conversion from any zone to UTC and back
+independent of the settings of the time zone settings of the 
+computer.  The <a href="exp-local_utc_conversion.html">local utc conversion example</a> 
+demonstrates both of these techniques.
+</div>
+  ライブラリは UTC から地域時間への変換を処理するための、2つの異なる方法を提示する。
+  一つ目は、コンピュータの時間帯設定を使う。
+  これは、ユーザーマシンのための UTC 時刻を変換することに対して、有用な解決法である。
+  このアプローチは ctime API に依存しており、もし環境設定が間違っていれば、正しくない結果を供給するであろう。
+  もうひとつのアプローチは、コンピュータの時間帯設定とは無関係に、任意の時間帯から UTC への変換を可能にする。
+</p>
+
+<h2><a name="header">Header</a></h2>
+<pre>
+#include "boost/date_time/gregorian/gregorian.hpp" //include all types plus i/o
+or
+#include "boost/date_time/gregorian/gregorian_types.hpp" //no i/o just types
+</pre>
+
+<h2><a name="classoverview">Class Overview</a></h2>
+<table border=1 cellspacing=3 cellpadding=3>
+  <tr><th>Class</th>
+      <th>Description</th>
+      <th>Example</th></tr>
+<tr>
+  <td>date_time::c_local_adjustor&lt;ptime&gt;::<strong class="el">utc_to_local</strong>(ptime)</td>
+  <!-- 
+    <td>Calculate local machine time from a UTC time based on time zone settings and the C API.</td>
+    -->
+  <td>時間帯の設定および C API に基づいた UTC 時刻から、<span class="draft">ローカルマシンの時刻</span>を計算する</td>
+  <td>
+     typedef boost::date_time::c_local_adjustor&lt;ptime&gt; local_adj;<br>
+     ptime t10(date(2002,Jan,1), hours(7)); <br>
+     ptime t11 = local_adj::utc_to_local(t10);<br>
+  </td></tr>
+<tr>
+  <td>date_time::local_adjustor&lt;ptime, utc_offset, dst_rules&gt;::<strong class="el">utc_to_local</strong>(ptime)</td>
+  <!-- 
+    <td>Calculate local machine time from a UTC time based daylight savings rules and utc offset</td>
+    -->
+  <td>UTC 時間に基づいた夏時間規則とUTCオフセットから、<span class="draft">ローカルマシンの時刻</span>を計算する</td>
+  <td><a href="exp-local_utc_conversion.html">例を参照</a></td></tr>
+<tr>
+  <td>date_time::local_adjustor&lt;ptime, utc_offset, dst_rules&gt;::<strong class="el">local_to_utc</strong>(ptime)</td>
+  <!-- 
+    <td>Calculate UTC time based on daylight savings rules and utc offset.</td>
+    -->
+  <td>夏時間規則とUTCオフセットに基づいて、UTC時刻を計算する</td>
+  <td><a href="exp-local_utc_conversion.html">例を参照</a></td></tr>
+</table>
+<br>
+
+
+<hr>
+<address><small>
+<!-- hhmts start -->
+Last modified: Thu Sep  5 07:34:28 MST 2002
+<!-- hhmts end -->
+ by <a href="mailto:jeff&#64;crystalclearsoftware.com">Jeff Garland</a> &copy; 2000-2002
+<br>
+  Japanese Translation Copyright (C) 2003 <a href="mailto:sshino@cppll.jp">Shoji Shinohara</a>.
+</small></address>
+</body>
+</html>
+

@@ -1,0 +1,119 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<title>gregorian::date iterators Documentation</title>
+<link href="doxygen.css" rel="stylesheet" type="text/css">
+<meta http-equiv="content-style-type" content="text/css">
+<!-- 入口 -->
+<style type="text/css"><!--
+  .original {color: #808080;}
+  .draft {color: green;}
+  .note {color: #ff8080;}
+--></style>
+</head>
+
+<body>
+<a href="../../../index.htm">
+<img align="left" src="../../../c++boost.gif" alt="C++ Boost">
+</a>  
+
+<h1>gregorian::date iterators</h1>
+<hr style="clear: left;">
+<p>
+<a href="index.html">Overall Index</a> --
+<a href="gregorian.html">Gregorian Index</a> --
+<a href="posix_time.html">Posix Time Index</a>
+</p>
+<h3>Date Generators / Algorithms</h3>
+<p>
+<a href="#intro">Introduction</a> --
+<a href="#header">Header</a> --
+<a href="#classoverview">Class Overview</a>
+</p>
+
+<h2><a name="intro">Introduction</a></h2>
+
+<p>
+<div class="original">
+Date iterators provide a standard mechanism for iteration through dates. 
+Date iterators are a model of
+<a href="http://www.sgi.com/tech/stl/InputIterator.html">Input Iterator</a> 
+and can be used to populate collections with dates and other date generation 
+tasks.  For example, the <a href="exp-print_month.html">print month</a> example iterates through all the days in a month and prints them.
+</div><div class="draft">
+  日付イテレータは、日単位で反復するための標準的なメカニズムを提供する。
+  日付イテレータは(STLの)<a href="http://www.sgi.com/tech/stl/InputIterator.html">入力イテレータ</a>のモデルであり、日付と他の日付生成タスクで集合を代入するために使われる。
+  例えば、<a href="exp-print_month.html">print month</a> の例では、1ヶ月の全ての日々を反復し、それらをプリントする。
+</div>
+</p>
+<p>
+<div class="original">
+All of the iterators here derive from boost::gregorian::date_iterator.
+</div>
+  ここにあるイテレータは全て boost::gregorian::date_iterator の派生である。
+</p>
+
+<h2><a name="header">Header</a></h2>
+<pre>
+#include "boost/date_time/gregorian/gregorian.hpp" //include all types plus i/o
+or
+#include "boost/date_time/gregorian/gregorian_types.hpp" //no i/o just types
+</pre>
+
+<h2><a name="classoverview">Class Overview</a></h2>
+<table border=1 cellspacing=3 cellpadding=3>
+<tr><th>Class</th>
+    <th>Construction Parameters</th>
+    <th>Description</th></tr>
+<tr><td>date_iterator</td>
+    <td></td>
+    <!-- 
+    <td>Common base class for all day level iterators.</td></tr>
+      -->
+    <td>全ての日付単位イテレータに共通な基底クラス</td></tr>
+<tr><td>day_iterator</td>
+    <td>date start_date, int day_count=1</td>
+    <!-- 
+    <td>Iterate day_count days at a time.</td></tr>
+      -->
+    <td>day_count 日単位で反復する</td></tr>
+<tr><td>week_iterator</td>
+    <td>date start_date, int week_offset=1</td>
+    <!-- 
+    <td>Iterate week_offset weeks at a time.</td></tr>
+      -->
+    <td>week_offset 週単位で反復する</td></tr>
+<tr><td>month_iterator</td>
+    <td>date start_date, int month_offset=1</td>
+    <!-- 
+    <td>Iterate month_offset months.  There are special rules for 
+        handling the end of the month. These are: if start date is last 
+        day of the month, always adjust to last day of the month.
+	if date is beyond the end of the month (eg: jan 31 + 1 month) 
+        adjust back to end of month.
+      </td></tr>
+      -->
+    <td>month_offset 月単位で反復する。<br>
+      月末の取り扱いについては、特別な規則がある。
+      それは、最初の日が月の最終日であるときは、常にその月の最終日に合わせて調整されるというものである。
+      日付がその月末を越えている場合(例: 1月31日+1ヶ月)、月の最終日に合わせて調整される。
+    </td></tr>
+<tr><td>year_iterator</td>
+    <td>date start_date, int year_offset=1</td>
+    <!-- 
+    <td>Iterate year_offset years</td></tr>
+      -->
+    <td>year_offset 年単位で反復する</td></tr>
+</table>
+<br>
+
+
+<hr><address><small>
+<!-- hhmts start -->
+Last modified: Thu Sep  5 06:06:41 MST 2002
+<!-- hhmts end -->
+ by <a href="mailto:jeff&#64;crystalclearsoftware.com">Jeff Garland</a> &copy; 2000-2002
+<br>
+  Japanese Translation Copyright (C) 2003 <a href="mailto:sshino@cppll.jp">Shoji Shinohara</a>.
+</small></address>
+</body>
+</html>

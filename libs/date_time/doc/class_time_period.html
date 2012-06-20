@@ -1,0 +1,258 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<title>posix_time::time_period Documentation</title>
+<link href="doxygen.css" rel="stylesheet" type="text/css">
+<meta http-equiv="content-style-type" content="text/css">
+<!-- 入口 -->
+<style type="text/css"><!--
+  .original {color: #808080;}
+  .draft {color: green;}
+  .note {color: #ff8080;}
+--></style>
+</head>
+
+<body>
+<a href="../../../index.htm">
+<img align="left" src="../../../c++boost.gif" alt="C++ Boost">
+</a>  
+
+<h1>posix_time::time_period</h1>
+<hr style="clear: left;">
+<p>
+<a href="index.html">Overall Index</a> -- 
+<a href="gregorian.html">Gregorian Index</a> --
+<a href="posix_time.html">Posix Time Index</a>
+</p>
+<h3>Time Period Documentation</h3>
+<p>
+<a href="#header">Header</a> -- 
+<a href="#construct">Construction</a> -- 
+<a href="#accessors">Accessors</a> -- 
+<a href="#conversiontostring">Conversion To String</a> -- 
+<a href="#operators">Operators</a> -- 
+</p>
+
+<h2><a name="intro">Introduction</a></h2>
+<p>
+<div class="original">
+The class boost::posix_time::time_period provides direct representation for ranges between two times.  Periods provide the ability to simplify some types of caculations by simplifing the conditional logic of the program.  
+</div><div class="draft">
+  クラス boost::posix_time::time_period は2つの時刻の範囲を直接表現する。
+  期間(period)は、プログラムの条件付きの論理を単純化することによって、ある種の計算を単純化する能力を提供する。
+</div>
+</p>
+<p>
+<div class="original">
+The <a href="exp-time_periods.html">time periods example</a> provides an example of using time periods.
+</div><div class="draft">
+  <a href="exp-time_periods.html">time periods example</a> は time_period の使用例を提供する。
+</div>
+</p>
+
+<h2><a name="header">Header</a></h2>
+<pre>
+#include "boost/date_time/posix_time/posix_time.hpp" //include all types plus i/o
+or
+#include "boost/date_time/posix_time/posix_time_types.hpp" //no i/o just types
+</pre>
+
+
+<h2><a name="construct">Construction</a></h2>
+<table border=1 cellspacing=3 cellpadding=3>
+<tr><th>Syntax</th><th>Description</th><th>Example</th></tr>
+<tr>
+  <td>time_period(ptime begin, ptime last)</td>
+  <td>
+    <!--
+	  Create a period as [begin, last).  If last is <= begin then
+          the period will be defined as null.
+      -->
+    [begin, last) で表される期間(period)を生成する。<br>
+    last &lt;= begin のときは null となる。
+  </td>
+  <td>
+    date d(2002,Jan,01);<br>
+    ptime t(d, seconds(10)); //10 sec after midnight<br>
+    time_period tp(t, hours(3));</td></tr>
+<tr>
+  <td>time_period(ptime start, ptime end)</td>
+  <td>
+    <!--
+	  Create a period as [begin, begin+len).  If len is <= zero then
+          the period will be defined as null.
+      -->
+    [begin, begin+len) で表される期間(period)を生成する。<br>
+    len &lt;= 0 のときは null となる。
+  </td>
+  <td>
+    date d(2002,Jan,01);<br>
+    ptime t1(d, seconds(10)); //10 sec after midnight<br>
+    ptime t2(d, hours(10)); //10 hours after midnight<br>
+    time_period tp(t1, t2);</td></tr>
+<tr>
+  <td>time_period(time_period rhs)</td>
+    <!--
+        <td>Copy constructor</td>
+      -->
+  <td>コピーコンストラクタ</td>
+  <td>time_period tp1(tp)</td></tr>
+</table>
+<br>
+
+
+<h2><a name="accessors">Accessors</a></h2>
+<table border=1 cellspacing=3 cellpadding=3>
+<tr><th>Syntax</th><th>Description</th><th>Example</th></tr>
+<tr>
+  <td>ptime <strong class="func">begin</strong>() const</td>
+  <!--
+        <td>Return first time of period.</td>
+    -->
+  <td class="draft">期間(period)の最初を返す</td>
+  <td>
+    date d(2002,Jan,01);<br>
+    ptime t1(d, seconds(10)); //10 sec after midnight<br>
+    ptime t2(d, hours(10)); //10 hours after midnight<br>
+    time_period tp(t1, t2);
+    tp.begin() --&gt; 2002-Jan-01 00:00:10 </td></tr>
+<tr>
+  <td>ptime <strong class="func">last</strong>() const</td>
+  <!--
+        <td>Return last time in the period</td>
+    -->
+  <td class="draft">期間(period)の最後を返す</td>
+  <td>
+    date d(2002,Jan,01);<br>
+    ptime t1(d, seconds(10)); //10 sec after midnight<br>
+    ptime t2(d, hours(10)); //10 hours after midnight<br>
+    time_period tp(t1, t2);
+    tp.last() --&gt; 2002-Jan-01 09:59:59.999999999 </td></tr>
+<tr>
+  <td>ptime <strong class="func">end</strong>() const</td>
+  <!--
+        <td>Return one past the last in period</td>
+    -->
+  <td class="draft">期間(period)の最後の次を返す</td>
+  <td>
+    date d(2002,Jan,01);<br>
+    ptime t1(d, seconds(10)); //10 sec after midnight<br>
+    ptime t2(d, hours(10)); //10 hours after midnight<br>
+    time_period tp(t1, t2);
+    tp.last() --&gt; 2002-Jan-01 10:00:00 </td></tr>
+<tr>
+  <td>bool <strong class="func">is_null</font>() const</td>
+  <!--
+        <td>True if period is not well formed.  eg: start less than end </td>
+    -->
+  <td class="draft">
+    期間(period) が正しい形式でないときtrue<br>
+    例: start less than end <span class="note" id="doubt">？逆では？</span></td>
+  <td></td></tr>
+<tr>
+  <td>bool <strong class="func">contains</strong>(ptime) const</td>
+  <!--
+        <td>True if ptime is within the period</td>
+    -->
+  <td>ptime が期間(period)の範囲内にあるとき true</td>
+  <td>
+    date d(2002,Jan,01);<br>
+    ptime t1(d, seconds(10)); //10 sec after midnight<br>
+    ptime t2(d, hours(10)); //10 hours after midnight<br>
+    ptime t3(d, hours(2)); //2 hours after midnight<br>
+    time_period tp(t1, t2);
+    tp.contains(t3) --&gt; true </td></tr>
+<tr>
+  <td>bool <strong class="func">contains</strong>(time_period) const</td>
+  <!--
+        <td>True if period is within the period</td>
+    -->
+  <td>time_period が期間(period)の範囲内にあるとき true</td>
+  <td>
+    time_period tp1(ptime(d,hours(1)), ptime(d,hours(12)));<br>
+    time_period tp2(ptime(d,hours(2)), ptime(d,hours(4)));<br>
+    tp1.contains(tp2) --&gt; true<br>
+    tp2.contains(tp1) --&gt; false</td></tr>
+<tr>
+  <td>bool <strong class="func">intersects</strong>(time_period) const</td>
+  <!--
+        <td>True if periods overlap</td>
+    -->
+  <td>期間(period)が重複するとき true</td>
+  <td>
+    time_period tp1(ptime(d,hours(1)), ptime(d,hours(12)));<br>
+    time_period tp2(ptime(d,hours(2)), ptime(d,hours(4)));<br>
+    tp2.intersects(tp1) --&gt; true</td></tr>
+<tr>
+  <td>time_period <strong class="func">intersection</strong>(time_period) const</td>
+  <!--
+        <td>Calculate the intersection of 2 periods.  Null if no intersection.</td>
+    -->
+  <td>二つの期間(period)が重複する範囲を計算する。期間(period)が重複しないときは null が返る</td>
+  <td></td></tr>
+<tr>
+  <td>time_period <strong class="func">merge</strong>(time_period) const</td>
+  <!--
+        <td>Returns union of two periods. Null if no intersection.</td>
+    -->
+  <td>二つの期間(period)を結合して返す。期間(period)が重複しないときは null が返る</td>
+  <td></td></tr>
+<tr>
+  <td>time_period <strong class="func">shift</strong>(time_duration)</td>
+  <!--
+        <td>Add duration to both start and end.</td>
+    -->
+  <td>時間長(time_duration)を start と end に加算する <span class="note" id="doubt"><br>ソースを見ると，原文の date_duration は time_duration の間違いだと思う。</span></td>
+  <td></td></tr>
+</table>
+<br>
+
+
+<h2><a name="conversiontostring">Conversion To String</a></h2>
+<table border=1 cellspacing=3 cellpadding=3>
+<tr><th>Syntax</th><th>Description</th><th>Example</th></tr>
+<tr><td>std::string <font class="func">to_simple_string</font>(time_period dp)</td>
+  <!--
+        <td>To [YYYY-mmm-DD hh:mm:ss.fffffffff/YYYY-mmm-DD hh:mm:ss.fffffffff] string where mmm is 3 char month name.</td>
+    -->
+  <td>[YYYY-mmm-DD hh:mm:ss.fffffffff/YYYY-mmm-DD hh:mm:ss.fffffffff] 形式の文字列に変換する(mmm は月名の3文字短縮形)</td>
+  <td>[2002-Jan-01 01:25:10.000000001/2002-Jan-31 01:25:10.123456789]</td></tr>
+</table>
+<br>
+
+
+<h2><a name="operators">Operators</a></h2>
+<table border=1 cellspacing=3 cellpadding=3>
+<tr><th>Syntax</th><th>Description</th><th>Example</th></tr>
+<tr><td>operator==, operator!=,<br> operator&gt;, operator&lt; </td>
+  <!--
+        <td>A full complement of comparison operators</td>
+    -->
+  <td>サポートする比較演算子</td>
+  <td>tp1 == tp2, etc</td></tr>
+<tr><td>operator&lt;</td>
+  <!--
+        <td>True if tp1.end() less than tp2.begin()</td>
+    -->
+  <td>tp1.end() が tp2.begin() よりも小さいとき true</td>
+  <td>tp1 &lt; tp2, etc</td></tr>
+<tr><td>operator&gt;</td>
+  <!--
+        <td>True if tp1.begin() greater than tp2.end()</td>
+    -->
+  <td>tp1.begin() が tp2.end() よりも大きいとき true</td>
+  <td>tp1 &gt; tp2, etc</td></tr>
+</table>
+<br>
+
+
+<hr>
+<address><small>
+<!-- hhmts start -->
+Last modified: Thu Sep  5 07:28:02 MST 2002
+<!-- hhmts end -->
+ by <a href="mailto:jeff&#64;crystalclearsoftware.com">Jeff Garland</a> &copy; 2000-2002
+<br>
+  Japanese Translation Copyright (C) 2003 <a href="mailto:sshino@cppll.jp">Shoji Shinohara</a>.
+</small></address>
+</body>
+</html>

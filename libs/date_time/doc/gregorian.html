@@ -1,0 +1,155 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<title>Gregorian Date System Documentation</title>
+<link href="doxygen.css" rel="stylesheet" type="text/css">
+<!-- 入口 -->
+<style type="text/css"><!--
+  .original {color: #808080;}
+  .draft {color: green;}
+  dl { text-indent: 4%; }
+  dt { font-weight: bold; }
+  dd { text-indent: 2%; }
+  .note { color: #ff8080; }
+--></style>
+</head>
+
+<body>
+<a href="../../../index.htm">
+<img align="left" src="../../../c++boost.gif" alt="C++ Boost">
+</a>  
+
+<h1>Gregorian Date System Documentation</h1>
+<hr style="clear: left;">
+
+<p>
+<a href="index.html">Overall Index</a>
+</p>
+<p>
+<a href="#intro">Introduction</a> --
+<a href="#usage">Usage Examples</a><p>
+</p>
+<p>
+<h3>Temporal Types</h3>
+<a href="class_date.html">Class date</a> -- 
+<a href="class_date_duration.html">Class date_duration</a> -- 
+<a href="class_date_period.html">Class date_period</a>
+</p>
+<p>
+<h3>Other Topics</h3>
+<a href="date_iterators.html">Date Iterators</a>  -- 
+<a href="date_algorithms.html">Date Generators / Algorithms</a>  -- 
+<a href="class_gregorian_calendar.html">Class gregorian_calendar</a> -- 
+<a href="class_date.html#constructfromclock">Class day_clock</a>
+</p>
+
+<h2><a name="intro">Introduction</a></h2>
+<p>
+<div class="original">
+The gregorian date system provides a date programming system based on the Gregorian Calendar.  The current implementation supports dates in the range 1400-Jan-01 to 10000-Jan-01.  The implemented calendar is a "propleptic Gregorian calendar" thus extending dates back prior to it's first adoption in in 1582.  
+  <br><span class="note" id="typo">propleptic -&gt; proleptic</span>
+</div>
+  <span class="draft">gregorian date system はグレゴリオ暦に基づいた日付プログラミングシステムを提供する。</span>
+  現在の実装は，1400-Jan-01から10000-Jan-01の範囲の日付をサポートする。
+  実装された暦は、"<span class="draft">予想グレゴリオ暦？</span>(proleptic Gregorian calendar)" で、(グレゴリオ暦が)最初に採用された 1582 年以前に遡る拡張がなされている。
+  <span class="note"><br>
+    訳注: <a href="http://www.wikipedia.org/wiki/Proleptic_Gregorian_Calendar">proleptic Gregorian calendar</a>
+  </span>
+</p>
+
+<p>
+<div class="original">
+Caution is required when handling historic dates as there are many adjustments required to account for the local adoption of various calendar systems.  
+See <A href="http://emr.cs.iit.edu/home/reingold/calendar-book/second-edition/">Calendrical Calculations</A> by Reingold &amp; Dershowitz for more details.  The current historical range of the calendar is not limited by algorithm, but rather time to write and perform tests to ensure correctness. It is expected that the range of this calendar system will continue to increase in the future.
+</div>
+  歴史上の日付を扱うとき，局地的に採用された様々な暦法との調整が必要な事に注意すべきである。
+  Reingold と Dershowitz による <a href="http://emr.cs.iit.edu/home/reingold/calendar-book/second-edition/">Calendrical Calculations</a> に詳しい説明がある。
+  暦法の現在の歴史上の範囲はアルゴリズムによって制限されてはいない。
+  <span class="draft">しかしそれよりもむしろ、時間の正当性を保証するためにテストを書いて実行する。</span>
+  <span class="draft">この暦法系の範囲が将来増加し続けるであろうと思われる。</span>
+</p>
+
+<p>
+<div class="original">
+Date information from <A href="http://emr.cs.iit.edu/home/reingold/calendar-book/second-edition/">Calendrical Calculations</A> has been used to cross-test the correctness of the Gregorian calendar implementation.
+</div><div class="draft">
+  <a href="http://emr.cs.iit.edu/home/reingold/calendar-book/second-edition/">Calendrical Calculations</a> からの日付情報がグレゴリオ暦の実装の正当性をクロステストするために使われた。
+</div>
+</p>
+
+<p>
+<div class="original">
+All types for the gregorian system are found in namespace boost::gregorian.  The library supports a convience header <font class="el">boost/date_time/gregorian/gregorian_types.hpp</font> that will include all the classes of the library with no input/output depedency.
+Another header <font class="el">boost/date_time/gregorian/gregorian.hpp</font> will include the types and the input/output code.
+</div>
+  gregorian system の全ての型は boost::gregorian 名前空間で見つかる。
+  ライブラリは入出力に依存しない全てのクラスが収められた便宜的なヘッダ <strong>boost/date_time/gregorian/gregorian_types.hpp</strong> をサポートする。
+  <div class="note" id="typo">convience は convenience かと…</div>
+  もう一つのヘッダ <strong>boost/date_time/gregorian/gregorian.hpp</strong> は型と入出力コードを含む。
+</p>
+
+<p>
+<div class="original">
+The class <a href="class_date.html">boost::gregorian::date</a> is the primary 
+temporal type for users.  
+
+If you are interested in learning about writing programs do specialized date calculations such as finding the "first sunday in april" see the <a href="date_algorithms.html">date generators and algorithms page</a>. 
+</div>
+  <a href="class_date.html">boost::gregorian::date</a> クラスはユーザーにとって主要な時間型である。 
+  もし，"4月の第1日曜日"を見つけるといった特別な日付計算プログラムの書き方に興味があるなら、<a href="date_algorithms.html">date generators and algorithms page</a> を見ると良い。
+</p>
+
+<h2><a name="usage">Usage Examples</a></h2>
+<table border=1 cellspacing=3 cellpadding=3>
+  <tr><th>Example</th><th>Description</th></tr>
+  <!-- 
+<tr><td><a href="exp-days_alive.html">Days Alive</a> <a href="exp-days_till_new_year.html">Days Till New Year</a></td><td>Simple date arithmetic. Retrieve current day from clock. </td></tr>
+    -->
+  <tr>
+    <td><a href="exp-days_alive.html">Days Alive</a> <a href="exp-days_till_new_year.html">Days Till New Year</a></td>
+    <td>簡単な日数計算。現在の日付を時計から取得</td>
+  </tr>
+  <!-- 
+<tr><td><a href="exp-dates_as_strings.html">Dates as strings</a></td><td>Simple parsing and formmatting of dates from/to strings </td></tr>
+    -->
+  <tr>
+    <td><a href="exp-dates_as_strings.html">Dates as strings</a></td>
+    <td>日付と文字列の相互変換、簡単な解析と書式化</td>
+  </tr>
+  <!-- 
+<tr><td><a href="exp-period_calc.html">Date Period Calculations</a></td><td>See if a date is in a set of date periods (eg: is it a holiday/weekend) </td></tr>
+    -->
+  <tr>
+    <td><a href="exp-period_calc.html">Date Period Calculations</a></td>
+    <td>日付が、期間(periods)の集合に含まれるか調べる (例: 休日・週末の判定)</td>
+  </tr>
+  <!-- 
+<tr><td><a href="exp-print_month.html">Print a month</a></td><td>Small utility program which prints out all the days in a month from command line. Need to know if 1999-Jan-1 was a Friday or a Saturday? This program shows how to do it. </td></tr>
+    -->
+  <tr>
+    <td><a href="exp-print_month.html">Print a month</a></td>
+    <td>コマンドラインで与えた月の日付を全て出力する小さなユーティリティプログラム。
+      1999年1月1日が金曜だったか土曜だったか知る必要がある?
+      このプログラムはその方法を示す</td>
+  </tr>
+  <!-- 
+<tr><td><a href="exp-print_holidays.html">Print Holidays</a></td><td>Uses date generators to convert abstract specification into concrete set of dates. </td></table>
+    -->
+  <tr>
+    <td><a href="exp-print_holidays.html">Print Holidays</a></td>
+    <td>抽象的な指定を具体的な日付の集合に変換するために、日付ジェネレータを使う</td>
+  </tr>
+</table>
+<br>
+
+<hr>
+<address><small>
+<!-- hhmts start -->
+Last modified: Thu Sep  5 07:33:06 MST 2002
+<!-- hhmts end -->
+ by Jeff Garland &copy 2000-2002
+<br>
+  Japanese Translation Copyright (C) 2003 <a href="mailto:sshino@cppll.jp">Shoji Shinohara</a>.
+</small></address>
+
+</body>
+</html>

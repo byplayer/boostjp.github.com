@@ -1,0 +1,194 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<title>Date-Time Terminology</title>
+<link href="doxygen.css" rel="stylesheet" type="text/css">
+<meta http-equiv="content-style-type" content="text/css">
+<!-- 入口 -->
+<style type="text/css"><!--
+  dl { text-indent: 4%; }
+  dt { font-weight: bold; }
+  dd { text-indent: 2%; }
+  .original {color: #808080;}
+  .draft {color: green;}
+  .note { color: #ff8080; }
+--></style>
+</head>
+
+<body>
+<a href="../../../index.htm">
+<img align="left" src="../../../c++boost.gif" alt="C++ Boost">
+</a>
+
+<h1>Date-Time Terminology</h1>
+<hr style="clear: left;">
+<a href="index.html">Overall Index</a> --
+<a href="gregorian.html">Gregorian Index</a> --
+<a href="posix_time.html">Posix Time Index</a>
+
+<p class="original">
+The following are a number of terms relevant to the date-time domain. 
+</p>
+<p>
+  以下は日付・時間分野に関する用語である。
+</p>
+<div class="original">
+  A taxonomy of temporal types:
+<UL>
+  <LI><B>Timepoint</B> -- Specifier for a location in the time continuum. 
+  Similar to a number on a ruler. 
+  <LI><B>Timelength</B> -- A duration of time unattached to any point on the 
+  time continuum. 
+  <LI><B>Timeinterval</B> -- A duration of time attached to a specific point in 
+  the time continuum. </LI></UL>
+</div>
+  時間型の分類:
+<dl>
+  <dt>時間位置(Timepoint)</dt>
+  <dd>時間連続体(time continuum)の中の特定の位置を表す。定規の目盛に似ている</dd>
+  <dt>時間長(Timelength)</dt>
+  <dd>時間連続体中のどの時間位置にも関係しない時間の長さ</dd>
+  <dt>時間間隔(Timeinterval)</dt>
+  <dd>時間連続体中の特定の時間位置に関係する時間の長さ</dd>
+</dl>
+
+<p>
+<div class="original">
+  And some other terms: 
+<UL>
+  <LI><B>Accuracy</B> -- A measure of error, the difference between the reading 
+  of a clock and the true time. 
+  <LI><B>Calendar System</B> -- A system for labeling time points with day level 
+  resolution. 
+  <LI><B>Clock Device</B> -- A software component (tied to some hardware) that 
+  provides the current date or time w.r.t. a calendar or clock system. 
+  <LI><B>Precision</B> -- A measure of repeatability of a clock. 
+  <LI><B>Resolution</B> -- A specification of the smallest representable 
+  duration (eg: 1 second, 1 century) for a clock/calendar system or temporal 
+  type. 
+  <LI><B>Stability</B> -- The property of a class which says that the underlying 
+  representation (implementation) associated with a particular (abstract) value 
+  will never change. 
+  <LI><B>Time System</B> -- A system for labeling time points with higher 
+  resolution than day-level. </LI></UL>
+</div>
+  他の用語:
+<dl>
+  <dt>正確度(Accuracy)</dt>
+  <dd>誤差の単位, クロックから読み出した時間と真の時間との差</dd>
+  <dt>暦法系(Calendar System)</dt>
+  <dd>日付レベルの分解能で時間位置(time points)にラベルを付ける体系</dd>
+  <dt>クロックデバイス</dt>
+  <dd>暦法系あるいは時法系に関して現在の日付や時刻を供給する(あるハードウェアに結び付けられた)ソフトウェアコンポーネント。</dd>
+  <dt>精密度(Precision)</dt>
+  <dd>クロック間隔の計測単位</dd>
+  <dt>分解能(Resolution)</dt>
+  <dd>時法系/暦法系あるいは時間型で表現可能な最小の時間間隔(例: 1秒，一世紀)</dd>
+  <dt>安定性(Stability)</dt>
+  <dd class="draft">根本的な表現（実装）が特定の（抽象的な）値に関連付いたことを示すクラスの特性は決して変化しない。
+</dd>
+  <dt>時法系(Time System)</dt>
+  <dd class="draft">日付レベルより高い分解能で時間位置(time points)にラベル付けするための体系。</dd>
+</dl>
+</p>
+<p>
+<div class="original">
+  Some standard date-time terminology: 
+<UL>
+  <LI><B>Epoch</B> -- Starting time point of a calendar or clock system. 
+  <LI><B>DST</B> -- Daylight savings time - a local time adjustment made in some 
+  regions during the summer to extend the amount of daylight. 
+  <LI><B>Time zone</B> -- A region of the earth that provides for a 'local time' 
+  defined by DST rules and UT offset. 
+  <LI><B>UTC Time</B> -- Coordinated Universal Time - Civil time system as 
+  measured at longitude zero. Kept adjusted to earth rotation by use of leap 
+  seconds. Also known as Zulu Time. Replaced the similar system known as 
+  Greenwich Mean Time. For more see <A 
+  href="http://aa.usno.navy.mil/faq/docs/UT.html">http://aa.usno.navy.mil/faq/docs/UT.html</A> 
+
+  <LI><B>TAI Time</B> -- A high-accuracy monotonic (need better term) time 
+  system measured to .1 microsecond resolution by atomic clocks around the 
+  world. Not adjusted to earth rotation. For more see <A 
+  href="http://www.bipm.fr/enus/5_Scientific/c_time/time_server.html">http://www.bipm.fr/enus/5_Scientific/c_time/time_server.html</A> 
+  </LI></UL>
+</div>
+  標準的な日付・時間用語:
+<dl>
+  <dt class="draft">エポック(Epoch)</dt>
+  <dd>時法系/暦法系の始点となる時間位置</dd>
+  <dt>夏時間(DST)</dt>
+  <dd>Daylight Savings Time; 
+    いくつかの地域で夏期に日照時間を延長するために使われている地域時間の調整</dd>
+  <dt>時間帯(Time zone)</dt>
+  <dd>「地域時間」を提供するために、夏時間(DST)規則と協定標準時(UT)からのオフセットで定義される地球上の地域</dd>
+  <dt>協定標準時(UTC Time)</dt>
+  <dd class="draft">
+    Coordinated Universal Time; 経度0 で計測される民間の時法系。
+    うるう秒を使用することで、地球自転に適応されている。
+    ズールー時間(Zulu Time)として知られる。
+    グリニッジ標準時(Greenwich Mean Time)として知られている類似の時法系を置き換えた。
+    詳細は <a href="http://aa.usno.navy.mil/faq/docs/UT.html">http://aa.usno.navy.mil/faq/docs/UT.html</a> を参照されたい</dd>
+  <dt>TAI Time</dt>
+  <dd class="draft">世界中の原子時計を使って 0.1 マイクロ秒の分解能で計測される、高精度で単調な時法系(もっと良い用語が必要)。
+  地球の自転には適応していない。詳細は <a 
+	href="http://www.bipm.fr/enus/5_Scientific/c_time/time_server.html">http://www.bipm.fr/enus/5_Scientific/c_time/time_server.html</a> を参照されたい</dd>
+</dl>
+</p>
+<p>
+<div class="original">
+  Some more experimental ones: 
+<UL>
+  <LI><B>Local Time</B> -- A time a measured in a specific location of the 
+  universe. 
+  <LI><B>Time Label</B> -- A tuple that either completely or partially specifies 
+  a specific date-time w.r.t a calendar or clock system. This is the 
+  year-month-day representation. 
+  <LI><B>Adjusting Time Length</B> -- A duration that represents varying 
+  physical durations depending on the moment in time. For example, a 1 month 
+  duration is typically not a fixed number of days and it depends on the date it 
+  is measured from to determine the actual length. </LI></UL>
+</div>
+  さらにいくつかの実験的なもの:
+<dl>
+  <dt>地域時間</dt>
+  <dd>世界の特定の地域で測定される時間</dd>
+  <dt class="draft">Time Label</dt>
+  <dd class="draft">暦法系あるいは時法系に関して、完全にあるいは部分的に特定の日付時間を明示するタプル。これは年-月-日の表現である。</dd>
+  <!-- 本家のrev1.2によると、"w.r.t" は"with respect to"の事らしい -->
+  <dt>時間長の調整</dt>
+  <dd>
+    その時々に依存した物理的な時間の長さを表現する時間長(duration)。
+    例えば、1ヶ月間の時間長(duration)は一般に日数の定数ではない。
+    その実際の長さは、評価する日付に依存して決定される。</dd>
+</dl>
+</p>
+<p>
+<div class="original">
+  These are design sorts of terms: 
+<UL>
+  <LI><B>Generation function</B> -- A function that generates a specific set of 
+  time points, lengths, or intervals based on one or more parameters. </LI></UL>
+</div>
+  設計に関する用語:
+<dl>
+  <dt>生成関数</dt>
+  <dd class="draft">一つ以上のパラメータからなる特定の時間位置(time points), 長さ(length), あるいは間隔(intervals)の集合を生成する関数</dd>
+</dl>
+</p>
+
+<p class="note">
+  訳注: <br>
+  時間用語の訳語について、国土地理院の地理情報標準第2版にある<a href="http://www.gsi.go.jp/GIS/stdind/stdindpdf/jsgi02.pdf">時間スキーマ</a>を参考にしてみました。<br>
+  Accuracy と Precision の使い分けは<a href="http://www.mathworks.com/access/helpdesk/jhelp/toolbox/daq/c1_int15.shtml">ここ</a>を参考にしました。
+</p>
+
+<hr>
+<address><small>
+<!-- hhmts start -->
+Last modified: Wed Aug 21 15:05:22 MST 2002
+<!-- hhmts end -->
+ by <a href="mailto:jeff&#64;crystalclearsoftware.com">Jeff Garland</a> &copy; 2000-2002
+<br>
+  Japanese Translation Copyright (C) 2003 <a href="mailto:sshino@cppll.jp">Shoji Shinohara</a>.
+</small></address>
+</body>
+</html>
