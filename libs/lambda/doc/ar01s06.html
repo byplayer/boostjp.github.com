@@ -1,0 +1,349 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+<head><title>6. Extending return type deduction system</title><meta name="generator" content="DocBook XSL Stylesheets V1.48"><link rel="home" href="index.html" title="
+      C++ BOOST
+
+      The Boost Lambda Library"><link rel="up" href="index.html" title="
+      C++ BOOST
+
+      The Boost Lambda Library"><link rel="previous" href="ar01s05.html" title="5. Lambda expressions in details"><link rel="next" href="ar01s07.html" title="7. Practical considerations"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">6. Extending return type deduction system</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ar01s05.html">Prev</a></td><th width="60%" align="center"></th><td width="20%" align="right"><a accesskey="n" href="ar01s07.html">Next</a></td></tr></table>
+<hr>
+</div>
+<div class="section">
+<div class="titlepage">
+<div>
+<h2 class="title" style="clear: both">
+<a name="sect:extending_return_type_system"></a>
+6. Extending return type deduction system
+</h2>
+</div>
+</div>
+<p>
+このセクションでは、ユーザ定義の演算子を扱うために、
+返り値の型推論システムの拡張する方法を解説する。
+BLL はデフォルトの演算子の返り値の型を定義しているため、
+多くの場合にはこれは必要ない。
+例えば、すべての比較演算子のデフォルトの返り値は <tt>bool</tt> であり、
+ユーザが比較演算子の返り値の型を bool として定義している限り
+返り値の型推論クラスの新しい特殊化を書く必要はない。
+しかし、これが不可避である場合もある。
+</p><p>
+In this section, we explain  how to extend the return type deduction system 
+to cover user defined operators. 
+
+In many cases this is not necessary, 
+as the BLL defines default return types for operators.
+
+For example, the default return type for all comparison operators is 
+<tt>bool</tt>, and as long as the user defined comparison operators 
+have a bool return type, there is no need to write new specializations 
+for the return type deduction classes.
+
+Sometimes this cannot be avoided, though.
+</p><p>
+オーバーロード可能なユーザ定義の演算子は、単項または二項演算子である。
+その引数の数ごとに、異る演算子の返り値の型を定義する
+二つの特性テンプレートがある。
+よって、このテンプレートを使い特殊化することにより、返り値の型推論システムを拡張することができる。
+単項関数のためのテンプレートは、
+<tt>
+plain_return_type_1&lt;Action, A&gt;
+</tt>
+と
+<tt>
+return_type_1&lt;Action, A&gt;
+</tt>
+であり、二項関数のためのものは、
+<tt>
+plain_return_type_2&lt;Action, A, B&gt;
+</tt>
+と
+<tt>
+return_type_2&lt;Action, A, B&gt;
+</tt>
+である。
+</p><p>
+The overloadable user defined operators are either unary or binary. 
+
+For each arity, there are two traits templates that define the 
+return types of the different operators.
+
+Hence, the return type system can be extended by providing more 
+specializations for these templates.
+
+The templates for unary functors are
+
+<tt>
+plain_return_type_1&lt;Action, A&gt;
+</tt>
+
+and 
+
+<tt>
+return_type_1&lt;Action, A&gt;
+</tt>, and 
+
+<tt>
+plain_return_type_2&lt;Action, A, B&gt;
+</tt>
+
+and 
+
+<tt>
+return_type_2&lt;Action, A, B&gt;
+</tt>
+
+respectively for binary functors.
+
+</p><p>
+これら全てのテンプレートに対する第一引数(<tt>Action</tt>) は、
+演算子を指定している <span class="emphasis"><i>アクション</i></span>クラスである。
+同じ返り値の型の規則を持った演算子は、
+<span class="emphasis"><i>アクショングループ</i></span> にまとめられ、
+アクションクラスとアクショングループのみが演算子の曖昧さを解決する。
+例を挙げると、<tt>operator+</tt>を示すアクション型
+<tt>arithmetic_action&lt;plus_action&gt;</tt> がある。
+他のアクション型の完全なリストを
+<a href="ar01s06.html#table:actions" title="Table 2. Action types">Table 2</a>
+に示す。
+</p><p>
+The first parameter (<tt>Action</tt>) to all these templates 
+is the <span class="emphasis"><i>action</i></span> class, which specifies the operator. 
+
+Operators with similar return type rules are grouped together into 
+<span class="emphasis"><i>action groups</i></span>, 
+and only the action class and action group together define the operator 
+unambiguously. 
+
+As an example, the action type 
+<tt>arithmetic_action&lt;plus_action&gt;</tt> stands for 
+<tt>operator+</tt>. 
+
+The complete listing of different action types is shown in 
+<a href="ar01s06.html#table:actions" title="Table 2. Action types">Table 2</a>. 
+</p><p>
+単項関数の場合の <tt>A</tt> や二項関数の場合の <tt>A</tt> や <tt>B</tt> 
+の残りのテンプレート引数は、演算子呼出しの引数の型を示している。
+二つのテンプレート群 <tt>plain_return_type_<i><tt>n</tt></i></tt> と
+<tt>return_type_<i><tt>n</tt></i></tt> は、(<i><tt>n</tt></i> は１または２)
+引数の型の提示の仕方において異なる。
+前者のテンプレートでは、引数の型は常に参照型でなく、
+また、const や volatile といった修飾子もついていない。
+これにより、一般的に各ユーザ定義の演算子や演算子群ごとに一つの特殊化を行うだけで十分となるため、特殊化が簡単になる。
+一方、特定の演算子を同じ型の引数に異なった const/volatile の修飾子をつけたり、オーバーロードした演算子の返り値の型が異なる場合には、より細かい操作が必要となる。
+よって、後者のテンプレートでは、引数の型は const/volatile の修飾子も変更せず、非参照型もそのままにする。
+欠点は上記のようなオーバーロードした演算子のために、最悪の場合十六個の
+<tt>return_type_2</tt> の特殊化が必要となるかもしれないことである。
+</p><p>
+The latter parameters, <tt>A</tt> in the unary case, 
+or <tt>A</tt> and <tt>B</tt> in the binary case, 
+stand for the argument types of the operator call. 
+
+The two sets of templates, 
+<tt>plain_return_type_<i><tt>n</tt></i></tt> and 
+<tt>return_type_<i><tt>n</tt></i></tt> 
+(<i><tt>n</tt></i> is 1 or 2) differ in the way how parameter types 
+are presented to them.
+
+For the former templates, the parameter types are always provided as 
+non-reference types, and do not have const or volatile qualifiers.
+
+This makes specializing easy, as commonly one specialization for each 
+user defined operator, or operator group, is enough.
+
+On the other hand, if a particular operator is overloaded for different 
+cv-qualifications of the same argument types, 
+and the return types of these overloaded versions differ, a more fine-grained control is needed.
+
+Hence, for the latter templates, the parameter types preserve the 
+cv-qualifiers, and are non-reference types as well. 
+ 
+The downside is, that for an overloaded set of operators of the 
+kind described above, one may end up needing up to 
+16 <tt>return_type_2</tt> specializations.
+</p><p>
+ユーザ定義の型 <tt>X</tt>、<tt>Y</tt>、<tt>Z</tt> に対して演算子をオーバーロードしたとする。
+<pre class="programlisting">
+Z operator+(const X&amp;, const Y&amp;);
+Z operator-(const X&amp;, const Y&amp;);
+</pre>
+Suppose the user has overloaded the following operators for some user defined 
+types <tt>X</tt>, <tt>Y</tt> and <tt>Z</tt>:
+
+<pre class="programlisting">
+Z operator+(const X&amp;, const Y&amp;);
+Z operator-(const X&amp;, const Y&amp;);
+</pre>
+そして以下では、左側の引数の型が <tt>X</tt>であり、右側の引数の型が <tt>Y</tt> であれば、そのような二項演算の結果の型は <tt>Z</tt> であるという特殊化の記述を追加している。
+<pre class="programlisting">
+namespace boost { 
+namespace lambda {
+  
+template&lt;class Act&gt; 
+struct plain_return_type_2&lt;arithmetic_action&lt;Act&gt;, X, Y&gt; {
+  typedef Z type;
+};
+
+}
+}
+</pre>
+Now, one can add a specialization stating, that if the left hand argument 
+is of type <tt>X</tt>, and the right hand one of type 
+<tt>Y</tt>, the return type of all such binary arithmetic 
+operators is <tt>Z</tt>:
+
+<pre class="programlisting">
+namespace boost { 
+namespace lambda {
+  
+template&lt;class Act&gt; 
+struct plain_return_type_2&lt;arithmetic_action&lt;Act&gt;, X, Y&gt; {
+  typedef Z type;
+};
+
+}
+}
+</pre>
+この特殊化を定義することにより、
+BLL は正しく上記の二つの演算子の返り値の型を推論することができる。
+特殊化は主要なテンプレートとともに、名前空間 <tt>::boost::lambda</tt>に
+存在しなければならない。
+簡単のために、以下の例ではこの名前空間の定義は省略する。
+<br><br>
+Having this specialization defined, BLL is capable of correctly 
+deducing the return type of the above two operators.
+
+Note, that the specializations must be in the same namespace, 
+<tt>::boost::lambda</tt>, with the primary template. 
+
+For brevity, we do not show the namespace definitions in the examples below.
+</p><p>
+演算子グループの特殊化に加えて、
+個々の演算子ごとに特殊化を行うことも可能である。
+例えば、新しく引数の型が、<tt>X</tt> と <tt>Y</tt> である算術演算子を追加したとする。
+<pre class="programlisting">
+X operator*(const X&amp;, const Y&amp;);
+</pre>
+全ての算術演算子に対する最初の規則では、
+返り値の型は <tt>Z</tt> と指定している。
+これは、この場合には明らか間違っている。
+よって、剰余演算子に対して次のように新しい規則を提供する。
+<pre class="programlisting">
+template&lt;&gt; 
+struct plain_return_type_2&lt;arithmetic_action&lt;multiply_action&gt;, X, Y&gt; {
+  typedef X type;
+};
+</pre>
+</p><p>
+It is possible to specialize on the level of an individual operator as well, 
+in addition to providing a specialization for a group of operators. 
+Say, we add a new arithmetic operator for argument types <tt>X</tt> 
+and <tt>Y</tt>:
+
+<pre class="programlisting">
+X operator*(const X&amp;, const Y&amp;);
+</pre>
+
+Our first rule for all arithmetic operators specifies that the return 
+type of this operator is <tt>Z</tt>, 
+which obviously is not the case.
+Hence, we provide a new rule for the multiplication operator:
+
+<pre class="programlisting">
+template&lt;&gt; 
+struct plain_return_type_2&lt;arithmetic_action&lt;multiply_action&gt;, X, Y&gt; {
+  typedef X type;
+};
+</pre>
+</p><p>
+特殊化により、引数の型から返り値の型への任意のマッピングを定義することができる。
+次のように、要素の型をテンプレートとした数学的なベクトルがあったとする。
+<pre class="programlisting">
+template &lt;class T&gt; class my_vector;
+</pre>
+
+The specializations can define arbitrary mappings from the argument types 
+to the return type. 
+Suppose we have some mathematical vector type, templated on the element type:
+<pre class="programlisting">
+template &lt;class T&gt; class my_vector;
+</pre>
+要素の型の間に加法演算子が定義されている限り、
+いかなる二つの <tt>my_vector</tt> のインタンスの間にも加法演算子が定義されるとする。
+さらに、その結果の <tt>my_vector</tt> の要素の型は、
+二つの <tt>my_vector</tt> の要素の加法の結果の型と同じであるとする。
+例えば、<tt>my_vector&lt;int&gt;</tt> と<tt>my_vector&lt;double&gt;</tt> 
+の加法の結果は <tt>my_vector&lt;double&gt;</tt> となる。
+BLL は整数、浮動小数、複素数の間の<font color="red">暗黙的な組込みの標準的な</font>型変換を実現する特性クラスを持っている。
+BLL の機能を利用すれば、上記の加法演算子は次のように定義できる。
+<pre class="programlisting">
+template&lt;class A, class B&gt; 
+my_vector&lt;typename return_type_2&lt;arithmetic_action&lt;plus_action&gt;, A, B&gt;::type&gt;
+operator+(const my_vector&lt;A&gt;&amp; a, const my_vector&lt;B&gt;&amp; b)
+{
+  typedef typename 
+    return_type_2&lt;arithmetic_action&lt;plus_action&gt;, A, B&gt;::type res_type;
+  return my_vector&lt;res_type&gt;();
+}
+</pre>
+</p><p>
+Suppose the addition operator is defined between any two 
+<tt>my_vector</tt> instantiations, 
+as long as the addition operator is defined between their element types. 
+
+Furthermore, the element type of the resulting <tt>my_vector</tt> 
+is the same as the result type of the addition between the element types.
+
+E.g., adding <tt>my_vector&lt;int&gt;</tt> and 
+<tt>my_vector&lt;double&gt;</tt> results in 
+<tt>my_vector&lt;double&gt;</tt>.
+
+The BLL has traits classes to perform the implicit built-in and standard 
+type conversions between integral, floating point, and complex classes.
+
+Using BLL tools, the addition operator described above can be defined as:
+
+<pre class="programlisting">
+template&lt;class A, class B&gt; 
+my_vector&lt;typename return_type_2&lt;arithmetic_action&lt;plus_action&gt;, A, B&gt;::type&gt;
+operator+(const my_vector&lt;A&gt;&amp; a, const my_vector&lt;B&gt;&amp; b)
+{
+  typedef typename 
+    return_type_2&lt;arithmetic_action&lt;plus_action&gt;, A, B&gt;::type res_type;
+  return my_vector&lt;res_type&gt;();
+}
+</pre>
+</p><p>
+<tt>my_vector</tt> の加算の型推論を正確に行うために、次のように定義できる。
+<pre class="programlisting">
+template&lt;class A, class B&gt; 
+class plain_return_type_2&lt;arithmetic_action&lt;plus_action&gt;, 
+                           my_vector&lt;A&gt;, my_vector&lt;B&gt; &gt; {
+  typedef typename 
+    return_type_2&lt;arithmetic_action&lt;plus_action&gt;, A, B&gt;::type res_type;
+public:
+  typedef my_vector&lt;res_type&gt; type;
+};
+</pre>
+BLL のテンプレート <tt>return_type_2</tt> の実在する特殊化を再利用している。
+そのためには、引数の型が参照型であることが必要である。
+</p><p>
+To allow BLL to deduce the type of <tt>my_vector</tt> 
+additions correctly, we can define:
+
+<pre class="programlisting">
+template&lt;class A, class B&gt; 
+class plain_return_type_2&lt;arithmetic_action&lt;plus_action&gt;, 
+                           my_vector&lt;A&gt;, my_vector&lt;B&gt; &gt; {
+  typedef typename 
+    return_type_2&lt;arithmetic_action&lt;plus_action&gt;, A, B&gt;::type res_type;
+public:
+  typedef my_vector&lt;res_type&gt; type;
+};
+</pre>
+Note, that we are reusing the existing specializations for the 
+BLL <tt>return_type_2</tt> template, 
+which require that the argument types are references. 
+</p>
+<div class="table"><p><a name="table:actions"></a><b>Table 2. Action types</b></p><table summary="Action types" border="1"><colgroup><col><col></colgroup><tbody><tr><td><tt>+</tt></td><td><tt>arithmetic_action&lt;plus_action&gt;</tt></td></tr><tr><td><tt>-</tt></td><td><tt>arithmetic_action&lt;minus_action&gt;</tt></td></tr><tr><td><tt>*</tt></td><td><tt>arithmetic_action&lt;multiply_action&gt;</tt></td></tr><tr><td><tt>/</tt></td><td><tt>arithmetic_action&lt;divide_action&gt;</tt></td></tr><tr><td><tt>%</tt></td><td><tt>arithmetic_action&lt;remainder_action&gt;</tt></td></tr><tr><td><tt>+</tt></td><td><tt>unary_arithmetic_action&lt;plus_action&gt;</tt></td></tr><tr><td><tt>-</tt></td><td><tt>unary_arithmetic_action&lt;minus_action&gt;</tt></td></tr><tr><td><tt>&amp;</tt></td><td><tt>bitwise_action&lt;and_action&gt;</tt></td></tr><tr><td><tt>|</tt></td><td><tt>bitwise_action&lt;or_action&gt;</tt></td></tr><tr><td><tt>~</tt></td><td><tt>bitwise_action&lt;not_action&gt;</tt></td></tr><tr><td><tt>^</tt></td><td><tt>bitwise_action&lt;xor_action&gt;</tt></td></tr><tr><td><tt>&lt;&lt;</tt></td><td><tt>bitwise_action&lt;leftshift_action_no_stream&gt;</tt></td></tr><tr><td><tt>&gt;&gt;</tt></td><td><tt>bitwise_action&lt;rightshift_action_no_stream&gt;</tt></td></tr><tr><td><tt>&amp;&amp;</tt></td><td><tt>logical_action&lt;and_action&gt;</tt></td></tr><tr><td><tt>||</tt></td><td><tt>logical_action&lt;or_action&gt;</tt></td></tr><tr><td><tt>!</tt></td><td><tt>logical_action&lt;not_action&gt;</tt></td></tr><tr><td><tt>&lt;</tt></td><td><tt>relational_action&lt;less_action&gt;</tt></td></tr><tr><td><tt>&gt;</tt></td><td><tt>relational_action&lt;greater_action&gt;</tt></td></tr><tr><td><tt>&lt;=</tt></td><td><tt>relational_action&lt;lessorequal_action&gt;</tt></td></tr><tr><td><tt>&gt;=</tt></td><td><tt>relational_action&lt;greaterorequal_action&gt;</tt></td></tr><tr><td><tt>==</tt></td><td><tt>relational_action&lt;equal_action&gt;</tt></td></tr><tr><td><tt>!=</tt></td><td><tt>relational_action&lt;notequal_action&gt;</tt></td></tr><tr><td><tt>+=</tt></td><td><tt>arithmetic_assignment_action&lt;plus_action&gt;</tt></td></tr><tr><td><tt>-=</tt></td><td><tt>arithmetic_assignment_action&lt;minus_action&gt;</tt></td></tr><tr><td><tt>*=</tt></td><td><tt>arithmetic_assignment_action&lt;multiply_action&gt;</tt></td></tr><tr><td><tt>/=</tt></td><td><tt>arithmetic_assignment_action&lt;divide_action&gt;</tt></td></tr><tr><td><tt>%=</tt></td><td><tt>arithmetic_assignment_action&lt;remainder_action&gt;</tt></td></tr><tr><td><tt>&amp;=</tt></td><td><tt>bitwise_assignment_action&lt;and_action&gt;</tt></td></tr><tr><td><tt>=|</tt></td><td><tt>bitwise_assignment_action&lt;or_action&gt;</tt></td></tr><tr><td><tt>^=</tt></td><td><tt>bitwise_assignment_action&lt;xor_action&gt;</tt></td></tr><tr><td><tt>&lt;&lt;=</tt></td><td><tt>bitwise_assignment_action&lt;leftshift_action&gt;</tt></td></tr><tr><td><tt>&gt;&gt;=</tt></td><td><tt>bitwise_assignment_action&lt;rightshift_action&gt;</tt></td></tr><tr><td><tt>++</tt></td><td><tt>pre_increment_decrement_action&lt;increment_action&gt;</tt></td></tr><tr><td><tt>--</tt></td><td><tt>pre_increment_decrement_action&lt;decrement_action&gt;</tt></td></tr><tr><td><tt>++</tt></td><td><tt>post_increment_decrement_action&lt;increment_action&gt;</tt></td></tr><tr><td><tt>--</tt></td><td><tt>post_increment_decrement_action&lt;decrement_action&gt;</tt></td></tr><tr><td><tt>&amp;</tt></td><td><tt>other_action&lt;address_of_action&gt;</tt></td></tr><tr><td><tt>*</tt></td><td><tt>other_action&lt;contents_of_action&gt;</tt></td></tr><tr><td><tt>,</tt></td><td><tt>other_action&lt;comma_action&gt;</tt></td></tr></tbody></table></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ar01s05.html">Prev</a></td><td width="20%" align="center"><a accesskey="u" href="index.html">Up</a></td><td width="40%" align="right"><a accesskey="n" href="ar01s07.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">5. Lambda expressions in details</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">7. Practical considerations</td></tr></table></div></body></html>

@@ -1,0 +1,270 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+<head><title>8. Relation to other Boost libraries</title><meta name="generator" content="DocBook XSL Stylesheets V1.48"><link rel="home" href="index.html" title="
+      C++ BOOST
+
+      The Boost Lambda Library"><link rel="up" href="index.html" title="
+      C++ BOOST
+
+      The Boost Lambda Library"><link rel="previous" href="ar01s07.html" title="7. Practical considerations"><link rel="next" href="ar01s09.html" title="9. Contributors"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">8. Relation to other Boost libraries</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ar01s07.html">Prev</a></td><th width="60%" align="center"></th><td width="20%" align="right"><a accesskey="n" href="ar01s09.html">Next</a></td></tr></table>
+<hr>
+</div>
+<div class="section">
+<div class="titlepage">
+<div>
+<h2 class="title" style="clear: both">
+<a name="id2808502"></a>
+8. Relation to other Boost libraries
+</h2>
+</div>
+</div>
+<div class="section">
+<div class="titlepage">
+<div>
+<h3 class="title">
+<a name="id2808509"></a>
+8.1. Boost Function
+</h3>
+</div>
+</div>
+<p>
+λファンクタを変数に格納すると都合のいい場合がある。
+しかし、最も単純なλファンクタの型であっても、長く、現実的でない。
+そして、一般的にはλファンクタの型の変数を宣言することは実現不可能である。
+<span class="emphasis"><i>Boost Function ライブラリ</i></span> [<a href="bi01.html#cit:boost::function" title="[function]">function</a>]
+は、例えばλファンクタのような任意の関数オブジェクトのラッパを定義する。
+これらのラッパは記述しやすい型となっている。
+以下に例を示す。
+<pre class="programlisting">
+boost::function&lt;int(int, int)&gt; f = _1 + _2;
+boost::function&lt;int&amp;(int&amp;)&gt; g = (_1 += 10);
+int i = 1, j = 2;
+f(i); // returns 3
+g(i); // sets i to = 11;
+</pre>
+Sometimes it is convenient to store lambda functors in variables.
+However, the types of even the simplest lambda functors are long and unwieldy, and it is in general unfeasible to declare variables with lambda functor types.
+<span class="emphasis"><i>The Boost Function library</i></span> [<a href="bi01.html#cit:boost::function" title="[function]">function</a>] defines wrappers for arbitrary function objects, for example 
+lambda functors; and these wrappers have types that are easy to type out.
+
+For example:
+
+<pre class="programlisting">
+boost::function&lt;int(int, int)&gt; f = _1 + _2;
+boost::function&lt;int&amp;(int&amp;)&gt; g = (_1 += 10);
+int i = 1, j = 2;
+f(i); // returns 3
+g(i); // sets i to = 11;
+</pre>
+<font color="red">
+たとえ、一般的な引数を持っているλファンクタであっても、
+</font>
+ラップする関数オブジェクトの返り値と引数の型は、ラッパテンプレート <tt>boost::function</tt> のテンプレート引数として明示的に記述されなければならない。
+<tt>boost::function</tt> で関数オブジェクトをラップすると、実際には仮想関数を使用していないが、仮想関数の処理と同等なパフォーマンスのコストが生じてしまう。
+<tt>boost::function</tt> 中にλファンクタを格納することは危険の原因となりうる。
+ある種のλファンクタは、λ式の引数のコピーをとる代わりに、束縛変数への参照を格納しているかもしれない。
+SLT アルゴリズムの呼出しが完了した直後にλファンクタは破棄されるため、STL アルゴリズムの呼出しで、一時的なλファンクタのオブジェクトが使用されている場合は常に安全である。
+しかし、<tt>boost::function</tt> の内部にラップされたλファンクタは、さらに生存し続け、無効な参照を持つ可能性を作ってしまう。
+以下に、例を示す。
+<pre class="programlisting">
+int* sum = new int();
+*sum = 0;
+boost::function&lt;int&amp;(int)&gt; counter = *sum += _1;
+counter(5); // ok, *sum = 5;
+delete sum; 
+counter(3); // error, *sum does not exist anymore
+</pre>
+
+The return and parameter types of the wrapped function object must be written explicilty as the template argument to the wrapper template <tt>boost::function</tt>; even when lambda functors, which otherwise have generic parameters, are wrapped.
+Wrapping a function object with <tt>boost::function</tt> introduces a performance cost comparable to virtual function dispatch, though virtual functions are not actually used.
+
+Note that storing lambda functors inside <tt>boost::function</tt> 
+introduces a danger.
+Certain types of lambda functors may store references to the bound 
+arguments, instead as taking copies of the arguments of the lambda expression.
+When temporary lambda functor objects are used 
+in STL algorithm invocations this is always safe, as the lambda functor gets 
+destructed immediately after the STL algortihm invocation is completed.
+
+However, a lambda functor wrapped inside <tt>boost::function</tt> 
+may continue to exist longer, creating the possibility of dangling references.
+For example:
+
+<pre class="programlisting">
+int* sum = new int();
+*sum = 0;
+boost::function&lt;int&amp;(int)&gt; counter = *sum += _1;
+counter(5); // ok, *sum = 5;
+delete sum; 
+counter(3); // error, *sum does not exist anymore
+</pre>
+
+</p>
+</div>
+<div class="section">
+<div class="titlepage">
+<div>
+<h3 class="title">
+<a name="id2808613"></a>
+8.2. Boost Bind
+</h3>
+</div>
+</div>
+<p>
+<span class="emphasis"><i>Boost Bind</i></span> [<a href="bi01.html#cit:boost::bind" title="[bind]">bind</a>] ライブラリは部分的に BLL の機能と重複する。
+基本的には、Boost Bind ライブラリ(以降 BB)では、BLL の一部の bind 式を実装しているといえる。
+しかし、いくつか意味的に異なる部分もある。
+</p><p>
+<span class="emphasis"><i>The Boost Bind</i></span> [<a href="bi01.html#cit:boost::bind" title="[bind]">bind</a>] library has partially overlapping functionality with the BLL. 
+Basically, the Boost Bind library (BB in the sequel) implements the bind expression part of BLL.
+There are, however, some semantical differerences.
+</p><p>
+BLL と BB は別々に発展し、異った実装となっている。
+そのため、BB の bind 式は BLL の bind 式、他の形のλ式には使用することはできない。
+BB において、BLL の bind 式を使用するのにも、同じ制限がある。
+しかし、BB ライブラリの名前は、名前空間 <tt>boost</tt> に存在するのに対し、
+BLL の名前は、名前空間 <tt>boost::lambda</tt> に存在するため、
+これらの二つのライブラリは共存できる。
+</p><p>
+The BLL and BB evolved separately, and have different implementations. 
+This means that the bind expressions from the BB cannot be used within 
+bind expressions, or within other type of lambda expressions, of the BLL.
+The same holds for using BLL bind expressions in the BB.
+The libraries can coexist, however, as
+the names of the BB library are in <tt>boost</tt> namespace, 
+whereas the BLL names are in <tt>boost::lambda</tt> namespace.
+</p><p>
+BLL はある程度 C++ 標準に順応なコンパイラが必要であるのに対し、
+BB ライブラリはよりポータブルなコンパイラで十分であり、より多くのコンパイラで機能する。
+</p><p>
+The BLL requires a compiler that is reasonably conformant to the 
+C++ standard, whereas the BB library is more portable, and works with 
+a larger set of compilers. 
+</p><p>
+以降の二つのサブセクションでは、
+BB と BLL における bind 式の意味的な相違について説明する。
+</p><p>
+The following two sections describe what are the semantic differences 
+between the bind expressions in BB and BLL.
+</p>
+<div class="section">
+<div class="titlepage">
+<div>
+<h4 class="title">
+<a name="id2808678"></a>
+8.2.1. First argument of bind expression
+</h4>
+</div>
+</div>
+BB においては、対象の関数である bind 式の第一引数の扱い方は、
+他の引数の扱い方とは異なる。
+この引数に関しては、引数の代入が行なわれないのである。
+BLL においては、この点においては第一引数は特別扱いはされない。
+以下に例を示す。
+<pre class="programlisting">
+template&lt;class F&gt;
+int foo(const F&amp; f) {
+  int x;
+  ..
+  bind(f, _1)(x);
+  ...
+}
+</pre>
+<pre class="programlisting">
+int bar(int, int);
+nested(bind(bar, 1, _1));
+</pre>
+
+In BB the first argument of the bind expression, the target function, 
+is treated differently from the other arguments, 
+as no argument substitution takes place within that argument.
+In BLL the first argument is not a special case in this respect.
+For example:
+<pre class="programlisting">
+template&lt;class F&gt;
+int foo(const F&amp; f) {
+  int x;
+  ..
+  bind(f, _1)(x);
+  ...
+}
+</pre>
+<pre class="programlisting">
+int bar(int, int);
+nested(bind(bar, 1, _1));
+</pre>
+
+<tt>foo</tt> の内部の bind 式は次のようになる。
+<pre class="programlisting">
+bind(bind(bar, 1, _1), _1)(x)
+</pre>
+The bind expression inside <tt>foo</tt> becomes:
+<pre class="programlisting">
+bind(bind(bar, 1, _1), _1)(x)
+</pre>
+
+BLL においては、これは次のように解釈される。
+<pre class="programlisting">
+bar(1, x)(x)
+</pre>
+The BLL interpretes this as:
+<pre class="programlisting">
+bar(1, x)(x)
+</pre>
+
+一方、BB においては次のようになる。
+<pre class="programlisting">
+bar(1, x)
+</pre>
+whereas the BB library as
+<pre class="programlisting">
+bar(1, x)
+</pre>
+
+BLL ではこの機能を実現するため、<a href="ar01s05.html#sect:unlambda" title="5.9.1.1. Unlambda">Section 5.9.1.1</a> で説明したように、関数 <tt>foo</tt> の内部の bind 式は次のように書くことが可能である。
+<pre class="programlisting">
+bind(unlambda(f), _1)(x);
+</pre>
+
+To get this functionality in BLL, the bind expression inside the <tt>foo</tt> function can be written as:
+<pre class="programlisting">
+bind(unlambda(f), _1)(x);
+</pre>
+as explained in <a href="ar01s05.html#sect:unlambda" title="5.9.1.1. Unlambda">Section 5.9.1.1</a>. 
+
+</div>
+<p>
+BLL では三つのプレースホルダしか定義されていないのに対し、
+BB ライブラリは九つまでのプレースホルダをサポートしている。
+これ以上のプレースホルダを提供しない根拠は、いかなる STL アルゴリズムで受理できる関数オブジェクトの最多の引数の数は二つであることである。
+BB ライブラリにおいてプレースホルダの数は簡単に増加させることができる。
+BLL でも可能であるが、しかしより多くの労力を必要とする。
+現在 BLL は実引数を内部的にλファンクタにそのまま渡しており、
+タプルにラップしたりはしない。
+これは、広く使用されているいくつかのコンパイラが最適化において中間のタプルを取り去ることができないためである。
+中間のタプルの生成はパフォーマンスに重大な影響を与えてしまう。
+特に、単純な(そして最も一般な)λファンクタの場合には重要である。
+そして、より多くのプレースホルダも可能であるが、単純なλファンクタのパフォーマンスに関して妥協しない折衷案を選択した。
+</p>
+<p>
+The BB library supports up to nine placeholders, while the BLL 
+defines only three placeholders. 
+The rationale for not providing more, is that the highest arity of the
+function objects accepted by any STL algorithm is two. 
+The placeholder count is easy to increase in the BB library.
+In BLL it is possible, but more laborous.
+The BLL currently passes the actual arguments to the lambda functors
+internally just as they are and does not wrap them inside a tuple object.
+The reason for this is that some widely used compilers are not capable
+of optimizing the intermediate tuple objects away. 
+The creation of the intermediate tuples would cause a significant
+performance hit, particularly for the simplest (and thus the most common) 
+lambda functors.  
+We are working on a hybrid approach, which will allow more placeholders
+but not compromise the performance of simple lambda functors.
+</p>
+</div>
+</div>
+
+<div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ar01s07.html">Prev</a></td><td width="20%" align="center"><a accesskey="u" href="index.html">Up</a></td><td width="40%" align="right"><a accesskey="n" href="ar01s09.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">7. Practical considerations</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">9. Contributors</td></tr></table></div></body></html>

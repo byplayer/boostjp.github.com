@@ -1,0 +1,300 @@
+<html>
+
+	<head>
+		<title>Special Functions Documentation</title>
+		<meta http-equiv="generator" content="Adobe GoLive 5">
+		<meta http-equiv="content-type" content="text/html;charset=utf-8">
+	</head>
+
+	<body bgcolor="#FFFFFF" text="#000000">
+原文 : <a href="http://www.boost.org/libs/math/special_functions/special_functions.html">http://www.boost.org/libs/math/special_functions/special_functions.html</a>
+		<h1><img src="../../../c++boost.gif" alt="c++boost.gif (8819 bytes)" align="center" width="277" height="86">Special Functions library</h1>
+		<ul>
+			<li><a href="#Acknowledgements">Acknowledgements</a>
+			<li><a href="#Header File">Header Files</a>
+			<li><a href="#Test Program">Test Program</a>
+			<li><a href="#Synopsis">Synopsis</a>
+			<li><a href="#Functions">Functions</a>
+			<li><a href="#History">History</a>
+		</ul>
+<p>
+現在このライブラリは5つの"特殊な"数学関数を、boost名前空間で、テンプレートとして提供している。この内、シンク関数とハイパボリックシンク関数(<code>sinc_pi</code>, <code>sinhc_pi</code>)は四元数と八元数を実装するのに必要である。
+</p>
+<p>
+逆双曲関数( <code>acosh</code>, <code>asinh</code>, <code>atanh</code> )は
+全体的に古典的であり、シンク関数( <code>sinc_pi</code> )は信号処理の作業で
+よく使われるようだ。また、双曲シンク関数( <code>sinhc_pi</code> )は、
+シンク関数( <code>sinc_pi</code> )と双曲関数( sinh, cosh, tanh )から
+名付けられており、<a href="#info_adhoc" name="adhoc">アドホックな</a>関数で
+ある。
+</p>
+<p>
+<font color="#000000">
+指数関数は、その意味が通る全ての対象に対して、
+<img src="graphics/special_functions_blurb1.jpeg" width="75" height="32" naturalsizeflag="3" align=absmiddle>
+という級数関数で定義される。ここで、
+<img src="graphics/special_functions_blurb2.jpeg" width="83" height="12" naturalsizeflag="3" align=absmiddle>
+(
+<img src="graphics/special_functions_blurb3.jpeg" width="26" height="12" naturalsizeflag="3" align=absmiddle>
+を自明とする)は
+<img src="graphics/special_functions_blurb4.jpeg" width="9" height="9" naturalsizeflag="3" align=absmiddle>
+の階乗である。特に、指数関数は、実数、複素数、四 元数、八元数、複素数を
+要素にもつ行列に対して、自然に定義される。
+</font>
+</p>
+		<div align="center">
+
+<p><img src="graphics/exp_on_R.png" width="502" height="330" border="0"></p>
+<p><samp>実数Rを変数にとった指数関数expのグラフ</samp></p>
+
+		</div>
+		<p></p>
+		<div align="center">
+			<p><img src="graphics/Re(exp)_on_C.png" width="374" height="249" border="0"><img src="graphics/Im(exp)_on_C.png" width="374" height="249" border="0"></p>
+			<p><samp>複素数Cを変数にとった指数関数expの実部と虚部</samp></p>
+		</div>
+		<p></p>
+		<p><font color="#000000">双曲関数は、(実数、複素数、四元数、八元数のために)数値計算可能な級数関数として以下のように定義する：</font></p>
+		<p><font color="#000000">&nbsp;</font></p>
+		<p><font color="#000000">双曲余弦関数： <img src="graphics/special_functions_blurb5.jpeg" width="144" height="29" naturalsizeflag="3" align=absmiddle></font></p>
+		<p><font color="#000000">双曲余弦関数： <img src="graphics/special_functions_blurb6.jpeg" width="142" height="29" naturalsizeflag="3" align=absmiddle></font></p>
+		<p><font color="#000000">双曲正接関数： <img src="graphics/special_functions_blurb7.jpeg" width="90" height="32" naturalsizeflag="3" align=absmiddle></font></p>
+		<p></p>
+		<div align="center">
+			<p><font color="#000000">&nbsp;<img src="graphics/trigonometric.png" width="502" height="330" border="0"></font></p>
+			<p><samp>実数Rを変数にとった三角関数 (cos: 紫; sin: 赤; tan: 青)</samp></p>
+			<p><img src="graphics/hyperbolic.png" width="502" height="330" border="0"></p>
+			<p><samp>実数Rを変数にとった双曲関数(cosh: 紫; sinh: 赤; tanh: 青)</samp></p>
+		</div>
+		<p></p>
+
+<p><font color="#000000">
+双曲正弦関数は無限小から無限大までの範囲の実数上で一対一対応である。
+一方で、双曲正接関数は
+<img src="graphics/special_functions_blurb8.jpeg" width="46" height="16" naturalsizeflag="3" align=absmiddle></font><font color="#000000">
+の範囲の実数上で一対一対応である。そして、この二つの関数は逆関数を持っている。
+双曲余弦関数は、
+<img src="graphics/special_functions_blurb9.jpeg" width="35" height="15" naturalsizeflag="3" align=absmiddle></font><font color="#000000">
+の範囲の実数上では
+<img src="graphics/special_functions_blurb10.jpeg" width="41" height="15" naturalsizeflag="3" align=absmiddle></font><font color="#000000">
+の範囲で、また
+<img src="graphics/special_functions_blurb11.jpeg" width="35" height="15" naturalsizeflag="3" align=absmiddle></font><font color="#000000">
+の範囲の実数上では
+<img src="graphics/special_functions_blurb12.jpeg" width="41" height="15" naturalsizeflag="3" align=absmiddle></font><font color="#000000">
+の範囲で一対一対応である。ここで使う逆関数は変域
+<img src="graphics/special_functions_blurb13.jpeg" width="41" height="15" naturalsizeflag="3" align=absmiddle></font><font color="#000000">
+、値域
+<img src="graphics/special_functions_blurb14.jpeg" width="35" height="15" naturalsizeflag="3" align=absmiddle></font><font color="#000000">
+で定義される。
+</font></p>
+
+<p><font color="#000000">
+双曲正接関数の逆関数は逆双曲正接関数と呼び、数値計算では次のように扱う。<img src="graphics/special_functions_blurb15.jpeg" width="109" height="44" naturalsizeflag="3" align=absbottom></font><font color="#000000"></font></p>
+
+<p><font color="#000000">
+双曲正弦関数の逆関数は逆双曲正弦関数と呼び、数値計算では次のように扱う。<img src="graphics/special_functions_blurb17.jpeg" width="133" height="24" naturalsizeflag="3" align=absmiddle></font><font color="#000000">
+ただし <img src="graphics/special_functions_blurb16.jpeg" width="28" height="12" naturalsizeflag="3" align=absmiddle></font><font color="#000000"> である。</font></p>
+
+<p><font color="#000000">
+双曲余弦関数の逆関数は逆双曲余弦関数と呼び、数値計算では次のように扱う。<img src="graphics/special_functions_blurb18.jpeg" width="133" height="24" naturalsizeflag="3" align=absmiddle></font><font color="#000000"></font></p>
+
+<p><font color="#000000">
+シンク関数は指数関数によって次のように定義される。<img src="graphics/special_functions_blurb19.jpeg" width="27" height="12" naturalsizeflag="3" align=absmiddle></font><font color="#000000">のとき <img src="graphics/special_functions_blurb20.jpeg" width="99" height="58" naturalsizeflag="3" align=absmiddle></font></p>
+
+<p><font color="#000000">
+我々は類似のものとして双曲シンク関数を指数関数によって次のように定義する。
+<img src="graphics/special_functions_blurb21.jpeg" width="27" height="12" naturalsizeflag="3" align=absmiddle></font><font color="#000000">のとき <img src="graphics/special_functions_blurb22.jpeg" width="111" height="58" naturalsizeflag="3" align=absmiddle></font>
+<font color="#000000">これもまた滑かな曲線を描く関数である。</font></p>
+
+		<div align="center">
+			<p><img src="graphics/sinc_pi_and_sinhc_pi_on_R.png" width="502" height="330" border="0"></p>
+
+<p><samp>実数Rを変数にとり、πを要素に持つシンク関数(紫)と双曲シンク関数(赤)
+</samp></p>
+		</div>
+		<h2><a name="Acknowledgements"></a>Acknowledgements</h2>
+
+<p>
+数式の編集には <a href="http://www.nisus-soft.com/">Nisus Writer</a> を、
+グラフ等の編集には <a href="http://www.pacifict.com/">Graphing Calculator</a> を使用した。Jens Maurer氏にはプレビューの管理で協力して戴いた。
+諸々の感謝については History の部分で述べる。
+このライブラリを議論し協力してくださった方々に感謝する。</p>
+
+<h2><a name="Header File"></a>Header Files</h2>
+<p>次のヘッダ一つ一つが、それぞれの関数のインターフェースと実装を提供する：</p>
+		<ul>
+			<li type="disc"><a href="../../../boost/math/special_functions/acosh.hpp">acosh.hpp</a>
+			<li type="disc"><a href="../../../boost/math/special_functions/asinh.hpp">asinh.hpp</a>
+			<li type="disc"><a href="../../../boost/math/special_functions/atanh.hpp">atahn.hpp</a>
+			<li type="disc"><a href="../../../boost/math/special_functions/sinc.hpp">sinc.hpp</a>
+			<li type="disc"><a href="../../../boost/math/special_functions/sinhc.hpp">sinhc.hpp</a>
+		</ul>
+
+<h2><a name="Test Program"></a>Test Program</h2>
+<p>
+テストプログラム<a href="special_functions_test.cpp">special_functions_test.cpp</a>は、float, double, long double型での関数のテストを行なう。(<a href="output.txt">出力サンプル</a>)</p>
+<p>以下の環境で動作確認をした：</p>
+		<blockquote>
+			<ul>
+<li>PowerPC G3 -- CodeWarrior for Mac OS Professional Edition v6(Metroworks)
+			</ul>
+		</blockquote>
+		<h2><a name="Synopsis"></a>Synopsis</h2>
+		<pre><code>namespace boost
+{
+	
+	namespace math
+	{
+		
+		template&lt;typename T&gt; inline T																																<a href="#acosh">acosh</a>(const T x);
+		
+		template&lt;typename T&gt; inline T																																<a href="#asinh">asinh</a>(const T x);
+		
+		template&lt;typename T&gt; inline T																																<a href="#atanh">atanh</a>(const T x);
+		
+		template&lt;typename T&gt; inline T																																<a href="#sinc_pi">sinc_pi</a>(const T x);
+		
+		template&lt;typename T, template&lt;typename&gt; class U&gt;	inline U&lt;T&gt;	<a href="#sinc_pi">sinc_pi</a>(const U&lt;T&gt; x);
+		
+		template&lt;typename T&gt; inline T																																<a href="#sinhc_pi">sinhc_pi</a>(const T x);
+		
+		template&lt;typename T, template&lt;typename&gt; class U&gt;	inline U&lt;T&gt;	<a href="#sinhc_pi">sinhc_pi</a>(const U&lt;T&gt; x);
+		
+
+	}
+
+	
+
+}</code></pre>
+
+
+<h2><a name="Functions"></a>Functions</h2>
+<p>
+ここで実装される関数は標準例外を投げるが、例外指定子は作られていない。
+</p>
+
+<h3><a name="acosh"></a>acosh</h3>
+<pre><code>template&lt;typename T&gt; inline T <strong>acosh</strong>(const T x);</code></pre>
+<blockquote>
+<p>
+<IMG SRC="graphics/special_functions_blurb29.jpeg" WIDTH="35" HEIGHT="15" NATURALSIZEFLAG="3" ALIGN=absmiddle>での双曲余弦関数の逆関数を、変数を<code>x</code>として数値計算する。
+精度を確保するため、1付近ではテイラー級数を使い、無限大付近ではローレンツ級数を使っている。
+</p>
+<p>
+<code>x</code>が<IMG SRC="graphics/special_functions_blurb27.jpeg" WIDTH="41" HEIGHT="15" NATURALSIZEFLAG="3" ALIGN=absmiddle>であるなら、
+例外を発生せずにNaNを返す。環境によっては、代わりにドメインエラーが発生する。
+</p>
+
+
+		</blockquote>
+		<h3><a name="asinh"></a>asinh</h3>
+		<pre><code>template&lt;typename T&gt; inline T <strong>asinh</strong>(const T x);</code></pre>
+		<blockquote>
+<p>
+双曲正弦関数の逆関数を数値計算する。精度を確保するため、原点付近では
+テイラー級数を使い、無限大付近ではローレンツ級数を使っている。
+</p>
+</blockquote>
+
+
+		<h3><a name="atanh"></a>atanh</h3>
+		<pre><code>template&lt;typename T&gt; inline T <strong>atanh</strong>(const T x);</code></pre>
+		<blockquote>
+<p>
+双曲正接関数の逆関数を数値計算する。精度を確保するため、原点付近ではテイラー
+級数を使っている。
+</p>
+<p>
+<code>x</code>の範囲が
+<IMG SRC="graphics/special_functions_blurb25.jpeg" WIDTH="41" HEIGHT="15" NATURALSIZEFLAG="3" ALIGN=absmiddle>
+もしくは
+<IMG SRC="graphics/special_functions_blurb26.jpeg" WIDTH="41" HEIGHT="15" NATURALSIZEFLAG="3" ALIGN=absmiddle>
+ならば、例外を発生せずにNaNを返す。環境によっては、代わりにドメインエラーが
+発生する。
+</p>
+<p>
+<code>x</code>の範囲が
+<IMG SRC="graphics/special_functions_blurb23.jpeg" WIDTH="55" HEIGHT="15" NATURALSIZEFLAG="3" ALIGN=absmiddle>
+ならば、無限小(<code>numeric_limits&lt;T&gt;::epsilon()</code>を意味する
+<img src="graphics/special_functions_blurb28.jpeg" width="9" height="9" naturalsizeflag="3" align=absmiddle>
+を返す。環境によっては、<code>out_of_range</code>例外が発生する。
+</p>
+<p>
+<code>x</code>の範囲が
+<IMG SRC="graphics/special_functions_blurb24.jpeg" WIDTH="55" HEIGHT="15" NATURALSIZEFLAG="3" ALIGN=absmiddle>
+ならば、無限大(<code>numeric_limits&lt;T&gt;::epsilon()</code>を意味する
+<img src="graphics/special_functions_blurb28.jpeg" width="9" height="9" naturalsizeflag="3" align=absmiddle>
+を返す。環境によっては、<code>out_of_range</code>例外が発生する。
+</p>
+</blockquote>
+
+
+		<h3><a name="sinc_pi"></a>sinc_pi</h3>
+		<pre><code>template&lt;typename T&gt; inline T 																															<strong>sinc_pi</strong>(const T x);</code></pre>
+		<pre><code>template&lt;typename T, template&lt;typename&gt; class U&gt; inline U&lt;T&gt; <strong>sinc_pi</strong>(const U&lt;T&gt; x);</code></pre>
+		<blockquote>
+
+<p>
+シンク関数を数値計算する。二つめの書式は複素数、四元数、八元数等のため
+のものである。精度を確保するため、テイラー級数を使っている。
+</p>
+
+
+		</blockquote>
+		<h3><a name="sinhc_pi"></a>sinhc_pi</h3>
+		<pre><code>template&lt;typename T&gt; inline T																								 							<strong>sinhc_pi</strong>(const T x);</code></pre>
+		<pre><code>template&lt;typename T, template&lt;typename&gt; class U&gt; inline U&lt;T&gt; <strong>sinhc_pi</strong>(const U&lt;T&gt; x);</code></pre>
+		<blockquote>
+
+<p>
+双曲シンク関数を数値計算する。 二つめの書式は複素数、四元数、八元数等のため
+のものである。精度を確保するため、テイラー級数を使っている。
+</p>
+		</blockquote>
+		<h2><a name="History"></a>History</h2>
+		<ul>
+<li>
+1.4.0 - 14/09/2001: Eric Ford氏により、<code>acosh</code>, <code>asinh</code>
+を追加。John Maddock氏が提案したGcc 2.9.xのための修正を適用。精度が向上。
+テストプログラムにより精度を検査。
+
+<li>
+1.3.2 - 07/07/2001: <code>math</code>名前空間を導入。
+
+<li>
+1.3.1 - 07/06/2001: boostを再検討した結果、<code>special_functions.hpp</code>を
+<code>atanh.hpp</code>, <code>sinc.hpp</code>, <code>sinhc.hpp</code>に分割。
+Daryle Walker氏により、コンパイルタイムを駆使し<code>atanh</code>の効率が向上。
+Peter Schmitteckert氏により、全ての関数の精度が向上。
+
+<li>
+1.3.0 - 26/03/2001: シンク関数、双曲シンク関数に複素数等を扱える書式を追加。
+
+<li>
+1.2.0 - 31/01/2001: 関数名の引数に依存した検索(Koenig lookup)のために一部修正。
+
+<li>1.1.0 - 23/01/2001: boostに統合。
+<li>1.0.0 - 10/08/1999: 公開開始。
+		</ul>
+
+<p><font color="#000000">
+訳注<br>
+<a href="#adhoc" name="info_adhoc">アドホックな</a>：双曲シンク関数は
+双曲正弦関数やシンク関数のように学会で名前の通った関数ではない。
+</font></p>
+		<hr>
+		<p>Revised <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%d %B %Y" startspan -->27 September 2001<!--webbot bot="Timestamp" endspan i-checksum="39502" --></p>
+		<p>&copy; Copyright Hubert Holin 2001. Permission to copy, use, modify, sell and distribute this document is granted provided this copyright notice appears in all copies. This software is provided &quot;as is&quot; without express or implied&nbsp; warranty, and with no claim as to its suitability for any purpose.</p>
+<hr>
+<pre>
+Japanese Translation Copyright (C) 2003 Mikmai Hayato&lt;fermi_kami@ybb.ne.jp&gt;.
+
+
+オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の
+複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」
+に提供されており、いかなる明示的、暗黙的保証も行わない。また、
+いかなる目的に対しても、その利用が適していることを関知しない。
+</pre>
+	</body>
+
+</html>

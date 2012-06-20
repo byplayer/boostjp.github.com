@@ -1,0 +1,159 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+  <title>Boost GCD &amp; LCM Library</title>
+   
+</head>
+  <body bgcolor="white" text="black" link="blue" alink="red"
+ vlink="purple">
+         
+<h1> <img src="../../../c++boost.gif" alt="c++boost.gif (8819 bytes)"
+ align="left" width="277" height="86">
+    Greatest Common Divisor<br>
+      Least Common Multiple<br>
+      </h1>
+          
+<p><cite><a href="../../../boost/math/common_factor.hpp">&lt;boost/math/common_factor.hpp&gt;</a> 
+  </cite>にあるクラステンプレート、関数テンプレートは、2つの整数の最大公約数(GCD)と最小公倍数(LCM)の実行時、 及びコンパイル時における評価を提供する。これらの機能は多くの数学指向のジェネリックプログラミングの問題に対して有用である。</p>
+          
+<h2><a name="contents">Contents</a></h2>
+          
+<ul>
+     	<li><a href="#contents">Contents</a></li>
+     	<li>Header <cite><a href="#cf_hpp">&lt;boost/math/common_factor.hpp&gt;</a></cite> 
+  	                    
+    <ul>
+     	<li><a href="#synopsis">Synopsis</a></li>
+     	                    
+    </ul>
+      </li>
+     	<li>Header <cite><a href="#cfrt_hpp">&lt;boost/math/common_factor_rt.hpp&gt;</a></cite> 
+  	                    
+    <ul>
+     	<li><a href="#gcd_obj">GCD Function Object</a></li>
+     	<li><a href="#lcm_obj">LCM Function Object</a></li>
+     		<li><a href="#run_gcd_lcm">Run-time GCD &amp; LCM Determination</a></li>
+     	                    
+    </ul>
+      </li>
+     	<li>Header <cite><a href="#cfct_hpp">&lt;boost/math/common_factor_ct.hpp&gt;</a></cite></li>
+     	<li><a href="#example">Example</a></li>
+     	<li><a href="#demo">Demonstration Program</a></li>
+     	<li><a href="#rationale">Rationale</a></li>
+     	<li><a href="#history">History</a></li>
+     	<li><a href="#credits">Credits</a></li>
+         
+</ul>
+          
+<h2>Header <cite><a name="cf_hpp"
+ href="../../../boost/math/common_factor.hpp">&lt;boost/math/common_factor.hpp&gt;</a></cite></h2>
+          
+<p>    このヘッダは単に <cite><a href="../../../boost/math/common_factor_ct.hpp">&lt;boost/math/common_factor_ct.hpp&gt;</a></cite> 
+ と <cite><a href="../../../boost/math/common_factor_rt.hpp">&lt;boost/math/common_factor_rt.hpp&gt;</a></cite>
+  をインクルードしているのみである。以前はコードを含んでいたが、 コンパイル時及び実行時の機能が(これらは独立していたので)別々のヘッダに移されたため、このヘッダは互換性のために維持されている。</p>
+          
+<h3><a name="synopsis">Synopsis</a></h3>
+          
+<blockquote>            
+  <pre>namespace boost<br>{<br>namespace math<br>{<br><br>template &lt; typename IntegerType &gt;<br>    class gcd_evaluator;<br>template &lt; typename IntegerType &gt;<br>    class lcm_evaluator;<br><br>template &lt; typename IntegerType &gt;<br>    IntegerType  gcd( IntegerType const &amp;a, IntegerType const &amp;b );<br>template &lt; typename IntegerType &gt;<br>    IntegerType  lcm( IntegerType const &amp;a, IntegerType const &amp;b );<br><br>template &lt; unsigned long Value1, unsigned long Value2 &gt;<br>    struct static_gcd;<br>template &lt; unsigned long Value1, unsigned long Value2 &gt;<br>    struct static_lcm;<br><br>}<br>}<br></pre>
+    </blockquote>
+          
+<h2>Header <cite><a name="cfrt_hpp"
+ href="../../../boost/math/common_factor_rt.hpp">&lt;boost/math/common_factor_rt.hpp&gt;</a></cite></h2>
+          
+<h3><a name="gcd_obj">GCD Function Object</a></h3>
+          
+<blockquote>            
+  <pre>template &lt; typename IntegerType &gt;<br>class boost::math::gcd_evaluator<br>{<br>public:<br>    // Types<br>    typedef IntegerType  result_type;<br>    typedef IntegerType  first_argument_type;<br>    typedef IntegerType  second_argument_type;<br><br>    // Function object interface<br>    result_type  operator ()( first_argument_type const &amp;a,<br>     second_argument_type const &amp;b ) const;<br>};<br></pre>
+    </blockquote>
+          
+<p><code>boost::math::gcd_evaluator</code>クラステンプレートは２つの整数の最大公約数を返す関数オブジェクトクラステンプレートを定義している。 
+テンプレートはここでIntegerTypeと呼ばれている単純な型によってパラメタ化される。この型は整数を表現する数値型でなければならない。 たとえどちらかの引数が負であっても、関数オブジェクトが返す値はつねに非負である。</p>
+          
+<p>この関数オブジェクトクラステンプレートは対応する <a href="#run_gcd_lcm">GCD function template</a>
+  で使用されている。もしある数値型の最大公約数の評価方法をカスタマイズしたいならば、gcd_evaluatorクラステンプレートをその型で特殊化すること。</p>
+          
+<h3><a name="lcm_obj">LCM Function Object</a></h3>
+          
+<blockquote>            
+  <pre>template &lt; typename IntegerType &gt;<br>class boost::math::lcm_evaluator<br>{<br>public:<br>    // Types<br>    typedef IntegerType  result_type;<br>    typedef IntegerType  first_argument_type;<br>    typedef IntegerType  second_argument_type;<br><br>    // Function object interface<br>    result_type  operator ()( first_argument_type const &amp;a,<br>     second_argument_type const &amp;b ) const;<br>};<br></pre>
+    </blockquote>
+          
+<p>boost::math::lcm_evaluatorクラステンプレートは２つの整数の最小公倍数を返す関数オブジェクトクラステンプレートを定義している。 
+テンプレートはここでIntegerTypeと呼ばれている単純な型によってパラメタ化される。この型は整数を表現する数値型でなければならない。 たとえどちらかの引数が負であっても、関数オブジェクトが返す値はつねに非負である。 
+もし最小公倍数が整数型の範囲を超える場合、その結果は未定義である。</p>
+          
+<p>この関数オブジェクトクラステンプレートは対応する <a href="#run_gcd_lcm">LCM function template</a>
+  で使用されている。もしある数値型の最小公倍数の評価方法をカスタマイズしたいならば、lcm_evaluatorクラステンプレートをその型で特殊化すること。</p>
+          
+<h3><a name="run_gcd_lcm">Run-time GCD &amp; LCM Determination</a></h3>
+          
+<blockquote>            
+  <pre>template &lt; typename IntegerType &gt;<br>IntegerType  boost::math::gcd( IntegerType const &amp;a, IntegerType const &amp;b );<br><br>template &lt; typename IntegerType &gt;<br>IntegerType  boost::math::lcm( IntegerType const &amp;a, IntegerType const &amp;b );<br></pre>
+    </blockquote>
+          
+<p>boost::math::gcd関数テンプレートは渡された2つの整数の(非負の)最大公約数を返す。boost::math::lcm関数テンプレートは 
+渡された2つの整数の(非負の)最小公倍数を返す。この関数テンプレートは引数の<i>IntegerType</i>によりパラメタ化される。 また返り値の型も同様である。内部的には、これらの関数テンプレートは対応する
+  <code><a href="#gcd_obj">gcd_evaluator</a></code> と <code><a
+ href="#lcm_obj">lcm_evaluator</a></code> クラステンプレートのオブジェクトを使用する。</p>
+          
+<h2>Header <cite><a name="cfct_hpp"
+ href="../../../boost/math/common_factor_ct.hpp">&lt;boost/math/common_factor_ct.hpp&gt;</a></cite></h2>
+          
+<blockquote>            
+  <pre>template &lt; unsigned long Value1, unsigned long Value2 &gt;<br>struct boost::math::static_gcd<br>{<br>    static unsigned long const  value = <em>implementation_defined</em>;<br>};<br><br>template &lt; unsigned long Value1, unsigned long Value2 &gt;<br>struct boost::math::static_lcm<br>{<br>    static unsigned long const  value = <em>implementation_defined</em>;<br>};<br></pre>
+    </blockquote>
+          
+<p>boost::math::static_gcdとboost::math::static_lcmクラステンプレートは2つのunsigned long型の値ベースの引数を取り、 
+同じ型の静的定数データメンバvalueを1つ持つ。メンバのvalueはテンプレートの引数の最大公約数か最小公倍数である。 最小公倍数がunsigned
+longの範囲を超える場合にはコンパイルエラーが起こるだろう。</p>
+          
+<h2><a name="example">Example</a></h2>
+          
+<blockquote>            
+  <pre>#include &lt;boost/math/common_factor.hpp&gt;<br>#include &lt;algorithm&gt;<br>#include &lt;iterator&gt;<br><br><br>int main()<br>{<br>    using std::cout;<br>    using std::endl;<br><br>    cout &lt;&lt; "The GCD and LCM of 6 and 15 are "<br>     &lt;&lt; boost::math::gcd(6, 15) &lt;&lt; " and "<br>     &lt;&lt; boost::math::lcm(6, 15) &lt;&lt; ", respectively."<br>     &lt;&lt; endl;<br><br>    cout &lt;&lt; "The GCD and LCM of 8 and 9 are "<br>     &lt;&lt; boost::math::static_gcd&lt;8, 9&gt;::value<br>     &lt;&lt; " and "<br>     &lt;&lt; boost::math::static_lcm&lt;8, 9&gt;::value<br>     &lt;&lt; ", respectively." &lt;&lt; endl;<br><br>    int  a[] = { 4, 5, 6 }, b[] = { 7, 8, 9 }, c[3];<br>    std::transform( a, a + 3, b, c, boost::math::gcd_evaluator&lt;int&gt;() );<br>    std::copy( c, c + 3, std::ostream_iterator&lt;int&gt;(cout, " ") );<br>}<br></pre>
+    </blockquote>
+          
+<h2><a name="demo">Demonstration Program</a></h2>
+          
+<p>プログラム <a href="../test/common_factor_test.cpp">common_factor_test.cpp</a> 
+ は実行時のGCDとLCM関数テンプレート、およびコンパイル時のGCDとLCMクラステンプレートのいくつかの例を 実体化した結果のデモンストレーションである。 
+(実行時のGCDとLCMクラステンプレートは実行時関数テンプレートを通して間接的にテストされる。)</p>
+          
+<h2><a name="rationale">Rationale</a></h2>
+          
+<p>最大公約数と最小公倍数はいくつかの他のBoostライブラリを含むいくつかの数学のコンテキストでよく使われる。 これらの関数を１つのヘッダにまとめることはコードの局所化を促進し、メンテナンスを容易にする。</p>
+          
+<h2><a name="history">History</a></h2>
+          
+<dl>
+  <dt>2 Jul 2002 	</dt>
+  <dd>コンパイル時と実行時の項目を新しいヘッダに分割した。<br>
+     </dd>
+  <dt>7 Nov 2001 	</dt>
+  <dd>初版<br>
+       </dd>
+</dl>
+          
+<h2><a name="credits">Credits</a></h2>
+          
+<p>GCDとLCMの計算のBoost compilation の作者は <a
+ href="../../../people/daryle_walker.html">Daryle  Walker</a> である。このコードは
+<a href="../../../people/paul_moore.htm">Paul Moore</a> の <a
+ href="../../rational/index.html">rational</a> ライブラリとSteve Clearyの <a
+ href="../../pool/doc/index.html">pool</a> ライブラリに潜在していたコードに喚起されたものだ。コードはHelmut
+  Zeiselによって更新されている。</p>
+          
+<hr>      
+<p>Revised July 2, 2002</p>
+          
+<p>© Copyright Daryle Walker 2001-2002.  Permission to copy, use, modify,
+  sell and distribute this document is granted provided this copyright notice
+  appears in all copies.  This document is provided "as is" without express
+  or implied warranty, and with no claim as to its suitability for any purpose.</p>
+     <br>
+     <br>
+  <br>
+ 
+</body>
+</html>

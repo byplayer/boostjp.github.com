@@ -1,0 +1,1098 @@
+<html>
+
+	<head>
+
+<title>Class octonion Documentation</title>
+
+<meta http-equiv="generator" content="Adobe GoLive 5">
+<meta http-equiv="content-type" content="text/html;charset=utf-8">
+	</head>
+
+<body bgcolor="#FFFFFF" text="#000000">
+<a href="http://www.boost.org/libs/math/octonion/octonion.html">
+最新版ドキュメント（英語）</a>
+
+		<h1><img src="../../../c++boost.gif" alt="c++boost.gif (8819 bytes)" align="center" width="277" height="86">Class octonion</h1>
+		<ul>
+			<li><a href="#Acknowledgements">Acknowledgements</a>
+			<li><a href="#Header File">Header File</a>
+			<li><a href="#Test Program">Test Program</a>
+			<li><a href="#Synopsis">Synopsis</a>
+			<li><a href="#Template class octonion">Template class <code>octonion</code></a>
+			<li><a href="#octonion specializations"><code>octonion</code> specializations</a>
+			<li><a href="#octonion member functions"><code>octonion</code> member functions</a>
+			<li><a href="#octonion member operators"><code>octonion</code> member operators</a>
+			<li><a href="#octonion non-member operations"><code>octonion</code> non-member operations</a>
+			<li><a href="#octonion value operations"><code>octonion</code> value operations</a>
+			<li><a href="#octonion transcendentals"><code>octonion</code> transcendentals</a>
+			<li><a href="#History">History</a>
+			<li><a href="#ToDo">To Do</a>
+		</ul>
+		<p></p>
+<p>
+<a href="../quaternion/quaternion.html">四元数</a>同様、八元数も複素数と
+関係深いものである。
+</p>
+<p>理論物理学では、八元数をよく利用するようである。</p>
+<p>
+実質的には、八元数は単純に八つの実数
+<img src="graphics/octonion_blurb.html1.jpeg" width="93" height="17"
+naturalsizeflag="3" align=absmiddle><font color="#000000">
+から成るものであり、
+<img src="graphics/octonion_blurb.html2.jpeg" width="215" height="15"
+naturalsizeflag="3" align=absmiddle>
+のように書く。ここで、
+<img src="graphics/octonion_blurb.html3.jpeg" width="6" height="11" naturalsizeflag="3" align=absmiddle>,
+<img src="graphics/octonion_blurb.html4.jpeg" width="8" height="13" naturalsizeflag="3" align=absmiddle>,
+<img src="graphics/octonion_blurb.html5.jpeg" width="9" height="12" naturalsizeflag="3" align=absmiddle>は
+四元数の説明で用いたものと同様のものであり、
+<img src="graphics/octonion_blurb.html6.jpeg" width="11" height="12" naturalsizeflag="3" align=absmiddle>,
+<img src="graphics/octonion_blurb.html7.jpeg" width="10" height="12" naturalsizeflag="3" align=absmiddle>,
+<img src="graphics/octonion_blurb.html8.jpeg" width="12" height="14" naturalsizeflag="3" align=absmiddle>,
+<img src="graphics/octonion_blurb.html9.jpeg" width="12" height="12" naturalsizeflag="3" align=absmiddle>は
+本質的には
+<img src="graphics/octonion_blurb.html3.jpeg" width="6" height="11" naturalsizeflag="3" align=absmiddle>,
+<img src="graphics/octonion_blurb.html4.jpeg" width="8" height="13" naturalsizeflag="3" align=absmiddle>,
+<img src="graphics/octonion_blurb.html5.jpeg" width="9" height="12" naturalsizeflag="3" align=absmiddle>と
+同じ役割をするが全く異なるものである。
+</p>
+<p>
+八元数における加法、乗法を定義する。これらにより、四元数の加法、乗法を一般化
+できる。ここでの中心となる新事項は、
+<strong>
+"乗法には交換法則が成り立たないものがあり、今は結合法則も成り立たない"
+</strong>
+(<cite>i.e.</cite> ある四元数
+<img src="graphics/octonion_blurb.html13.jpeg" width="9" height="9" naturalsizeflag="3" align=absmiddle>,
+<img src="graphics/octonion_blurb.html14.jpeg" width="9" height="11" naturalsizeflag="3" align=absmiddle>,
+<img src="graphics/octonion_blurb.html15.jpeg" width="8" height="8" naturalsizeflag="3" align=absmiddle>
+<font color="#000000">は
+<img src="graphics/octonion_blurb.html16.jpeg" width="72" height="16" naturalsizeflag="3" align=absmiddle>となる)である。
+以下に早見表を上げる:
+</p>
+		<div align="center">
+			<p><img src="graphics/octonion_blurb.html17.jpeg" width="243" height="158" naturalsizeflag="3" align=BOTTOM></p>
+		</div>
+<p>
+八元数やそれに類するものの詳細については、他のドキュメント(
+<a href="../quaternion/TQE.pdf">document</a>,
+<a href="../quaternion/TQE_EA.pdf">errata and addenda</a>
+)に記述されている。
+</p>
+<p>
+指数関数のような伝統的な構造のものは、あまり変更せずに八元数の領域に適用できる
+が、平方根を持つようなものはそうではない。指数関数が閉じた形の関数であるのは
+最初に定義した人物によるものだが、八元数において指数関数が存在することは
+ずっと前に知られていることである。
+</p>
+
+		<h2><a name="Acknowledgements"></a>Acknowledgements</h2>
+<p>
+数式の編集には
+<a href="http://www.nisus-soft.com/">Nisus Writer</a>
+を使用した。Jens Maurer氏には<font color=red>推敲(has helped with portability and standard adherence)</font>とプレビューの管理で協力して戴いた。
+諸々の感謝については History の部分で述べる。このライブラリを議論し
+協力してくださった方々に感謝する。
+</p>
+
+		<h2><a name="Header File"></a>Header File</h2>
+<p>
+インターフェースと実装を提供するのがヘッダ
+<a href="../../../boost/math/octonion.hpp">octonion.h</a>
+である。
+</p>
+
+		<h2><a name="Test Program"></a>Test Program</h2>
+<p>
+テストプログラム<a href="octonion_test.cpp">octonion_test.cpp</a>は、
+float, double, long double型での八元数の特殊化のテストを
+行なう。(<a href="output.txt">出力の例</a>)
+</p>
+<p>
+BOOST_OCTONION_TEST_VERBOSEを定義していれば、
+さらなる出力(<a href="output_more.txt">出力の例</a>)が得られる。
+もちろん(関連する行をテストプログラムに記述しない、または
+コマンドラインで --log_level=messages と加えることによって)、
+同時に出力出来る場合のみ役立つ。
+その場合、すなわち対話的に実行している場合、
+標準入力により入力演算子の対話的テストのために、
+(テストプログラムに大変なコーディングを施す代わりに)
+付加的にBOOST_INTERACTIVE_TEST_INPUT_ITERATORを定義できる。
+</p>
+		<h2><a name="Synopsis"></a>Synopsis</h2>
+		<pre><code>namespace boost
+{
+	namespace math
+	{
+		
+		template&lt;typename T&gt; class <a href="#octonion">octonion</a>;
+		template&lt;&gt;           class <a href="##octonion<float>">octonion&lt;float&gt;</a>;
+		template&lt;&gt;           class <a href="##octonion<double>">octonion&lt;double&gt;</a>; 
+		template&lt;&gt;           class <a href="##octonion<long double>">octonion&lt;long double&gt;</a>; 
+		
+		// operators
+		
+		template&lt;typename T&gt; inline octonion&lt;T&gt; <a href="#octonion non-member operations">operator +</a> (T const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+		template&lt;typename T&gt; inline octonion&lt;T&gt; <a href="#octonion non-member operations">operator +</a> (octonion&lt;T&gt; const &amp; lhs, T const &amp; rhs);
+		template&lt;typename T&gt; inline octonion&lt;T&gt; <a href="#octonion non-member operations">operator +</a> (::std::complex&lt;T&gt; const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+		template&lt;typename T&gt; inline octonion&lt;T&gt; <a href="#octonion non-member operations">operator +</a> (octonion&lt;T&gt; const &amp; lhs, ::std::complex&lt;T&gt; const &amp; rhs);
+		template&lt;typename T&gt; inline octonion&lt;T&gt; <a href="#octonion non-member operations">operator +</a> (::boost::math::quaternion&lt;T&gt; const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+		template&lt;typename T&gt; inline octonion&lt;T&gt; <a href="#octonion non-member operations">operator +</a> (octonion&lt;T&gt; const &amp; lhs, ::boost::math::quaternion&lt;T&gt; const &amp; rhs);
+		template&lt;typename T&gt; inline octonion&lt;T&gt; <a href="#octonion non-member operations">operator +</a> (octonion&lt;T&gt; const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+		
+		template&lt;typename T&gt; inline octonion&lt;T&gt; <a href="#octonion non-member operations">operator -</a> (T const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+		template&lt;typename T&gt; inline octonion&lt;T&gt; <a href="#octonion non-member operations">operator -</a> (octonion&lt;T&gt; const &amp; lhs, T const &amp; rhs);
+		template&lt;typename T&gt; inline octonion&lt;T&gt; <a href="#octonion non-member operations">operator -</a> (::std::complex&lt;T&gt; const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+		template&lt;typename T&gt; inline octonion&lt;T&gt; <a href="#octonion non-member operations">operator -</a> (octonion&lt;T&gt; const &amp; lhs, ::std::complex&lt;T&gt; const &amp; rhs);
+		template&lt;typename T&gt; inline octonion&lt;T&gt; <a href="#octonion non-member operations">operator -</a> (::boost::math::quaternion&lt;T&gt; const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+		template&lt;typename T&gt; inline octonion&lt;T&gt; <a href="#octonion non-member operations">operator -</a> (octonion&lt;T&gt; const &amp; lhs, ::boost::math::quaternion&lt;T&gt; const &amp; rhs);
+		template&lt;typename T&gt; inline octonion&lt;T&gt; <a href="#octonion non-member operations">operator -</a> (octonion&lt;T&gt; const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+		
+		template&lt;typename T&gt; inline octonion&lt;T&gt; <a href="#octonion non-member operations">operator *</a> (T const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+		template&lt;typename T&gt; inline octonion&lt;T&gt; <a href="#octonion non-member operations">operator *</a> (octonion&lt;T&gt; const &amp; lhs, T const &amp; rhs);
+		template&lt;typename T&gt; inline octonion&lt;T&gt; <a href="#octonion non-member operations">operator *</a> (::std::complex&lt;T&gt; const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+		template&lt;typename T&gt; inline octonion&lt;T&gt; <a href="#octonion non-member operations">operator *</a> (octonion&lt;T&gt; const &amp; lhs, ::std::complex&lt;T&gt; const &amp; rhs);
+		template&lt;typename T&gt; inline octonion&lt;T&gt; <a href="#octonion non-member operations">operator *</a> (::boost::math::quaternion&lt;T&gt; const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+		template&lt;typename T&gt; inline octonion&lt;T&gt; <a href="#octonion non-member operations">operator *</a> (octonion&lt;T&gt; const &amp; lhs, ::boost::math::quaternion&lt;T&gt; const &amp; rhs);
+		template&lt;typename T&gt; inline octonion&lt;T&gt; <a href="#octonion non-member operations">operator *</a> (octonion&lt;T&gt; const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+		
+		template&lt;typename T&gt; inline octonion&lt;T&gt; <a href="#octonion non-member operations">operator /</a> (T const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+		template&lt;typename T&gt; inline octonion&lt;T&gt; <a href="#octonion non-member operations">operator /</a> (octonion&lt;T&gt; const &amp; lhs, T const &amp; rhs);
+		template&lt;typename T&gt; inline octonion&lt;T&gt; <a href="#octonion non-member operations">operator /</a> (::std::complex&lt;T&gt; const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+		template&lt;typename T&gt; inline octonion&lt;T&gt; <a href="#octonion non-member operations">operator /</a> (octonion&lt;T&gt; const &amp; lhs, ::std::complex&lt;T&gt; const &amp; rhs);
+		template&lt;typename T&gt; inline octonion&lt;T&gt; <a href="#octonion non-member operations">operator /</a> (::boost::math::quaternion&lt;T&gt; const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+		template&lt;typename T&gt; inline octonion&lt;T&gt; <a href="#octonion non-member operations">operator /</a> (octonion&lt;T&gt; const &amp; lhs, ::boost::math::quaternion&lt;T&gt; const &amp; rhs);
+		template&lt;typename T&gt; inline octonion&lt;T&gt; <a href="#octonion non-member operations">operator /</a> (octonion&lt;T&gt; const &amp; lhs, octonion&lt;T&gt; const &amp; rhs); 
+		
+		template&lt;typename T&gt; inline octonion&lt;T&gt; <a href="#octonion non-member operations">operator +</a> (octonion&lt;T&gt; const &amp; o);
+		template&lt;typename T&gt; inline octonion&lt;T&gt; <a href="#octonion non-member operations">operator -</a> (octonion&lt;T&gt; const &amp; o); 
+		
+		template&lt;typename T&gt; inline bool <a href="#octonion non-member operations">operator ==</a> (T const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+		template&lt;typename T&gt; inline bool <a href="#octonion non-member operations">operator ==</a> (octonion&lt;T&gt; const &amp; lhs, T const &amp; rhs);
+		template&lt;typename T&gt; inline bool <a href="#octonion non-member operations">operator ==</a> (::std::complex&lt;T&gt; const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+		template&lt;typename T&gt; inline bool <a href="#octonion non-member operations">operator ==</a> (octonion&lt;T&gt; const &amp; lhs, ::std::complex&lt;T&gt; const &amp; rhs);
+		template&lt;typename T&gt; inline bool <a href="#octonion non-member operations">operator ==</a> (::boost::math::quaternion&lt;T&gt; const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+		template&lt;typename T&gt; inline bool <a href="#octonion non-member operations">operator ==</a> (octonion&lt;T&gt; const &amp; lhs, ::boost::math::quaternion&lt;T&gt; const &amp; rhs);
+		template&lt;typename T&gt; inline bool <a href="#octonion non-member operations">operator ==</a> (octonion&lt;T&gt; const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+		
+		template&lt;typename T&gt; inline bool <a href="#octonion non-member operations">operator !=</a> (T const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+		template&lt;typename T&gt; inline bool <a href="#octonion non-member operations">operator !=</a> (octonion&lt;T&gt; const &amp; lhs, T const &amp; rhs);
+		template&lt;typename T&gt; inline bool <a href="#octonion non-member operations">operator !=</a> (::std::complex&lt;T&gt; const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+		template&lt;typename T&gt; inline bool <a href="#octonion non-member operations">operator !=</a> (octonion&lt;T&gt; const &amp; lhs, ::std::complex&lt;T&gt; const &amp; rhs);
+		template&lt;typename T&gt; inline bool <a href="#octonion non-member operations">operator !=</a> (::boost::math::quaternion&lt;T&gt; const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+		template&lt;typename T&gt; inline bool <a href="#octonion non-member operations">operator !=</a> (octonion&lt;T&gt; const &amp; lhs, ::boost::math::quaternion&lt;T&gt; const &amp; rhs);
+		template&lt;typename T&gt; inline bool <a href="#octonion non-member operations">operator !=</a> (octonion&lt;T&gt; const &amp; lhs, octonion&lt;T&gt; const &amp; rhs); 
+		
+		template&lt;typename T, typename charT, class traits&gt;
+		::std::basic_istream&lt;charT,traits&gt; &amp;	<a href="#octonion non-member operations">operator &gt;&gt;</a> (::std::basic_istream&lt;charT,traits&gt; &amp; is, octonion&lt;T&gt; &amp; o);
+		
+		template&lt;typename T, typename charT, class traits&gt;
+		::std::basic_ostream&lt;charT,traits&gt; &amp;	<a href="#octonion non-member operations">operator &lt;&lt;</a> (::std::basic_ostream&lt;charT,traits&gt; &amp; os, octonion&lt;T&gt; const &amp; o);
+		
+		// values
+		
+		template&lt;typename T&gt;	inline T		<a href="#octonion value operations">real</a>(octonion&lt;T&gt; const &amp; o);
+		template&lt;typename T&gt;	inline octonion&lt;T&gt;	<a href="#octonion value operations">unreal</a>(octonion&lt;T&gt; const &amp; o);
+		
+		template&lt;typename T&gt;	inline T		<a href="#octonion value operations">sup</a>(octonion&lt;T&gt; const &amp; o);
+		template&lt;typename T&gt;	inline T		<a href="#octonion value operations">l1</a>(octonion&lt;T&gt;const &amp; o);	
+		template&lt;typename T&gt;	inline T		<a href="#octonion value operations">abs</a>(octonion&lt;T&gt; const &amp; o);
+		template&lt;typename T&gt;	inline T		<a href="#octonion value operations">norm</a>(octonion&lt;T&gt;const  &amp; o);
+		template&lt;typename T&gt;	inline octonion&lt;T&gt;	<a href="#octonion value operations">conj</a>(octonion&lt;T&gt; const &amp; o);
+		
+		template&lt;typename T&gt;	inline octonion&lt;T&gt;	<a href="#octonion value operations">spherical</a>(T const &amp; rho, T const &amp; theta, T const &amp; phi1, T const &amp; phi2, T const &amp; phi3, T const &amp; phi4, T const &amp; phi5, T const &amp; phi6);
+		template&lt;typename T&gt;	inline octonion&lt;T&gt;	<a href="#octonion value operations">multipolar</a>(T const &amp; rho1, T const &amp; theta1, T const &amp; rho2, T const &amp; theta2, T const &amp; rho3, T const &amp; theta3, T const &amp; rho4, T const &amp; theta4);
+		template&lt;typename T&gt;	inline octonion&lt;T&gt;	<a href="#octonion value operations">cylindrical</a>(T const &amp; r, T const &amp; angle, T const &amp; h1, T const &amp; h2, T const &amp; h3, T const &amp; h4, T const &amp; h5, T const &amp; h6);
+		
+		// transcendentals
+		
+		template&lt;typename T&gt;	inline octonion&lt;T&gt;	<a href="#exp">exp</a>(octonion&lt;T&gt; const &amp; o);
+		template&lt;typename T&gt;	inline octonion&lt;T&gt;	<a href="#cos">cos</a>(octonion&lt;T&gt; const &amp; o);
+		template&lt;typename T&gt;	inline octonion&lt;T&gt;	<a href="#sin">sin</a>(octonion&lt;T&gt; const &amp; o);
+		template&lt;typename T&gt;	inline octonion&lt;T&gt;	<a href="#tan">tan</a>(octonion&lt;T&gt; const &amp; o);
+		template&lt;typename T&gt;	inline octonion&lt;T&gt;	<a href="#cosh">cosh</a>(octonion&lt;T&gt; const &amp; o);
+		template&lt;typename T&gt;	inline octonion&lt;T&gt;	<a href="#sinh">sinh</a>(octonion&lt;T&gt; const &amp; o);
+		template&lt;typename T&gt;	inline octonion&lt;T&gt;	<a href="#tanh">tanh</a>(octonion&lt;T&gt; const &amp; o);
+		
+		template&lt;typename T&gt;	octonion&lt;T&gt;		<a href="#pow">pow</a>(octonion&lt;T&gt; const &amp; o, int n);
+		
+	}
+}</code></pre>
+		<h2><a name="Template class octonion"></a>Template class <code>octonion</code></h2>
+		<pre><code>namespace boost
+{
+	namespace math
+	{
+	
+<a name="octonion"></a>		template&lt;typename T&gt;
+		class octonion
+		{
+		public:
+			
+			typedef T <a href="#value_type">value_type</a>;
+			
+			explicit		<a href="#Constructors">octonion</a>(T const &amp; requested_a = T(), T const &amp; requested_b = T(), T const &amp; requested_c = T(), T const &amp; requested_d = T(), T const & requested_e = T(), T const & requested_f = T(), T const & requested_g = T(), T const & requested_h = T());
+			explicit		<a href="#Constructors">octonion</a>(::std::complex&lt;T&gt; const &amp; z0, ::std::complex&lt;T&gt; const &amp; z1 = ::std::complex&lt;T&gt;(), ::std::complex&lt;T&gt; const & z2 = ::std::complex&lt;T&gt;(), ::std::complex&lt;T&gt; const & z3 = ::std::complex&lt;T&gt;());
+			explicit		<a href="#Constructors">octonion</a>(::boost::math::quaternion&lt;T&gt; const &amp; q0, ::boost::math::quaternion&lt;T&gt; const &amp; q1 = ::boost::math::quaternion&lt;T&gt;());
+			template&lt;typename X&gt; explicit	<a href="#Constructors">octonion</a>(octonion&lt;X&gt; const &amp; a_recopier);
+			
+			T			<a href="#Other member functions">real</a>() const;
+			octonion&lt;T&gt;		<a href="#Other member functions">unreal</a>() const;
+			
+			T			<a href="#Other member functions">R_component_1</a>() const;
+			T			<a href="#Other member functions">R_component_2</a>() const;
+			T			<a href="#Other member functions">R_component_3</a>() const;
+			T			<a href="#Other member functions">R_component_4</a>() const;
+			T			<a href="#Other member functions">R_component_5</a>() const;
+			T			<a href="#Other member functions">R_component_6</a>() const;
+			T			<a href="#Other member functions">R_component_7</a>() const;
+			T			<a href="#Other member functions">R_component_8</a>() const;
+			
+			::std::complex&lt;T&gt;	<a href="#Other member functions">C_component_1</a>() const;
+			::std::complex&lt;T&gt;	<a href="#Other member functions">C_component_2</a>() const;
+			::std::complex&lt;T&gt;	<a href="#Other member functions">C_component_3</a>() const;
+			::std::complex&lt;T&gt;	<a href="#Other member functions">C_component_4</a>() const;
+			
+			::boost::math::quaternion&lt;T&gt;	<a href="#Other member functions">H_component_1</a>() const;
+			::boost::math::quaternion&lt;T&gt;	<a href="#Other member functions">H_component_2</a>() const;
+			
+			octonion&lt;T&gt; &amp;	<a href="#Assignment operators">operator =</a> (octonion&lt;T&gt; const  &amp; a_affecter);
+			template&lt;typename X&gt;	octonion&lt;T&gt; &amp;	<a href="#Assignment operators">operator =</a> (octonion&lt;X&gt; const  &amp; a_affecter);
+			octonion&lt;T&gt; &amp;	<a href="#Assignment operators">operator =</a> (T const  &amp; a_affecter);
+			octonion&lt;T&gt; &amp;	<a href="#Assignment operators">operator =</a> (::std::complex&lt;T&gt; const &amp; a_affecter);
+			octonion&lt;T&gt; &amp;	<a href="#Assignment operators">operator =</a> (::boost::math::quaternion&lt;T&gt; const &amp; a_affecter);
+			
+			octonion&lt;T&gt; &amp;	<a href="#Other member operators">operator +=</a> (T const &amp; rhs);
+			octonion&lt;T&gt; &amp;	<a href="#Other member operators">operator +=</a> (::std::complex&lt;T&gt; const &amp; rhs);
+			octonion&lt;T&gt; &amp;	<a href="#Other member operators">operator +=</a> (::boost::math::quaternion&lt;T&gt; const &amp; rhs);
+			template&lt;typename X&gt;	octonion&lt;T&gt; &amp;	<a href="#Other member operators">operator +=</a> (octonion&lt;X&gt; const &amp; rhs);
+			
+			octonion&lt;T&gt; &amp;	<a href="#Other member operators">operator -=</a> (T const &amp; rhs);
+			octonion&lt;T&gt; &amp;	<a href="#Other member operators">operator -=</a> (::std::complex&lt;T&gt; const &amp; rhs);
+			octonion&lt;T&gt; &amp;	<a href="#Other member operators">operator -=</a> (::boost::math::quaternion&lt;T&gt; const &amp; rhs);
+			template&lt;typename X&gt;	octonion&lt;T&gt; &amp;	<a href="#Other member operators">operator -=</a> (octonion&lt;X&gt; const &amp; rhs);
+			
+			octonion&lt;T&gt; &amp;	<a href="#Other member operators">operator *=</a> (T const &amp; rhs);
+			octonion&lt;T&gt; &amp;	<a href="#Other member operators">operator *=</a> (::std::complex&lt;T&gt; const &amp; rhs);
+			octonion&lt;T&gt; &amp;	<a href="#Other member operators">operator *=</a> (::boost::math::quaternion&lt;T&gt; const &amp; rhs);
+			template&lt;typename X&gt;	octonion&lt;T&gt; &amp;	<a href="#Other member operators">operator *=</a> (octonion&lt;X&gt; const &amp; rhs);
+			
+			octonion&lt;T&gt; &amp;	<a href="#Other member operators">operator /=</a> (T const &amp; rhs);
+			octonion&lt;T&gt; &amp;	<a href="#Other member operators">operator /=</a> (::std::complex&lt;T&gt; const &amp; rhs);
+			octonion&lt;T&gt; &amp;	<a href="#Other member operators">operator /=</a> (::boost::math::quaternion&lt;T&gt; const &amp; rhs);
+			template&lt;typename X&gt;	octonion&lt;T&gt; &amp;	<a href="#Other member operators">operator /=</a> (octonion&lt;X&gt; const &amp; rhs);
+			
+		};
+		
+	}
+}</code></pre>
+		<p></p>
+		<h2><a name="quaternion specializations"></a><code>octonion</code> specializations</h2>
+		<pre><code>namespace boost
+{
+	namespace math
+	{
+		
+<a name="octonion<float>"></a>		template&lt;&gt;
+		class octonion&lt;float&gt;
+		{
+		public:
+			
+			typedef float <a href="#value_type">value_type</a>;
+			
+			explicit		<a href="#Constructors">octonion</a>(float const &amp; requested_a = 0.0f, float const &amp; requested_b = 0.0f, float const &amp; requested_c = 0.0f, float const &amp; requested_d = 0.0f, float const &amp; requested_e = 0.0f, float const &amp; requested_f = 0.0f, float const &amp; requested_g = 0.0f, float const &amp; requested_h = 0.0f);
+			explicit		<a href="#Constructors">octonion</a>(::std::complex&lt;float&gt; const &amp; z0, ::std::complex&lt;float&gt; const &amp; z1 = ::std::complex&lt;float&gt;(), ::std::complex&lt;float&gt; const &amp; z2 = ::std::complex&lt;float&gt;(), ::std::complex&lt;float&gt; const &amp; z3 = ::std::complex&lt;float&gt;());
+			explicit		<a href="#Constructors">octonion</a>(::boost::math::quaternion&lt;float&gt; const &amp; q0, ::boost::math::quaternion&lt;float&gt; const &amp; q1 = ::boost::math::quaternion&lt;float&gt;());
+			explicit		<a href="#Constructors">octonion</a>(octonion&lt;double&gt; const &amp; a_recopier);
+			explicit		<a href="#Constructors">octonion</a>(octonion&lt;long double&gt; const &amp; a_recopier);
+			
+			float			<a href="#Other member functions">real</a>() const;
+			octonion&lt;float&gt;	<a href="#Other member functions">unreal</a>() const;
+			
+			float			<a href="#Other member functions">R_component_1</a>() const;
+			float			<a href="#Other member functions">R_component_2</a>() const;
+			float			<a href="#Other member functions">R_component_3</a>() const;
+			float			<a href="#Other member functions">R_component_4</a>() const;
+			float			<a href="#Other member functions">R_component_5</a>() const;
+			float			<a href="#Other member functions">R_component_6</a>() const;
+			float			<a href="#Other member functions">R_component_7</a>() const;
+			float			<a href="#Other member functions">R_component_8</a>() const;
+			
+			::std::complex&lt;float&gt;	<a href="#Other member functions">C_component_1</a>() const;
+			::std::complex&lt;float&gt;	<a href="#Other member functions">C_component_2</a>() const;
+			::std::complex&lt;float&gt;	<a href="#Other member functions">C_component_3</a>() const;
+			::std::complex&lt;float&gt;	<a href="#Other member functions">C_component_4</a>() const;
+			
+			::boost::math::octonion&lt;float&gt;	<a href="#Other member functions">H_component_1</a>() const;
+			::boost::math::octonion&lt;float&gt;	<a href="#Other member functions">H_component_2</a>() const;
+			
+			octonion&lt;float&gt; &amp;	<a href="#Assignment operators">operator =</a> (octonion&lt;float&gt; const &amp; a_affecter);
+			template&lt;typename X&gt;	octonion&lt;float&gt; &amp;	<a href="#Assignment operators">operator =</a> (octonion&lt;X&gt;const  &amp; a_affecter);
+			octonion&lt;float&gt; &amp;	<a href="#Assignment operators">operator =</a> (float const &amp; a_affecter);
+			octonion&lt;float&gt; &amp;	<a href="#Assignment operators">operator =</a> (::std::complex&lt;float&gt; const &amp; a_affecter);
+			octonion&lt;float&gt; &amp;	<a href="#Assignment operators">operator =</a> (::boost::math::quaternion&lt;float&gt; const &amp; a_affecter);
+			
+			octonion&lt;float&gt; &amp;	<a href="#Other member operators">operator +=</a> (float const &amp; rhs);
+			octonion&lt;float&gt; &amp;	<a href="#Other member operators">operator +=</a> (::std::complex&lt;float&gt; const &amp; rhs);
+			template&lt;typename X&gt;	octonion&lt;float&gt; &amp;	<a href="#Other member operators">operator +=</a> (octonion&lt;X&gt; const &amp; rhs);
+			
+			octonion&lt;float&gt; &amp;	<a href="#Other member operators">operator -=</a> (float const &amp; rhs);
+			octonion&lt;float&gt; &amp;	<a href="#Other member operators">operator -=</a> (::std::complex&lt;float&gt; const &amp; rhs);
+			octonion&lt;float&gt; &amp;	<a href="#Other member operators">operator -=</a> (::boost::math::quaternion&lt;float&gt; const &amp; rhs);
+			template&lt;typename X&gt;	octonion&lt;float&gt; &amp;	<a href="#Other member operators">operator -=</a> (octonion&lt;X&gt; const &amp; rhs);
+			
+			octonion&lt;float&gt; &amp;	<a href="#Other member operators">operator *=</a> (float const &amp; rhs);
+			octonion&lt;float&gt; &amp;	<a href="#Other member operators">operator *=</a> (::std::complex&lt;float&gt; const &amp; rhs);
+			octonion&lt;float&gt; &amp;	<a href="#Other member operators">operator *=</a> (::boost::math::quaternion&lt;float&gt; const &amp; rhs);
+			template&lt;typename X&gt;	octonion&lt;float&gt; &amp;	<a href="#Other member operators">operator *=</a> (octonion&lt;X&gt; const &amp; rhs);
+			
+			octonion&lt;float&gt; &amp;	<a href="#Other member operators">operator /=</a> (float const &amp; rhs);
+			octonion&lt;float&gt; &amp;	<a href="#Other member operators">operator /=</a> (::std::complex&lt;float&gt; const &amp; rhs);
+			octonion&lt;float&gt; &amp;	<a href="#Other member operators">operator /=</a> (::boost::math::quaternion&lt;float&gt; const &amp; rhs);
+			template&lt;typename X&gt;	octonion&lt;float&gt; &amp;	<a href="#Other member operators">operator /=</a> (octonion&lt;X&gt; const &amp; rhs);
+		};
+		
+		
+<a name="octonion<double>"></a>		template&lt;&gt;
+		class octonion&lt;double&gt;
+		{
+		public:
+			
+			typedef double <a href="#value_type">value_type</a>;
+			
+			explicit		<a href="#Constructors">octonion</a>(double const &amp; requested_a = 0.0, double const &amp; requested_b = 0.0, double const &amp; requested_c = 0.0, double const &amp; requested_d = 0.0, double const &amp; requested_e = 0.0, double const &amp; requested_f = 0.0, double const &amp; requested_g = 0.0, double const &amp; requested_h = 0.0);
+			explicit		<a href="#Constructors">octonion</a>(::std::complex&lt;double&gt; const &amp; z0, ::std::complex&lt;double&gt; const &amp; z1 = ::std::complex&lt;double&gt;(), ::std::complex&lt;double&gt; const &amp; z2 = ::std::complex&lt;double&gt;(), ::std::complex&lt;double&gt; const &amp; z3 = ::std::complex&lt;double&gt;());
+			explicit		<a href="#Constructors">octonion</a>(::boost::math::quaternion&lt;double&gt; const &amp; q0, ::boost::math::quaternion&lt;double&gt; const &amp; q1 = ::boost::math::quaternion&lt;double&gt;());
+			explicit		<a href="#Constructors">octonion</a>(octonion&lt;float&gt; const &amp; a_recopier);
+			explicit		<a href="#Constructors">octonion</a>(octonion&lt;long double&gt; const &amp; a_recopier);
+			
+			double			<a href="#Other member functions">real</a>() const;
+			octonion&lt;double&gt;	<a href="#Other member functions">unreal</a>() const;
+			
+			double			<a href="#Other member functions">R_component_1</a>() const;
+			double			<a href="#Other member functions">R_component_2</a>() const;
+			double			<a href="#Other member functions">R_component_3</a>() const;
+			double			<a href="#Other member functions">R_component_4</a>() const;
+			double			<a href="#Other member functions">R_component_5</a>() const;
+			double			<a href="#Other member functions">R_component_6</a>() const;
+			double			<a href="#Other member functions">R_component_7</a>() const;
+			double			<a href="#Other member functions">R_component_8</a>() const;
+			
+			::std::complex&lt;double&gt;	<a href="#Other member functions">C_component_1</a>() const;
+			::std::complex&lt;double&gt;	<a href="#Other member functions">C_component_2</a>() const;
+			::std::complex&lt;double&gt;	<a href="#Other member functions">C_component_3</a>() const;
+			::std::complex&lt;double&gt;	<a href="#Other member functions">C_component_4</a>() const;
+			
+			::boost::math::quaternion&lt;double&gt;	<a href="#Other member functions">H_component_1</a>() const;
+			::boost::math::quaternion&lt;double&gt;	<a href="#Other member functions">H_component_2</a>() const;
+			
+			octonion&lt;double&gt; &amp;	<a href="#Assignment operators">operator =</a> (octonion&lt;double&gt; const &amp; a_affecter);
+			template&lt;typename X&gt;	octonion&lt;double&gt; &amp;	<a href="#Assignment operators">operator =</a> (octonion&lt;X&gt; const &amp; a_affecter);
+			octonion&lt;double&gt; &amp;	<a href="#Assignment operators">operator =</a> (double const &amp; a_affecter);
+			octonion&lt;double&gt; &amp;	<a href="#Assignment operators">operator =</a> (::std::complex&lt;double&gt; const &amp; a_affecter);
+			octonion&lt;double&gt; &amp;	<a href="#Assignment operators">operator =</a> (::boost::math::quaternion&lt;double&gt; const &amp; a_affecter);
+			
+			octonion&lt;double&gt; &amp;	<a href="#Other member operators">operator +=</a> (double const &amp; rhs);
+			octonion&lt;double&gt; &amp;	<a href="#Other member operators">operator +=</a> (::std::complex&lt;double&gt; const &amp; rhs);
+			octonion&lt;double&gt; &amp;	<a href="#Other member operators">operator +=</a> (::boost::math::quaternion&lt;double&gt; const &amp; rhs);
+			template&lt;typename X&gt; octonion&lt;double&gt; &amp;	<a href="#Other member operators">operator +=</a> (octonion&lt;X&gt; const &amp; rhs);
+			
+			octonion&lt;double&gt; &amp;	<a href="#Other member operators">operator -=</a> (double const &amp; rhs);
+			octonion&lt;double&gt; &amp;	<a href="#Other member operators">operator -=</a> (::std::complex&lt;double&gt; const &amp; rhs);
+			octonion&lt;double&gt; &amp;	<a href="#Other member operators">operator -=</a> (::boost::math::quaternion&lt;double&gt; const &amp; rhs);
+			template&lt;typename X&gt; octonion&lt;double&gt; &amp;	<a href="#Other member operators">operator -=</a> (octonion&lt;X&gt; const &amp; rhs);
+			
+			octonion&lt;double&gt; &amp;	<a href="#Other member operators">operator *=</a> (double const &amp; rhs);
+			octonion&lt;double&gt; &amp;	<a href="#Other member operators">operator *=</a> (::std::complex&lt;double&gt; const &amp; rhs);
+			octonion&lt;double&gt; &amp;	<a href="#Other member operators">operator *=</a> (::boost::math::quaternion&lt;double&gt; const &amp; rhs);
+			template&lt;typename X&gt; octonion&lt;double&gt; &amp;	<a href="#Other member operators">operator *=</a> (octonion&lt;X&gt; const &amp; rhs);
+			
+			octonion&lt;double&gt; &amp;	<a href="#Other member operators">operator /=</a> (double const &amp; rhs);
+			octonion&lt;double&gt; &amp;	<a href="#Other member operators">operator /=</a> (::std::complex&lt;double&gt; const &amp; rhs);
+			octonion&lt;double&gt; &amp;	<a href="#Other member operators">operator /=</a> (::boost::math::quaternion&lt;double&gt; const &amp; rhs);
+			template&lt;typename X&gt;	octonion&lt;double&gt; &amp;	<a href="#Other member operators">operator /=</a> (octonion&lt;X&gt; const &amp; rhs);
+		};
+		
+		
+<a name="octonion<long double>"></a>		template&lt;&gt;
+		class octonion&lt;long double&gt;
+		{
+		public:
+			
+			typedef long double <a href="#value_type">value_type</a>;
+			
+			explicit			<a href="#Constructors">octonion</a>(long double const &amp; requested_a = 0.0L, long double const &amp; requested_b = 0.0L, long double const &amp; requested_c = 0.0L, long double const &amp; requested_d = 0.0L, long double const &amp; requested_e = 0.0L, long double const &amp; requested_f = 0.0L, long double const &amp; requested_g = 0.0L, long double const &amp; requested_h = 0.0L);
+			explicit			<a href="#Constructors">octonion</a>(	::std::complex&lt;long double&gt; const &amp; z0, ::std::complex&lt;long double&gt; const &amp; z1 = ::std::complex&lt;long double&gt;(), ::std::complex&lt;long double&gt; const &amp; z2 = ::std::complex&lt;long double&gt;(), ::std::complex&lt;long double&gt; const &amp; z3 = ::std::complex&lt;long double&gt;());
+			explicit			<a href="#Constructors">octonion</a>(	::boost::math::quaternion&lt;long double&gt; const &amp; q0, ::boost::math::quaternion&lt;long double&gt; const &amp; z1 = ::boost::math::quaternion&lt;long double&gt;());
+			explicit			<a href="#Constructors">octonion</a>(octonion&lt;float&gt; const &amp; a_recopier);
+			explicit			<a href="#Constructors">octonion</a>(octonion&lt;double&gt; const &amp; a_recopier);
+			
+			long double			<a href="#Other member functions">real</a>() const;
+			octonion&lt;long double&gt;		<a href="#Other member functions">unreal</a>() const;
+			
+			long double			<a href="#Other member functions">R_component_1</a>() const;
+			long double			<a href="#Other member functions">R_component_2</a>() const;
+			long double			<a href="#Other member functions">R_component_3</a>() const;
+			long double			<a href="#Other member functions">R_component_4</a>() const;
+			long double			<a href="#Other member functions">R_component_5</a>() const;
+			long double			<a href="#Other member functions">R_component_6</a>() const;
+			long double			<a href="#Other member functions">R_component_7</a>() const;
+			long double			<a href="#Other member functions">R_component_8</a>() const;
+			
+			::std::complex&lt;long double&gt;	<a href="#Other member functions">C_component_1</a>() const;
+			::std::complex&lt;long double&gt;	<a href="#Other member functions">C_component_2</a>() const;
+			::std::complex&lt;long double&gt;	<a href="#Other member functions">C_component_3</a>() const;
+			::std::complex&lt;long double&gt;	<a href="#Other member functions">C_component_4</a>() const;
+			
+			::boost::math::quaternion&lt;long double&gt;	<a href="#Other member functions">H_component_1</a>() const;
+			::boost::math::quaternion&lt;long double&gt;	<a href="#Other member functions">H_component_2</a>() const;
+			
+			octonion&lt;long double&gt; &amp;	<a href="#Assignment operators">operator =</a> (octonion&lt;long double&gt; const &amp; a_affecter);
+			template&lt;typename X&gt;	octonion&lt;long double&gt; &amp;	<a href="#Assignment operators">operator =</a> (octonion&lt;X&gt; const &amp; a_affecter);
+			octonion&lt;long double&gt; &amp;	<a href="#Assignment operators">operator =</a> (long double const &amp; a_affecter);
+			octonion&lt;long double&gt; &amp;	<a href="#Assignment operators">operator =</a> (::std::complex&lt;long double&gt; const &amp; a_affecter);
+			octonion&lt;long double&gt; &amp;	<a href="#Assignment operators">operator =</a> (::boost::math::quaternion&lt;long double&gt; const &amp; a_affecter);
+			
+			octonion&lt;long double&gt; &amp;	<a href="#Other member operators">operator +=</a> (long double const &amp; rhs);
+			octonion&lt;long double&gt; &amp;	<a href="#Other member operators">operator +=</a> (::std::complex&lt;long double&gt; const &amp; rhs);
+			octonion&lt;long double&gt; &amp;	<a href="#Other member operators">operator +=</a> (::boost::math::quaternion&lt;long double&gt; const &amp; rhs);
+			template&lt;typename X&gt;	octonion&lt;long double&gt; &amp;	<a href="#Other member operators">operator +=</a> (octonion&lt;X&gt; const &amp; rhs);
+			
+			octonion&lt;long double&gt; &amp;	<a href="#Other member operators">operator -=</a> (long double const &amp; rhs);
+			octonion&lt;long double&gt; &amp;	<a href="#Other member operators">operator -=</a> (::std::complex&lt;long double&gt; const &amp; rhs);
+			octonion&lt;long double&gt; &amp;	<a href="#Other member operators">operator -=</a> (::boost::math::quaternion&lt;long double&gt; const &amp; rhs);
+			template&lt;typename X&gt;	octonion&lt;long double&gt; &amp;	<a href="#Other member operators">operator -=</a> (octonion&lt;X&gt; const &amp; rhs);
+			
+			octonion&lt;long double&gt; &amp;	<a href="#Other member operators">operator *=</a> (long double const &amp; rhs);
+			octonion&lt;long double&gt; &amp;	<a href="#Other member operators">operator *=</a> (::std::complex&lt;long double&gt; const &amp; rhs);
+			octonion&lt;long double&gt; &amp;	<a href="#Other member operators">operator *=</a> (::boost::math::quaternion&lt;long double&gt; const &amp; rhs);
+			template&lt;typename X&gt;	octonion&lt;long double&gt; &amp;	<a href="#Other member operators">operator *=</a> (octonion&lt;X&gt; const &amp; rhs);
+			
+			octonion&lt;long double&gt; &amp;	<a href="#Other member operators">operator /=</a> (long double const &amp; rhs);
+			octonion&lt;long double&gt; &amp;	<a href="#Other member operators">operator /=</a> (::std::complex&lt;long double&gt; const &amp; rhs);
+			octonion&lt;long double&gt; &amp;	<a href="#Other member operators">operator /=</a> (::boost::math::quaternion&lt;long double&gt; const &amp; rhs);
+			template&lt;typename X&gt;	octonion&lt;long double&gt; &amp;	<a href="#Other member operators">operator /=</a> (octonion&lt;X&gt; const &amp; rhs);
+		};
+		
+	}
+}</code></pre>
+		<p></p>
+		<h2><a name="octonion typedefs"></a><code>octonion</code> typedefs</h2>
+		<h3><a name="value_type"></a><code>value_type</code></h3>
+		<pre><code>typedef T <strong>value_type</strong>;</code></pre>
+		<blockquote>
+<p>テンプレート版</p>
+		</blockquote>
+		<pre><code>typedef float <strong>value_type</strong>;</code></pre>
+		<blockquote>
+<p>float型の特殊化版</p>
+		</blockquote>
+		<pre><code>typedef double <strong>value_type</strong>;</code></pre>
+		<blockquote>
+<p>double型の特殊化版</p>
+		</blockquote>
+		<pre><code>typedef long double <strong>value_type</strong>;</code></pre>
+		<blockquote>
+<p>long double型の特殊化版</p>
+<p>これらにより、テンプレートが作られる型へのアクセスが容易になる。</p>
+		</blockquote>
+		<h2><a name="octonion member functions"></a><code>octonion</code> member functions</h2>
+		<h3><a name="Constructors"></a>Constructors</h3>
+		<pre><code>explicit		<strong>octonion</strong>(T const &amp; requested_a = T(), T const &amp; requested_b = T(), T const &amp; requested_c = T(), T const &amp; requested_d = T(), T const & requested_e = T(), T const & requested_f = T(), T const & requested_g = T(), T const & requested_h = T());
+explicit		<strong>octonion</strong>(::std::complex&lt;T&gt; const &amp; z0, ::std::complex&lt;T&gt; const &amp; z1 = ::std::complex&lt;T&gt;(), ::std::complex&lt;T&gt; const & z2 = ::std::complex&lt;T&gt;(), ::std::complex&lt;T&gt; const & z3 = ::std::complex&lt;T&gt;());
+explicit		<strong>octonion</strong>(::boost::math::quaternion&lt;T&gt; const &amp; q0, ::boost::math::quaternion&lt;T&gt; const &amp; q1 = ::boost::math::quaternion&lt;T&gt;());
+template&lt;typename X&gt; explicit	<strong>octonion</strong>(octonion&lt;X&gt; const &amp; a_recopier);</code></pre>
+		<blockquote>
+<p>テンプレート版</p>
+		</blockquote>
+		<pre><code>explicit		<strong>octonion</strong>(float const &amp; requested_a = 0.0f, float const &amp; requested_b = 0.0f, float const &amp; requested_c = 0.0f, float const &amp; requested_d = 0.0f, float const &amp; requested_e = 0.0f, float const &amp; requested_f = 0.0f, float const &amp; requested_g = 0.0f, float const &amp; requested_h = 0.0f);
+explicit		<strong>octonion</strong>(::std::complex&lt;float&gt; const &amp; z0, ::std::complex&lt;float&gt; const &amp; z1 = ::std::complex&lt;float&gt;(), ::std::complex&lt;float&gt; const &amp; z2 = ::std::complex&lt;float&gt;(), ::std::complex&lt;float&gt; const &amp; z3 = ::std::complex&lt;float&gt;());
+explicit		<strong>octonion</strong>(::boost::math::quaternion&lt;float&gt; const &amp; q0, ::boost::math::quaternion&lt;float&gt; const &amp; q1 = ::boost::math::quaternion&lt;float&gt;());
+explicit		<strong>octonion</strong>(octonion&lt;double&gt; const &amp; a_recopier); 
+explicit		<strong>octonion</strong>(octonion&lt;long double&gt; const &amp; a_recopier);</code></pre>
+		<blockquote>
+<p>float型の特殊化版</p>
+		</blockquote>
+		<pre><code>explicit		<strong>octonion</strong>(double const &amp; requested_a = 0.0, double const &amp; requested_b = 0.0, double const &amp; requested_c = 0.0, double const &amp; requested_d = 0.0, double const &amp; requested_e = 0.0, double const &amp; requested_f = 0.0, double const &amp; requested_g = 0.0, double const &amp; requested_h = 0.0);
+explicit		<strong>octonion</strong>(::std::complex&lt;double&gt; const &amp; z0, ::std::complex&lt;double&gt; const &amp; z1 = ::std::complex&lt;double&gt;(), ::std::complex&lt;double&gt; const &amp; z2 = ::std::complex&lt;double&gt;(), ::std::complex&lt;double&gt; const &amp; z3 = ::std::complex&lt;double&gt;());
+explicit		<strong>octonion</strong>(::boost::math::quaternion&lt;double&gt; const &amp; q0, ::boost::math::quaternion&lt;double&gt; const &amp; q1 = ::boost::math::quaternion&lt;double&gt;());
+explicit		<strong>octonion</strong>(octonion&lt;float&gt; const &amp; a_recopier);
+explicit		<strong>octonion</strong>(octonion&lt;long double&gt; const &amp; a_recopier);</code></pre>
+		<blockquote>
+<p>double型の特殊化版</p>
+		</blockquote>
+		<pre><code>explicit		<strong>octonion</strong>(long double const &amp; requested_a = 0.0L, long double const &amp; requested_b = 0.0L, long double const &amp; requested_c = 0.0L, long double const &amp; requested_d = 0.0L, long double const &amp; requested_e = 0.0L, long double const &amp; requested_f = 0.0L, long double const &amp; requested_g = 0.0L, long double const &amp; requested_h = 0.0L);
+explicit		<strong>octonion</strong>(	::std::complex&lt;long double&gt; const &amp; z0, ::std::complex&lt;long double&gt; const &amp; z1 = ::std::complex&lt;long double&gt;(), ::std::complex&lt;long double&gt; const &amp; z2 = ::std::complex&lt;long double&gt;(), ::std::complex&lt;long double&gt; const &amp; z3 = ::std::complex&lt;long double&gt;());
+explicit		<strong>octonion</strong>(::boost::math::quaternion&lt;long double&gt; const &amp; q0, ::boost::math::quaternion&lt;long double&gt; const &amp; q1 = ::boost::math::quaternion&lt;long double&gt;());
+explicit		<strong>octonion</strong>(octonion&lt;float&gt; const &amp; a_recopier);
+explicit		<strong>octonion</strong>(octonion&lt;double&gt; const &amp; a_recopier);</code></pre>
+		<blockquote>
+<p>long doubleの特殊化版</p>
+<p>
+デフォルトのコンストラクタはそれぞれの版で提供され、
+それぞれの<!-yakugo-component>コンポーネント
+はその型でのデフォルト値で初期化される( <cite>i.e.</cite>浮動小数ではゼロ )。
+また、このコンストラクタは1～8つまで
+<!-yakugo-base-->基底型の引数をとることができる。
+<font color=red>
+さらに、コンストラクタが提供されるのは、同じ基底型を有する1～4つの複素数、または
+同じ基底型を有する1～2つの四元数から八元数を作るためである。
+</font>
+( A constructor is also provided to build octonions from
+one to four complex numbers sharing the same base type,
+and another taking one or two quaternions sharing the same base type. )
+<font color=red>
+特殊化版が他の2つの特殊化版からのコピーコンストラクタを持っている間は、
+特殊化されていないテンプレートはテンプレート化されたコピーコンストラクタを
+持ち、精度を損なう危険があるときでは明示的である。
+</font>
+( The unspecialized template also sports a templarized copy constructor,
+while the specialized forms have copy constructors
+from the other two specializations,
+which are explicit when a risk of precision loss exists. )
+特殊化されていないもののために、基底型のコンストラクタが
+<!-yakugo-throw-->発生してはならない。
+</p>
+<p>
+(同じ型からの)コピーコンストラクタ、及びデストラクタはコンパイラによって提供
+される。コピーコンストラクタを変換するために、テンプレート化された
+ヘルパ関数が<!-yakugo-subnamespace-->サブ名前空間&quot;detail&quot;
+で使われる。
+</p>
+		</blockquote>
+		<h3><a name="Other member functions"></a>Other member functions</h3>
+		<pre><code>T			<strong>real</strong>() const;
+octonion&lt;T&gt;		<strong>unreal</strong>() const;</code></pre>
+		<blockquote>
+<p>
+八元数は、複素数と同様に &quot;実部&quot; という重要な概念を持っているが、
+複素数と異なり &quot;虚部&quot; という重要な概念は存在しない。その代わり、
+&quot;実部ではない部分&quot; があり、それこそが八元数である。また、( 複素数の
+場合とは対照的に )通例単純ではない。最初の2つの関数がこれらを返す。
+</p>
+		</blockquote>
+		<pre><code>T			<strong>R_component_1</strong>() const;
+T			<strong>R_component_2</strong>() const;
+T			<strong>R_component_3</strong>() const;
+T			<strong>R_component_4</strong>() const;
+T			<strong>R_component_5</strong>() const;
+T			<strong>R_component_6</strong>() const;
+T			<strong>R_component_7</strong>() const;
+T			<strong>R_component_8</strong>() const;</code></pre>
+		<blockquote>
+<p>
+八元数は8つの実成分を持っており、これら8つの関数が値を返す。
+それゆえに、 <code>real</code> と <code>R_component_1</code> は同じ値を返す。
+</p>
+		</blockquote>
+		<pre><code>::std::complex&lt;T&gt;	<strong>C_component_1</strong>() const;
+::std::complex&lt;T&gt;	<strong>C_component_2</strong>() const;
+::std::complex&lt;T&gt;	<strong>C_component_3</strong>() const;
+::std::complex&lt;T&gt;	<strong>C_component_4</strong>() const;</code></pre>
+		<blockquote>
+<p>
+同様に、八元数は4つの複素数を成分として持つ。
+<font color=red>
+実際、八元数は複素数四次元空間のベクトル場であるが
+</font>
+( octonions are indeed a (<font color=red>left</font>) vector field over the complexes )
+、どのような八元数
+<img src="graphics/octonion_blurb.html18.jpeg" width="215" height="15" naturalsizeflag="3" align=absmiddle>
+についても
+<img src="graphics/octonion_blurb.html19.jpeg" width="228" height="17" naturalsizeflag="3" align=absmiddle>(※最後の項の中は<strong>&quot;-&quot;</strong>)
+と書けることに注意。しかしながら、<code>C_component_n</code>関数が返すのは、
+コンストラクタを用いた八元数を作るのに利用できるであろう複素数であり、
+八元数の<img src="graphics/octonion_blurb.html21.jpeg" width="52" height="16" naturalsizeflag="3" align=absmiddle>成分では<strong>ない</strong>。
+</p>
+		</blockquote>
+		<pre><code>::boost::math::quaternion&lt;T&gt;	<strong>H_component_1</strong>() const;
+::boost::math::quaternion&lt;T&gt;	<strong>H_component_2</strong>() const;</code></pre>
+		<blockquote>
+<p>
+同様にどのような八元数
+<img src="graphics/octonion_blurb.html18.jpeg" width="215" height="15" naturalsizeflag="3" align=absmiddle>
+についても
+<img src="graphics/octonion_blurb.html20.jpeg" width="219" height="17" naturalsizeflag="3" align=absmiddle>
+と書けるが、四元数を成分とした、ベクトル空間のような構造という意味は無い。
+<code>H_component_n</code>関数が返すのは、コンストラクタを用いた八元数を
+作るのに利用できるであろう四元数である。
+</p>
+
+		</blockquote>
+		<h2><a name="octonion member operators"></a><code>octonion</code> member operators</h2>
+		<h3><a name="Assignment operators"></a>Assignment operators</h3>
+		<pre><code>octonion&lt;T&gt; &amp; <strong>operator =</strong> (octonion&lt;T&gt; const &amp; a_affecter);
+template&lt;typename X&gt; octonion&lt;T&gt; &amp; <strong>operator =</strong> (octonion&lt;X&gt; const &amp; a_affecter);
+octonion&lt;T&gt; &amp; <strong>operator =</strong> (T const &amp; a_affecter);
+octonion&lt;T&gt; &amp; <strong>operator =</strong> (::std::complex&lt;T&gt; const &amp; a_affecter);
+octonion&lt;T&gt; &amp; <strong>operator =</strong> (::boost::math::quaternion&lt;T&gt; const &amp; a_affecter);</code></pre>
+		<blockquote>
+
+<p>
+これらは代入を行ない、必要があれば変換する( 例えば、基底型からの
+代入では、その値は実部へと変換される。すなわち、他の成分はゼロとなる )。
+特殊化版でない場合、基底型の代入演算子は<!-yakugo-->発生してはならない。
+</p>
+
+		</blockquote>
+		<h3><a name="Other member operators"></a>Other member operators</h3>
+		<pre><code>octonion&lt;T&gt; &amp;	<strong>operator +=</strong> (T const &amp; rhs)
+octonion&lt;T&gt; &amp;	<strong>operator +=</strong> (::std::complex&lt;T&gt; const &amp; rhs);
+octonion&lt;T&gt; &amp;	<strong>operator +=</strong> (::boost::math::quaternion&lt;T&gt; const &amp; rhs);
+template&lt;typename X&gt;	octonion&lt;T&gt; &amp;	<strong>operator +=</strong> (octonion&lt;X&gt; const &amp; rhs);</code></pre>
+		<blockquote>
+<p>
+これらは数学演算子 (*this)+rhs を求めて代入を行なう。
+特殊化版でないものは<!-、例外が発生したときは代入を行なわないという-->例外
+安全の強い保証を尊守している。
+特殊化版では、例外の安全性を保証するために、代入まで行なう。
+特殊化版でない場合、基底型の代入演算子は<!-yakugo-->発生してはならない。
+</p>
+		</blockquote>
+		<pre><code>octonion&lt;T&gt; &amp;	<strong>operator -=</strong> (T const &amp; rhs)
+octonion&lt;T&gt; &amp;	<strong>operator -=</strong> (::std::complex&lt;T&gt; const &amp; rhs);
+octonion&lt;T&gt; &amp;	<strong>operator -=</strong> (::boost::math::quaternion&lt;T&gt; const &amp; rhs);
+template&lt;typename X&gt;	octonion&lt;T&gt; &amp;	<strong>operator -=</strong> (octonion&lt;X&gt; const &amp; rhs);</code></pre>
+		<blockquote>
+<p>
+これらは数学演算子 (*this)-rhs を求めて代入を行なう。
+特殊化版でないものは<!-、例外が発生したときは代入を行なわないという-->例外
+安全の強い保証を尊守している。
+特殊化版では、例外の安全性を保証するために、代入まで行なう。
+特殊化版でない場合、基底型の代入演算子は<!-yakugo-->発生してはならない。
+</p>
+		</blockquote>
+		<pre><code>octonion&lt;T&gt; &amp;	<strong>operator *=</strong> (T const &amp; rhs)
+octonion&lt;T&gt; &amp;	<strong>operator *=</strong> (::std::complex&lt;T&gt; const &amp; rhs);
+octonion&lt;T&gt; &amp;	<strong>operator *=</strong> (::boost::math::quaternion&lt;T&gt; const &amp; rhs);
+template&lt;typename X&gt;	octonion&lt;T&gt; &amp;	<strong>operator *=</strong> (octonion&lt;X&gt; const &amp; rhs);</code></pre>
+		<blockquote>
+<p>
+これらは数学演算子 (*this)*rhs を、
+前述した通りの順序で、求めて代入を行なう( 八元数では
+乗法の可換でないため、乗法の順序は重要である )。
+特殊化版でないものは<!-、例外が発生したときは代入を行なわないという-->例外
+安全の強い保証を尊守している。
+特殊化版では、例外の安全性を保証するために、代入まで行なう。
+特殊化版でない場合、基底型の代入演算子は<!-yakugo-->発生してはならない。
+また、八元数では乗法の結合法則が成り立たないことから、
+論理を明確にするために二つの集合の乗法では
+<em>いつでも</em>
+要素をまとめるべきである( もちろんこの事が重要でないときもあるが、
+大抵は重要である )。
+</p>
+		</blockquote>
+		<pre><code>octonion&lt;T&gt; &amp;	<strong>operator /=</strong> (T const &amp; rhs)
+octonion&lt;T&gt; &amp;	<strong>operator /=</strong> (::std::complex&lt;T&gt; const &amp; rhs);
+octonion&lt;T&gt; &amp;	<strong>operator /=</strong> (::boost::math::quaternion&lt;T&gt; const &amp; rhs);
+template&lt;typename X&gt;	octonion&lt;T&gt; &amp;	<strong>operator /=</strong> (octonion&lt;X&gt; const &amp; rhs);</code></pre>
+		<blockquote>
+<p>
+これらは数学演算子 (*this)*inverse_of(rhs) との積を、前述した通りの順序で、
+求めて代入を行なう( 八元数では
+乗法の可換でないため、乗法の順序は重要である )。
+特殊化版でないものは<!-、例外が発生したときは代入を行なわないという-->例外
+安全の強い保証を尊守している。
+特殊化版では、例外の安全性を保証するために、代入まで行なう。
+特殊化版でない場合、基底型の代入演算子は<!-yakugo-->発生してはならない。
+この乗法では、括弧で括った二つの要素をまとめることを忘れずに
+行ないなさい。
+</p>
+		</blockquote>
+		<h2><a name="octonion non-member operations"></a><code>octonion</code> non-member operations</h2>
+		<pre><code>template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>operator +</strong> (octonion&lt;T&gt; const &amp; o);</code></pre>
+		<blockquote>
+<p>
+この単項演算子はただ <code>o</code> を返す。
+</p>
+		</blockquote>
+		<pre><code>template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>operator -</strong> (octonion&lt;T&gt; const &amp; o);</code></pre>
+		<blockquote>
+<p>
+この単項演算子は <code>o</code> の逆符号のものを返す。
+</p>
+		</blockquote>
+		<pre><code>template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>operator +</strong> (T const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>operator +</strong> (octonion&lt;T&gt; const &amp; lhs, T const &amp; rhs);
+template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>operator +</strong> (::std::complex&lt;T&gt; const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>operator +</strong> (octonion&lt;T&gt; const &amp; lhs, ::std::complex&lt;T&gt; const &amp; rhs);
+template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>operator +</strong> (::boost::math::quaternion&lt;T&gt; const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>operator +</strong> (octonion&lt;T&gt; const &amp; lhs, ::boost::math::quaternion&lt;T&gt; const &amp; rhs);
+template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>operator +</strong> (octonion&lt;T&gt; const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);</code></pre>
+		<blockquote>
+<p>
+これらの演算子は <code>octonion&lt;T&gt;(lhs) += rhs</code> を返す。
+</p>
+		</blockquote>
+		<pre><code>template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>operator -</strong> (T const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>operator -</strong> (octonion&lt;T&gt; const &amp; lhs, T const &amp; rhs);
+template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>operator -</strong> (::std::complex&lt;T&gt; const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>operator -</strong> (octonion&lt;T&gt; const &amp; lhs, ::std::complex&lt;T&gt; const &amp; rhs);
+template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>operator -</strong> (::boost::math::quaternion&lt;T&gt; const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>operator -</strong> (octonion&lt;T&gt; const &amp; lhs, ::boost::math::quaternion&lt;T&gt; const &amp; rhs);
+template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>operator -</strong> (octonion&lt;T&gt; const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);</code></pre>
+		<blockquote>
+<p>
+これらの演算子は <code>octonion&lt;T&gt;(lhs) -= rhs</code> を返す。
+</p>
+		</blockquote>
+		<pre><code>template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>operator *</strong> (T const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>operator *</strong> (octonion&lt;T&gt; const &amp; lhs, T const &amp; rhs);
+template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>operator *</strong> (::std::complex&lt;T&gt; const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>operator *</strong> (octonion&lt;T&gt; const &amp; lhs, ::std::complex&lt;T&gt; const &amp; rhs);
+template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>operator *</strong> (::boost::math::quaternion&lt;T&gt; const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>operator *</strong> (octonion&lt;T&gt; const &amp; lhs, ::boost::math::quaternion&lt;T&gt; const &amp; rhs);
+template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>operator *</strong> (octonion&lt;T&gt; const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);</code></pre>
+		<blockquote>
+<p>
+これら演算子子は <code>octonion&lt;T&gt;(lhs) *= rhs</code> を返す。
+</p>
+		</blockquote>
+		<pre><code>template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>operator /</strong> (T const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>operator /</strong> (octonion&lt;T&gt; const &amp; lhs, T const &amp; rhs);
+template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>operator /</strong> (::std::complex&lt;T&gt; const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>operator /</strong> (octonion&lt;T&gt; const &amp; lhs, ::std::complex&lt;T&gt; const &amp; rhs);
+template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>operator /</strong> (::boost::math::quaternion&lt;T&gt; const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>operator /</strong> (octonion&lt;T&gt; const &amp; lhs, ::boost::math::quaternion&lt;T&gt; const &amp; rhs);
+template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>operator /</strong> (octonion&lt;T&gt; const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);</code></pre>
+		<blockquote>
+<p>
+これらの演算子は <code>octonion&lt;T&gt;(lhs) /= rhs</code> を返す。
+ゼロでの除法は、もちろんエラーになる...。
+</p>
+		</blockquote>
+		<pre><code>template&lt;typename T&gt;	inline bool	<strong>operator ==</strong> (T const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+template&lt;typename T&gt;	inline bool	<strong>operator ==</strong> (octonion&lt;T&gt; const &amp; lhs, T const &amp; rhs);
+template&lt;typename T&gt;	inline bool	<strong>operator ==</strong> (::std::complex&lt;T&gt; const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+template&lt;typename T&gt;	inline bool	<strong>operator ==</strong> (octonion&lt;T&gt; const &amp; lhs, ::std::complex&lt;T&gt; const &amp; rhs);
+template&lt;typename T&gt;	inline bool	<strong>operator ==</strong> (::boost::math::quaternion&lt;T&gt; const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+template&lt;typename T&gt;	inline bool	<strong>operator ==</strong> (octonion&lt;T&gt; const &amp; lhs, ::boost::math::quaternion&lt;T&gt; const &amp; rhs);
+template&lt;typename T&gt;	inline bool	<strong>operator ==</strong> (octonion&lt;T&gt; const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);</code></pre>
+		<blockquote>
+<p>
+これらは、 <code>octonion&lt;T&gt;(lhs)</code> の四つの成分とこれらの
+対応成分とが等しければ <code>true</code> を返す。
+どんな浮動小数点型のものであっても、本質的には意味が無い。
+</p>
+		</blockquote>
+		<pre><code>template&lt;typename T&gt;	inline bool	<strong>operator !=</strong> (T const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+template&lt;typename T&gt;	inline bool	<strong>operator !=</strong> (octonion&lt;T&gt; const &amp; lhs, T const &amp; rhs);
+template&lt;typename T&gt;	inline bool	<strong>operator !=</strong> (::std::complex&lt;T&gt; const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+template&lt;typename T&gt;	inline bool	<strong>operator !=</strong> (octonion&lt;T&gt; const &amp; lhs, ::std::complex&lt;T&gt; const &amp; rhs);
+template&lt;typename T&gt;	inline bool	<strong>operator !=</strong> (::boost::math::quaternion&lt;T&gt; const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);
+template&lt;typename T&gt;	inline bool	<strong>operator !=</strong> (octonion&lt;T&gt; const &amp; lhs, ::boost::math::quaternion&lt;T&gt; const &amp; rhs);
+template&lt;typename T&gt;	inline bool	<strong>operator !=</strong> (octonion&lt;T&gt; const &amp; lhs, octonion&lt;T&gt; const &amp; rhs);</code></pre>
+		<blockquote>
+<p>
+これらは、 <code>octonion&lt;T&gt;(lhs) == octonion&lt;T&gt;(rhs)</code> が
+偽のときのみ、 <code>true</code> を返す。
+どんな浮動小数点型のものであっても、本質的には意味が無い。
+</p>
+		</blockquote>
+		<pre><code>template&lt;typename T, typename charT, class traits&gt;
+::std::basic_istream&lt;charT,traits&gt; &amp;	<strong>operator &gt;&gt;</strong> (::std::basic_istream&lt;charT,traits&gt; &amp; is, octonion&lt;T&gt; &amp; o);</code></pre>
+		<blockquote>
+<p>
+八元数 <code>o</code> を引き出す。妥当なようならばどのような書式でも
+受けいれる。しかしながらこのことが多大なあいまいさに引き起こし、
+これらを向上させるためにいくつかの解決がなされた。
+疑念がある場合は実態を示す。
+</p>
+<p>
+入力値は T に変換できなければならない。
+不正な入力に出くわしたときは、 is.setstate(ios::failbit) を呼ぶ(
+ios::failure (27.4.5.3) <!-yakugo-throw-->が発生するかもしれない )。
+</p>
+<p>
+<font color=red>
+返り値は
+</font>
+( Returns <code>is</code>. )。</p>
+		</blockquote>
+		<pre><code>template&lt;typename T, typename charT, class traits&gt;
+::std::basic_ostream&lt;charT,traits&gt; &amp;	<strong>operator &lt;&lt;</strong> (::std::basic_ostream&lt;charT,traits&gt; &amp; os, octonion&lt;T&gt; const &amp; o);</code></pre>
+		<blockquote>
+<p>
+以下に示す通り、あたかも実装されたかのように、
+八元数 <code>o</code> をストリーム <code>os</code> に挿入する:
+</p>
+		</blockquote>
+		<pre><code>	template&lt;typename T, typename charT, class traits&gt;
+	::std::basic_ostream&lt;charT,traits&gt; &amp;	operator &lt;&lt; (	::std::basic_ostream&lt;charT,traits&gt; &amp; os,
+								octonion&lt;T&gt; const &amp; o)
+					{
+						::std::basic_ostringstream&lt;charT,traits&gt;	s;
+						
+						s.flags(os.flags());
+						s.imbue(os.getloc());
+						s.precision(os.precision());
+						
+						s &lt;&lt; '('	&lt;&lt; o.R_component_1() &lt;&lt; ','
+								&lt;&lt; o.R_component_2() &lt;&lt; ','
+								&lt;&lt; o.R_component_3() &lt;&lt; ','
+								&lt;&lt; o.R_component_4() &lt;&lt; ','
+								&lt;&lt; o.R_component_5() &lt;&lt; ','
+								&lt;&lt; o.R_component_6() &lt;&lt; ','
+								&lt;&lt; o.R_component_7() &lt;&lt; ','
+								&lt;&lt; o.R_component_8() &lt;&lt; ')';
+									
+						return os &lt;&lt; s.str();
+					}</code></pre>
+		<h2><a name="octonion value operations"></a><code>octonion</code> value operations</h2>
+		<pre><code>template&lt;typename T&gt;	inline T		<strong>real</strong>(octonion&lt;T&gt; const &amp; o);
+template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>unreal</strong>(octonion&lt;T&gt; const &amp; o);</code></pre>
+		<blockquote>
+<p>
+これらはそれぞれ、 <code>o.real()</code> と <code>o.unreal()</code> を返す。
+
+</p>
+		</blockquote>
+		<pre><code>template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>conj</strong>(octonion&lt;T&gt; const &amp; o);</code></pre>
+		<blockquote>
+<p>
+これは八元数の共役を返す。
+</p>
+		</blockquote>
+		<pre><code>template&lt;typename T&gt;	inline T	 	<strong>sup</strong>(octonion&lt;T&gt; const &amp; o);</code></pre>
+		<blockquote>
+<p>
+これは八元数の最大ノルム( <code>abs(o.R_component_1())</code>...<code>abs(o.Rcomponent_8())間の
+最大値)を返す。
+</p>
+		</blockquote>
+		<pre><code>template&lt;typename T&gt;	inline T	 	<strong>l1</strong>(octonion&lt;T&gt; const &amp; o);</code></pre>
+		<blockquote>
+<p>
+これは八元数の1-ノルム( <code>abs(o.R_component_1())+...+abs(o.R_component_8())</code> )を返す。
+</p>
+		</blockquote>
+		<pre><code>template&lt;typename T&gt;	inline T	 	<strong>abs</strong>(octonion&lt;T&gt; const &amp; o);</code></pre>
+		<blockquote>
+<p>
+これは八元数の大きさ(ユークリッドノルム)を返す。
+</p>
+		</blockquote>
+		<pre><code>template&lt;typename T&gt;	inline T		<strong>norm</strong>(octonion&lt;T&gt;const  &amp; o);</code></pre>
+		<blockquote>
+<p>
+これは八元数の(ケイリー)ノルムを返す。&quot;ノルム&quot;という言葉から
+ユークリッドノルム(二次関数のようなもの)を連想する人々にとっては、
+&quot;ノルム&quot;が混乱を招くものかもしれない。八元数(として
+知られる数学的なもの)についてのこの表現としては、(大きさとして
+知られている)ユークリッドノルムはケイリーノルムの
+平方根である。
+</p>
+		</blockquote>
+		<pre><code>template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>spherical</strong>(T const &amp; rho, T const &amp; theta, T const &amp; phi1, T const &amp; phi2, T const &amp; phi3, T const &amp; phi4, T const &amp; phi5, T const &amp; phi6);
+template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>multipolar</strong>(T const &amp; rho1, T const &amp; theta1, T const &amp; rho2, T const &amp; theta2, T const &amp; rho3, T const &amp; theta3, T const &amp; rho4, T const &amp; theta4);
+template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>cylindrical</strong>(T const &amp; r, T const &amp; angle, T const &amp; h1, T const &amp; h2, T const &amp; h3, T const &amp; h4, T const &amp; h5, T const &amp; h6);</code></pre>
+		<blockquote>
+<p>
+これらは、<code>polar</code>が複素数を構築するように、八元数を構築する。
+ただし、八元数にとって極座標が全く同等であるというわけではない。
+</p>
+<p>
+<code>spherical</code>は単に<code>polar</code>を置換したもので、
+入力として(明確な)大きさと、三つの角度から得られる多次元球上の点を取る。
+最初のシータ <code>theta</code> の値域は-pi～+piで、
+他の二つの値域は-pi/2～+pi/2をである(三次元の球面座標と同様である)。
+対称性と周期性から、大きさが負であったり角度が値域外の値であっても、
+不都合は生じない。
+しかしながら、(大きさゼロでは角度が無視されるといった)特定の不都合は生じる。
+</p>
+<p>
+<code>cylindrical</code>もまた三次元での通常の円筒座標を置き換えたものである。
+この円筒座標は平面の極座標からのもう一つの派生物である。最初の二つの入力は
+、八元数の成分である最初のCの極座標である。三番目、四番目の入力はそれぞれ、
+八元数の成分である三番目、四番目のRにあたる。
+</p>
+<p>
+<code>multipolar</code>はもう一つの、極座標の一般化である。
+今度は、八元数の成分である二つのCが極座標で与えられる。
+</p>
+		</blockquote>
+<p>
+このバージョンの八元数を実装では、いくぶんややこしい複素数の
+座標操作関数 <code>arg</code> に類するものは無い
+</p>
+		<h2><a name="octonion transcendentals"></a><code>octonion</code> transcendentals</h2>
+<p>
+現在の実装では八元数のための <code>log</code> や <code>sqrt</code> は
+提供されておらず、<code>pow</code>もまた指数の整数乗に制限される。
+これにはいくつか理由がある。一方で、八元数への解析接続については
+これから徹底的に研究されなければならない(私によって、どんなことがあっても...)。
+また、複素数乗の複素数(自然に定義されるが、標準的ではない)という、
+標準的に考えつくナンセンンスを回避したいと思う。
+このナンセンスについて話しながら、<code>pow(0,0)</code>が"実装はこう
+定義した"と言うのは、明らかに脳味噌が死んでいるだけだ。
+</p>
+<p>
+しかしながら我々は、指数関数を最高位とする、超越関数をいくつか提供しよう。
+それが"閉論理式"を考慮したものだというのが著者の結論である(他方で、
+八元数での指数関数の存在と定義はたかだか一世紀前になされたものである)。
+基本的に、実係数を持ち収束するどのような指数関数も、複素数Cでの閉論理式を
+考慮をしており、 八元数Oに変換できる。要請があれば、さらなる改訂版で
+このような超越関数をさらに加えるかもしれない。
+これらの関数は
+<a href="../../../boost/math/special_functions/sinc.hpp">
+boost/math/<code>special_functions/sinc.hpp</code>
+</a>
+と
+<a href="../../../boost/math/special_functions/sinhc.hpp">
+boost/math/<code>special_functions/sinhc.hpp</code>
+</a>
+に依存していることに注意した方がいい。
+</p>
+		<h3><a name="exp"></a>exp</h3>
+		<pre><code>template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>exp</strong>(octonion&lt;T&gt; const &amp; o);</code></pre>
+		<blockquote>
+<p>
+八元数の指数関数を計算する。
+</p>
+		</blockquote>
+		<h3><a name="cos"></a>cos</h3>
+		<pre><code>template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>cos</strong>(octonion&lt;T&gt; const &amp; o);</code></pre>
+		<blockquote>
+<p>
+八元数の余弦関数を計算する。
+</p>
+		</blockquote>
+		<h3><a name="sin"></a>sin</h3>
+		<pre><code>template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>sin</strong>(octonion&lt;T&gt; const &amp; o);</code></pre>
+		<blockquote>
+<p>
+八元数の正弦関数を計算する。
+</p>
+		</blockquote>
+		<h3><a name="tan"></a>tan</h3>
+		<pre><code>template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>tan</strong>(octonion&lt;T&gt; const &amp; o);</code></pre>
+		<blockquote>
+<p>
+八元数の正接関数を計算する。
+</p>
+		</blockquote>
+		<h3><a name="cosh"></a>cosh</h3>
+		<pre><code>template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>cosh</strong>(octonion&lt;T&gt; const &amp; o);</code></pre>
+		<blockquote>
+<p>
+八元数の双曲余弦関数を計算する。
+</p>
+		</blockquote>
+		<h3><a name="sinh"></a>sinh</h3>
+		<pre><code>template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>sinh</strong>(octonion&lt;T&gt; const &amp; o);</code></pre>
+		<blockquote>
+<p>
+八元数の双曲正弦関数を計算する。
+</p>
+		</blockquote>
+		<h3><a name="tanh"></a>tanh</h3>
+		<pre><code>template&lt;typename T&gt;	inline octonion&lt;T&gt;	<strong>tanh</strong>(octonion&lt;T&gt; const &amp; o);</code></pre>
+		<blockquote>
+<p>
+八元数の双曲正接関数を計算する。
+</p>
+		</blockquote>
+		<h3><a name="pow"></a>pow</h3>
+		<pre><code>template&lt;typename T&gt;	octonion&lt;T&gt;		<strong>pow</strong>(octonion&lt;T&gt; const &amp; o, int n);</code></pre>
+		<blockquote>
+<p>
+八元数<code>q</code>の<code>n</code>乗を計算する。
+</p>
+		</blockquote>
+		<h2><a name="History"></a>History</h2>
+		<ul>
+<li>
+1.5.7 - 25/02/2003:
+ユニットテストを通過。
+現在、(テストプログラムというより)ライブラリ
+が&lt;boost/math/quanternion.hpp&gt;経由で、&lt;boost/config.hpp&gt;を
+インクルードしている。
+
+<li>
+1.5.6 - 15/10/2002:
+Alkis Evlogimenos氏(alkis@routescience.com)により
+、Gcc2.95.xとstlportのlinux環境に適合。
+
+<li>
+1.5.5 - 27/09/2002:
+Michael Stevens氏(michael@acfr.usyd.edu.au)により、Microsoft VCPP 7に適合。
+要、/Za コンパイラオプション。
+
+<li>1.5.4 - 19/09/2002:
+(異なる翻訳単位での)複数の包含関係に関する問題を修正。
+Michael Stevens氏(michael@acfr.usyd.edu.au)とFredrick Blomqvist氏(fredrik@blomqvist.nu)により、
+Microsoftコンパイラとの適合性の向上を試みられる。
+その他の適合性を修正。
+
+<li>1.5.3 - 01/02/2002:
+Douglas Gregor氏(gregod@cs.rpi.edu)により、Gcc 2.95.3への適合とバグの修正。
+
+<li>1.5.2 - 07/07/2001:
+<code>namespace math</code>を導入。
+
+<li>1.5.1 - 07/06/2001:
+(Boostレビューの終了)現在、<code>&lt;boost/special_functions.hpp&gt;</code>の
+代わりに<code>&lt;boost/math/special_functions/sinc.hpp&gt;</code>と<code>&lt;boost/math/special_functions/sinhc.hpp&gt;</code>を
+インクルードしている。<code>sin</code>のバグを訂正(Daryle Walker氏)。
+自己代入に対するチェックを削除(Gary Powel氏)。
+<code>explicit</code>関数を改造(Gary Powel氏)。
+<code>abs</code>と除算演算子に対するオーバーフローガードを
+追加(Peter Schmitteckert)。
+<code>sup</code>と<code>l1</code>を追加。
+コードを単純化するため、Vesa Karvonen氏のC++プログラミング技法を適用。
+
+<li>1.5.0 - 23/03/2001:
+boost化、
+入力、出力、<code>pow</code>を除く全ての演算子をインライン化、boost化。
+いくつかの(テンプレート版)メンバに対する例外の安全性を修正。
+
+<li>1.4.0 - 09/01/2001:
+<code>tan</code>と<code>tanh</code>を追加。
+
+<li>1.3.1 - 08/01/2001:
+体裁を整える。
+
+<li>1.3.0 - 12/07/2000:
+現在、<code>pow</code>にMaarten Hilferink氏(mhilferink@tip.nl)のアルゴリズム
+を用いている。
+
+<li>1.2.0 - 25/05/2000:
+除算演算子と出力を修正。多くのシグネチャを変更。
+
+<li>1.1.0 - 23/05/2000:
+<code>sinc</code>を<code>sinc_pi</code>へ変更。<code>sin</code>, <code>cos</code>, <code>sinh</code>, <code>cosh</code>を追加。
+
+<li>1.0.0 - 10/08/1999:
+初版
+
+		</ul>
+
+		<h2><a name="ToDo"></a>To Do</h2>
+		<ul>
+<li>
+テストの向上。
+
+<li>
+出力演算子を、Spiritを用いて(依存関係を作り)、書き変える。
+
+<li>
+Expression Templateの機能を組み込む(おそらくuBlasから借りる)。
+                </ul>
+		<hr>
+		<p>Revised <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%d %B %Y" startspan -->25 Feb 2003<!--webbot bot="Timestamp" endspan i-checksum="18778" --></p>
+		<p>&copy; Copyright Hubert Holin 2001-2003. Permission to copy, use, modify, sell and distribute this document is granted provided this copyright notice appears in all copies. This software is provided &quot;as is&quot; without express or implied&nbsp; warranty, and with no claim as to its suitability for any purpose.</p>
+
+<hr>
+<pre>
+Japanese Translation Copyright (C) 2003 Mikmai Hayato&lt;fermi_kami@ybb.ne.jp&gt;.
+
+
+オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の
+複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」
+に提供されており、いかなる明示的、暗黙的保証も行わない。また、
+いかなる目的に対しても、その利用が適していることを関知しない。
+</pre>
+
+	</body>
+
+</html>
