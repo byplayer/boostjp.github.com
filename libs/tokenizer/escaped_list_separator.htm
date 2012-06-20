@@ -1,0 +1,191 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type"
+content="text/html; charset=utf-8">
+<meta name="GENERATOR" content="Microsoft FrontPage Express 2.0">
+<title>Boost Escaped List Separator</title>
+<!--
+  -- Copyright ｩ John Bandela 2001
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  Jeremy Siek makes no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+</head>
+
+<body bgcolor="#FFFFFF" text="#000000" link="#0000EE"
+vlink="#551A8B" alink="#FF0000">
+
+<h1 align="left"><img src="../../c++boost.gif" alt="C++ Boost"
+width="277" height="86"> </h1>
+
+<h1 align="center">Escaped List Separator</h1>
+<div align="left">
+
+<pre>
+escaped_list_separator&lt;Char, Traits = std::char_traits&lt;Char&gt; &gt;
+</pre>
+</div>
+
+<p><tt>escaped_list_separator</tt> クラスは <a href="tokenizerfunction.htm">TokenizerFunction</a>
+の実装である。escaped_list_separator はcsv (comma separated value) フォーマットの上位集合を構文解析する。
+このフォーマットの例を以下に示す。デフォルトの区切り文字としてはクォーテーション記号とエスケープ文字が使われることが想定されている。</p>
+
+<p>Field 1,Field 2,Field 3<br>
+Field 1,&quot;Field 2, with comma&quot;,Field 3<br>
+Field 1,Field 2 with \&quot;embedded quote\&quot;,Field 3<br>
+Field 1, Field 2 with \n new line,Field 3<br>
+Field 1, Field 2 with embedded \\ ,Field 3</p>
+
+<p>フィールドは通常コンマによって区切られる。フィールド内にコンマを入れたい場合は、その周りをクォーテーション記号で囲む必要がある。
+また、さらに3つのエスケープシーケンスがサポートされている。</p>
+
+<table border="1">
+    <tr>
+        <td><p align="center"><strong>エスケープシーケンス</strong></p>
+        </td>
+        <td><p align="center"><strong>結果</strong></p>
+        </td>
+    </tr>
+    <tr>
+        <td>&lt;escape&gt;&lt;quote&gt;</td>
+        <td>&lt;quote&gt;</td>
+    </tr>
+    <tr>
+        <td>&lt;escape&gt;n</td>
+        <td>改行</td>
+    </tr>
+    <tr>
+        <td>&lt;escape&gt;&lt;escape&gt;</td>
+        <td>&lt;escape&gt;</td>
+    </tr>
+</table>
+
+<p>&lt;quote&gt; はクォーテーション記号として指定された何らかの文字であり、
+&lt;escape&gt; はエスケープ文字として指定された何らかの文字である。</p>
+
+<h2>Example</h2>
+
+<pre>// simple_example_2.cpp
+#include&lt;iostream&gt;
+#include&lt;boost/tokenizer.hpp&gt;
+#include&lt;string&gt;
+
+int main(){
+   using namespace std;
+   using namespace boost;
+   string s = &quot;Field 1,\&quot;putting quotes around fields, allows commas\&quot;,Field 3&quot;;
+   tokenizer&lt;escaped_list_separator&lt;char&gt; &gt; tok(s);
+   for(tokenizer&lt;escaped_list_separator&lt;char&gt; &gt;::iterator beg=tok.begin(); beg!=tok.end();++beg){
+       cout &lt;&lt; *beg &lt;&lt; &quot;\n&quot;;
+   }
+}</pre>
+
+<p>&nbsp;</p>
+
+<h2>Construction and Usage</h2>
+
+<p>escaped_list_separator には2つのコンストラクタがある。それらを以下に示す。</p>
+
+<pre>explicit escaped_list_separator(Char e = '\\', Char c = ',',Char q = '\&quot;')</pre>
+
+<table border="1">
+    <tr>
+        <td><p align="center"><strong>引数</strong></p>
+        </td>
+        <td><p align="center"><strong>説明</strong></p>
+        </td>
+    </tr>
+    <tr>
+        <td>e</td>
+        <td>エスケープシーケンスのために使用する文字を指定する。
+        デフォルトは C 形式の \ （バックスラッシュ）である。
+        しかしながら、異なる文字を渡すことによってオーバーライドすることができる。
+        例えば、Windows スタイルのファイル名のフィールドが多く存在する場合、
+        パスの中に含まれる全ての \ をエスケープシーケンスに置き換える代わりに、
+        エスケープシーケンスのために使用する文字を何か別の文字に変更すれば良い。
+        </td>
+    </tr>
+    <tr>
+        <td>c</td>
+        <td>フィールドを区切るために使用される文字を指定する。</td>
+    </tr>
+    <tr>
+        <td>q</td>
+        <td>クォーテーション記号として使用する文字を指定する。</td>
+    </tr>
+</table>
+
+<p>&nbsp;</p>
+
+<pre>escaped_list_separator(string_type e, string_type c, string_type q):</pre>
+
+<table border="1">
+    <tr>
+        <td><p align="center"><strong>引数</strong></p>
+        </td>
+        <td><p align="center"><strong>説明</strong></p>
+        </td>
+    </tr>
+    <tr>
+        <td>e</td>
+        <td>文字列 e に含まれる文字をエスケープ文字とする。もし空の文字列が指定された場合は、エスケープ文字は存在しなくなる。</td>
+    </tr>
+    <tr>
+        <td>c</td>
+        <td>文字列 c に含まれる文字を区切り文字とする。もし空の文字列が指定された場合は、区切り文字は存在しなくなる。</td>
+    </tr>
+    <tr>
+        <td>q</td>
+        <td>文字列 q に含まれる文字をクォーテーション記号とする。もし空の文字列が指定された場合は、クォーテーション記号は存在しなくなる。</td>
+    </tr>
+</table>
+
+<p>&nbsp;</p>
+
+<p>このクラスを使用するためには、TokenizerFunctionが要求される場合、そのオブジェクトをTokenizerパッケージのいかなる場所にも渡してください。</p>
+
+<p>&nbsp;</p>
+
+<h2>Template Parameters</h2>
+
+<table border="1">
+    <tr>
+        <th><strong>引数</strong></th>
+        <th><strong>説明</strong></th>
+    </tr>
+    <tr>
+        <td><tt>Char</tt></td>
+        <td>トークンの要素の型。通常は <tt>char</tt> である。</td>
+    </tr>
+    <tr>
+        <td>Traits</td>
+        <td>Char 型の特性クラス。Char の比較の為に使用される。デフォルトは std::char_traits&lt;Char&gt; である。</td>
+    </tr>
+</table>
+
+<p>&nbsp;</p>
+
+<h2>Model of</h2>
+
+<p><a href="tokenizerfunction.htm">TokenizerFunction</a> </p>
+
+<p>&nbsp;</p>
+
+<hr>
+
+<p>&copy; Copyright John R. Bandela 2001. Permission to copy, use,
+modify, sell and distribute this document is granted provided
+this copyright notice appears in all copies. This document is
+provided &quot;as is&quot; without express or implied warranty,
+and with no claim as to its suitability for any purpose.</p>
+
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:yamasaki@mail.ne.jp">Akihiro Yamasaki</a><br>
+<small>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</small></p>
+</body>
+</html>

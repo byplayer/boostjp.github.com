@@ -1,0 +1,185 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> 
+<HTML>
+<HEAD>
+<TITLE>Simple Segregated Storage</TITLE>
+<LINK HREF="../pool.css" REL="stylesheet" TYPE="text/css">
+</HEAD>
+<BODY>
+
+<IMG SRC="../../../../c++boost.gif" WIDTH=276 HEIGHT=86 ALT="C++ Boost">
+
+<H1 ALIGN=CENTER>単純分離記憶域</H1>
+
+<P>
+<H2>はじめに</H2>
+
+<P>
+simple_segregated_storage.hpp はメモリーチャンクの<EM>フリーリスト</EM>へのアクセスを管理するテンプレートクラス <SPAN CLASS="code">simple_segregated_storage</SPAN> を提供する。
+これは<STRONG>極めて</STRONG>単純なクラスであり、ほとんどすべての機能に事前条件があることに注意してほしい。
+それは最速最小ですぐ使えるメモリアロケータとなることを狙っている。
+&mdash;例えば組み込みシステムで使われるような。
+このクラスは多くの難しい事前条件(すなわちアラインメント問題である)をユーザーの代わりに処理する。
+さらに多くの用法については<A HREF="../interfaces.html">他のプールインタフェイス</A>を見よ。
+<P>
+<H2>梗概</H2>
+
+<PRE CLASS="code">template &lt;typename SizeType = std::size_t&gt;
+class simple_segregated_storage
+{
+  private:
+    simple_segregated_storage(const simple_segregated_storage &amp;);
+    void operator=(const simple_segregated_storage &amp;);
+
+  public:
+    typedef SizeType size_type;
+
+    simple_segregated_storage();
+    ~simple_segregated_storage();
+
+    static void * segregate(void * block,
+        size_type nsz, size_type npartition_sz,
+        void * end = 0);
+    void add_block(void * block,
+        size_type nsz, size_type npartition_sz);
+    void add_ordered_block(void * block,
+        size_type nsz, size_type npartition_sz);
+
+    bool empty() const;
+
+    void * malloc();
+    void free(void * chunk);
+    void ordered_free(void * chunk);
+    void * malloc_n(size_type n, size_type partition_sz);
+    void free_n(void * chunks, size_type n,
+        size_type partition_sz);
+    void ordered_free_n(void * chunks, size_type n,
+        size_type partition_sz);
+};</PRE>
+
+<P>
+<H2>意味</H2>
+
+<P>
+<SPAN CLASS="code">simple_segregated_storage&lt;SizeType&gt;</SPAN>型のオブジェクトは、それのフリーリストが空ならば<EM>空(empty)</EM>である。
+オブジェクトが空でないとき、そのフリーリストが順序付けされているならば<EM>順序付けされている(ordered)</EM>。
+フリーリストは <SPAN CLASS="code">malloc()</SPAN>の繰り返し呼び出しが、<SPAN CLASS="code">std::less&lt;void *&gt;</SPAN>で定義される、単調増加列の値に帰着するならば、順序付けされている。
+メンバー関数は、フリーリストの順序付けられた傾向を維持するならば<EM>順序付け維持(order-preserving)</EM>である。(すなわち順序付けられたフリーリストは、そのメンバー関数の呼出し後も順序付けられている。)
+<P>
+<TABLE BORDER ALIGN=CENTER>
+<CAPTION><EM>Symbol Table</EM></CAPTION>
+<TR><TH>Symbol<TH>Meaning
+<TR><TD CLASS="code">Store<TD CLASS="code">simple_segregated_storage&lt;SizeType&gt;
+<TR><TD CLASS="code">t<TD><SPAN CLASS="code">Store</SPAN>型の値
+<TR><TD CLASS="code">u<TD><SPAN CLASS="code">const Store</SPAN>型の値
+<TR><TD CLASS="code">block, chunk, end<TD><SPAN CLASS="code">void *</SPAN>型の値
+<TR><TD CLASS="code">partition_sz, sz, n<TD><SPAN CLASS="code">Store::size_type</SPAN>型の値
+</TABLE>
+
+<P>
+<TABLE BORDER ALIGN=CENTER>
+<CAPTION><EM>テンプレートパラメータ</EM></CAPTION>
+<TR><TH>パラメータ<TH>既定値<TH>要求
+<TR><TD CLASS="code">SizeType<TD CLASS="code">std::size_t<TD>符号無し整数型
+</TABLE>
+
+<P>
+<TABLE BORDER ALIGN=CENTER>
+<CAPTION><EM>Typedefs</EM></CAPTION>
+<TR><TH>Symbol<TH>Type
+<TR><TD CLASS="code">size_type<TD CLASS="code">SizeType
+</TABLE>
+
+<P>
+<TABLE BORDER ALIGN=CENTER>
+<CAPTION><EM>Constructors, Destructors, and State</EM></CAPTION>
+<TR><TH>式<TH>戻り型<TH>事後条件<TH>注意事項
+<TR><TD CLASS="code">Store()<TD>not used<TD CLASS="code">empty()<TD>新しい <SPAN CLASS="code">Store</SPAN> を構築する
+<TR><TD CLASS="code">(&amp;t)->~Store()<TD>not used<TD><TD> <SPAN CLASS="code">Store</SPAN>を破棄する
+<TR><TD CLASS="code">u.empty()<TD CLASS="code">bool<TD><TD><SPAN CLASS="code">u</SPAN> が空のとき <SPAN CLASS="code">true</SPAN> を返す。順序付け維持(Order-preserving)
+</TABLE>
+
+<P>
+<TABLE BORDER ALIGN=CENTER>
+<CAPTION><EM>Segregation</EM></CAPTION>
+<TR><TH>式<TH>戻り型<TH>事前条件<TH>事後条件<TH>意味的同値<TH>注意事項
+
+<TR><TD CLASS="code">Store::segregate(block, sz, partition_sz, end)<TD CLASS="code">void *<TD><SPAN CLASS="code">partition_sz &gt;= sizeof(void *)</SPAN><BR><SPAN CLASS="code">partition_sz = sizeof(void *) * i</SPAN> となる整数<SPAN CLASS="code">i</SPAN>が存在する<BR>。
+<SPAN CLASS="code">sz &gt;= partition_sz</SPAN><BR><SPAN CLASS="code">block</SPAN> はサイズが<SPAN CLASS="code">partition_sz</SPAN>であるオブジェクトの配列に適切に整列している。<BR>
+<SPAN CLASS="code">block</SPAN> は<SPAN CLASS="code">void *</SPAN>の配列に適切に整列している。<TD><TD><TD><SPAN CLASS="code">block</SPAN>によって指定された<SPAN CLASS="code">sz</SPAN>バイトのメモリーブロック全体を通してフリーリストをインターリーブする、そのさい可能な限り多くの<SPAN CLASS="code">partition_sz</SPAN>-サイズのチャンクに分割する。
+最後のチャンクは<SPAN CLASS="code">end</SPAN>を指すようにセットされ、最初のチャンクへのポインタが返される(これはいつも<SPAN CLASS="code">block</SPAN>に等しい)。 
+このインターリーブされたフリーリストは順序付けされている。O(sz)。
+
+<TR><TD CLASS="code">Store::segregate(block, sz, partition_sz)<TD CLASS="code">void *<TD>Same as above<TD><TD CLASS="code">Store::segregate(block, sz, partition_sz, 0)<TD>
+
+<TR><TD CLASS="code">t.add_block(block, sz, partition_sz)<TD CLASS="code">void<TD>Same as above<TD CLASS="code">!t.empty()<TD><TD><SPAN CLASS="code">block</SPAN>によって指定された<SPAN CLASS="code">sz</SPAN>バイトのメモリーブロックを<SPAN CLASS="code">partition_sz</SPAN>サイズのチャンクに分割し(segregate)、そのフリーリストを自分自身のフリーリストに加える。
+呼び出し前に<SPAN CLASS="code">t</SPAN> が空のとき、呼出し後は順序付けられている。
+O(sz)。
+
+<TR><TD CLASS="code">t.add_ordered_block(block, sz, partition_sz)<TD CLASS="code">void<TD>Same as above<TD CLASS="code">!t.empty()<TD><TD>
+<SPAN CLASS="code">block</SPAN>によって指定された<SPAN CLASS="code">sz</SPAN>バイトのメモリーブロックを<SPAN CLASS="code">partition_sz</SPAN>サイズのチャンクに分離させ(segregate)、そのフリーリストを自分自身のフリーリストとマージする。
+順序付け維持(Order-preserving)である。
+O(sz)。
+</TABLE>
+
+<P>
+<TABLE BORDER ALIGN=CENTER>
+<CAPTION><EM>Allocation and Deallocation</EM></CAPTION>
+<TR><TH>式<TH>戻り型<TH>事前条件<TH>事後条件<TH>意味的同値<TH>注意事項
+<TR><TD CLASS="code">t.malloc()<TD CLASS="code">void *<TD CLASS="code">!t.empty()<TD><TD><TD>フリーリストから、存在する最初のチャンクを取り出し返す。
+順序付け維持(Order-preserving)である。
+O(1)。
+
+<TR><TD CLASS="code">t.free(chunk)<TD CLASS="code">void<TD><SPAN CLASS="code">chunk</SPAN> was previously returned from a call to <SPAN CLASS="code">t.malloc()</SPAN><TD CLASS="code">!t.empty()<TD><TD><SPAN CLASS="code">chunk</SPAN>をフリーリスト中へ戻す。
+<SPAN CLASS="code">chunk</SPAN>は<SPAN CLASS="code">0</SPAN>であってはならない。
+O(1)。
+
+<TR><TD CLASS="code">t.ordered_free(chunk)<TD CLASS="code">void<TD>Same as above<TD CLASS="code">!t.empty()<TD><TD>
+<SPAN CLASS="code">chunk</SPAN>をフリーリスト中へ戻す。<SPAN CLASS="code">chunk</SPAN>は<SPAN CLASS="code">0</SPAN>であってはならない。
+フリーリストのサイズによりO(N)。
+
+<TR><TD CLASS="code">t.malloc_n(n, partition_sz)<TD CLASS="code">void *<TD><TD><TD><TD>
+<SPAN CLASS="code">partition_sz</SPAN>サイズの連続したチャンク<SPAN CLASS="code">n</SPAN>個を発見しようと企てる。
+見つかれば、それらをすべてフリーリストから取り除き、それらの先頭へのポインタを返す。
+見つからなければ、<SPAN CLASS="code">0</SPAN>を返す。
+(必須ではないが)フリーリストは順序づけられていることが強く推奨される。
+このアルゴリズムは、フリーリストがうまく連続していなければ失敗するからである。
+順序付け維持(Order-preserving)である。
+フリーリストのサイズにより O(N)。
+
+<TR><TD CLASS="code">t.free_n(chunk, n, partition_sz)<TD CLASS="code">void<TD><SPAN CLASS="code">chunk</SPAN> was previously returned from a call to <SPAN CLASS="code">t.malloc_n(n, partition_sz)</SPAN><TD CLASS="code">!t.empty()<TD CLASS="code">t.add_block(chunk, n * partition_sz, partition_sz)<TD>
+<SPAN CLASS="code">chunk</SPAN>は実際に <SPAN CLASS="code">n * partition_sz</SPAN>バイトにわたるチャンクのブロックを参照していることを前提に、分離しブロックに加える。
+<SPAN CLASS="code">chunk</SPAN>は<SPAN CLASS="code">0</SPAN>であってはならない。
+O(n)。
+
+<TR><TD CLASS="code">t.ordered_free_n(chunk, n, partition_sz)<TD CLASS="code">void<TD>same as above<TD>same as above<TD CLASS="code">t.add_ordered_block(chunk, n * partition_sz, partition_sz)<TD>
+上記と同じ。
+ただしフリーリストにマージする。
+順序付け維持(Order-preserving)である。
+NをフリーリストのサイズとしてO(N + n)。
+</TABLE>
+
+<P>
+<H2>Symbols</H2>
+
+<P>
+<UL>
+<LI>boost::simple_segregated_storage</LI>
+</UL>
+
+<P>
+<H2><A HREF="../implementation/simple_segregated_storage.html">実装の詳細</A></H2>
+
+<P>
+<HR>
+
+<P>
+Copyright &copy; 2000, 2001 Stephen Cleary (<A HREF="mailto:shammah@voyager.net">shammah@voyager.net</A>)
+
+<P>
+This file can be redistributed and/or modified under the terms found in <A HREF="../copyright.html">copyright.html</A>
+
+<P>
+This software and its documentation is provided &quot;as is&quot; without express or implied warranty, and with no claim as to its suitability for any purpose.
+
+</BODY>
+</HTML>

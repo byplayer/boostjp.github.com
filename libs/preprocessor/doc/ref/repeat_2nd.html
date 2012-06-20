@@ -1,0 +1,76 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=EUC-JP"><!--*- encoding: euc-jp -*-->
+	<title>BOOST_PP_REPEAT_2ND</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">
+</head>
+<body>
+	<div style="margin-left:  0px;">
+		<b>BOOST_PP_REPEAT_2ND</b> マクロは <b>BOOST_PP_REPEAT</b> の2番目の次元を表す。
+	</div>
+	<h4>Usage</h4>
+		<div class="code">
+			<b>BOOST_PP_REPEAT_2ND</b>(<i>count</i>, <i>macro</i>, <i>data</i>)
+		</div>
+	<h4>Arguments</h4>
+		<dl>
+			<dt>count</dt>
+			<dd>
+			<i>macro</i> を呼び出す繰り返しの回数。
+			有効な値の範囲は <i>0</i> から <b>BOOST_PP_LIMIT_REPEAT</b> までである。
+			</dd>
+			<dt>macro</dt>
+			<dd>
+			<i>macro</i>(<i>z</i>, <i>n</i>, <i>data</i>) という形の3つ組の演算。
+			このマクロは <b>BOOST_PP_REPEAT_2ND</b> によって利用可能な次の繰り返しの深さ、
+			現在の繰り返し回数、付属の <i>data</i> 引数に展開される。
+			</dd>
+			<dt>data</dt>
+			<dd>
+			<i>macro</i> に渡される付属のデータ。
+			</dd>
+		</dl>
+	<h4>Remarks</h4>
+		<div>
+		このマクロは次のシーケンスに展開される:
+			<div>
+				<i>macro</i>(<i>z</i>, <i>0</i>, <i>data</i>) <i>macro</i>(<i>z</i>, <i>1</i>, <i>data</i>) ... <i>macro</i>(<i>z</i>, <i>count</i> - <i>1</i>, <i>data</i>)
+			</div>
+		</div>
+		<div>
+		<i>macro</i> に渡される <i>z</i> の値は利用可能な次の繰り返しの次元を表す。
+		接尾辞 <b>_Z</b> をもつ他のマクロの仲間は内部で <b>BOOST_PP_REPEAT</b> を利用している -
+		例えば <b>BOOST_PP_ENUM_PARAMS</b> や <b>BOOST_PP_ENUM_PARAMS_Z</b> など。
+		これらの <b>_Z</b> バージョンの利用は厳密には必要ではない。
+		しかし、 (<i>macro</i> に渡される) <i>z</i> の値をこれらのマクロに渡すことで、
+		最も効率的に <b>BOOST_PP_REPEAT</b> に再入出来る。
+		</div>
+		<div>
+		この <i>z</i> の値を、単純に別のマクロに渡すのではなく、直接使うためには、
+		 <b>BOOST_PP_REPEAT_<i>z</i></b> を見よ。
+		</div>
+		<div>
+		このマクロは推奨されていない。
+		過去のバージョンとの互換性のためだけに存在している。
+		代わりに <b>BOOST_PP_REPEAT</b> を使うこと。
+		</div>
+	<h4>See Also</h4>
+		<ul>
+			<li><a href="limit_repeat.html">BOOST_PP_LIMIT_REPEAT</a></li>
+			<li><a href="repeat.html">BOOST_PP_REPEAT</a></li>
+			<li><a href="repeat_z.html">BOOST_PP_REPEAT_<i>z</i></a></li>
+		</ul>
+	<h4>Requirements</h4>
+		<div>
+			<b>Header:</b> &nbsp;<a href="../headers/repetition/repeat.hpp.html">&lt;boost/preprocessor/repetition/repeat.hpp&gt;</a>
+		</div>
+	<h4>Sample Code</h4>
+<div><pre>
+#include &lt;<a href="../headers/repetition/repeat.hpp.html">boost/preprocessor/repetition/repeat.hpp</a>&gt;
+
+#define DECL(z, n, text) text ## n = n;
+
+<a href="repeat_2nd.html">BOOST_PP_REPEAT_2ND</a>(5, DECL, int x)
+</pre></div>
+</body>
+</html>

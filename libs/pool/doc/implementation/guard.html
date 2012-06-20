@@ -1,0 +1,112 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> 
+<HTML>
+<HEAD>
+<TITLE>guard - Auto-lock/unlock-er</TITLE>
+<LINK HREF="../pool.css" REL="stylesheet" TYPE="text/css">
+</HEAD>
+<BODY>
+
+<IMG SRC="../../../../c++boost.gif" WIDTH=276 HEIGHT=86 ALT="C++ Boost">
+
+<H1 ALIGN=CENTER>guard - Auto-lock/unlock-er</H1>
+
+<P>
+<H2>はじめに</H2>
+
+<P>
+detail/guard.hpp は <SPAN CLASS="code">Mutex</SPAN> のロックとアンロック操作にスコープ付きのアクセスを許すようにした <SPAN CLASS="code">guard&lt;Mutex&gt;</SPAN> を提供する。
+それは、例外が投げられたときでも、<SPAN CLASS="code">Mutex</SPAN> を確実にアンロックする。
+<P>
+<H2>梗概</H2>
+
+<PRE CLASS="code">namespace details {
+namespace pool {
+
+template &lt;typename Mutex&gt;
+class guard
+{
+  private:
+    guard(const guard &amp;);
+    void operator=(const guard &amp;);
+
+  public:
+    explicit guard(Mutex &amp; mtx);
+    ~guard();
+};
+
+} // namespace pool
+} // namespace details</PRE>
+
+<P>
+<H2>意味</H2>
+
+<P>
+<TABLE BORDER ALIGN=CENTER>
+<CAPTION><EM>Symbol Table</EM></CAPTION>
+<TR><TH>Symbol<TH>Meaning
+<TR><TD CLASS="code">T<TD><SPAN CLASS="code">guard&lt;Mutex&gt;</SPAN>
+<TR><TD CLASS="code">m<TD>value of type <SPAN CLASS="code">Mutex &amp;</SPAN>
+<TR><TD CLASS="code">g<TD>value of type <SPAN CLASS="code">guard&lt;Mutex&gt;</SPAN>
+</TABLE>
+
+<P>
+<TABLE BORDER ALIGN=CENTER>
+<CAPTION><EM>Requirements on <SPAN CLASS="code">Mutex</SPAN></EM></CAPTION>
+<TR><TH>Expression<TH>Return Type<TH>Assertion/Note/Pre/Post-Condition
+<TR><TD CLASS="code">m.lock()<TD>not used<TD><SPAN CLASS="code">m</SPAN> で参照される mutex をロックする。
+<TR><TD CLASS="code">m.unlock()<TD>not used<TD><SPAN CLASS="code">m</SPAN> で参照される mutex をアンロックする。
+</TABLE>
+
+<P>
+<TABLE BORDER ALIGN=CENTER>
+<CAPTION><EM>Requirements satisfied by <SPAN CLASS="code">guard</SPAN></EM></CAPTION>
+<TR><TH>式<TH>アサーション/注意事項/事前/事後条件
+<TR><TD CLASS="code">T(m)<TD>
+<SPAN CLASS="code">m</SPAN> で参照される mutex をロックする。<SPAN CLASS="code">T(m)</SPAN> を <SPAN CLASS="code">m</SPAN> に束縛する。
+<TR><TD CLASS="code">(&amp;g)->~T()<TD><SPAN CLASS="code">g</SPAN> が束縛されている mutex をアンロックする。
+</TABLE>
+
+<P>
+<H2>例</H2>
+
+<P>
+(プラットフォーム依存の) <SPAN CLASS="code">mutex</SPAN> があり、以下のようにそれをコードで包むことができる。
+<PRE CLASS="code">extern mutex global_lock;
+
+static void f()
+{
+  boost::details::pool::guard&lt;mutex&gt; g(global_lock);
+  // g のコンストラクタは &quot;global_lock&quot; をロックする
+
+  ... // 何をしてもよい:
+      //   例外を投げるもよし
+      //   return するもよし
+      //   そのまま抜けてもよし
+  
+} // g のデストラクタが &quot;global_lock&quot;をアンロックする</PRE>
+
+<P>
+<H2>依存性</H2>
+
+<P>
+なし。
+
+<P>
+<H2>将来の方向性</H2>
+
+<P>
+このヘッダーはいつかは Boost multithreading library で置き換えられるであろう。
+<P>
+<HR>
+
+<P>
+Copyright &copy; 2000, 2001 Stephen Cleary (<A HREF="mailto:shammah@voyager.net">shammah@voyager.net</A>)
+
+<P>
+This file can be redistributed and/or modified under the terms found in <A HREF="../copyright.html">copyright.html</A>
+
+<P>
+This software and its documentation is provided &quot;as is&quot; without express or implied warranty, and with no claim as to its suitability for any purpose.
+
+</BODY>
+</HTML>

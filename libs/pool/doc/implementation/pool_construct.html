@@ -1,0 +1,71 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> 
+<HTML>
+<HEAD>
+<TITLE>Object Pool Constructors Generator</TITLE>
+<LINK HREF="../pool.css" REL="stylesheet" TYPE="text/css">
+</HEAD>
+<BODY>
+
+<IMG SRC="../../../../c++boost.gif" WIDTH=276 HEIGHT=86 ALT="C++ Boost">
+
+<H1 ALIGN=CENTER>Object Pool Constructors Generator</H1>
+
+<P>
+<H2>説明</H2>
+
+<P>
+テンプレートクラス <SPAN CLASS="code">object_pool</SPAN> (<A HREF="object_pool.html">object_pool.html</A> を見よ)は、いくつもの関数 <SPAN CLASS="code">construct(..)</SPAN> を含んでいる。
+これらはオブジェクトの割り当てと構築の両方をひとつの操作で行う。
+<P>
+この関数への引数の数と型はまったく気まぐれであるので、テンプレート関数 <SPAN CLASS="code">construct</SPAN> を自動的に生成する簡単なシステムが用意されている。
+このシステムは <STRONG>m4</STRONG> マクロプリプロセッサをベースとしている。
+<STRONG>m4</STRONG> は UNIX システムでは標準であり、Win32 システムにもある。
+
+<P>
+<STRONG>m4</STRONG> を走らせると、detail/pool_construct.m4 は detail/pool_construct.inc を作る。
+ここには適切な個数の引数を持つ <SPAN CLASS="code">construct</SPAN> の定義のみがある。
+引数の数は m4 マクロ <SPAN CLASS="code">NumberOfArguments</SPAN> としてファイルに渡されることがある。
+もし提供されていなければ既定値は <SPAN CLASS="code">3</SPAN> である。
+
+<P>
+異なった引数の個数毎に(<SPAN CLASS="code">1</SPAN> から <SPAN CLASS="code">NumberOfArguments</SPAN>まで)、テンプレート関数が生成される。
+引数の数と同じ数のテンプレートパラメータが存在し、それぞれの引数の型はそのテンプレートの引数(cv-修飾の場合もある)の反映である。
+cv-修飾の可能な順列の数だけ生成される。
+
+<P>
+可能な引数の数のすべての順列が生成されるため、インクルードされるファイルのサイズは
+コンストラクター引数の数の式で線形ではなく、指数的に増加する。
+無理のないコンパイル時間のために、必要なだけの数の引数のみを使うべきである。
+
+<P>
+detail/pool_construct.bat と detail/pool_construct.sh はどちらも、<SPAN CLASS="code">NumberOfArguments</SPAN> をコマンドラインとして定義するように、<STRONG>m4</STRONG> を呼び出すために提供されている。
+より詳細はこれらのファイルを見よ。
+
+<P>
+<H2>依存性</H2>
+
+<P>
+for.m4 に依存(<A HREF="for.html">for.html</A> を見よ)。
+<P>
+<H2>将来の方向性</H2>
+
+<P>
+このシステムは Python (または他の言語)スクリプトによって補完または置換される予定。
+
+<P>
+<H2><A HREF="../interfaces/object_pool.html">Interface Description</A></H2>
+
+<P>
+<HR>
+
+<P>
+Copyright &copy; 2000, 2001 Stephen Cleary (<A HREF="mailto:shammah@voyager.net">shammah@voyager.net</A>)
+
+<P>
+This file can be redistributed and/or modified under the terms found in <A HREF="../copyright.html">copyright.html</A>
+
+<P>
+This software and its documentation is provided &quot;as is&quot; without express or implied warranty, and with no claim as to its suitability for any purpose.
+
+</BODY>
+</HTML>

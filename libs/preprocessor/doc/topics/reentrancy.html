@@ -1,0 +1,233 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=euc-jp"></meta>
+	<title>reentrancy.html</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">
+</head>
+<body>
+<h4>再入</h4>
+<div>
+	マクロ展開は完全に関数的である。したがってイテレーションは存在しない。残念ながら、プリプロセッサは再帰も許していない。これはライブラリが、マクロを定義することによってイテレーションか再帰を模造しなければならないことを意味する。
+</div>
+<div>
+	例えば、これは単純な連結マクロである:
+</div>
+<div class="code"><pre>
+#define CONCAT(a, b) CONCAT_D(a, b)
+#define CONCAT_D(a, b) a ## b
+
+CONCAT(a, CONCAT(b, c)) // abc
+</pre></div>
+<div>
+	これは上の例のように単純な例ではうまくゆくが、次のようなものでは何がおこるだろうか:
+</div>
+<div class="code"><pre>
+#define AB(x, y) CONCAT(x, y)
+
+CONCAT(A, B(p, q)) // CONCAT(p, q)
+</pre></div>
+<div>
+	再帰ができないため、この例は<code>pq</code>ではなく<code>CONCAT(p, q)</code>に展開される。
+</div>
+<div>
+	これを「修正」するには2つの方法しかない。
+	まず、<code>AB</code>は<code>CONCAT</code>を使っているため、上の例のような使いかたはできないことを文書化することができる。
+	次に、複数の連結マクロを定義することができる。
+</div>
+<div class="code"><pre>
+#define CONCAT_1(a, b) CONCAT_1_D(a, b)
+#define CONCAT_1_D(a, b) a ## b
+
+#define CONCAT_2(a, b) CONCAT_2_D(a, b)
+#define CONCAT_2_D(a, b) a ## b
+
+#define AB(x, y) CONCAT_2(x, y)
+
+CONCAT_1(A, B(p, q)) // pq
+</pre></div>
+<div>
+	これは問題を解決する。しかしながら、<code>AB</code>は連結マクロとして特に<code>CONCAT_2</code>を使っていることを知らなければならなくなった。
+</div>
+<div>
+	より良い解決法は、<i>どの</i>連結マクロが使われるかを抽象化することである...
+</div>
+<div class="code"><pre>
+#define AB(c, x, y) CONCAT_ ## c(x, y)
+
+CONCAT_1(A, B(2, p, q)) // pq
+</pre></div>
+<div>
+	これは<i>総称的再入(generic reentrance)</i>の例であり、この例では一連の連結マクロへの総称的再入になっている。
+	引数<code>c</code>は連結の構成の「状態」を表現していて、ユーザがこの状態を憶えているかぎり、連結マクロの中からさらに<code>AB</code>を使うことができる。
+</div>
+<div>
+	このライブラリは同様の選択肢を持っている。
+	その中で連結を構成することをを許さないか、あるいは複数の等価な定義を用意しその構成の中へ<i>再入</i>する均一の方法を提供している。
+	再帰を<i>必要とする</i>構成はいくつかある(たとえば<b>BOOST_PP_WHILDE</b>)。
+	その結果、このライブラリは、まだ使われていないマクロにおいてその集まりへ再入するメカニズムを伴ったマクロの集まりを提供することにしている。(Consequently, the library chooses to provide several sets of macros with mechanisms to reenter the set at a macro that has not already been used.)
+</div>
+<div>
+	特に、ライブラリは<b>BOOST_PP_FOR</b>、<b>BOOST_PP_REPEAT</b>、<b>BOOST_PP_WHILE</b>への再入を提供しなければならない。
+	これを実現するには二つのメカニズムがある。状態パラメータ(上の構成の例のようなもの)と<i>自動再帰(automatic recursion)</i>である。
+</div>
+<h4>状態パラメータ</h4>
+<div>
+	上の構成(<b>BOOST_PP_FOR</b>、<b>BOOST_PP_REPEAT</b>、<b>BOOST_PP_WHILE</b>)のいずれも、関連付けられた状態を持っている。
+	この「状態」はそれぞれの構成へ再入する手段を提供する。
+</div>
+<div>
+	いくつかのユーザ定義マクロはこれらの構成へ渡すことができる(述語や演算子として)。
+	ユーザ定義マクロが呼ばれるたびにそのユーザ定義マクロはそれを呼び出した構成の現在の状態を受け取り、必要ならそのマクロが(その構成へ)再入することができる。
+</div>
+<div>
+	これらの状態は、他のマクロへ連結するものと渡されるものの二つの方法のいずれかで利用される。
+</div>
+<div>
+	これらの状態パラメータが利用されるマクロには三つのタイプがある。
+	まず一つ目は、それ自身が連結を通じて再入するもの。
+	二つ目は、一つ目のタイプの一部となるようなもの。これらも連結を通じて再入する。
+	三つ目は、内部で一つ目や二つ目のタイプのマクロを利用しているもの。
+	それらは追加の引数として状態を取る。
+</div>
+<div>
+	<b>BOOST_PP_WHILE</b>の状態は文字<i>D</i>によって表される。
+	述語および演算子の二つのユーザ定義マクロが<b>BOOST_PP_WHILE</b>に渡される。
+	<b>BOOST_PP_WHILE</b>がそれらユーザ定義マクロを展開する際には、それらが<b>BOOST_PP_WHILDE</b>へ再入できるように、状態がマクロへ渡される。
+</div>
+<div>
+	次の乗算の実装の例がその技を説明している:
+</div>
+<div class="code"><pre>
+// 「足し算」マクロ。
+// 末尾の「_D」はこのマクロがBOOST_PP_WHILEへ再入することを表す。
+
+#define ADD_D(d, x, y) \
+   BOOST_PP_TUPLE_ELEM( \
+      2, 0, \
+      BOOST_PP_WHILE_ ## d(ADD_P, ADD_O, (x, y)) \
+   ) \
+   /**/
+
+// BOOST_PP_WHILEへ渡される述語。
+// 「y」が0にならない限り「true」を返し続ける。
+
+#define ADD_P(d, xy) BOOST_PP_TUPLE_ELEM(2, 1, xy)
+
+// BOOST_PP_WHILEへ渡される演算。
+// 「y」が0にならない限り「x」がインクリメント、
+// 「y」がデクリメントされる。いずれ「y」が0になり、
+// 述語が「false」を返す。
+
+#define ADD_O(d, xy) \
+   ( \
+      BOOST_PP_INC( \
+         BOOST_PP_TUPLE_ELEM(2, 0, xy) \
+      ), \
+      BOOST_PP_DEC( \
+         BOOST_PP_TUPLE_ELEM(2, 1, xy) \
+      ) \
+   ) \
+   /**/
+
+// 乗算インタフェースマクロ。
+
+#define MUL(x, y) \
+   BOOST_PP_TUPLE_ELEM( \
+      3, 0, \
+      BOOST_PP_WHILE(MUL_P, MUL_O, (0, x, y)) \
+   ) \
+   /**/
+
+// BOOST_PP_WHILEへ渡される述語。これは「y」が0に
+// ならない限り「true」を返す。
+
+#define MUL_P(d, rxy) BOOST_PP_TUPLE_ELEM(3, 2, rxy)
+
+// BOOST_PP_WHILEへ渡される演算。これは「r」に「x」を
+// 加え、「y」をデクリメントする。「y」が0になれば
+// 述語が「false」を返す。
+
+#define MUL_O(d, rxy) \
+   ( \
+      ADD_D( \
+         d, /* pass the state on to ADD_D */ \
+         BOOST_PP_TUPLE_ELEM(3, 0, rxy), \
+         BOOST_PP_TUPLE_ELEM(3, 1, rxy) \
+      ), \
+      BOOST_PP_TUPLE_ELEM(3, 1, rxy), \
+      BOOST_PP_DEC( \
+         BOOST_PP_TUPLE_ELEM(3, 2, rxy) \
+      ) \
+   ) \
+   /**/
+
+MUL(3, 2) // 6へ展開される。
+</pre></div>
+<div>
+	上の実装について注目すべきことが二つある。
+	まず、<code>ADD_D</code>が状態パラメータ<i>d</i>を使ってどのように<b>BOOST_PP_WHILE</b>へ再入しているかを注意せよ。
+	次に、<b>BOOST_PP_WHILE</b>によって展開される<code>MUL</code>の演算がどのように<code>ADD_D</code>へ状態を渡しているかを注意せよ。
+	これは引数によるものと連結によるものの二つの再入の実例である。
+</div>
+<div>
+	このライブラリの<b>BOOST_PP_WHILE</b>を使うマクロの各々について、状態再入を使う変種がある。
+	その変種がもし連結ではなく引数を使っているなら、それは<code>_D</code>が名前の後ろにつく。
+	例えばライブラリに含まれる<b>BOOST_PP_ADD_D</b>や<b>BOOST_PP_MUL_D</b>がその例である。
+	連結を使っているほうの変種は、名前の後ろにアンダースコアが付く。
+	それは「状態」を連結することによって完結する。
+	これには<b>BOOST_PP_WHILE</b>自身(<b>BOOST_PP_WHILE_</b> ## <i>d</i>)や、<b>BOOST_PP_LIST_FOLD_LEFT</b>(<b>BOOST_PP_LIST_FOLD_LEFT_</b> ## <i>d</i>)が含まれる。
+</div>
+<div>
+	同様のものが<b>BOOST_PP_FOR</b>と<b>BOOST_PP_REPEAT</b>にもあるが、これらはそれぞれ<i>R</i>と<i>Z</i>の文字が状態を表すのに使われる。
+</div>
+<div>
+	上の<code>MUL</code>の実装でさらに注意すべきことは、すぐにはわからないことだが、<i>三つすべての</i>種類の再帰を使っていることである。
+	二つの種類の<i>状態</i>再入だけでなく、<i>自動再帰</i>も使っている。
+</div>
+<h4>自動再帰</h4>
+<div>
+	自動再帰は再帰の構成を非常に単純化する技である。
+	それは状態パラメータを単に<i>使わない</i>ことによる。
+</div>
+<div>
+	上の<code>MUL</code>の例は、それ自身が<b>BOOST_PP_WHILE</b>を使う際に自動再帰を使っている。
+	いいかえると、それはたとえ<b>BOOST_PP_WHILE_</b>に状態を連結することによって<b>BOOST_PP_WHILE</b>へ再入していなくても、<code>MUL</code>は<i>まだ</i><b>BOOST_PP_WHILE</b>の中で使うことができる。
+	In other words, <code>MUL</code> can <i>still</i> be used inside <b>BOOST_PP_WHILE</b> even though it doesn't
+	reenter <b>BOOST_PP_WHILE</b> by concatenating the state to <b>BOOST_PP_WHILE_</b>.
+</div>
+<div>
+	これを実現するため、このライブラリはあるトリックを使っている。
+	見掛けとは違い、マクロ<b>BOOST_PP_WHILE</b>は三つの引数は取らない。
+	実際、このマクロは全く引数を取らない。
+	そのかわり、<b>BOOST_PP_WHILE</b>マクロは、三つの引数を取るマクロ<i>へ</i>展開される。
+	それは単に次の<b>BOOST_PP_WHILE_</b> ## <i>d</i>マクロを見つけ、それを返す。
+	この「見つける」プロセスは入り組んでいて、私はそれが<i>どのようにして</i>動作しているかについては立ち入らないが、それが動作<i>する</i>ことさえ言えば十分である。
+</div>
+<div>
+	いくつかのマクロへ再入するのに自動再帰を使うのは明らかにずっと単純である。
+	それは実装の詳細を完全にかくしてしまう。
+	もしそうなら、なぜ状態パラメータを使うものが存在するのか？
+	理由は単純である。
+	状態パラメータが使われる時には、状態は常に<i>わかる</i>。
+	これは自動再帰の場合にはなりたたない。
+	自動再帰は状態が必要な場合にそれを<i>推理</i>しなければならない。
+	これはいくつかの状況においてマクロの複雑さ、とくにマクロの深さを増大させ、プリプロセッサを非常に遅くさせることになる。
+</div>
+<h4>結論</h4>
+<div>
+	再入を行うのに状態パラメータを使うか自動再帰を使うかにはトレードオフがある。
+	自動再帰の利点は利用が簡単なことと実装が包み隠されることである。
+	しかし自動再帰はいくつかの状況においてプリプロセッサに性能上のコストを強いることになる。
+	状態パラメータの利点は逆に、効率性である。
+	状態パラメータの使用は<i>最大</i>の性能を得るのに唯一の方法である。
+	一方でそれはコードの複雑さと実装の暴露の問題がある。
+</div>
+<h4>参照</h4>
+<ul>
+	<li><a href="../ref/for.html">BOOST_PP_FOR</a></li>
+	<li><a href="../ref/repeat.html">BOOST_PP_REPEAT</a></li>
+	<li><a href="../ref/while.html">BOOST_PP_WHILE</a></li>
+</ul>
+<div class="sig">- Paul Mensonides</div>
+</body>
+</html>

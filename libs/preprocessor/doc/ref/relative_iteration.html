@@ -1,0 +1,94 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=EUC-JP"><!--*- encoding: euc-jp -*-->
+	<title>BOOST_PP_RELATIVE_ITERATION</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">
+</head>
+<body>
+	<div style="margin-left:  0px;">
+		<b>BOOST_PP_RELATIVE_FLAGS</b> マクロは <i>ファイル繰り返し</i>
+		の現在の深さと相対的な深さの反復値に展開される。
+	</div>
+	<h4>Usage</h4>
+		<div class="code">
+			<b>BOOST_PP_RELATIVE_ITERATION</b>(<i>i</i>)
+		</div>
+	<h4>Arguments</h4>
+		<dl>
+			<dt>i</dt>
+			<dd>
+			その反復値が検索されるフレームの相対的な深さ。
+			有効な値の範囲は <i>0</i> から <b>BOOST_PP_ITERATION_DEPTH</b>() - <i>1</i> までである。
+			</dd>
+		</dl>
+	<h4>Remarks</h4>
+		<div>
+
+		このマクロは <i>ファイル繰り返し</i> が進行中の時のみ有効である。
+		</div>
+		<div>
+		引数 <i>i</i> は現在のフレームより <i>外側の</i> フレームの数として解釈される。
+		それゆえ、 <b>BOOST_PP_RELATIVE_ITERATION</b>(<i>0</i>) は
+		<b>BOOST_PP_ITERATION</b>() と等価である。
+		</div>
+	<h4>Requirements</h4>
+		<div>
+			<b>Header:</b> &nbsp;<a href="../headers/iteration/iterate.hpp.html">&lt;boost/preprocessor/iteration/iterate.hpp&gt;</a>
+		</div>
+	<h4>Sample Code</h4>
+<div><pre>
+// file.h
+#if !<a href="is_iterating.html">BOOST_PP_IS_ITERATING</a>
+
+   #ifndef FILE_H_
+   #define FILE_H_
+
+   #include &lt;<a href="../headers/iteration/iterate.hpp.html">boost/preprocessor/iteration/iterate.hpp</a>&gt;
+
+1st iteration:
+   #define <a href="iteration_params_x.html">BOOST_PP_ITERATION_PARAMS_1</a> (4, (0, 3, "file.h", 0x0001))
+   #include <a href="iterate.html">BOOST_PP_ITERATE</a>()
+
+2nd iteration:
+   #define <a href="iteration_params_x.html">BOOST_PP_ITERATION_PARAMS_1</a> (4, (1, 10, "file.h", 0x0002))
+   #include <a href="iterate.html">BOOST_PP_ITERATE</a>()
+
+   #endif
+
+#elif <a href="iteration_depth.html">BOOST_PP_ITERATION_DEPTH</a>() == 1 \
+   &amp;&amp; <a href="iteration_flags.html">BOOST_PP_ITERATION_FLAGS</a>() == 0x0001 \
+   /**/
+
+   --
+   #define <a href="iteration_params_x.html">BOOST_PP_ITERATION_PARAMS_2</a> (3, (1, 10, "file.h"))
+   #include <a href="iterate.html">BOOST_PP_ITERATE</a>()
+
+#elif <a href="iteration_depth.html">BOOST_PP_ITERATION_DEPTH</a>() == 1 \
+   &amp;&amp; <a href="iteration_flags.html">BOOST_PP_ITERATION_FLAGS</a>() == 0x0002 \
+   /**/
+
+   --
+   #define <a href="iteration_params_x.html">BOOST_PP_ITERATION_PARAMS_2</a> \
+      (3, (1, <a href="iteration.html">BOOST_PP_ITERATION</a>(), "file.h")) \
+      /**/
+   #include <a href="iterate.html">BOOST_PP_ITERATE</a>()
+
+#elif <a href="iteration_depth.html">BOOST_PP_ITERATION_DEPTH</a>() == 2 \
+   &amp;&amp; <a href="frame_flags.html">BOOST_PP_FRAME_FLAGS</a>(1) == 0x0001 \
+   /**/
+
+   --
+   #define <a href="iteration_params_x.html">BOOST_PP_ITERATION_PARAMS_3</a> \
+      (3, (1, <a href="iteration.html">BOOST_PP_ITERATION</a>(), "file.h")) \
+      /**/
+   #include <a href="iterate.html">BOOST_PP_ITERATE</a>()
+
+#else // used by both
+
+   previous: <a href="relative_iteration.html">BOOST_PP_RELATIVE_ITERATION</a>(1)
+   current: <a href="iteration.html">BOOST_PP_ITERATION</a>()
+
+#endif
+</pre></div>
+</body>
+</html>

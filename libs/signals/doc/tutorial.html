@@ -1,0 +1,739 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="ja">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Boost.Signals チュートリアル</title>
+  </head>
+
+  <body bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080">
+
+  <h1><IMG SRC="../../../c++boost.gif" WIDTH="276" HEIGHT="86" ALT="Boost">Boost.Signals チュートリアル</h1>
+
+<h2><a name="intro">チュートリアルの読み方</a></h2>
+<p> このチュートリアルは直線的に読むことを意図していない。
+最上位の構成では、
+おおまかにライブラリにおける異なった概念
+(たとえば複数スロット呼び出しの扱い、スロットとの値の受け渡し)
+を分類している。
+それぞれの概念に対して、
+まず基本的な考え方が提示され、
+その後、
+より複雑なライブラリの利用法について記述されている。
+読者の便宜を図るため、
+各セクションは<em>初級</em>、<em>中級</em>、<em>上級</em>と区分されている。
+<em>初級</em>セクションは、すべてのライブラリユーザが知っておくべき情報を含んでいる。
+<em>初級</em>セクションのみを読み終えた段階で、
+Signals ライブラリの標準的な使用が可能になる。
+<em>中級</em>セクションは<em>初級</em>セクションの基礎の上に立ち、
+ライブラリのやや複雑な使用法を提供する。
+最後に<em>上級</em>セクションは Signals ライブラリの非常に高度な使用方法を詳述しており、
+しばしば<em>初級</em>、<em>中級</em>の項目に関する堅固な理解が要求される。
+ほとんどのユーザは<em>上級</em>セクションを読む必要はない。
+
+<h2>互換性に関する注記</h2>
+<p> Boost.Signals は二通りの文法形式を持つ。
+preferred 形式は、より C++ に似合っており、
+考慮の必要がある隔てられたテンプレートパラメータの数を減少させ、
+たいてい可読性を向上させる。
+しかしながらコンパイラのバグのため、
+preferred 形式はすべてのプラットフォームではサポートされていない。
+compatible 形式は Boost によってサポートされているすべてのコンパイラで動作する。
+あなたのコンパイラでどちらの形式を利用するか決定するために、
+下の表が参考になる。
+<a
+href="../../function/index.html">Boost.Function</a>
+の利用者は、Signals の prefered 形式は Function の preferred 形式と等価なことに注意。
+
+    <center>
+      <table border=1 cellspacing=1>
+          <tr><th bgcolor="#008080">preferred 形式</th><th bgcolor="#008080">compatible 形式</th></tr>
+          <tr>
+            <td>
+              <ul>
+                <li>GNU C++ 2.95.x, 3.0.x, 3.1.x</li>
+                <li>Comeau C++ 4.2.45.2</li>
+                <li>SGI MIPSpro 7.3.0</li>
+                <li>Intel C++ 5.0, 6.0</li>
+                <li>Compaq's cxx 6.2</li>
+              </ul>
+            </td>
+            <td>
+              <ul>
+                <li>Microsoft Visual C++ 6.0, 7.0</li>
+                <li>Borland C++ 5.5.1</li>
+                <li>Sun WorkShop 6 update 2 C++ 5.3</li>
+                <li>Metrowerks CodeWarrior 8.1</li>
+              </ul>
+            </td>
+          </tr>
+      </table>
+      </center>
+
+<p> アナタのコンパイラがこのリストに含まれていない場合、
+この表を最新の状態に保つため、
+preferred 形式を試して結果を Boost メーリングリストに報告して欲しい。
+
+<h2>大要</h2>
+
+<ul>
+  <li><em>初級:</em> <a href="#hello_world">Hello, World!</a></li>
+  <li>複数スロットの呼び出し
+    <ul>
+      <li><em>初級:</em> <a href="#multiple_slots">複数スロットの接続</a></li>
+      <li><em>中級:</em> <a href="#ordering_slots">スロット呼び出しグループの順序づけ</a></li>
+    </ul></li>
+  <li>スロットとの値の受け渡し
+    <ul>
+      <li><em>初級:</em> <a href="#slot_arguments">スロットへの実引数</a></li>
+      <li><em>上級:</em> <a href="#return_values">シグナルの戻り値</a></li>
+    </ul></li>
+  <li>接続管理
+    <ul>
+      <li><em>初級:</em> <a href="#disconnecting">スロットの切断</a></li>
+      <li><em>中級:</em> <a href="#scoped">変数スコープによって管理された接続</a></li>
+      <li><em>中級:</em> <a href="#tracking">自動化された接続管理</li>
+    </ul></li>
+  <li><a href="#passing_slots">スロットの受け渡し</a></li>
+</ul>
+<hr>
+
+<h2><a name="hello_world">Hello, World!</a></h2>
+<p> 次の例はシグナルとスロットを用いて "Hello, World!" を出力する。
+はじめにシグナル <code>sig</code> を作成する。これは引数を取らず戻り値もない。
+次に <code>connect</code> メソッドを用いて、
+<code>hello</code> 関数オブジェクトをシグナルに接続する。
+最後に、シグナル <code>sig</code> をスロットを呼び出す関数のように使用する。
+これが <code>HelloWorld::operator()</code> を呼び出し "Hello, World!" を表示する。
+
+    <center>
+      <table border=1 cellspacing=1>
+          <tr><th bgcolor="#008080">preferred 形式</th><th
+          bgcolor="#008080">compatible 形式</th></tr>
+<tr><td>
+<pre>
+struct HelloWorld 
+{
+  void operator()() const 
+  { 
+    std::cout &lt;&lt; "Hello, World!" &lt;&lt; std::endl;
+  } 
+};
+
+// ...
+
+// 引数なし、戻り値なしのシグナル
+boost::signal&lt;void ()&gt; sig;
+
+// HelloWorld スロットに接続
+HelloWorld hello;
+sig.connect(hello);
+
+// スロットをすべて呼び出す
+sig();
+</pre>
+</td><td>
+<pre>
+struct HelloWorld 
+{
+  void operator()() const 
+  { 
+    std::cout &lt;&lt; "Hello, World!" &lt;&lt; std::endl;
+  } 
+};
+
+// ...
+
+// 引数なし、戻り値なしのシグナル
+boost::signal0&lt;void&gt; sig;
+
+// HelloWorld スロットに接続
+HelloWorld hello;
+sig.connect(hello);
+
+// スロットをすべて呼び出す
+sig();
+</pre>
+</td></tr>
+</table></center>
+
+<hr><h1>複数スロットの呼び出し</h1>
+<h2><a name="multiple_slots">複数スロットの接続</a></h2>
+<p> 単一のシグナルから単一のスロットを呼び出すのは、あまり面白いとはいえない。
+そこで "Hello, World!" を表示する仕事を二つの完全に分離されたスロットに分割することによって、
+Hello, World プログラムをより興味深いものにする。
+最初のスロットは "Hello" を表示するもので、次のようになるだろう。
+<pre>
+struct Hello 
+{
+  void operator()() const
+  {
+    std::cout &lt;&lt; "Hello";
+  }
+};
+</pre>
+
+<p> 次のスロットは ", World!" と改行を表示し、プログラムを完全なものとする。
+第二のスロットは次のようになるだろう。
+<pre>
+struct World
+{
+  void operator()() const
+  {
+    std::cout &lt;&lt; ", World!" &lt;&lt; std::endl;
+  }
+};
+</pre>
+
+<p> 先の例と同様に、引数なし、戻り値型 <code>void</code> のシグナル <code>sig</code> を作成する。
+ここで <code>hello</code> と <code>world</code> 両スロットを同一のシグナルに接続すると、
+シグナル呼び出しによって双方のスロットが呼ばれるだろう。
+
+    <center>
+      <table border=1 cellspacing=1>
+          <tr><th bgcolor="#008080">preferred 形式</th><th
+          bgcolor="#008080">compatible 形式</th></tr>
+<tr><td>
+<pre>
+boost::signal&lt;void ()&gt; sig;
+
+sig.connect(Hello());
+sig.connect(World());
+
+sig();
+</pre>
+</td>
+<td>
+<pre>
+boost::signal0&lt;void&gt; sig;
+
+sig.connect(Hello());
+sig.connect(World());
+
+sig();
+</pre>
+</td>
+</tr>
+</table>
+</center>
+
+<p>  ところで、このプログラムをコンパイルし実行すると、奇妙なものを目にするかもしれない。
+出力は次のようになる可能性がある:
+<pre>
+  , World!
+Hello
+</pre>
+
+<p> 理由は、シグナルの順序が保証されないためだ。
+シグナルは <code>Hello</code> と <code>World</code> のいずれを先に呼び出しても構わないが、
+何かまずいこと (例えば例外) が起きない限り、すべてのスロットが呼ばれる。
+先を読み続けると "Hello, World!" が常に想定通りに表示されるように、
+順序を制御する方法を学ぶことができる。
+
+<h2><a name="ordering_slots">スロット呼び出しグループの順序づけ</a></h2>
+<p> スロットには副作用があってもかまわないため、
+他のスロットに先立って呼ぶ必要があるスロットが存在する可能性がある。
+Boost.Signals ライブラリでは、
+スロットを何らかの方法で順序づけられたグループに配置することができる。
+Hello, World プログラムでは "Hello" を ", World!" に先だって表示したいので、
+"Hello" を ", World!" が格納されるグループよりも先に実行されるグループに配置する。
+このために、
+<code>connect</code> の最初にグループを指定する追加のパラメタを与えることができる。
+既定の状態では、グループ値は <code>int</code> であり整数の &lt; 関係によって順序づけがなされる。
+Hello, World を組み立てる方法は次の通りである:
+    <center>
+      <table border=1 cellspacing=1>
+          <tr><th bgcolor="#008080">preferred 形式</th><th
+          bgcolor="#008080">compatible 形式</th></tr>
+<tr><td>
+<pre>
+boost::signal&lt;void ()&gt; sig;
+sig.connect(0, Hello());
+sig.connect(1, World());
+sig();
+</pre>
+</td><td>
+<pre>
+boost::signal0&lt;void&gt; sig;
+sig.connect(0, Hello());
+sig.connect(1, World());
+sig();
+</pre>
+</td></tr></table></center>
+
+<p> このプログラムは正しく "Hello, World!" を出力する。
+なぜならグループ 0 に含まれる <code>Hello</code> オブジェクトは
+<code>World</code> オブジェクトが所属するグループ 1 よりも先に実行されるからだ。
+
+<p> 実際のところ、グループパラメタはオプションである。
+最初の Hello, World の例ではグループパラメタを省略した。
+なぜなら、すべてのスロットが独立であればグループパラメタは不要だからだ。
+それではグループパラメタを使用しているものと使用していないものを混在させたら、
+何が起きるだろうか？
+"無名" スロット (グループ名を指定せずに接続されたスロット) は、
+他のすべてのグループの後にくる特殊な別グループに置かれる。
+したがって、私たちの例に次のような新しいスロットを追加すると:
+<pre>
+struct GoodMorning
+{
+  void operator()() const
+  {
+    std::cout &lt;&lt; "... and good morning!" &lt;&lt; std::endl;
+  }
+};
+
+sig.connect(GoodMorning());
+</pre>
+
+<p>…次のように、望み通りの結果を得られるだろう:
+<pre>
+Hello, World!
+... and good morning!
+</pre>
+
+<p> スロットグループに関する最後の興味深い点は、
+複数のスロットが同一グループに接続された際の振る舞いである。
+グループ内ではスロット呼び出しは順不同である: 
+スロット <code>A</code> と <code>B</code> を同一グループ名で同じシグナルに接続すると、
+<code>A</code> と <code>B</code> いずれかが最初に呼ばれる (ただし両方とも呼ばれる)。
+これは、我々が第二バージョンの Hello, World で見たのと同じ振る舞いであり、
+スロットが誤った順番で呼ばれ出力がめちゃくちゃになる可能性がある。
+
+<hr><h1>スロットとの値の受け渡し</h1>
+<h2><a name="slot_arguments">スロットへの実引数</a></h2>
+<p> シグナルは、呼び出すそれぞれのスロットに対して引数を伝搬させることができる。
+たとえばマウス動作イベントを伝搬させるシグナルは、
+新しいマウス座標とボタンが押されているか否かを渡したいだろう。
+
+<p> 例として二つの <code>float</code> 引数をスロットに渡すシグナルを作成する。
+そして、これらの値に対して様々な算術操作を行った結果を表示するスロットをいくつか作成する。
+
+<pre>
+void print_sum(float x, float y)
+{
+  std::cout &lt;&lt; "The sum is " &lt;&lt; x+y &lt;&lt; std::endl;
+}
+
+void print_product(float x, float y)
+{
+  std::cout &lt;&lt; "The product is " &lt;&lt; x*y &lt;&lt; std::endl;
+}
+
+void print_difference(float x, float y)
+{
+  std::cout &lt;&lt; "The difference is " &lt;&lt; x-y &lt;&lt; std::endl;
+}
+
+void print_quotient(float x, float y)
+{
+  std::cout &lt;&lt; "The quotient is " &lt;&lt; x/y &lt;&lt; std::endl;
+}
+
+boost::signal&lt;void, float, float&gt; sig;
+
+sig.connect(&amp;print_sum);
+sig.connect(&amp;print_product);
+sig.connect(&amp;print_difference);
+sig.connect(&amp;print_quotient);
+
+sig(5, 3);
+</pre>
+
+<p> このプログラムは、行の順序は異なる可能性があるが、以下のような出力を行うだろう:
+<pre>
+The sum is 8
+The difference is 2
+The product is 15
+The quotient is 1.66667
+</pre>
+
+<p>このように <code>sig</code> が関数のように呼び出される際に与えられた値は、
+いずれも各スロットに渡される。
+シグナルを作成する際は、先頭でこれらの値の型を宣言しなければならない。
+型 <code>boost::signal&lt;void, float, float&gt;</code> は、
+戻り値型 <code>void</code> を持ち二つの <code>float</code> 値をとるシグナルを意味する。
+
+<h2><a name="return_values">シグナルの戻り値</a></h2>
+<p> スロットが実引数を受け取れるのと同様、
+スロットは値を戻すこともできる。
+これらの値は <em>統合子</em> を介してシグナルの呼び出し側に戻される。
+統合子はスロット呼び出しの結果 
+(結果はないこともあれば百個に及ぶこともある; プログラムを実行するまで分からない) 
+を受けとり、それを合体させて呼び出し側に戻す単一の値にする仕組みである。
+その単一の値は、しばしばスロット呼び出しの結果に対する単純な関数である: 
+最後のスロット呼び出しの結果、スロットによって戻された値の最大値、
+すべての結果を格納したものなどがありうる。
+
+<p> 先ほどの算術操作の例に少々手を加えて、
+それぞれのスロットが積、商、和もしくは差を返すように変更する。
+これによってシグナルが結果に基づいた値を戻し、それを表示することが可能になる。
+
+    <center>
+      <table border=1 cellspacing=1>
+          <tr><th bgcolor="#008080">preferred 形式</th><th
+          bgcolor="#008080">compatible 形式</th></tr>
+<tr><td>
+<pre>
+float compute_product(float x, float y) { return x*y; }
+float compute_quotient(float x, float y) { return x/y; }
+float compute_sum(float x, float y) { return x+y; }
+float compute_difference(float x, float y) { return x-y; }
+
+boost::signal&lt;float (float x, float y)&gt; sig;
+
+sig.connect(&amp;compute_product);
+sig.connect(&amp;compute_quotient);
+sig.connect(&amp;compute_sum);
+sig.connect(&amp;compute_difference);
+
+std::cout &lt;&lt; sig(5, 3) &lt;&lt; std::endl;
+</pre>
+</td><td>
+<pre>
+float compute_product(float x, float y) { return x*y; }
+float compute_quotient(float x, float y) { return x/y; }
+float compute_sum(float x, float y) { return x+y; }
+float compute_difference(float x, float y) { return x-y; }
+
+boost::signal2&lt;float, float, float&gt; sig;
+
+sig.connect(&amp;compute_product);
+sig.connect(&amp;compute_quotient);
+sig.connect(&amp;compute_sum);
+sig.connect(&amp;compute_difference);
+
+std::cout &lt;&lt; sig(5, 3) &lt;&lt; std::endl;
+</pre>
+</td></tr></table></center>
+
+<p> このプログラムは、シグナルが呼ばれる順序によるが、
+<code>8</code>, <code>1.6667</code>, <code>15</code> もしくは <code>2</code> 
+のいずれかを出力するだろう。
+これは、戻り値型
+(<code>float</code>, <code>boost::signal</code> クラステンプレートに与えられた最初の引数) 
+を持つシグナルの既定の動作は、
+すべてのスロット呼び出した上で、
+最後のスロット呼び出しによって返された結果を返すことだからである。
+正直なところ、今回の例に対してはこの振る舞いは馬鹿げている。
+というのはスロットに副作用がないため、
+本質的に結果はスロットからランダムに選ばれるためだ。
+
+<p> すべてのスロットから戻された値の最大値は、より興味あるシグナルの結果だろう。
+これを求めるために、次のようなカスタム統合子を作成する。
+
+<pre>
+template&lt;typename T&gt;
+struct maximum
+{
+  typedef T result_type;
+
+  template&lt;typename InputIterator&gt;
+  T operator()(InputIterator first, InputIterator last) const
+  {
+    // If there are no slots to call, just return the
+    // default-constructed value
+    if (first == last)
+      return T();
+
+    T max_value = *first++;
+    while (first != last) {
+      if (max_value &lt; *first)
+        max_value = *first;
+      ++first;
+    }
+  
+    return max_value;
+  }
+};
+</pre>
+
+<p> <code>maximum</code> クラステンプレートは関数オブジェクトとして機能する。
+戻り値型はテンプレートパラメタとして与えられ、
+その型に基づいて最大値が計算される
+(たとえば <code>maximum&lt;float&gt;</code> は <code>float</code> のシーケンスから、
+最大の <code>float</code> を見つけ出す)。
+<code>maximum</code> オブジェクトが呼び出される際、
+すべてのスロット呼び出しの結果を含む入力イテレータのシーケンス <code>[first, last)</code> が与えられる。
+<code>maximum</code> はこの入力イテレータのシーケンスを用いて最大の要素を計算し、
+その最大値を返す。
+
+<p> 実際には、この関数オブジェクトの型をシグナルに対する統合子として導入し、利用する。
+この型は、次のように <em>名前付きテンプレートパラメタ</em> を介して与える。
+
+    <center>
+      <table border=1 cellspacing=1>
+          <tr><th bgcolor="#008080">preferred 形式</th><th
+          bgcolor="#008080">compatible 形式</th></tr>
+<tr><td>
+<pre>
+boost::signal&lt;float (float x, float y), 
+              maximum&lt;float&gt; &gt; sig;
+</pre>
+</td><td>
+<pre>
+boost::signal2&lt;float, float, float, 
+               maximum&lt;float&gt; &gt; sig;
+</pre>
+</td></tr></table></center>
+
+<p> これで、算術関数を計算するスロットを接続してシグナルを使うことができる。
+<pre>
+sig.connect(&amp;compute_quotient);
+sig.connect(&amp;compute_product);
+sig.connect(&amp;compute_sum);
+sig.connect(&amp;compute_difference);
+
+std::cout &lt;&lt; sig(5, 3) &lt;&lt; std::endl;
+</pre>
+
+<p> このプログラムの出力は <code>15</code> となるだろう。
+なぜならスロットが呼ばれる順序にかかわらず、
+5 と 3 の積は商、和、差よりも大きくなるからだ。
+
+<p> 別の場合には、スロットによって計算されたすべての値をまとめて
+ひとつの大きなデータ構造で返したくなるかもしれない。
+これは別の統合子によって、容易に実行できる。
+<pre>
+template&lt;typename Container&gt;
+struct aggregate_values
+{
+  typedef Container result_type;
+
+  template&lt;typename InputIterator&gt;
+  Container operator()(InputIterator first, InputIterator last) const
+  {
+    return Container(first, last);
+  }
+};
+</pre>
+
+再び、この新しい統合子を使ったシグナルを作ろう。
+    <center>
+      <table border=1 cellspacing=1>
+          <tr><th bgcolor="#008080">preferred 形式</th><th
+          bgcolor="#008080">compatible 形式</th></tr>
+<tr><td>
+<pre>
+boost::signal&lt;float (float, float), 
+              aggregate_values&lt;std::vector&lt;float&gt; &gt; &gt; sig;
+
+sig.connect(&amp;compute_quotient);
+sig.connect(&amp;compute_product);
+sig.connect(&amp;compute_sum);
+sig.connect(&amp;compute_difference);
+
+std::vector&lt;float&gt; results = sig(5, 3);
+std::copy(results.begin(), results.end(), 
+          std::ostream_iterator&lt;float&gt;(cout, " "));
+</pre>
+</td><td>
+<pre>
+boost::signal2&lt;float, float, float,
+               aggregate_values&lt;std::vector&lt;float&gt; &gt; &gt; sig;
+
+sig.connect(&amp;compute_quotient);
+sig.connect(&amp;compute_product);
+sig.connect(&amp;compute_sum);
+sig.connect(&amp;compute_difference);
+
+std::vector&lt;float&gt; results = sig(5, 3);
+std::copy(results.begin(), results.end(), 
+          std::ostream_iterator&lt;float&gt;(cout, " "));
+</pre>
+</td></tr></table></center>
+
+<p>このプログラムの出力は 15, 8, 1.6667 と 2 を含む (ただし順不同)。
+<code>signal</code> クラスに対する最初のテンプレート実引数 <code>float</code> が、
+実際にはシグナルの戻り値型でないことは興味深い。
+そうではなく、
+最初のテンプレート実引数は接続されたスロットの戻り値型であり、
+統合子に渡される入力イテレータの <code>value_type</code> として用いられる。
+統合子それ自身は関数オブジェクトであり、
+統合子の <code>result_type</code> メンバ型がシグナルの戻り値型となる。
+<hr>
+
+<h1>接続管理</h1>
+<h2><a name="disconnecting">スロットの切断</a></h2>
+<p> スロットは、接続後、永遠に存在することは期待されていない。
+しばしばスロットは 2, 3 のイベントを受け取るために用いられ、
+そして切断される。
+そこでプログラマは、
+スロットを切断すべきタイミングを決定する制御を必要とする。
+
+<p> 明示的な接続管理の入口は <code>boost::signal::connection</code> クラスである。
+<code>connection</code> クラスは、
+それぞれ特定のシグナルと特定のスロットの間の接続を表している。
+<code>connected()</code> メソッドはそのシグナルとスロットがまだ接続されているかを調べ、
+<code>disconnect()</code> メソッドは、
+シグナルとスロットが接続されているなら呼び出される前に切断する。
+シグナルの <code>connect()</code> メソッドはそれぞれ connection オブジェクトを返す。
+そのオブジェクトは接続がまだ存在しているかを決定し、
+またシグナルとスロットを切断するために用いることができる。
+
+
+<pre>
+boost::signals::connection c = sig.connect(HelloWorld());
+if (c.connected()) {
+  <em>// c はまだシグナルに接続されている</em>
+  sig(); <em>// "Hello, World!" を表示する</em>
+}
+
+c.disconnect(); <em>// HelloWorld オブジェクトを切断する</em>
+assert(!c.connected()); <em>c はすでに接続されていない</em>
+
+sig(); <em>// 何もしない : 接続されたスロットはない</em>
+</pre>
+
+<h2><a name="scoped">変数スコープによって管理された接続</a></h2>
+<p> <code>boost::signals::scoped_connection</code> クラスは、
+<code>scoped_connection</code> クラスがスコープからはずれると切断されるシグナル／スロット接続を参照する。
+この機能は接続が一時的に必要な場合に有用である。
+例を次に示す。
+<pre>
+{
+  boost::signals::scoped_connection c = sig.connect(ShortLived());
+  sig(); <em>// ShortLived 関数オブジェクトを呼び出す</em>
+}
+sig(); <em>// ShortLived 関数オブジェクトは、もはや sig に接続されていない</em>
+</pre>
+
+<h2><a name="tracking">自動化された接続管理</a></h2>
+Boost.Signals は、
+スロット呼び出しに含まれるオブジェクトが破棄されたときに自動的にスロットを切断することも含めて、
+シグナル／スロット接続に関係するオブジェクトの寿命を自動的に追跡することができる。
+たとえば、
+クライアントがニュース供給者に接続し、
+ニュース供給者は情報が届くとすべての接続されたクライアントにニュースを送るという、
+単純なニュース配信サービスを考えてみる。
+ニュース配信サービスは、次のようになるだろう:
+
+    <center>
+      <table border=1 cellspacing=1>
+          <tr><th bgcolor="#008080">preferred 形式</th><th
+          bgcolor="#008080">compatible 形式</th></tr>
+<tr><td>
+<pre>
+class NewsItem { /* ... */ };
+
+boost::signal&lt;void (const NewsItem&amp; latestNews)&gt; deliverNews;
+</pre>
+</td><td>
+<pre>
+class NewsItem { /* ... */ };
+
+boost::signal1&lt;void, const NewsItem&gt; deliverNews;
+</pre>
+</td></tr></table></center>
+
+<p> ニュース更新を受け取りたいクライアントは、
+ニュース項目を受信できる関数オブジェクトを <code>deliverNews</code> シグナルに接続するだけで良い。
+たとえば、アプリケーションにニュースのための特別なメッセージ領域があるとしよう。
+例を次に示す:
+
+<pre>
+struct NewsMessageArea : public MessageArea
+{
+public:
+  // ...
+
+  void displayNews(const NewsItem&amp; news) const
+  {
+    messageText = news.text();
+    update();
+  }
+};
+
+// ...
+NewsMessageArea newsMessageArea = new NewsMessageArea(/* ... */);
+// ...
+deliverNews.connect(boost::bind(&amp;NewsMessageArea::displayNews, 
+                                newsMessageArea, _1));
+</pre>
+
+<p> しかしながら、
+ユーザがニュースメッセージ領域を閉じ
+<code>deliverNews</code> が関知している <code>newsMessageArea</code> オブジェクトを破棄したら、
+どうなるだろうか？ 
+おそらくセグメンテーションフォールトが起こるだろう。
+だが Boost.Signals では <code>NewsMessageArea</code> を <em>trackable</em> にするだけでよい、
+そうすれば <code>newsMessageArea</code> が破棄される時に <code>newsMessageArea</code> に含まれるスロットが切断される。
+<code>boost::signals::trackable</code> から public 派生させることで、
+<code>NewsMessageArea</code> クラスは trackable になる。
+例を次に示す:
+
+<pre>
+struct NewsMessageArea : public MessageArea, public boost::signals::trackable
+{
+  // ...
+};
+</pre>
+
+<p> 現在は、
+スロット接続を作成する際の<code>trackable</code> オブジェクトの使用法には、
+ひとつ重大な制約がある: 
+関数オブジェクトはBoost.Bind を用いて構築する必要がある。
+したがって <code>trackable</code> オブジェクトは常に bind 式の中に現れる。
+しかし、
+ユーザ定義の関数オブジェクトや他のライブラリ (Boost.Function や Boost.Lambda など) 由来の関数オブジェクトは
+<code>trackable</code> オブジェクト検出のために必要なインターフェースを実装していないため、
+<em>bind された trackable オブジェクトは黙って無視される。</em>
+将来の Boost ライブラリは、この制約に対処するだろう。
+
+<h2><a name="passing_slots">スロットの受け渡し</a></h2>
+<p> Boost.Signals ライブラリのスロットは任意の関数オブジェクトから作成されるため、
+特定の型を持たない。
+しかしながら、
+テンプレートにできないインターフェースを介してスロットを受け渡すことが必要となるのは良くあることだ。
+スロットは、
+それぞれのシグナル型に対応する <code>slot_type</code> を介して受け渡すことが可能であり、
+任意の有効な関数オブジェクトを<code>slot_type</code> 型のパラメタに渡すことができる。
+例を次に示す:
+
+    <center>
+      <table border=1 cellspacing=1>
+          <tr><th bgcolor="#008080">Preferred Syntax</th><th
+          bgcolor="#008080">Compatible Syntax</th></tr>
+<tr><td>
+<pre>
+class Button 
+{
+  typedef boost::signal&lt;void (int x, int y)&gt; OnClick;
+
+public:
+  void doOnClick(const OnClick::slot_type&amp; slot);
+
+private:
+  OnClick onClick;
+};
+
+void Button::doOnClick(const OnClick::slot_type&amp; slot)
+{
+  onClick.connect(slot);
+}
+</pre>
+</td><td>
+<pre>
+class Button 
+{
+  typedef boost::signal2&lt;void, int x, int y&gt; OnClick;
+
+public:
+  void doOnClick(const OnClick::slot_type&amp; slot);
+
+private:
+  OnClick onClick;
+};
+
+void Button::doOnClick(const OnClick::slot_type&amp; slot)
+{
+  onClick.connect(slot);
+}
+</pre>
+</td></tr></table></center>
+
+<p> <code>doOnClick</code> メソッドは <code>onClick</code> シグナルの <code>connect</code> メソッドと機能的に等価だが、
+いまや <code>doOnClick</code> メソッドの詳細は実装詳細ファイルに隠蔽することが可能になる。
+
+    <hr>
+    <address><a href="http://www.cs.rpi.edu/~gregod">Doug Gregor</a></address>
+  </body>
+</html>

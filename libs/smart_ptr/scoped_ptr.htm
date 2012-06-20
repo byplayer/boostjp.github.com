@@ -1,0 +1,283 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+	<head>
+		<title>scoped_ptr</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	</head>
+	<body bgcolor="#ffffff" text="#000000">
+		<h1><img src="../../c++boost.gif" alt="c++boost.gif (8819 bytes)" align="middle" width="277" height="86"><a name="scoped_ptr">scoped_ptr</a>
+			class template</h1>
+
+<p><b>scoped_ptr</b> クラステンプレートは動的に割り当てられたオブジェクトへのポインタを
+  保持する。(動的に割り当てられたオブジェクトとは C++ の <b>new</b> で割り当てられたものである。)
+  指されたオブジェクトは <b>scoped_ptr</b> のデストラクト時か、明示的な <b>reset</b> によって
+	削除されることが保証されている。<a href="#example">example</a> を参考のこと。
+</p>
+
+<p><b>scoped_ptr</b> テンプレートはシンプルな要求におけるシンプルな解決法である。
+	これは、所有権の共有や移動を伴わずに、
+	デザインパターンの
+	&quot; Resource Acquisition Is Initialization &quot; イディオム
+	(訳注:RAIIパターン、「資源獲得を初期化時に行う」ことによりオブジェクトの所有権の所在を明確にする)
+	を実現するための基礎的な仕組みを提供する。
+	<b>scoped_ptr</b> の名前と意味的な主張
+	(<a href="../utility/utility.htm#class noncopyable">noncopyable</a> であるということ)
+	の両方が、
+	そのスコープでの所有権の所在が唯一であることを表す。
+	これは <a href="../utility/utility.htm#class noncopyable">noncopyable</a> であり、
+	コピーされるべきでないポインタに対して、
+	<b>shared_ptr</b> や <b>std::auto_ptr</b> よりも安全である。
+</p>
+
+<p> <b>scoped_ptr</b> はとてもシンプルなので、通常の実装では全ての操作は組み込みポインタと
+	同様に速く、組み込みポインタよりも大きな記憶スペースを取ることはない。
+</p>
+
+<p><STRONG>scoped_ptr</STRONG> は C++ 標準ライブラリコンテナの中で使うことはできない。
+	コンテナの中にスマートポインタを格納する必要があるときは、
+	<a href="shared_ptr.htm"><b>shared_ptr</b></a> を
+	使う。
+</p>
+
+<p><STRONG>scoped_ptr</STRONG> は動的に割り当てられた配列を正しく扱うことはできない。
+	動的に割り当てられた配列を扱うためには、
+	<a href="scoped_array.htm"><b>scoped_array</b></a>
+	を参考にせよ。
+</p>
+
+<p>このクラステンプレートには、指し示すオブジェクトの型を表すパラメータ <b>T</b> を与える。
+	<b>T</b> はスマートポインタの
+	<a href="smart_ptr.htm#Common requirements">共通の要求事項</a>
+	を満たさなければならない。
+</p>
+
+		<h2>Synopsis</h2>
+		<pre>namespace boost {
+
+  template&lt;typename T&gt; class scoped_ptr : <a href="../utility/utility.htm#class noncopyable">noncopyable</a> {
+
+   public:
+     typedef T <a href="#element_type">element_type</a>;
+
+     explicit <a href="#constructors">scoped_ptr</a>(T * p = 0); // never throws
+     <a href="#destructor">~scoped_ptr</a>(); // never throws
+
+     void <a href="#reset">reset</a>(T * p = 0); // never throws
+
+     T &amp; <a href="#indirection">operator*</a>() const; // never throws
+     T * <a href="#indirection">operator-&gt;</a>() const; // never throws
+     T * <a href="#get">get</a>() const; // never throws
+     
+     void <a href="#swap">swap</a>(scoped_ptr &amp; b); // never throws
+  };
+
+  template&lt;typename T&gt; void <a href="#free-swap">swap</a>(scoped_ptr&lt;T&gt; &amp; a, scoped_ptr&lt;T&gt; &amp; b); // never throws
+
+}</pre>
+		<h2>Members</h2>
+		<h3><a name="element_type">element_type</a></h3>
+		<pre>typedef T element_type;</pre>
+<p>保持するポインタの型を規定する</p>
+		<h3><a name="constructors">constructors</a></h3>
+		<pre>explicit scoped_ptr(T * p = 0); // never throws</pre>
+<p><b>scoped_ptr</b> を構築して、<b>p</b> のコピーを保持する。
+	<b>p</b> は C++ の <b>new</b> によって割り当てられたものか、0 でなければならない。
+	<b>T</b> は完全型である必要はない。
+	スマートポインタの
+	<a href="smart_ptr.htm#Common requirements">共通の要求事項</a>
+	を参考にせよ。
+</p>
+		<h3><a name="destructor">destructor</a></h3>
+		<pre>~scoped_ptr(); // never throws</pre>
+		<p>保持するポインタが指すオブジェクトを、まるで
+			<tt>delete this-&gt;get()</tt>
+			としたかのようにして破棄する。
+		</p>
+
+		<p>例外を送出しないという保証は、
+			削除されるオブジェクトのデストラクタが例外を送出しない
+			という要求に依存する。
+			スマートポインタの
+			<a href="smart_ptr.htm#Common requirements">共通の要求事項</a>
+			を参考にせよ。
+		</p>
+
+		<h3><a name="reset">reset</a></h3>
+		<pre>void reset(T * p = 0); // never throws</pre>
+		<p>p が保持するポインタと等価でなければ、保持するポインタが指すオブジェクトを削除し、
+			p のコピーを保持する。
+			p は C++ の <b>new</b> によって割り当てられたものか、0 でなければならない。
+			例外を送出しないという保証は、
+			削除されるオブジェクトのデストラクタが例外を送出しない
+			という要求に依存する。
+			スマートポインタの
+			<a href="smart_ptr.htm#Common requirements">共通の要求事項</a>
+			を参考にせよ。
+		</p>
+		<h3><a name="indirection">indirection</a></h3>
+		<pre>T &amp; operator*() const; // never throws</pre>
+		<p>保持するポインタが指すオブジェクトの参照を返す。
+			保持するポインタが 0 なら動作は未定義である。
+		</p>
+
+		<pre>T * operator-&gt;() const; // never throws</pre>
+		<p>保持するポインタを返す。
+			保持するポインタが 0 なら
+			動作は未定義である。
+		</p>	
+
+		<h3><a name="get">get</a></h3>
+		<pre>T * get() const; // never throws</pre>
+		<p>保持するポインタを返す。
+			<b>T</b> は完全型である必要はない。
+			スマートポインタの
+			<a href="smart_ptr.htm#Common requirements">共通の要求事項</a>
+			を参考にせよ。
+		</p>
+
+		<h3><a name="swap">swap</a></h3>
+		<pre>void swap(scoped_ptr &amp; b); // never throws</pre>
+		<p>ふたつのスマートポインタの中身を交換する。
+			<b>T</b> は完全な型である必要はない。
+			スマートポインタの
+			<a href="smart_ptr.htm#Common requirements">共通の要求事項</a>
+			を参考にせよ。
+		</p>
+
+		<h2><a name="functions">Free Functions</a></h2>
+		<h3><a name="free-swap">swap</a></h3>
+		<pre>template&lt;typename T&gt; void swap(scoped_ptr&lt;T&gt; &amp; a, scoped_ptr&lt;T&gt; &amp; b); // never throws</pre>
+		<p><b>a.swap(b)</b> と等価である。
+			<b>std::swap</b> のインターフェースとの一貫性を図り、
+			ジェネリックプログラミングを支援する。
+		</p>
+
+		<h2><a name="example">Example</a></h2>
+		<p><b>scoped_ptr</b>の使い方の例を示す。</p>
+		<blockquote>
+			<pre>#include &lt;boost/scoped_ptr.hpp&gt;
+#include &lt;iostream&gt;
+
+struct Shoe { ~Shoe() { std::cout &lt;&lt; "Buckle my shoe\n"; } };
+
+class MyClass {
+    boost::scoped_ptr&lt;int&gt; ptr;
+  public:
+    MyClass() : ptr(new int) { *ptr = 0; }
+    int add_one() { return ++*ptr; }
+};
+
+void main()
+{
+    boost::scoped_ptr&lt;Shoe&gt; x(new Shoe);
+    MyClass my_instance;
+    std::cout &lt;&lt; my_instance.add_one() &lt;&lt; '\n';
+    std::cout &lt;&lt; my_instance.add_one() &lt;&lt; '\n';
+}</pre>
+		</blockquote>
+<p>このプログラムは子守唄の始めの部分をつくる(※訳注:例が分かりにくい。)</p>
+		<blockquote>
+			<pre>1
+2
+Buckle my shoe</pre>
+		</blockquote>
+		<h2>Rationale</h2>
+	<p>
+		<b>auto_ptr</b> に代わって <b>scoped_ptr</b> を使う第一の理由は、
+		「資源獲得は初期化時に行う」RAII パターンがカレントスコープでのみ適用されることと、
+		所有権の移動はないことの二つのことをソースを読む人に伝えることである。
+	</p>
+
+	<p>
+		<b>scoped_ptr</b> を使う第二の理由は、後になってメンテナンスするプログラマが、
+		<b>auto_ptr</b> を返すことで所有権を移動させる関数を加えることを防ぐ、ということだ。
+		なぜなら、メンテナンスプログラマは <b>auto_ptr</b> を見れば、所有権を安全に移動する
+		ことが可能だと考えてしまうからである。
+	</p>
+
+	<p>
+		<b>bool</b> と <b>int</b> を考えよう。
+		我々は皆、蓋を開けてみれば <b>bool</b> はただの <b>int</b> に過ぎないことを知っている。
+		実際、そのため <b>bool</b> を C++ の標準に含めることに反対した者もいる。
+		しかし、単に <b>int</b> と書くのではなく <b>bool</b> と書くことで、
+		プログラマの意図をはっきりと表現することができる。
+		<b>scoped_ptr</b> も同じことである。
+		これを使えば、何をしたいかをはっきりと伝えることができる。
+	</p>
+
+	<p><b>scoped_ptr&lt;T&gt;</b> は <b>std::auto_ptr&lt;T&gt; const</b>
+		と等価であると考えられるかもしれない。
+		しかし Ed Brey は <b>reset</b> が <b>std::auto_ptr&lt;T&gt; const</b>
+		ではうまく働かないことを指摘した。
+	</p>
+
+		<h2><a name="Handle/Body">Handle/Body</a> Idiom</h2>
+
+		<!--
+		<p>One common usage of <b>scoped_ptr</b> is to implement a handle/body (also called 
+			pimpl) idiom which avoids exposing the body (implementation) in the header 
+			file.</p>
+		-->
+		<p>
+			<b>scoped_ptr</b> の一般的な用法の一つに、
+			handle/body 表現 (pimpl とも呼ばれる) の実装がある。
+			handle/body 表現とは、オブジェクト本体の実装を隠蔽する
+			(ヘッダファイル中にさらけ出すことを回避する)
+			ためのものである。
+		</p>
+
+		<!--
+		<p>The <a href="scoped_ptr_example_test.cpp">scoped_ptr_example_test.cpp</a> sample 
+			program includes a header file, <a href="scoped_ptr_example.hpp">scoped_ptr_example.hpp</a>, 
+			which uses a <b>scoped_ptr&lt;&gt;</b> to an incomplete type to hide the 
+			implementation. The instantiation of member functions which require a complete 
+			type occurs in the <a href="scoped_ptr_example.cpp">scoped_ptr_example.cpp</a> implementation 
+			file.</p>
+		-->
+		<p>
+			サンプルプログラム
+			<a href="scoped_ptr_example_test.cpp">scoped_ptr_example_test.cpp</a>
+			は、ヘッダファイル
+			<a href="scoped_ptr_example.hpp">scoped_ptr_example.hpp</a>
+			をインクルードしている。
+			このヘッダファイルでは、不完全型のポインタを取る <b>scoped_ptr&lt;&gt;</b>
+			を利用して実装を隠蔽している。
+			完全型が必要となるメンバ関数のインスタンス化は、実装ファイル
+			<a href="scoped_ptr_example.cpp">scoped_ptr_example.cpp</a>
+			の中に記述されている。
+		</p>
+
+		<h2>Frequently Asked Questions</h2>
+
+		<p><b>Q</b>. なぜ <b>scoped_ptr</b> はメンバ関数 release() を持たないのか?<br>
+			<b>A</b>. ソースコードを読んでいるとき、使われている型に基づいてプログラムの
+			動作を結論付けられることは価値がある。もし <STRONG>scoped_ptr</STRONG> が
+			メンバ関数 release() を持っていれば、保持するポインタの所有権の移動が可能になり、
+			資源の寿命を与えられた文脈に制限するという役割が弱くなる。
+			所有権の移動が
+			必要なときは <STRONG>std::auto_ptr</STRONG> を使えばよい。
+			( Dave Abraham により提供されている。)
+		</p>
+
+		<hr>
+		<p>Revised <!--webbot bot="Timestamp" s-type="EDITED" s-format="%d %B %Y" startspan -->
+			17 September 2002<!--webbot bot="Timestamp" endspan i-checksum="15110" --></p>
+		<p>Copyright 1999 Greg Colvin and Beman Dawes. Copyright 2002 Darin Adler. 
+			Copyright 2002 Peter Dimov. Permission to copy, use, modify, sell and 
+			distribute this document is granted provided this copyright notice appears in 
+			all copies. This document is provided "as is" without express or implied 
+			warranty, and with no claim as to its suitability for any purpose.</p>
+
+		<p>
+			Japanese Translation Copyright (C) 2003
+			<a href="mailto:kohske@msc.biglobe.ne.jp">Kohske Takahashi</a>,
+			<a href="mailto:lenoir@zeroscape.org">Ryo Kobayashi</a>.
+
+			オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の
+			複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」
+			に提供されており、いかなる明示的、暗黙的保証も行わない。また、
+			いかなる目的に対しても、その利用が適していることを関知しない。
+		</p>
+	</body>
+</html>
+

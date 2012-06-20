@@ -1,0 +1,254 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+	<head>
+		<title>scoped_array</title>
+		<!--meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"-->
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	</head>
+	<body bgcolor="#ffffff" text="#000000">
+		<h1><img src="../../c++boost.gif" alt="c++boost.gif (8819 bytes)" align="middle" width="277" height="86"><a name="scoped_array">scoped_array</a>
+			class template</h1>
+		<!--
+		<p>The <b>scoped_array</b> class template stores a pointer to a dynamically 
+			allocated array. (Dynamically allocated arrays are allocated with the C++ <b>new[]</b>
+			expression.) The array pointed to is guaranteed to be deleted, either on 
+			destruction of the <b>scoped_array</b>, or via an explicit <b>reset</b>.</p>
+		-->
+		<p>
+			<b>scoped_array</b> クラステンプレートは動的に割り当てられた配列へのポインタを保持する。
+			(動的に割り当てられた配列とは、C++ の <b>new[]</b> によって割り当てられたものである。)
+			<b>scoped_array</b> に指された配列は、その <b>scoped_array</b> が破棄されたとき、
+			もしくは明示的に <b>reset</b> を呼び出したときに削除されることが保証される。
+		</p>
+
+		<!--
+		<p>The <b>scoped_array</b> template is a simple solution for simple needs. It 
+			supplies a basic "resource acquisition is initialization" facility, without 
+			shared-ownership or transfer-of-ownership semantics. Both its name and 
+			enforcement of semantics (by being <a href="../utility/utility.htm#class noncopyable">
+				noncopyable</a>) signal its intent to retain ownership solely within the 
+			current scope. Because it is <a href="../utility/utility.htm#class noncopyable">noncopyable</a>, 
+			it is safer than <b>shared_array</b> for pointers which should not be copied.</p>
+		-->
+
+		<p><b>scoped_array</b> テンプレートはシンプルな要求におけるシンプルな解決法である。
+			これは、所有権の共有や移動を伴わずに、デザインパターンの
+			&quot; Resource Acquisition Is Initialization &quot; イディオム
+			(訳注:RAIIパターン、「資源獲得を初期化時に行う」ことによりオブジェクトの所有権の所在を明確にする)
+			を実現するための基礎的な仕組みを提供する。
+			<b>scoped_array</b> の名前と意味的な主張
+			(<a href="../utility/utility.htm#class noncopyable">noncopyable</a> であるということ)の両方が、
+			そのスコープでの所有権の所在が唯一であることを表す。
+			これは <a href="../utility/utility.htm#class noncopyable">noncopyable</a> であり、
+			コピーされるべきでないポインタに対して、
+			<b>shared_array</b> よりも安全である。
+		</p>
+
+		<!--
+		<p>Because <b>scoped_array</b> is so simple, in its usual implementation every 
+			operation is as fast as a built-in array pointer and it has no more space 
+			overhead that a built-in array pointer.</p>
+		-->
+		<p>
+		<b>scoped_array</b> はとてもシンプルなので、通常の実装では全ての操作は組み込み配列ポインタと同様に速く、
+			組み込み配列ポインタよりも大きな記憶スペースを取ることはない。
+		</p>
+
+		<!--
+		<p>It cannot be used in C++ standard library containers. See <a href="shared_array.htm">
+				<b>shared_array</b></a> if <b>scoped_array</b> does not meet your needs.</p>
+		-->
+		<p>
+			<b>scoped_array</b> は C++ 標準ライブラリコンテナの中で使うことはできない。
+			<!-- 原文の訳とは違うが、shared_array の原文と対応付けて訳した -->
+			配列のスマートポインタをコンテナの中に格納する必要があるときは、
+			<a href="shared_array.htm"><b>shared_array</b></a> 
+			を使う。
+		</p>
+
+		<!--
+		<p>It cannot correctly hold a pointer to a single object. See <a href="scoped_ptr.htm"><b>scoped_ptr</b></a>
+			for that usage.</p>
+		-->
+		<p>
+			<b>scoped_array</b> は単独のオブジェクトへのポインタを正しく扱うことはできない。
+			単独のオブジェクトへのポインタを扱うためには 
+		<a href="scoped_ptr.htm"><b>scoped_ptr</b></a> を参考にせよ。</p>
+
+		<!--
+		<p>A <b>std::vector</b> is an alternative to a <b>scoped_array</b> that is a bit 
+			heavier duty but far more flexible. A <b>boost::array</b> is an alternative 
+			that does not use dynamic allocation.</p>
+		-->
+		<p><b>scoped_array</b> に代わるものとして、 <b>std::vector</b> がある。
+			<b>std::vector</b> は <b>scoped_array</b> に比べ若干重いが、より柔軟である。
+			動的なメモリ割当を使わないのであれば、<b>boost::array</b> もまた、
+			<b>scoped_array</b> の代わりとなる。
+		</p>
+
+		<!--
+		<p>The class template is parameterized on <b>T</b>, the type of the object pointed 
+			to. <b>T</b> must meet the smart pointer <a href="smart_ptr.htm#Common requirements">
+				common requirements</a>.</p>
+		-->
+		<p>
+		このクラステンプレートには、指し示す配列の要素の型を表すパラメータ <b>T</b> を与える。
+		<b>T</b> はスマートポインタの
+		<a href="smart_ptr.htm#Common requirements">共通の要求事項</a>
+		を満たさなければならない。</p>
+
+		<h2>Synopsis</h2>
+		<pre>namespace boost {
+
+  template&lt;typename T&gt; class scoped_array : <a href="../utility/utility.htm#noncopyable">noncopyable</a> {
+
+    public:
+      typedef T <a href="#element_type">element_type</a>;
+
+      explicit <a href="#ctor">scoped_array</a>(T * p = 0); // never throws
+      <a href="#~scoped_array">~scoped_array</a>(); // never throws
+
+      void <a href="#reset">reset</a>(T * p = 0); // never throws
+
+      T &amp; <a href="#operator[]">operator[]</a>(std::ptrdiff_t i) const; // never throws
+      T * <a href="#get">get</a>() const; // never throws
+     
+      void <a href="#swap">swap</a>(scoped_array &amp; b); // never throws
+  };
+
+  template&lt;typename T&gt; void <a href="#free-swap">swap</a>(scoped_array&lt;T&gt; &amp; a, scoped_array&lt;T&gt; &amp; b); // never throws
+
+}</pre>
+		<h2>Members</h2>
+		<h3>
+			<a name="element_type">element_type</a></h3>
+		<pre>typedef T element_type;</pre>
+		<p>保持されるポインタの型を規定する。</p>
+
+		<h3><a name="ctor">constructors</a></h3>
+		<pre>explicit scoped_array(T * p = 0); // never throws</pre>
+		<!--
+		<p>Constructs a <b>scoped_array</b>, storing a copy of <b>p</b>, which must have 
+			been allocated via a C++ <b>new</b>[] expression or be 0. <b>T</b> is not 
+			required be a complete type. See the smart pointer <a href="smart_ptr.htm#Common requirements">
+				common requirements</a>.</p>
+		-->
+		<p>
+			<b>scoped_array</b> を構築し、<b>p</b> のコピーを保持する。
+			<b>p</b> は C++ の <b>new[]</b> によって割り当てられた配列へのポインタか、0 でなくてはならない。
+			<b>T</b> は完全型である必要はない。
+
+			スマートポインタの
+			<a href="smart_ptr.htm#Common requirements">共通の要求事項</a>
+			を参照のこと。
+		</p>
+
+		<h3><a name="~scoped_array">destructor</a></h3>
+		<pre>~scoped_array(); // never throws</pre>
+		<!--
+		<p>Deletes the array pointed to by the stored pointer. Note that <b>delete[]</b> on 
+			a pointer with a value of 0 is harmless. The guarantee that this does not throw 
+			exceptions depends on the requirement that the deleted array's objects' 
+			destructors do not throw exceptions. See the smart pointer <a href="smart_ptr.htm#Common requirements">
+				common requirements</a>.</p>
+		-->
+		<p>
+			保持されているポインタが指す配列を削除する。
+			値が 0 のポインタに対する <b>delete[]</b> が安全であることに注意せよ。 
+			<b>T</b> は完全型である必要はない。
+			削除される配列の要素のデストラクタが例外を送出しないという条件が満たされている場合、
+			このデストラクタが例外を送出しないことが保証される。
+			スマートポインタの
+			<a href="smart_ptr.htm#Common requirements">共通の要求事項</a> を参照のこと。</p>
+
+		<h3><a name="reset">reset</a></h3>
+		<pre>void reset(T * p = 0); // never throws</pre>
+		<!--
+		<p>If p is not equal to the stored pointer, deletes the array pointed to by the 
+			stored pointer and then stores a copy of p, which must have been allocated via 
+			a C++ <b>new[]</b> expression or be 0. The guarantee that this does not throw 
+			exceptions depends on the requirement that the deleted array's objects' 
+			destructors do not throw exceptions. See the smart pointer <a href="smart_ptr.htm#Common requirements">
+				common requirements</a>.</p>
+		-->
+		<p>p が保持するポインタと等価でなければ、保持するポインタが指す配列を削除し、
+			p のコピーを保持する。
+			p は C++ の <b>new[]</b> によって割り当てられたものか、0 でなければならない。
+			削除される配列の要素のデストラクタが例外を送出しないという条件が満たされている場合、
+			このデストラクタが例外を送出しないことが保証される。
+			スマートポインタの
+			<a href="smart_ptr.htm#Common requirements">共通の要求事項</a>
+			を参照のこと。
+		</p>
+
+		<h3><a name="operator[]">subscripting</a></h3>
+		<pre>T &amp; operator[](std::ptrdiff_t i) const; // never throws</pre>
+		<!--
+		<p>Returns a reference to element <b>i</b> of the array pointed to by the stored 
+			pointer. Behavior is undefined and almost certainly undesirable if the stored 
+			pointer is 0, or if <b>i</b> is less than 0 or is greater than or equal to the 
+			number of elements in the array.</p>
+		-->
+		<p>
+			保持しているポインタが指す配列の <b>i</b> 番目の要素への参照を返す。
+			保持しているポインタが 0 のとき、及び
+			<b>i</b> が 0 未満または配列の要素数以上の数であるとき、
+			この演算子のふるまいは未定であり、ほぼ確実に有害である。</p>
+	
+		<h3><a name="get">get</a></h3>
+		<pre>T * get() const; // never throws</pre>
+		<!--
+		<p>Returns the stored pointer. <b>T</b> need not be a complete type. See the smart 
+			pointer <a href="smart_ptr.htm#Common requirements">common requirements</a>.</p>
+			-->
+		<p>
+			保持しているポインタを返す。
+			<b>T</b> は完全型である必要はない。
+			スマートポインタの
+			<a href="smart_ptr.htm#Common requirements">共通の要求事項</a>
+			を参照のこと。</p>
+
+		<h3><a name="swap">swap</a></h3>
+		<pre>void swap(scoped_array &amp; b); // never throws</pre>
+		<!--
+		<p>Exchanges the contents of the two smart pointers. <b>T</b> need not be a 
+			complete type. See the smart pointer <a href="smart_ptr.htm#Common requirements">common 
+				requirements</a>.</p>
+		-->
+		<p>
+			二つのスマートポインタの中身を交換する。
+			<b>T</b> は完全型である必要はない。
+			スマートポインタの
+			<a href="smart_ptr.htm#Common requirements">共通の要求事項</a>
+			を参照のこと。</p>
+
+		<h2><a name="functions">Free Functions</a></h2>
+		<h3><a name="free-swap">swap</a></h3>
+		<pre>template&lt;typename T&gt; void swap(scoped_array&lt;T&gt; &amp; a, scoped_array&lt;T&gt; &amp; b); // never throws</pre>
+		<!--
+		<p>Equivalent to <b>a.swap(b)</b>. Matches the interface of <b>std::swap</b>. 
+			Provided as an aid to generic programming.</p>
+		-->
+		<p><b>a.swap(b)</b> と等価。
+			<b>std::swap</b> のインターフェースとの一貫性を図り、
+			ジェネリックプログラミングを補助するために用意されている。</p>
+
+		<hr>
+		<p>Revised <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%d %B %Y" startspan--> 
+			1 February 2002<!--webbot bot="Timestamp" endspan i-checksum="13964"--></p>
+		<p>Copyright 1999 Greg Colvin and Beman Dawes. Copyright 2002 Darin Adler. 
+			Permission to copy, use, modify, sell and distribute this document is granted 
+			provided this copyright notice appears in all copies. This document is provided 
+			"as is" without express or implied warranty, and with no claim as to its 
+			suitability for any purpose.</p>
+
+		<p>Japanese Translation Copyright (C) 2003
+		<a href="mailto:lenoir@zeroscape.org">Ryo Kobayashi</a>,
+			オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の
+			複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」
+			に提供されており、いかなる明示的、暗黙的保証も行わない。また、
+			いかなる目的に対しても、その利用が適していることを関知しない。
+		</p>
+
+	</body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="ja">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Boost.Signals: ヘッダ &lt;boost/signals/connection.hpp&gt;</title>
+  </head>
+
+  <body bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080">
+
+  <h1><IMG SRC="../../../../c++boost.gif" WIDTH="276" HEIGHT="86" ALT="Boost">Boost.Signals: ヘッダ <code>&lt;<a href="../../../../boost/signals/connection.hpp">boost/signals/connection.hpp</a>&gt;</code></h1>
+
+<h2><code>&lt;<a href="../../../../boost/signals/connection.hpp">boost/signals/connection.hpp</a>&gt;</code> ヘッダ概要</h2>
+
+<pre>
+<b>namespace</b> boost {
+  <b>namespace</b> signals {
+    class <a href="#connection_class">connection</a>;
+    class <a href="#scoped_connection_class">scoped_connection</a>;
+
+    <a href="#swap_free"><b>void</b> swap(connection&amp, connection&amp;)</a>;
+    <a href="#scoped_swap_free"><b>void</b> swap(scoped_connection&amp, scoped_connection&amp;)</a>;
+  }
+}
+</pre>
+
+<a name="connection_class"><h2><code>connection</code> クラス概要</h2></a>
+<p><code>connection</code> クラスは <a href="Signal.html">Signal</a> と <a href="Slot.html">Slot</a> の間の接続を表す。
+これはシグナルとスロットが現在接続されているかを問い合わせ、またシグナルとスロットを切断する能力を有する軽量オブジェクトである。
+問い合わせと <code>connection</code> の切断を行うことは、常に安全である。
+
+<pre>
+<b>namespace</b> boost {
+  <b>namespace</b> signals {
+    <b>class</b> connection : <em>// connection クラスは <a href="http://www.sgi.com/tech/stl/LessThanComparable.html">LessThanComparable</a> かつ <a href="http://www.sgi.com/tech/stl/EqualityComparable.html">EqualityComparable</a>である</em>
+      <b>private</b> less_than_comparable1&lt;connection&gt;, <em>// 開示用</em>
+      <b>private</b> equality_comparable1&lt;connection&gt;<em>// 開示用</em>
+    {
+    <b>public</b>:
+      <a href="#default_constructor">connection()</a>;
+      <a href="#copy_constructor">connection(<b>const</b> connection&amp;)</a>;
+      <a href="#destructor">~connection()</a>;
+  
+      <a href="#disconnect"><b>void</b> disconnect() <b>const</b></a>;
+      <a href="#connected"><b>bool</b> connected() <b>const</b></a>;
+
+      <a href="#copy_assignment">connection& <b>operator=</b>(<b>const</b> connection&amp;)</a>;
+      <a href="#swap_member"><b>void</b> swap(connection&amp;)</a>;
+
+      <a href="#equality"><b>bool</b> <b>operator==</b>(<b>const</b> connection& other) <b>const</b></a>;
+      <a href="#less_than"><b>bool</b> <b>operator&lt;</b>(<b>const</b> connection& other) <b>const</b></a>;
+    };
+  }
+}
+</pre>
+
+<h2><code>connection</code> クラスメンバ</h2>
+
+<hr><h3>コンストラクタ</h3>
+<p><a name="default_constructor"><code>connection();</code></a>
+<ul>
+  <li><b>作用</b>: 現在の接続を NULL 接続に設定する。</li>
+  <li><b>事後条件</b>: <code>!<b>this</b>-&gt;connected()</code>
+  <li><b>例外</b>: なし。</li>
+</ul>
+
+<p><a name="copy_constructor"><code>connection(<b>const</b> connection&amp; other);</code></a>
+<ul>
+  <li><b>作用</b>: <code>other</code> によって参照されていた接続を <code><b>this</b></code> が参照する。</li>
+  <li><b>例外</b>: なし。</li>
+</ul>
+
+<hr><h3>デストラクタ</h3>
+
+<p><a name="destructor">~<code>connection();</code></a>
+<ul>
+  <li><b>作用</b>: なし。</li>
+</ul>
+
+<hr><h3>接続管理</h3>
+<p><a name="disconnect"><code><b>void</b> disconnect() <b>const</b>;</code></a>
+<ul>
+  <li><b>作用</b>: <code><b>this-&gt;</b>is_connected()</code> が真であれば <code><b>this</b></code> によって参照されているシグナルとスロットの接続を切断する; そうでなければ何もしない。</li>
+  <li><b>事後条件</b>: <code><b>!this</b>-&gt;is_connected()</code></li>
+</ul>
+
+<p><a name="connected"><code><b>bool</b> connected() <b>const</b>;</code></a>
+<ul>
+  <li><b>戻り値</b>: <code><b>this</b></code> がアクティブな (接続されている) 非 NULL 接続を参照していれば <code><b>true</b></code>、そうでなければ <code><b>false</b></code>。</li>
+  <li><b>例外</b>: なし。</li>
+</ul>
+
+<hr><h3>代入と交換</h3>
+<p><a name="copy_assignment"><code>connection&amp; <b>operator=</b>(<b>const</b> connection&amp; other);</code></a>
+<ul>
+  <li><b>作用</b>: <code>connection(other).swap(*<b>this</b>);</code>
+  <li><b>戻り値</b>: <code>*<b>this</b></code></li>
+</ul>
+
+<p><a name="swap_member"><code><b>void</b> swap(connection&amp; other);</code></a>
+<ul>
+  <li><b>作用</b>: <code><b>this</b></code> と <code>other</code> が参照している接続を交換する。</li>
+  <li><b>例外</b>: なし。</li>
+</ul>
+
+<hr><h3>比較</h3>
+<p><a name="equality"><code><b>bool</b> <b>operator==</b>(<b>const</b> connection&amp; other) <b>const</b>;</code></a>
+<ul>
+  <li><b>戻り値</b>: <code><b>this</b></code> と <code>other</code> が同一の接続を参照しているか、両方とも NULL 接続を参照している場合 <b>true</b>、そうでなければ <code><b>false</b></code>。</li>
+  <li><b>例外</b>: なし。</li>
+</ul>
+
+<p><a name="less_than"><code><b>bool</b> <b>operator&lt;</b>(<b>const</b> connection&amp; other) <b>const</b>;</code></a>
+<ul>
+  <li><b>戻り値</b>: 実装定義の順序づけによって、<code><b>this</b></code> によって参照されている接続が <code>other</code> によって参照されている接続に先行する場合 <code><b>true</b></code>、そうでなければ <code><b>false</b></code>。</li>
+  <li><b>例外</b>: なし。</li>
+</ul>
+
+<a name="scoped_connection_class"><h2><code>scoped_connection</code> クラス概要</h2></a>
+
+<p> <code>scoped_connection</code> クラスは、
+そのインスタンスが破棄されるときに自動的に切断される接続である。
+
+<pre>
+<b>namespace</b> boost {
+  <b>namespace</b> signals {
+    <b>class</b> scoped_connection : <b>public</b> connection
+    {
+    <b>public</b>:
+      <a href="#scoped_default_constructor">scoped_connection()</a>;
+      <a href="#scoped_copy_constructor">scoped_connection(<b>const</b> scoped_connection&amp;)</a>;
+      <a href="#scoped_copy_connection_constructor">scoped_connection(<b>const</b> connection&amp;)</a>;
+      <a href="#scoped_destructor">~scoped_connection()</a>;
+
+      <a href="#scoped_copy_assignment">connection& <b>operator=</b>(<b>const</b> scoped_connection&amp;)</a>;
+      <a href="#scoped_copy_connection_assignment">connection& <b>operator=</b>(<b>const</b> connection&amp;)</a>;
+      <a href="#scoped_swap_member"><b>void</b> swap(connection&amp;)</a>;
+    };
+  }
+}
+</pre>
+
+<h2><code>scoped_connection</code> クラスメンバ</h2>
+
+<hr><h3>コンストラクタ</h3>
+<p><a name="scoped_default_constructor"><code>scoped_connection();</code></a>
+<ul>
+  <li><b>作用</b>: 現在の接続を NULL 接続に設定する。</li>
+  <li><b>事後条件</b>: <code>!<b>this</b>-&gt;connected()</code>
+  <li><b>例外</b>: なし。</li>
+</ul>
+
+<p><a name="scoped_copy_constructor"><code>scoped_connection(<b>const</b> scoped_connection&amp; other);</code></a>
+<ul>
+  <li><b>作用</b>: <code>other</code> によって参照されていた接続を <code><b>this</b></code> が参照する。</li>
+  <li><b>例外</b>: なし。</li>
+</ul>
+
+<p><a name="scoped_copy_connection_constructor"><code>scoped_connection(<b>const</b> connection&amp; other);</code></a>
+<ul>
+  <li><b>作用</b>: <code>other</code> によって参照されていた接続を <code><b>this</b></code> が参照する。</li>
+  <li><b>例外</b>: なし。</li>
+</ul>
+
+<hr><h3>デストラクタ</h3>
+
+<p><a name="destructor">~<code>connection();</code></a>
+<ul>
+  <li><b>作用</b>: <code><b>this</b>-&gt;disconnect()</li>
+</ul>
+
+<hr><h3>代入と交換</h3>
+<p><a name="scoped_copy_assignment"><code>scoped_connection&amp; <b>operator=</b>(<b>const</b> scoped_connection&amp; other);</code></a>
+<ul>
+  <li><b>作用</b>: <code>scoped_connection(other).swap(*<b>this</b>);</code>
+  <li><b>戻り値</b>: <code>*<b>this</b></code></li>
+</ul>
+
+<p><a name="scoped_copy_connection_assignment"><code>scoped_connection&amp; <b>operator=</b>(<b>const</b> connection&amp; other);</code></a>
+<ul>
+  <li><b>作用</b>: <code>scoped_connection(other).swap(*<b>this</b>);</code>
+  <li><b>戻り値</b>: <code>*<b>this</b></code></li>
+</ul>
+
+<p><a name="scoped_swap_member"><code><b>void</b> swap(scoped_connection&amp; other);</code></a>
+<ul>
+  <li><b>作用</b>: <code><b>this</b></code> と <code>other</code> が参照する接続を交換する。</li>
+  <li><b>例外</b>: なし。</li>
+</ul>
+
+<hr><h2>フリー関数</h2>
+<p><a name="swap_free"><code><b>void</b> swap(connection&amp; c1, connection&amp; c2);</code></a>
+<ul>
+  <li><b>作用</b>: <code>c1.swap(c2)</code></li>
+  <li><b>例外</b>: なし。</li>
+</ul>
+
+<p><a name="scoped_swap_free"><code><b>void</b> swap(scoped_connection&amp; c1, scoped_connection&amp; c2);</code></a>
+<ul>
+  <li><b>作用</b>: <code>c1.swap(c2)</code></li>
+  <li><b>例外</b>: なし。</li>
+</ul>
+
+    <hr>
+    <address><a href="http://www.cs.rpi.edu/~gregod">Doug Gregor</a></address>
+<!-- Created: Fri Jul 13 10:57:20 EDT 2001 -->
+<!-- hhmts start -->
+Last modified: Fri Oct 11 05:42:05 EDT 2002
+<!-- hhmts end -->
+  </body>
+</html>

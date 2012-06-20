@@ -1,0 +1,40 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=EUC-JP"><!--*- encoding: euc-jp -*-->
+	<title>BOOST_PP_INDIRECT_SELF</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">
+</head>
+<body>
+	<div style="margin-left:  0px;">
+		<b>BOOST_PP_INDIRECT_SELF</b> マクロは <b>BOOST_PP_INDIRECT_SELF</b> で使われる、
+		ユーザ定義の <i>名前付けされた外部引数</i> である。
+	</div>
+	<h4>Usage</h4>
+		<div class="code">
+			#define <b>BOOST_PP_INDIRECT_SELF</b> <i>filename</i>
+		</div>
+	<h4>Arguments</h4>
+		<dl>
+			<dt>filename</dt>
+			<dd>
+			<b>BOOST_PP_INCLUDE_SELF</b> でインクルードされる、
+			引用符、またはカギ括弧で囲まれたファイル名。
+			</dd>
+		</dl>
+	<h4>Remarks</h4>
+		<div>
+		多くのプリプロセッサはファイルがそのファイル自身を直接インクルードすることを許さない。
+		例えファイルが、そのような状況を、自分自身で防いでいてもである。
+		このマクロを <b>BOOST_PP_INCLUDE_SELF</b> と組み合わせることで、
+		ファイルがそのファイル自身を間接的にインクルードすることを可能にする。
+		</div>
+		<div>
+		このマクロは <b>BOOST_PP_INCLUDE_SELF</b> の呼び出しによって、
+		再利用のために自動的に未定義化される。
+		</div>
+	<h4>See Also</h4>
+		<ul>
+			<li><a href="include_self.html">BOOST_PP_INCLUDE_SELF</a></li>
+		</ul>
+</body>
+</html>

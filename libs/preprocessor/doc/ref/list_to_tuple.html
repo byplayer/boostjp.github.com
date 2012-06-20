@@ -1,0 +1,53 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=EUC-JP"><!--*- encoding: euc-jp -*-->
+	<title>BOOST_PP_LIST_TO_TUPLE</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">
+</head>
+<body>
+	<div style="margin-left:  0px;">
+		<b>BOOST_PP_LIST_TO_TUPLE</b> マクロは <i>リスト</i> を <i>タプル</i> に変換する。
+	</div>
+	<h4>Usage</h4>
+		<div class="code">
+			<b>BOOST_PP_LIST_TO_TUPLE</b>(<i>list</i>)
+		</div>
+	<h4>Arguments</h4>
+		<dl>
+			<dt>list</dt>
+			<dd>
+				変換される <i>リスト</i> 。
+			</dd>
+		</dl>
+	<h4>Remarks</h4>
+		<div>
+			たとえば、もし <i>リスト</i> が (<i>a</i>, (<i>b</i>, (<i>c</i>, <b>BOOST_PP_NIL</b>))) ならば、
+			このマクロは
+			<div>
+				(<i>a</i>, <i>b</i>, <i>c</i>)
+			</div>
+			を生成するだろう。
+		</div>
+		<div>
+			以前、このマクロは <b>BOOST_PP_FOR</b> の中では使えなかったが、
+			現在ではこのような制限はない。&nbsp;
+			しかし、そのような状況では <b>BOOST_PP_LIST_TO_TUPLE_R</b> を使うほうがより能率的である。
+		</div>
+	<h4>See Also</h4>
+		<ul>
+			<li><a href="list_to_tuple_r.html">BOOST_PP_LIST_TO_TUPLE_R</a></li>
+		</ul>
+	<h4>Requirements</h4>
+		<div>
+			<b>Header:</b> &nbsp;<a href="../headers/list/to_tuple.hpp.html">&lt;boost/preprocessor/list/to_tuple.hpp&gt;</a>
+		</div>
+	<h4>Sample Code</h4>
+<div><pre>
+#include &lt;<a href="../headers/list/to_tuple.hpp.html">boost/preprocessor/list/to_tuple.hpp</a>&gt;
+
+#define LIST (w, (x, (y, (z, <a href="nil.html">BOOST_PP_NIL</a>))))
+
+<a href="list_to_tuple.html">BOOST_PP_LIST_TO_TUPLE</a>(LIST) // (w, x, y, z) に展開される
+</pre></div>
+</body>
+</html>

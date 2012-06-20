@@ -1,0 +1,43 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+	<title>arrays.html</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">
+	<script language="javascript" type="text/javascript" src="../scripts.js"></script>
+</head>
+<body>
+	<h4>Arrays</h4>
+	<div>
+		<i>配列</i>は二要素の<i>タプル</i>からなるデータ構造である。
+		その第一要素は<i>配列</i>の要素数であり、
+		第二要素は<i>配列</i>の要素となる別の<i>タプル</i>である。
+		例えば、
+	</div>
+	<div class="code">
+		(<i>3</i>, (<i>a</i>, <i>b</i>, <i>c</i>))
+	</div>
+	<div>
+		は <i>a</i>、<i>b</i>、<i>c</i> の三要素からなる<i>配列</i>である。
+	</div>
+	<div>
+		<i>配列</i>の最も重要な長所は、それが自分自身のサイズを保持していることである。
+		このおかげで、要素へのアクセスにはサイズを必要としない。
+		必要なことは、そのインデックスに要素が存在することだけだ。
+	</div>
+	<div>
+		この構造により、<font color="green">マクロ引数は可変長となることができ(?)</font>、
+		ユーザーが自力でサイズ変化を追尾することをせずとも、データのサイズを変更できる。
+	</div>
+	<div>
+		<i>配列</i>の要素は <b>BOOST_PP_ARRAY_ELEM</b>、
+		サイズは <b>BOOST_PP_ARRAY_SIZE</b> により展開され、
+		さらに<i>配列</i>は <b>BOOST_PP_ARRAY_DATA</b> により、より基本的なデータ構造である<i>タプル</i>に変換できる。
+	</div>
+	<h4>Primitives</h4>
+		<ul>
+			<li><a href="../ref/array_data.html">BOOST_PP_ARRAY_DATA</a></li>
+			<li><a href="../ref/array_elem.html">BOOST_PP_ARRAY_ELEM</a></li>
+			<li><a href="../ref/array_size.html">BOOST_PP_ARRAY_SIZE</a></li>
+		</ul>
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> 
+<HTML>
+<HEAD>
+<TITLE>Boost Pool Library</TITLE>
+<LINK HREF="pool.css" REL="stylesheet" TYPE="text/css">
+</HEAD>
+<BODY>
+
+<IMG SRC="../../../c++boost.gif" WIDTH=276 HEIGHT=86 ALT="C++ Boost">
+
+<H1 ALIGN=CENTER>Boost Pool Library</H1>
+
+<P>
+<H2>はじめに</H2>
+
+<P>
+<H3>Poolとは何か?</H3>
+
+<P>
+Poolアロケーションは使い方の制限があるものの非常に高速なメモリー割り当て方法である。
+Poolアロケーション(「単純分割記憶域(simple segregated storage)」とも言う)のより詳細な情報は<A HREF="concepts.html">概念資料</A>を見よ。
+
+<P>
+<H3>なぜPoolを使うのか?</H3>
+
+<P>
+Poolsを使用すると、プログラム中でどのようにメモリーが使用されるかを、よりうまく管理することができる。
+例えば、一度に小さなオブジェクトを大量に割り当てたいときがあり、
+そしてそれらの一切が要らなくなるというときがやってくる、という状況になり得るだろう。
+プールインターフェイス使えば、それらのデストラクターを実行するか、忘却の彼方へ送り去るかを選ぶことができる。
+プールインタフェースはメモリーリークが起きないことを保証してくれる。
+
+<P>
+<H3>いつPoolを使うべきか?</H3>
+
+<P>
+通常、プールは小さいオブジェクトを大量に割り当て、解放するときに使用される。
+もう一つのよくある使い方が、上記の状況である。
+すなわち沢山のオブジェクトがメモリーから消えるときである。
+
+<P>
+一般に、Poolは普段はやらないような効率的なメモリー管理が必要なときに使うべきだ。
+
+<P>
+<H3>Poolの使い方は?</H3>
+
+<P>
+<A HREF="interfaces.html">pool interfaces document</A>を見なさい。
+そこには、このライブラリーで提供される様々なインターフェイスについて記述がある。
+
+<P>
+<H2>ライブラリの構造と依存性</H2>
+
+<P>
+このライブラリーの開示されたシンボルの前方宣言は、ヘッダーファイル<SPAN CLASS="code">&lt;boost/pool/poolfwd.hpp&gt;</SPAN>に含まれている。
+
+<P>
+ライブラリーは<SPAN CLASS="code">BOOST_POOL_</SPAN>で始まるマクロを使っている。
+例外はインクルードファイルガード、(<EM>xxx</EM>.hppについては)<SPAN CLASS="code">BOOST_<EM>xxx</EM>_HPP</SPAN>である。
+
+<P>
+ライブラリーで定義されているすべての開示されたシンボルは名前空間<SPAN CLASS="code">boost</SPAN>内にある。
+ライブラリーの実装だけが使用するシンボルは名前空間<SPAN CLASS="code">boost::details::pool</SPAN>内にある。
+
+<P>
+ライブラリーの実装だけが使用するヘッダーはサブディレクトリー<SPAN CLASS="code">detail/</SPAN>にある。
+
+<P>
+ライブラリーに含まれるヘッダーは、ライブラリーのヘッダーやシステムが提供するヘッダーをそれぞれの裁量で使っていることがある。
+
+<P>
+<H2>Installation</H2>
+
+<P>
+The Boost Pool ライブラリーはヘッダファイルによるライブラリーである。
+なので .lib も .dll も .so も作る必要はなく、コンパイラーのインクルードファイルパスに Boost ディレクトリを追加するだけで使える。
+
+<P>
+<H2>Building the Test Programs</H2>
+
+<P>
+&quot;build&quot; サブディレクトリにいくつかのプラットフォーム用のサブディレクトリがある。
+これらのサブディレクトリには、それぞれのプラットフォームに合わせた回避手段コードに加えてメイクファイルまたは IDE プロジェクトファイルがある。
+
+<P>
+適切なサブディレクトリの &quot;readme.txt&quot; を読みなさい。もしあれば。
+
+<P>
+標準的なメイクファイルのターゲットは &quot;all&quot;、&quot;clean&quot; (全ての中間ファイルを削除)、&quot;veryclean&quot; (全ての中間ファイルと実行ファイルを削除)、である。
+すべての中間ファイルと実行ファイルはメイクファイル/プロジェクトファイルと同じディレクトリに作られる。
+メイクファイルではなくプロジェクトファイルが提供されている場合、&quot;clean&quot; and &quot;veryclean&quot; シェルスクリプト/バッチファイルが用意されている。
+
+<P>
+ここにないプラットフォーム用のプロジェクトファイルやメイクファイルを作ったら <A HREF="mailto:shammah@voyager.net">shammah@voyager.net</A> へ送ってくれて構わない。
+
+<P>
+<H2>文書マップ</H2>
+
+<UL>
+<LI>Poolingの概観
+ <UL>
+ <LI><A HREF="concepts.html">concepts.html</A> - プール(pooling)の基本的考え方</LI>
+ <LI><A HREF="implementation/alignment.html">implementation/alignment.html</A> - 如何にアラインメントの移植性を保証するか</LI>
+ <LI><A HREF="interfaces.html">interfaces.html</A> - 提供されるインターフェースと、いつどれを使うか</LI>
+ </UL>
+</LI>
+<LI>Poolの外部インターフェース
+ <UL>
+ <LI><A HREF="interfaces/simple_segregated_storage.html">interfaces/simple_segregated_storage.html</A> - Not for the faint of heart; embedded programmers only.</LI>
+ <LI><A HREF="interfaces/pool.html">interfaces/pool.html</A> - 基本的プールインターフェース</LI>
+ <LI><A HREF="interfaces/singleton_pool.html">interfaces/singleton_pool.html</A> - スレッドセーフシングルトンとしての基本的プールインターフェース</LI>
+ <LI><A HREF="interfaces/object_pool.html">interfaces/object_pool.html</A> - (サイズ指向でなく)型指向のプールインターフェース</LI>
+ <LI><A HREF="interfaces/pool_alloc.html">interfaces/pool_alloc.html</A> - singleton_poolに基づく標準アロケータプールインターフェース</LI>
+ <LI><A HREF="interfaces/user_allocator.html">interfaces/user_allocator.html</A> - 
+プールインターフェースではないと言うのは、ごもっとも。だがプールがシステムメモリーをどのように管理するかをユーザーがどうのように管理するかを記述してある。</LI>
+ </UL>
+</LI>
+<LI>Pool実装の詳細と拡張
+ <UL>
+ <LI>インターフェースの実装と拡張
+  <UL>
+  <LI><A HREF="implementation/simple_segregated_storage.html">implementation/simple_segregated_storage.html</A></LI>
+  <LI><A HREF="implementation/pool.html">implementation/pool.html</A></LI>
+  <LI><A HREF="implementation/singleton_pool.html">implementation/singleton_pool.html</A></LI>
+  <LI><A HREF="implementation/object_pool.html">implementation/object_pool.html</A></LI>
+  <LI><A HREF="implementation/pool_alloc.html">implementation/pool_alloc.html</A></LI>
+  </UL>
+ </LI>
+ <LI>実装にのみ使用されるコンポーネント
+  <UL>
+  <LI><A HREF="implementation/ct_gcd_lcm.html">implementation/ct_gcd_lcm.html</A> - コンパイル時GCDとLDM</LI>
+  <LI><A HREF="implementation/for.html">implementation/for.html</A> - コンポーネントの記述</LI>
+  <LI><A HREF="implementation/gcd_lcm.html">implementation/gcd_lcm.html</A> - 実行時GCDとLCM</LI>
+  <LI><A HREF="implementation/guard.html">implementation/guard.html</A> - mutexの自動ロックとアンロック</LI>
+  <LI><A HREF="implementation/mutex.html">implementation/mutex.html</A> - プラットフォーム依存のmutex型</LI>
+  <LI><A HREF="implementation/pool_construct.html">implementation/pool_construct.html</A> - object_poolのコンストラクタの引数をより多くサポートするためのシステム</LI>
+  <LI><A HREF="implementation/singleton.html">implementation/singleton.html</A> - 静的初期化問題を回避するシングルトン</LI>
+  </UL>
+ </LI>
+ </UL>
+</LI>
+</UL>
+
+<P>
+<H2>将来の方向性</H2>
+
+<P>
+別のプールインターフェースを作るつもり。クラス毎の割り当ての既定クラス
+
+<P>
+<H2>Acknowledgements</H2>
+
+<P>
+Many, many thanks to the Boost peers, notably Jeff Garland, Beman Dawes, Ed Brey, Gary Powell, Peter Dimov, and Jens Maurer for providing helpful suggestions!
+
+
+<P>
+<HR>
+
+<P>
+Copyright &copy; 2000, 2001 Stephen Cleary (<A HREF="mailto:shammah@voyager.net">shammah@voyager.net</A>)
+
+<P>
+This file can be redistributed and/or modified under the terms found in <A HREF="copyright.html">copyright.html</A>
+
+<P>
+This software and its documentation is provided &quot;as is&quot; without express or implied warranty, and with no claim as to its suitability for any purpose.
+
+</BODY>
+</HTML>
+
+
+
+
+
+
+
+

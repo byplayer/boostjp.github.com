@@ -1,0 +1,155 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="ja">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Boost.Signals 設計</title>
+  </head>
+
+  <body bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080">
+
+  <h1><IMG SRC="../../../c++boost.gif" WIDTH="276" HEIGHT="86" ALT="Boost">Boost.Signals 設計</h1>
+
+<p> このドキュメントは Boost.Signals に関する高レベルの設計を解説する。
+追加のドキュメントが <a href="design_rationale.html">設計の論拠</a> を解説する。
+
+<h2>目次</h2>
+<ul>
+  <li><a href="#type_erasure">型抹消</a></li>
+  <li><a href="#connection"><code>connection</code> クラス</a></li>
+  <li><a href="#slot_call_iterator">スロット呼び出しイテレータ</a></li>
+  <li><a href="#visit_each"><code>visit_each</code> function template</a></li>
+</ul>
+
+<h2><a name="type_erasure">型抹消</a></h2>
+<p> 型抹消は、
+テンプレート実体化で生成されるコードの量を減らすため、
+Boost.Signals ライブラリ中で広範に使われている。
+各シグナルは、
+スロット名から関連する接続を写像する <code>std::map</code> とともに、
+スロットとそれに関係する接続のリストを管理しなければならない。
+しかしながら、
+この map をすべてのトークン型、
+また場合によっては各翻訳単位 (普及しているテンプレート実体化戦略である) に対して実体化することは、
+コンパイル時間と空間負荷を増大させる。
+
+<p> このいわゆる "テンプレート膨張" に対抗するため、
+我々は未知の型と操作を格納する <a
+href="../../function/index.html">Boost.Function</a> と <a
+href="../../any/index.html">Boost.Any</a> を用いている。
+スロットのリストと名付けられたスロットから接続への写像を扱うコードはすべて、
+<code>any</code> と <code>Function</code> オブジェクトのみを扱う 
+<a href="../../../boost/signals/signal_base.hpp"><code>signal_base</code></a> 
+クラスに含められ、
+実際の実装はよく知られた pimpl イディオムを用いて隠蔽されている。
+実際の <a href="reference/signalN.html"><code>signal<em>N</em></code></a> クラスは、
+引数の数によって変化する、もしくは connection のように本質的にテンプレート依存であるコードのみを扱う。
+
+<h2><a name="connection"><code>connection</code> クラス</a></h2>
+<p> <code>connection</code> クラスは Boost.Signals の働きにおいて中枢をなす。
+これは Boost.Signals システムにおいて、
+与えられた接続に関連づけられた全オブジェクトを把握している唯一の存在である。
+具体的には <code>connection</code> クラスそれ自身は、
+<code>basic_connection</code> オブジェクトを
+<a href="../../libs/smart_ptr/index.htm"><code>shared_ptr</code></a> で薄くラップしたものに過ぎない。
+
+<p> <code>connection</code> オブジェクトは Signals システムの全関係者によって保持される: 
+各 <a href="reference/trackable.html"><code>trackable</code></a> オブジェクトは、
+すべての接続を記述する<code>connection</code> オブジェクトのリストを含む; 
+同様にシグナルはすべて、スロットを定義する対の集合を含む。
+この対はスロットの関数オブジェクト (一般に <a href="../../function/index.html">Boost.Function</a> オブジェクト) と <code>connection</code> オブジェクトからなる。
+この <code>connection</code> オブジェクトはシグナル破棄時に切断される。
+最後にスロットグループからスロットへの対応は <code>std::multimap</code> のキー値に基づいている
+(<code>std::multimap</code> が保持するデータはスロットの対である)。
+
+<h2><a name="slot_call_iterator">スロット呼び出しイテレータ</a></h2>
+<p> スロット呼び出しイテレータは、
+スロットのリストを通じてその下にあるイテレータの振る舞いを変更するイテレータアダプタのスタックである。
+下の表は、型と各イテレータアダプタに要求される振る舞いを記述している。
+ただし、これは概念上のモデルであることに注意: 
+実装ではすべての層を単一のイテレータアダプタにまとめている。
+なぜなら概念上のモデルを実装すると、いくつかの広く使われているコンパイラがコンパイルに失敗するからだ。
+
+<table border=1>
+<tr>
+  <th><center>イテレータアダプタ</center></th>
+  <th>目的</th>
+</tr>
+<tr>
+  <td><center>Slot List Iterator</center></td>
+  <td>シグナルに接続されたスロットを貫くイテレータ。
+      このイテレータの <code>value_type</code> は
+            <code>std::pair&lt;any, connection&gt;</code> であり、
+            <code>any</code> はスロット関数型のインスタンスを保持する。</td>
+</tr>
+<tr>
+  <td><center>Filter Iterator Adaptor</center></td>
+  <td>切断されたスロットを除去する。
+            したがって後のステージでは切断されたスロットは見えない。</td>
+</tr>
+<tr>
+  <td><center>Projection Iterator Adaptor</center></td>
+  <td>接続されたスロットを構成する pair の第一メンバへの参照
+            (たとえばスロット関数を保持する <code>boost::any</code> オブジェクト) を戻す。</td>
+</tr>
+<tr>
+  <td><center>Transform Iterator Adaptor</center></td>
+  <td> <code>any_cast</code> を行い、
+            適切な関数型を伴ったスロット関数への参照を引き出す。</td>
+</tr>
+<tr>
+  <td><center>Transform Iterator Adaptor</center></td>
+  <td>下層のイテレータを参照外しして得られる関数オブジェクトに、
+シグナル自身に与えられた一連の引数を渡して呼び出しを行い、
+そのスロット呼び出しの結果を戻す。 </td>
+</tr>
+
+<tr>
+  <td><center>Input Caching Iterator Adaptor</center></td>
+  <td>下層のイテレータを参照外しした結果をキャッシュする。
+したがってこのイテレータを複数回参照外ししても、
+下層のイテレータは一度だけ参照外しされる; 
+つまりスロットは一度だけ呼ばれるが、結果は何度でも利用できる。
+</td>
+</tr>
+<tr><td colspan=2><center>Slot Call Iterator</center></td</tr>
+</table>
+
+<h2>関数テンプレート <a name="visit_each"><code>visit_each</code></a></h2>
+<p> <a href="reference/visit_each.html"><code>visit_each</code></a> 関数テンプレートは、
+他のオブジェクトに格納されているオブジェクトを発見するための仕組みである。
+関数テンプレート <code>visit_each</code> は 3 つの引数をとる: 
+走査対象のオブジェクト、
+各部分オブジェクトに対して呼び出される visitor 関数、
+そして <code>int</code> 0 である。
+</p>
+
+<p> 第三パラメタは、関数テンプレートに対する部分整列の欠落が広まっていることに対する一時的な解決策に過ぎない。
+非特殊化版 <code>visit_each</code> 関数テンプレートではこの第三パラメタの型を <code>long</code> と定義しているが、
+ユーザによる特殊化では第三パラメタの型を <code>int</code> にしなければならない。
+これにより、
+たとえばパラメタ <code>T</code> と <code>A&lt;T&gt;</code> 間の順序づけを行えない壊れたコンパイラであっても、
+汎整数 0 から <code>int</code> への変換の方が <code>long</code> への変更よりも適していると決定できる。
+したがってこの変換によって決定される順序づけは、
+限られた範囲ではあるが正しく関数テンプレートの部分整列を達成する。
+以下の例はこのテクニックの使用法を示している: </p>
+<pre>
+template&lt;typename&gt; class A {};
+template&lt;typename T&gt; void foo(T, long);
+template&lt;typename T&gt; void foo(A&lt;T&gt;, int);
+A&lt;T&gt; at;
+foo(at, 0);
+</pre>
+
+    <p>この例では、
+      コンパイラが <code>A&lt;T&gt;</code> が <code>T</code> よりも適している判断できないことを仮定している。
+      したがって関数テンプレートは、そのパラメタに基づいて順序づけることができないと仮定される。
+      ここで 0 から <code>int</code> への変換は 0 から <code>long</code> への変換よりも適しているため、
+      二番目の関数テンプレートが選択される。</p>
+    <hr>
+    <address><a href="http://www.cs.rpi.edu/~gregod">Doug Gregor</a></address>
+<!-- Created: Fri Jul 13 10:57:20 EDT 2001 -->
+<!-- hhmts start -->
+Last modified: Fri Oct 11 05:40:53 EDT 2002
+<!-- hhmts end -->
+  </body>
+</html>

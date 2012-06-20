@@ -1,0 +1,98 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=EUC-JP"><!--*- encoding: euc-jp -*-->
+	<title>BOOST_PP_REPEAT_FROM_TO_z</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">
+</head>
+<body>
+	<div style="margin-left:  0px;">
+		<b>BOOST_PP_REPEAT_FROM_TO_<i>z</i></b> マクロは <b>BOOST_PP_REPEAT_FROM_TO</b>
+		の繰り返しの構築への再入を表す。
+	</div>
+	<h4>Usage</h4>
+		<div class="code">
+			<b>BOOST_PP_REPEAT_FROM_TO_</b> ## <i>z</i>(<i>first</i>, <i>last</i>, <i>macro</i>, <i>data</i>)
+		</div>
+	<h4>Arguments</h4>
+		<dl>
+			<dt>z</dt>
+			<dd>
+			利用可能な次の <b>BOOST_PP_REPEAT</b> の次元。
+			</dd>
+			<dt>first</dt>
+			<dd>
+			繰り返しの下限。
+			有効な値の範囲は <i>0</i> から <b>BOOST_PP_LIMIT_MAG</b> までである。
+			</dd>
+			<dt>last</dt>
+			<dd>
+			繰り返しの上限。
+			有効な値の範囲は <i>0</i> から <b>BOOST_PP_LIMIT_MAG</b> までである。
+			</dd>
+			<dt>macro</dt>
+			<dd>
+			<i>macro</i>(<i>z</i>, <i>n</i>, <i>data</i>) という形の 3つ組の演算。
+			このマクロは <b>BOOST_PP_REPEAT</b> によって、
+			利用可能な次の繰り返しの深さ、現在の繰り返し回数、付属の <i>data</i> に展開される。
+			</dd>
+			<dt>data</dt>
+			<dd>
+			<i>macro</i> に渡される付属のデータ。
+			</dd>
+		</dl>
+	<h4>Remarks</h4>
+		<div>
+		このマクロは次のシーケンスに展開される:
+			<div>
+				<i>macro</i>(<i>z</i>, <i>first</i>, <i>data</i>) <i>macro</i>(<i>z</i>, <i>first</i> + <i>1</i>, <i>data</i>) ... <i>macro</i>(<i>z</i>, <i>last</i> - <i>1</i>, <i>data</i>)
+			</div>
+		</div>
+		<div>
+		     繰り返しの回数 (つまり、 <i>last</i> - <i>first</i> は <b>BOOST_PP_LIMIT_REPEAT</b> 
+		     を越えてはならない。
+		</div>
+		<div>
+		文字列結合を、プリプロセッサのトークン結合演算子ではなく、 <b>BOOST_PP_CAT</b>
+		で行わなければいけない時もある。
+		これは、 <i>z</i> の値がマクロ呼び出しそのものである時に起こる。
+		マクロの展開を可能にするには遅延呼び出しが必要である。
+		そのような状況で、構文は次のようになる:
+			<div>
+				<b>BOOST_PP_CAT</b>(<b>BOOST_PP_REPEAT_FROM_TO_</b>, <i>z</i>)(<i>count</i>, <i>macro</i>, <i>data</i>).
+			</div>
+		</div>
+	<h4>See Also</h4>
+		<ul>
+			<li><a href="cat.html">BOOST_PP_CAT</a></li>
+			<li><a href="limit_repeat.html">BOOST_PP_LIMIT_REPEAT</a></li>
+			<li><a href="repeat.html">BOOST_PP_REPEAT</a></li>
+		</ul>
+	<h4>Requirements</h4>
+		<div>
+			<b>Header:</b> &nbsp;<a href="../headers/repetition/repeat_from_to.hpp.html">&lt;boost/preprocessor/repetition/repeat_from_to.hpp&gt;</a>
+		</div>
+	<h4>Sample Code</h4>
+<div><pre>
+#include &lt;<a href="../headers/repetition/repeat_from_to.hpp.html">boost/preprocessor/repetition/repeat_from_to.hpp</a>&gt;
+
+#define TEXT(z, n, data) n data
+
+#define MACRO(z, n, data) \
+  ( \
+     <a href="repeat_from_to_z.html">BOOST_PP_REPEAT_FROM_TO_</a> ## z( \
+        1, 4, \
+        TEXT, xyz \
+     ) \
+  ) \
+  /**/
+
+<a href="repeat.html">BOOST_PP_REPEAT</a>(3, MACRO, _)
+   /*
+      expands to:
+      (1 xyz 2 xyz 3 xyz)
+      (1 xyz 2 xyz 3 xyz)
+      (1 xyz 2 xyz 3 xyz)
+   */
+</pre></div>
+</body>
+</html>

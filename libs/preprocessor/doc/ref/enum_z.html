@@ -1,0 +1,88 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+	<title>BOOST_PP_ENUM_z</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">
+</head>
+<body>
+	<div style="margin-left:  0px;">
+		<b>BOOST_PP_ENUM_<i>z</i></b> マクロは <b>BOOST_PP_ENUM</b> の繰り返し構築への再入を表す。
+	</div>
+	<h4>Usage</h4>
+		<div class="code">
+			<b>BOOST_PP_ENUM_</b> ## <i>z</i>(<i>count</i>, <i>macro</i>, <i>data</i>)
+		</div>
+	<h4>Arguments</h4>
+		<dl>
+			<dt>z</dt>
+			<dd>
+				利用可能な次の <b>BOOST_PP_REPEAT</b> の次元。
+			</dd>
+			<dt>count</dt>
+			<dd>
+				<i>macro</i> を繰り返し呼び出す回数。
+				有効な値の範囲は <i>0</i> から <b>BOOST_PP_LIMIT_REPEAT</b> まで。
+			</dd>
+			<dt>macro</dt>
+			<dd>
+				<i>macro</i>(<i>z</i>, <i>n</i>, <i>data</i>) の形の三項演算。
+				このマクロは、
+				利用可能な次の反復の深さ、
+				現在の繰り返し番号、
+				付属の <i>data</i> の三引数でもって <b>BOOST_PP_ENUM</b> により展開される。
+			</dd>
+			<dt>data</dt>
+			<dd>
+				<i>macro</i> に渡される付属データ。
+			</dd>
+		</dl>
+	<h4>Remarks</h4>
+		<div>
+			このマクロはコンマ区切りのシーケンスに展開される:
+			<div>
+				<i>macro</i>(<i>z</i>, <i>0</i>, <i>data</i>), <i>macro</i>(<i>z</i>, <i>1</i>, <i>data</i>), ... <i>macro</i>(<i>z</i>, <i>count</i> - <i>1</i>, <i>data</i>)
+			</div>
+		</div>
+		<div>
+			プリプロセッサのトークン貼り付け演算子よりも <b>BOOST_PP_CAT</b> を用いた連結が必要な場合があるかもしれない。
+			それは、<i>z</i> の値がマクロ呼び出しそのものであるときに起こる。
+			この場合、マクロの遅延展開が必要となる。
+			以上のような場合でのシンタックスはこのようになる:
+			<div>
+				<b>BOOST_PP_CAT</b>(<b>BOOST_PP_ENUM_</b>, <i>z</i>)(<i>count</i>, <i>macro</i>, <i>data</i>)
+			</div>
+		</div>
+	<h4>See Also</h4>
+		<ul>
+			<li><a href="cat.html">BOOST_PP_CAT</a></li>
+			<li><a href="enum.html">BOOST_PP_ENUM</a></li>
+			<li><a href="limit_repeat.html">BOOST_PP_LIMIT_REPEAT</a></li>
+		</ul>
+	<h4>Requirements</h4>
+		<div>
+			<b>Header:</b> &nbsp;<a href="../headers/repetition/enum.hpp.html">&lt;boost/preprocessor/repetition/enum.hpp&gt;</a>
+		</div>
+	<h4>Sample Code</h4>
+<div><pre>
+#include &lt;<a href="../headers/arithmetic/inc.hpp.html">boost/preprocessor/arithmetic/inc.hpp</a>&gt;
+#include &lt;<a href="../headers/repetition/enum.hpp.html">boost/preprocessor/repetition/enum.hpp</a>&gt;
+
+#define TEXT(z, n, text) text
+
+#define TTP(z, n, _) \
+   template&lt; \
+      <a href="enum_z.html">BOOST_PP_ENUM_</a> ## z(<a href="inc.html">BOOST_PP_INC</a>(n), TEXT, class) \
+   &gt; \
+   class T ## n \
+   /**/
+
+<a href="enum.html">BOOST_PP_ENUM</a>(3, TTP, nil)
+   /*
+      template&lt;class&gt; class T0,
+      template&lt;class, class&gt; class T1,
+      template&lt;class, class, class&gt; class T2
+      に展開される
+   */
+</pre></div>
+</body>
+</html>

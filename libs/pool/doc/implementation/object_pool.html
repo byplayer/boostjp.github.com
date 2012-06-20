@@ -1,0 +1,78 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> 
+<HTML>
+<HEAD>
+<TITLE>Object Pool Implementation</TITLE>
+<LINK HREF="../pool.css" REL="stylesheet" TYPE="text/css">
+</HEAD>
+<BODY>
+
+<IMG SRC="../../../../c++boost.gif" WIDTH=276 HEIGHT=86 ALT="C++ Boost">
+
+<H1 ALIGN=CENTER>Object Pool Implementation</H1>
+
+<P>
+<H2>依存性</H2>
+
+<P>
+Boost ヘッダー <SPAN CLASS="code">&quot;pool.hpp&quot;</SPAN>(<A HREF="pool.html">pool.html</A> を見よ)をインクルードしている。
+
+<P>
+<H2>公開インタフェースの拡張</H2>
+
+<P>
+<SPAN CLASS="code">ObjectPool</SPAN> 型のオブジェクトがシステムからメモリーを必要とするときはいつでも、それのテンプレートパラメーター <SPAN CLASS="code">UserAllocator</SPAN> がシステムへ要求を出す。
+リクエストされる量はダブリングアルゴリズムによって決定される。
+言い換えると、より多くのシステムメモリーが割り当てられるとき、要求される量は2倍になるということである。
+ユーザーは以下に述べる拡張によってダブリングアルゴリズムを管理することができる。
+
+<P>
+<H3>追加のコンストラクタパラメータ</H3>
+
+<P>
+ユーザーは <SPAN CLASS="code">ObjectPool</SPAN> のコンストラクタに追加のパラメータを渡すことができる。
+このパラメータは <SPAN CLASS="code">size_type</SPAN> 型で、そのオブジェクトがシステムメモリーを初めて必要とするときに要求するチャンクの数である。
+デフォルト値は 32 である。このパラメーターは 0 であってはならない。
+
+<P>
+<H3><SPAN CLASS="code">next_size</SPAN>アクセサ関数</H3>
+
+<P>
+関数<SPAN CLASS="code">size_type get_next_size() const;</SPAN> と <SPAN CLASS="code">void set_next_size(size_type);</SPAN>のペアはユーザーに明示的な<SPAN CLASS="code">next_size</SPAN>の読み書きを許す。
+この値はオブジェクトが次にシステムメモリーから割り当てを必要とするときに要求するチャンクの数である。
+この値を 0 に設定してはならない。
+
+<P>
+<H2>Protected インタフェース</H2>
+
+<P>
+<H3>梗概</H3>
+
+<PRE CLASS="code">template &lt;typename ElementType, typename UserAllocator = default_user_allocator_new_delete&gt;
+class object_pool: protected pool&lt;UserAllocator&gt;
+{
+  ... // public interface
+};</PRE>
+
+<P>
+<H3>Protected Derivation</H3>
+
+ObjectPool は protected 導出を使って単純分離記憶域から導出されている。
+これは <A HREF="pool.html">Pool 実装の詳細</A>のすべてを、ObjectPool から導出されるすべてのクラスにも同じように開示している。
+
+<P>
+<H2><A HREF="../interfaces/object_pool.html">インタフェースの説明</A></H2>
+
+<P>
+<HR>
+
+<P>
+Copyright &copy; 2000, 2001 Stephen Cleary (<A HREF="mailto:shammah@voyager.net">shammah@voyager.net</A>)
+
+<P>
+This file can be redistributed and/or modified under the terms found in <A HREF="../copyright.html">copyright.html</A>
+
+<P>
+This software and its documentation is provided &quot;as is&quot; without express or implied warranty, and with no claim as to its suitability for any purpose.
+
+</BODY>
+</HTML>

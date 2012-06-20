@@ -1,0 +1,154 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> 
+<HTML>
+<HEAD>
+<TITLE>Boost Pool Interfaces</TITLE>
+<LINK HREF="pool.css" REL="stylesheet" TYPE="text/css">
+</HEAD>
+<BODY>
+
+<IMG SRC="../../../c++boost.gif" WIDTH=276 HEIGHT=86 ALT="C++ Boost">
+
+<H1 ALIGN=CENTER>Boost Pool Interfaces</H1>
+
+<P>
+<H2>はじめに</H2>
+
+<P>
+ユーザーが Pool を使いたくなるような、素晴らしい柔軟性のあるインターフェースを紹介しよう。
+Pools がどのように働くかについて基本的理解が必要なら、<A HREF="concepts.html">concepts document概念資料</A>をよく読むと良い。
+
+<P>
+<H2>用語とトレードオフ</H2>
+
+<P>
+<H3>オブジェクト用法 対 シングルトン用法</H3>
+
+<P>
+<EM>オブジェクト用法</EM>は、個々の Pool を生成・破棄されるオブジェクトとして扱う方法である。
+Pool の破棄は、暗黙のうちに、そのプールから割り当てられたチャンクを開放する。
+
+<P>
+
+<EM>シングルトン用法</EM>は、個々のプールを static な生存期間のオブジェクトとして扱う方法である。
+つまりプログラム終了時まで破棄されない。
+シングルトン用法ではプールは共有されてもよい。
+シングルトン用法はスレッドセーフであるということである。
+シングルトン用法のプールオブジェクトによって確保されたシステムメモリーは、<SPAN CLASS="code">release_memory</SPAN> または <SPAN CLASS="code">purge_memory</SPAN>を使って開放される。
+
+<P>
+<H3>メモリー枯渇時状態: 例外 対 Null 返し</H3>
+
+<P>
+Some Pool interfaces throw exceptions when out-of-memory; others will return 0.  In general, unless mandated by the Standard, Pool interfaces will always prefer to return 0 instead of throw an exception.
+
+プールインタフェースには、メモリ枯渇時に例外を投げるものもある。
+他のものは 0 を返す。
+全般的には、標準に則っていないが、プールインタフェースは例外を投げるより 0 を返すことを好んでいる。
+
+<P>
+<H2>インタフェース</H2>
+
+<P>
+<H3>pool</H3>
+
+<P>
+<A HREF="interfaces/pool.html">pool interface</A>はNullを返す、単純なオブジェクト用法のインタフェースである。
+<P>
+Example:
+<PRE CLASS="code">void func()
+{
+  boost::pool&lt;&gt; p(sizeof(int));
+  for (int i = 0; i < 10000; ++i)
+  {
+    int * const t = p.malloc();
+    ... // t を使って何かをする。それを free() する時間は取らなくてよい
+  }
+} // 関数終了時、pは破棄され、すべてのmalloc()されたintも暗黙のうちに開放される。
+</PRE>
+
+<P>
+<H3>object_pool</H3>
+
+<P>
+<A HREF="interfaces/object_pool.html">object_pool interface</A> は Null を返すオブジェクト用法のインタフェースである。
+これはチャンクが割り当てられようとしているオブジェクトの型を意識するという違いがある。
+破棄時、object_poolが割り当てたすべてのチャンクにデストラクタが呼び出される。
+
+<P>
+Example:
+<PRE CLASS="code">struct X { ... }; // 副作用のあるデストラクタを持つ
+
+void func()
+{
+  boost::object_pool&lt;X&gt; p;
+  for (int i = 0; i < 10000; ++i)
+  {
+    X * const t = p.malloc();
+    ... //  t を使って何かをする。それを free() する時間は取らなくてよい
+  }
+} // 関数終了時、pは破棄され、すべてのXオブジェクトについてデストラクタが呼び出される。
+</PRE>
+
+<P>
+<H3>singleton_pool</H3>
+
+<P>
+<A HREF="interfaces/singleton_pool.html">singleton_pool interface</A> は Null を返す、シングルトン用法のインタフェースである。
+これはシングルトン用法であること以外は pool インタフェースと同じである。
+<P>
+Example:
+<PRE CLASS="code">struct MyPoolTag { };
+
+typedef boost::singleton_pool&lt;MyPoolTag, sizeof(int)&gt; my_pool;
+void func()
+{
+  for (int i = 0; i < 10000; ++i)
+  {
+    int * const t = my_pool::malloc();
+    ... //  t を使って何かをする。それを free() する時間は取らなくてよい
+  }
+  // 明示的にすべてのmalloc()された int を開放しなくてはならない
+  my_pool::purge_memory();
+}</PRE>
+
+<P>
+<H3>pool_alloc</H3>
+
+<P>
+<A HREF="interfaces/pool_alloc.html">pool_alloc interface</A> は例外を使うシングルトン用法のインタフェースである。
+singleton_pool interface 上に構築され、標準アロケータ準拠クラス(コンテナ内で使用できるなど)を提供する。
+
+<P>
+Example:
+<PRE CLASS="code">void func()
+{
+  std::vector&lt;int, boost::pool_allocator&lt;int&gt; &gt; v;
+  for (int i = 0; i < 10000; ++i)
+    v.push_back(13);
+} // 関数の終了時にpoolアロケータによって割り当てられたシステムメモリーは解放されないので、
+  // 開放させるために
+  //  boost::singleton_pool&lt;boost::pool_allocator_tag, sizeof(int)&gt;::release_memory()
+  // を呼ばなくてはならない</PRE>
+
+<P>
+<H2>Future Directions</H2>
+
+<P>
+別のプールインタフェースを書く予定である。
+クラス個々のプールによる割り当てのための基底クラスになる。
+この&quot;pool_base&quot; インタフェースは、例外を使うシングルトン用法で、singleton_pool インターフェース上に構築されることになるだろう。
+
+<P>
+<HR>
+
+<P>
+Copyright &copy; 2000, 2001 Stephen Cleary (<A HREF="mailto:shammah@voyager.net">shammah@voyager.net</A>)
+
+<P>
+This file can be redistributed and/or modified under the terms found in <A HREF="copyright.html">copyright.html</A>
+
+<P>
+This software and its documentation is provided &quot;as is&quot; without express or implied warranty, and with no claim as to its suitability for any purpose.
+
+</BODY>
+</HTML>

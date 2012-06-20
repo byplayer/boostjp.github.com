@@ -1,0 +1,242 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> 
+<HTML>
+<HEAD>
+<TITLE>Pool Concepts</TITLE>
+<LINK HREF="pool.css" REL="stylesheet" TYPE="text/css">
+</HEAD>
+<BODY>
+
+<IMG SRC="../../../c++boost.gif" WIDTH=276 HEIGHT=86 ALT="C++ Boost">
+
+<H1 ALIGN=CENTER>Poolの概念</H1>
+<P>
+<BLOCKQUOTE>
+&quot;動的メモリー割り当ては、概ね1960年以来、ほとんどのコンピューターシステムにとって基礎部分でありつづけた&quot;<SUP><A HREF="#ref1">1</A></SUP>
+
+</BLOCKQUOTE>
+
+<p>
+誰しも動的メモリー割り当てを使用する。
+<SPAN CLASS="code">malloc</SPAN> や <SPAN CLASS="code">new</SPAN>を呼び出したことがあるなら、動的メモリー割り当てを使用したことがあるということだ。
+ほとんどのプログラマはヒープを&quot;magic bag&quot;として扱う傾向がある。
+我らは請い、魔術によって生み出され給うと。
+だが、ヒープは魔術<EM>ではない</EM>ため、時に問題が起きるのだ。
+
+<p>
+ヒープには限界がある。
+膨大な量の仮想記憶を持つ、(組み込みシステムではない)巨大システムであっても限界はある。
+誰しも物理的限界には思いを馳せるが、より気付きにくい&quot;仮想&quot;システム上の限界がある。
+その限界では仮想記憶の使用によってあなたのプログラム(もしくはシステム全体)がスローダウンする。
+この仮想システムの限界は、物理的限界に比べ遥かにあなたのプログラムに密接である。
+マルチタスクシステム上では、格別である。
+従って、大きなシステムで実行されるプログラムの場合は、必要とする最小リソースだけを使い出来る限り速やかにそれを解放するよう、&quot;細心&quot;の注意を払わなくてはならない。
+組み込みシステムの場合は、無駄にできるメモリーなどそもそもないのだ。
+
+<P>
+ヒープは複雑に絡まっている。
+どのような型のメモリー要求にも、どのようなサイズであっても、満足させなくてはならない上に、それを<EM>高速に</EM>やってのけなくてはならない。
+よくあるメモリー管理の方法は、メモリーを一区切りづつに分け、そのサイズ順に木やリストの類に保持するもののはずだ。
+ここに局所性や予想生存期間といった他の要素を加えてやると、ヒープはすぐに複雑に絡まってしまう。
+実際、複雑すぎて、動的メモリー割り当て方法の&quot;完璧な&quot解は知られていない。
+下によくあるメモリーマネージャーのほとんどがどのように働くかを図示する。
+個々のメモリーチャンクは、内部の木やリストを維持するために、その一部を使用している。
+メモリーチャンクがプログラムへ <SPAN CLASS="code">malloc</SPAN> されるときに、メモリーマネージャーは、そこへある種の情報を&quot;保存&quot;しているに違いない。&mdash;普通はそのサイズだが。
+そうすることでブロックが <SPAN CLASS="code">free</SPAN> されるとき、メモリーマネージャーは容易にその大きさを知ることができる。
+
+<TABLE CELLSPACING="0" BORDER="3" RULES="none" STYLE="float: left; clear: both;">
+<CAPTION><EM>未割り当てメモリーブロック</EM></CAPTION>
+<TR><TD STYLE="background-color: red; text-align: center;">プロセス外メモリー</TD></TR>
+<TR><TD STYLE="padding: 1em 0em; background-color: silver; text-align: center;">メモリー割り当てアルゴリズムが内部で使用しているメモリー(通常8ないし12バイト)</TD></TR>
+<TR><TD STYLE="padding: 2em 0em; background-color: gray; text-align: center">未使用メモリー</TD></TR>
+<TR><TD STYLE="background-color: red; text-align: center;">プロセス外メモリー</TD></TR>
+</TABLE>
+
+<TABLE CELLSPACING="0" BORDER="3" RULES="none" STYLE="float: right; clear: both;">
+<CAPTION><EM>割り当て済みメモリーブロック(プログラムで使用中)</EM></CAPTION>
+<TR><TD STYLE="background-color: red; text-align: center;">プロセス外メモリー</TD></TR>
+<TR><TD STYLE="background-color: silver; text-align: center;">メモリー割り当てアルゴリズムに内部で使用されているメモリー(通常4バイト)</TD></TR>
+<TR><TD STYLE="padding: 3em 0em; background-color: yellow; text-align: center">プログラムが使用可能なメモリー</TD></TR>
+<TR><TD STYLE="background-color: red; text-align: center;">プロセス外メモリー</TD></TR>
+</TABLE>
+
+<P>
+動的メモリー割り当ては複雑であるがゆえに、時間と空間の両方または一方の見地から効率が悪いということがよく起きる。
+ほとんどのメモリー割り当てアルゴリズムは、個々のメモリーブロックに、ブロックのサイズ、もしくは木やリスト内での自身の位置のような、関連を示す情報を保存している。
+このような&quot;ヘッダーフィールド&quot;では、プログラムで使用されようとするブロックに1マシンワードを入れるということが普通に行われている。
+だが、これでは小さなオブジェクトが動的に割り当てられるときは、明らかに問題がある。
+例えば、<SPAN CLASS="code">int</SPAN> が動的に割り当てられるようなことがあれば、アルゴリズムは宜しく自動的にヘッダーフィールドを、御取り置きするため、メモリーの50%が無駄になる。
+これは最悪のシナリオの話ではある。
+しかしながら、モダンなプログラミングは小さなオブジェクトをヒープに作るようになり、この問題は益々顕著になってきている。
+Wilson <EM>et. al.</EM> は、平均的なケースでメモリーのオーバーヘッドは10から20パーセントであると述べている<SUP><A HREF="#ref2">2</A></SUP>。
+プログラムが使用するオブジェクトが小さくなるほど、このメモリーのオーバーヘッドは大きくなる。
+プログラムを仮想システムの限界に近づけるのは、まさにこのメモリーオーバーヘッドである。
+
+<P>
+より巨大システムでは(かかる実行時間に比べると)メモリーオーバーヘッドは重要ではなく無視されることが多い。
+しかし、小さなオブジェクトの多数の割り当てと(and/or)解放が、タイムクリティカルなアルゴリズムでは、無視できなくなる状況がある。
+このような状況では、システムが提供しているメモリー割り当て機構は遅すぎる場合が多いのだ。
+
+<P>
+単純分離記憶域は、この両方の問題に取り組んでいる。
+メモリーオーバーヘッドはほとんど無くなり、すべての割り当ては短い(償却)定数時間しかかからない。
+しかしながら、汎用性は失われることになる。
+単純分離記憶域は、単一サイズのチャンクしか割り当てられない。
+
+<P>
+<HR>
+
+<P>
+<H1 ALIGN=CENTER>単純分離記憶域(Simple Segregated Storage)</H1>
+
+<P>
+単純分離記憶域は Boost Pool ライブラリの見えないところにある基礎的アイデアである。
+単純分離記憶域は最も単純な、そしておそらく最速のメモリー割り当て・開放アルゴリズムである。
+それは、メモリー<EM>ブロック</EM>を、一定サイズの<EM>チャンク</EM>に<EM>仕切る</EM>ことから始まる。
+ブロックがどこ由来のものであるかは、実装時までは重要ではない。
+<EM>Pool</EM> は、このようなやり方で単純分離記憶域を使用する、オブジェクトのひとつである。
+図示する。
+
+<TABLE CELLSPACING="0" BORDER="3" RULES="none" ALIGN=CENTER STYLE="clear: both;">
+<CAPTION><EM>Memory block, split into chunks</EM></CAPTION>
+<TR><TD STYLE="background-color: red; text-align: center;">プロセス外メモリ</TD></TR>
+<TR><TD STYLE="padding: 1em 0em; background-color: gray; text-align: center;">チャンク 0</TD></TR>
+<TR><TD STYLE="padding: 1em 0em; background-color: gray; text-align: center;">チャンク 1</TD></TR>
+<TR><TD STYLE="padding: 1em 0em; background-color: gray; text-align: center;">チャンク 2</TD></TR>
+<TR><TD STYLE="padding: 1em 0em; background-color: gray; text-align: center;">チャンク 3</TD></TR>
+<TR><TD STYLE="background-color: red; text-align: center;">プロセス外メモリ</TD></TR>
+</TABLE>
+
+<P>
+どのブロックにおいても、それぞれのチャンクは<STRONG>常に</STRONG>同一サイズである。
+これは単純分離記憶域の、基礎からの制約事項である。
+チャンクに異なるサイズであれ、と求めることはできない。
+たとえば、integer 用の Pool に character が欲しいと求めても適わないし、character 用のプールに interger を求めることもできない(characterとintegerが異なるサイズであると仮定してのことだが)。
+
+<P>
+単純分離記憶域は<EM>フリーリスト</EM>を未使用チャンク群の中で纏り縫いにする(interleave)ことで動作する。
+例えば、
+
+<TABLE CELLSPACING="0" BORDER="3" RULES="none" STYLE="float: left; clear: both;">
+<CAPTION><EM>チャンクを割り当てていないメモリーブロック</EM></CAPTION>
+<TR><TD STYLE="background-color: red; text-align: center;">プロセス外メモリ</TD></TR>
+<TR><TD STYLE="padding: 1em 0em; background-color: gray; text-align: center;">チャンク 0; チャンク 1 を指す</TD></TR>
+<TR><TD STYLE="padding: 1em 0em; background-color: gray; text-align: center;">チャンク 1; チャンク 2 を指す</TD></TR>
+<TR><TD STYLE="padding: 1em 0em; background-color: gray; text-align: center;">チャンク 2; チャンク 3 を指す</TD></TR>
+<TR><TD STYLE="padding: 1em 0em; background-color: gray; text-align: center;">チャンク 3; リストの末尾</TD></TR>
+<TR><TD STYLE="background-color: red; text-align: center;">プロセス外メモリ</TD></TR>
+</TABLE>
+
+<TABLE CELLSPACING="0" BORDER="3" RULES="none" STYLE="float: right; clear: both;">
+<CAPTION><EM>2個のチャンクが割り当て中になっているメモリブロック</EM></CAPTION>
+<TR><TD STYLE="background-color: red; text-align: center;">プロセス外メモリ</TD></TR>
+<TR><TD STYLE="padding: 1em 0em; background-color: gray; text-align: center;">チャンク 0; チャンク 2 を指す</TD></TR>
+<TR><TD STYLE="padding: 1em 0em; background-color: silver; text-align: center;">チャンク 1 (プロセスが使用中)</TD></TR>
+<TR><TD STYLE="padding: 1em 0em; background-color: gray; text-align: center;">チャンク 2; リストの末尾</TD></TR>
+<TR><TD STYLE="padding: 1em 0em; background-color: silver; text-align: center;">チャンク 3 (プロセスが使用中)</TD></TR>
+<TR><TD STYLE="background-color: red; text-align: center;">プロセス外メモリ</TD></TR>
+</TABLE>
+
+<P>
+チャンク群の中にフリーリストを纏り縫いするので、個々の単純分離記憶域のオーバーヘッドはポインタ一個(リストの中の最初の要素へのポインタ)分だけである。
+プロセスで使用されているチャンクにはメモリーのオーバーヘッドは<EM>存在しない</EM>
+
+<P>
+単純分離記憶域は、猛烈に速い。
+最も単純なケースでは、メモリーの割り当ては自由リストから断片を取り除くだけの O(1) 操作にすぎない。
+自由リストが空の場合、別のブロックを確保し仕切る必要がある、これには償却 O(1) 時間を要する。
+メモリーの開放は、フリーリストの先頭に断片を追加するのと同等の単純さであり、O(1) 操作である。
+しかしながら、単純分離記憶域のより複雑な使用方法は、フリーリストがソートされていなくてはならず、開放は O(N) 時間を要するようになる。
+
+<P>
+単純分離記憶域は、システムが提供する割り当て機構よりも、高速に実行されメモリーオーバーヘッドも少ないが、割り当てサイズに汎用性がない。
+多くの(不連続な)小さなオブジェクトをヒープ上に割り当てるような状況や、同じサイズのオブジェクトの割り当てと開放が繰り返し起きるような状況が Pool を使用するのに相応しい。
+
+<P>
+<HR>
+
+<P>
+<H2>参考</H2>
+
+<P>
+<OL>
+<LI><A NAME="ref1">Doug Lea, <EM>A Memory Allocator</EM>.</A>  web 上では <A HREF="http://gee.cs.oswego.edu/dl/html/malloc.html">http://gee.cs.oswego.edu/dl/html/malloc.html</A> にある</LI>
+<LI><A NAME="ref2">Paul R. Wilson, Mark S. Johnstone, Michael Neely, and David Boles, &quot;Dynamic Storage Allocation: A Survey and Critical Review&quot; in <EM>International Workshop on Memory Management</EM>, September 1995, pg. 28, 36.</A>  web 上では <A HREF="ftp://ftp.cs.utexas.edu/pub/garbage/allocsrv.ps">ftp://ftp.cs.utexas.edu/pub/garbage/allocsrv.ps</A> にある</LI>
+</OL>
+
+<P>
+<H2>他の実装</H2>
+
+<P>
+Pool 割り当て機構は多くのプログラミング言語に見ることができ、多くのバリエーションが存在する。
+多くの実装の端緒は、ごく普通のプログラミングに関する文献に求めることができる。
+いくつかを以下に示す。これらの何れも完全な実装ではない。
+多くは実装のある局面を読者への練習問題としている。
+しかしながら、これらの例はどれも、ある局面が欠落しているとはいえ、このドキュメントで述べている単純分離記憶域と同じ基底概念を使用している。
+
+<P>
+<UL>
+
+<LI>
+&quot;The C++ Programming Language&quot;, 3rd ed., by Bjarne Stroustrup, Section 19.4.2.  欠落局面:
+ <OL>
+ <LI>ポータブルでない</LI>
+ <LI>任意数のオブジェクトを扱うことができない(練習問題として残されている)</LI>
+ <LI>スレッドセーフではない</LI>
+ <LI>静的初期化問題による不都合がある</LI>
+ </OL>
+</LI>
+
+<LI>
+&quot;MicroC/OS-II: The Real-Time Kernel&quot;, by Jean J. Labrosse, Chapter 7 and Appendix B.04. 実際のOSの内部で機能している単純分離記憶域手法の例である。
+欠落局面:
+ <OL>
+ <LI>ポータブルではない(これは OK である。自分自身が OS の一部である。)</LI>
+ <LI>任意数のオブジェクトを扱うことができない(これも OK である。この特徴は必要ではない。)</LI>
+</LI>
+ <LI>プールを生成また破棄するために非直感的なコードを書く必要がある
+</LI>
+ </OL>
+</LI>
+
+<LI>
+&quot;Efficient C++: Performance Programming Techniques&quot;, by Dov Bulka and David Mayhew, Chapters 6 and 7.
+
+プール解の反復開発の良い例である。
+しかしながら、(システムが提供する割り当てメカニズムが絶望的に非効率的であるという)前提は、私がテストしたすべてのシステムで不備があった。
+彼らの結論を受け入れる前に、あなたのシステムで時間を測定してみよ。
+欠落局面:
+ <OL>
+ <LI>プールを生成また破棄するために非直感的なコードを書く必要がある</LI>
+ </OL>
+</LI>
+
+<LI>
+&quot;Advanced C++: Programming Styles and Idioms&quot;, by James O. Coplien, Section 3.6. 
+これは静的と動的、両方の pooling の例である。欠落局面:
+ <OL>
+ <LI>スレッドセーフではない</LI>
+ <LI>静的 pooling の例がポータブルではない。
+</LI>
+ </OL>
+</LI>
+
+</UL>
+
+<P>
+<HR>
+
+<P>
+Copyright &copy; 2000, 2001 Stephen Cleary (<A HREF="mailto:shammah@voyager.net">shammah@voyager.net</A>)
+
+<P>
+This file can be redistributed and/or modified under the terms found in <A HREF="copyright.html">copyright.html</A>
+
+<P>
+This software and its documentation is provided &quot;as is&quot; without express or implied warranty, and with no claim as to its suitability for any purpose.
+
+</BODY>
+</HTML>
+
+
+
+

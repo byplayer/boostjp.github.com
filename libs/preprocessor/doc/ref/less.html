@@ -1,0 +1,55 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=EUC-JP"><!--*- encoding: euc-jp -*-->
+	<title>BOOST_PP_LESS</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">	
+</head>
+<body>
+	<div style="margin-left:  0px;">
+		<b>BOOST_PP_LESS</b> マクロは 2つの値の大きさを比較する。
+	</div>
+	<h4>Usage</h4>
+		<div class="code">
+			<b>BOOST_PP_LESS</b>(<i>x</i>、<i>y</i>)
+		</div>
+	<h4>Arguments</h4>
+		<dl>
+			<dt>x</dt>
+			<dd>
+				比較における左オペランド。&nbsp;
+				有効な値の範囲は <i>0</i> から <b>BOOST_PP_LIMIT_MAG</b> まで。
+			</dd>
+			<dt>y</dt>
+			<dd>
+				比較における右オペランド。&nbsp;
+				有効な値の範囲は <i>0</i> から <b>BOOST_PP_LIMIT_MAG</b> まで。
+			</dd>
+		</dl>
+	<h4>Remarks</h4>
+		<div>
+			もし <i>x</i> が <i>y</i> より小さいならば、このマクロは <i>1</i> に展開される。&nbsp;
+			そうでなければ <i>0</i> に展開される。
+		</div>
+		<div>
+			以前、このマクロは <b>BOOST_PP_WHILE</b> の中では使えなかったが、
+			現在ではこのような制限はない。
+			しかし、そのような状況では <b>BOOST_PP_LESS_D</b> を使うほうがより能率的である。
+		</div>
+	<h4>See Also</h4>
+		<ul>
+			<li><a href="less_d.html">BOOST_PP_LESS_D</a></li>
+			<li><a href="limit_mag.html">BOOST_PP_LIMIT_MAG</a></li>
+		</ul>
+	<h4>Requirements</h4>
+		<div>
+			<b>Header:</b> &nbsp;<a href="../headers/comparison/less.hpp.html">&lt;boost/preprocessor/comparison/less.hpp&gt;</a>
+		</div>
+	<h4>Sample Code</h4>
+<div><pre>
+#include &lt;<a href="../headers/comparison/less.hpp.html">boost/preprocessor/comparison/less.hpp</a>&gt;
+
+<a href="less.html">BOOST_PP_LESS</a>(4, 3) // 0 に展開される
+<a href="less.html">BOOST_PP_LESS</a>(3, 4) // 1 に展開される
+</pre></div>
+</body>
+</html>

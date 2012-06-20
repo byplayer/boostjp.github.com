@@ -1,0 +1,298 @@
+<html>
+<head>
+<title>Design decisions rationale for Boost Tuple Library</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body bgcolor="#FFFFFF" text="#000000">
+
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86">
+
+<h1>Tuple Library : design decisions rationale</h1>
+
+<!--
+<h2>About namespaces</h2>
+-->
+<h2>名前空間について</h2>
+
+<!--
+<p>
+There was a discussion about whether tuples should be in a separate namespace or directly in the <code>boost</code> namespace.
+The common principle is that domain libraries (like <i>graph</i>, <i>python</i>) should be on a separate
+subnamespace, while utility like libraries directly in the <code>boost</code> namespace.
+-->
+<p>
+その昔、タプルは独立した名前空間にあるべきか、直接<code>boost</code>名前空間にあるべきかについて、議論がなされた。
+一般的な原則として、専門的なライブラリ(<i>graph</i>や<i>python</i>のような)は独立した入れ子の名前空間に入るべきである一方、ユーティリティ的なライブラリは直接<code>boost</code>名前空間に入るべきであった。
+
+<!--
+Tuples are somewhere in between, as the tuple template is clearly a general utility, but the library introduces quite a lot of names in addition to just the tuple template. 
+-->
+タプルはそのどちらとも決めがたい。tupleテンプレートは明らかに汎用的なユーティリティであるが、ライブラリは他にとても多くの名前を、ただtupleテンプレートのために導入する。
+
+<!--
+Tuples were originally under a subnamespace.
+As a result of the discussion, tuple definitions were moved directly under the <code>boost</code> namespace.
+As a result of a continued discussion, the subnamespace was reintroduced.
+The final (I truly hope so) solution is now to have all definitions in namespace <code>::boost::tuples</code>, and the most common names in the <code>::boost</code> namespace as well. 
+-->
+タプルは最初は入れ子の名前空間のもとにあった。
+議論の結果、タプルの定義は<code>boost</code>の直下に移された。
+さらに継続した議論の結果、入れ子の名前空間が再び導入された。
+最終的な(真剣にそう願う)解答は、今や、全ての定義を名前空間<code>::boost::tuples</code>に置き、最もよく使われる名前を、<code>::boost</code>名前空間にも同様に置こうというものである。
+
+<!--
+This is accomplished with using declarations (suggested by Dave Abrahams):
+<code><pre>namespace boost {
+  namespace tuples {
+      ...      
+    // All library code
+      ...
+  }
+  using tuples::tuple; 
+  using tuples::make_tuple;
+  using tuples::tie;
+  using tuples::get;
+}
+</pre></code>
+
+-->
+これはusing宣言によって実現された(Dave Abrahamsの提案による):
+<code><pre>namespace boost {
+  namespace tuples {
+      ...      
+    // 全てのライブラリ コード
+      ...
+  }
+  using tuples::tuple; 
+  using tuples::make_tuple;
+  using tuples::tie;
+  using tuples::get;
+}
+</pre></code>
+
+<!--
+With this arrangement, tuple creation with direct constructor calls, <code>make_tuple</code> or <code>tie</code> functions do not need the namespace qualifier.
+Further, all functions that manipulate tuples are found with Koenig-lookup.
+The only exceptions are the <code>get&lt;N&gt;</code> functions, which are always called with an explicitly qualified template argument, and thus Koenig-lookup does not apply.
+Therefore, get is lifted to <code>::boost</code> namespace with a using declaration.
+Hence, the interface for an application programmer is in practice under the namespace <code>::boost</code>.
+</p>
+-->
+この配置によって、コンストラクタによる、または<code>make_tuple</code>あるいは<code>tie</code>関数によるタプル生成には、名前空間限定子が不要になる。
+さらに、タプルを操作する全ての関数はKoenig-lookupで検出される。
+唯一の例外は、常に明示的なテンプレート引数とともに呼び出されるため、Koenig-lookupが適用されない<code>get&lt;N&gt;</code>関数である。
+そこで、getはusing宣言によって<code>::boost</code>名前空間に持ち上げられた。
+こうして、アプリケーション プログラマのためのインタフェイスだけが、実際に名前空間<code>::boost</code>のもとにあることになった。
+</p>
+<!--
+<p>
+The other names, forming an interface for library writers (cons lists, metafunctions manipulating cons lists, ...) remain in the subnamespace <code>::boost::tuples</code>.
+Note, that the names <code>ignore</code>, <code>set_open</code>, <code>set_close</code> and <code>set_delimiter</code> are considered to be part of the application programmer's interface, but are still not under <code>boost</code> namespace. 
+The reason being the danger for name clashes for these common names.
+Further, the usage of these features is probably not very frequent.
+</p>
+-->
+<p>
+その他の名前、ライブラリ作者のためのインタフェイス(consリスト、consリストを操作するメタ関数、...)は入れ子の名前空間<code>::boost::tuples</code>に残された。
+名前<code>ignore</code>、<code>set_open</code>、<code>set_close</code>および<code>set_delimiter</code>はアプリケーション プログラマのインタフェイスに含まれるものと考えられるが、<code>boost</code>名前空間には入っていないことに注意されたい。
+その理由は、ありがちな命名なので名前が衝突する危険があるためである。それに、たぶん、これらはそう頻繁には使われないだろう。
+</p>
+
+<!--
+<h4>For those who are really interested in namespaces</h4>
+-->
+<h4>名前空間に魅せられた者たちへ</h4>
+
+<!--
+<p>
+The subnamespace name <i>tuples</i> raised some discussion.
+The rationale for not using the most natural name 'tuple' is to avoid having an identical name with the tuple template. 
+Namespace names are, however, not generally in plural form in boost libraries. 
+First, no real trouble was reported for using the same name for a namespace and a class and we considered changing the name 'tuples' to 'tuple'.
+But we found some trouble after all.
+Both gcc and edg compilers reject using declarations where the namespace and class names are identical:
+-->
+<p>
+入れ子の名前空間名<i>tuples</i>は多少の議論を惹き起こした。
+最も自然な命名である'tuple'を使わなかった理論的根拠は、tupleテンプレートと同一の名前を持つことを避けたからである。
+しかし、boost librariesでは、名前空間名は一般に複数形ではない。
+最初は、名前空間とクラスに同じ名前を使っても、深刻なトラブルは報告されなかったので、'tuples'を'tuple'に変えようかとも考えた。
+しかし結局トラブルが見つかった。
+gccとedgコンパイラが、名前空間名とクラス名が同一の場合、using宣言を拒絶したのである:
+
+<code><pre>namespace boost {
+  namespace tuple {
+    ... tie(...);
+    class tuple; 
+&nbsp;     ...
+  }
+  using tuple::tie; // ok
+  using tuple::tuple; // error
+    ...
+}
+</pre></code>
+
+<!--
+Note, however, that a corresponding using declaration in the global namespace seems to be ok: 
+-->
+とはいえ、グローバル名前空間では同様のusing宣言はokらしい:
+
+<code><pre>
+using boost::tuple::tuple; // ok;
+</pre></code>
+
+<!--
+<h2>The end mark of the cons list (nil, null_type, ...)</h2>
+-->
+<h2>consリストの終端マーク(nil, null_type, ...)</h2>
+
+<!--
+<p>
+Tuples are internally represented as <code>cons</code> lists:
+
+<code><pre>tuple&lt;int, int&gt;
+</pre></code> 
+inherits from 
+<code><pre>cons&lt;int, cons&lt;int, null_type&gt; &gt;
+</code></pre>
+
+<code>null_type</code> is the end mark of the list. Original proposition was <code>nil</code>, but the name is used in MacOS, and might have caused problems, so <code>null_type</code> was chosen instead.
+Other names considered were <i>null_t</i> and <i>unit</i> (the empty tuple type in SML).
+-->
+<p>
+タプルは内部的には<code>cons</code>リストとして表現されている:
+
+<code><pre>tuple&lt;int, int&gt;
+</pre></code> 
+は
+<code><pre>cons&lt;int, cons&lt;int, null_type&gt; &gt;
+</code></pre>
+を継承している。
+
+<code>null_type</code>はリストの終端を示すマークである。最初の案では<code>nil</code>であったが、この名前はMacOSで使われており、問題を起こすことが予想されたので、代わりに<code>null_type</code>が選ばれた。
+他には<i>null_t</i>および<i>unit</i>(SMLにおける空タプル型)も考慮の対象となった。
+<p>
+<!--
+Note that <code>null_type</code> is the internal representation of an empty tuple: <code>tuple&lt;&gt;</code> inherits from <code>null_type</code>.
+</p>
+-->
+<code>null_type</code>は空タプルの内部表現である: <code>tuple&lt;&gt;</code>は<code>null_type</code>から派生している。
+</p>
+
+<!--
+<h2>Element indexing</h2>
+-->
+<h2>要素のインデックス</h2>
+
+<!--
+<p>
+Whether to use 0- or 1-based indexing was discussed more than thoroughly, and the following observations were made:
+
+<ul>
+<li> 0-based indexing is 'the C++ way' and used with arrays etc.</li>
+<li> 1-based 'name like' indexing exists as well, eg. <code>bind1st</code>, <code>bind2nd</code>, <code>pair::first</code>, etc.</li>
+</ul>
+Tuple access with the syntax <code>get&lt;N&gt;(a)</code>, or <code>a.get&lt;N&gt;()</code> (where <code>a</code> is a tuple and <code>N</code> an index), was considered to be of the first category, hence, the index of the first element in a tuple is 0.
+-->
+<p>
+要素のインデックスを0から始めるか1からにするかは、徹底的のさらに上をゆく議論がなされ、次の所見が得られた:
+
+<ul>
+<li> 0-ベースのインデックスは'C++らしい'。配列などで前例がある。</li>
+<li> 1-ベースの'name like'インデックスもまた前例がある。例えば<code>bind1st</code>, <code>bind2nd</code>, <code>pair::first</code>など。</li>
+</ul>
+<code>get&lt;N&gt;(a)</code>または<code>a.get&lt;N&gt;()</code>(<code>a</code>はタプルで、<code>N</code>はインデックスである)のシンタックスでタプル要素にアクセスするのは、前者の種類に属すると考えられる。そこで、最初の要素のインデックスは0とされた。
+
+<!--
+<p>
+A suggestion to provide 1-based 'name like' indexing with constants like <code>_1st</code>, <code>_2nd</code>, <code>_3rd</code>, ... was made.
+By suitably chosen constant types, this would allow alternative syntaxes:
+-->
+<p>
+1-ベースの'name like'インデックスを、<code>_1st</code>, <code>_2nd</code>, <code>_3rd</code>, ...のような定数を使って提供しようという提案もなされた。
+定数に適切な型を選べば、こんな代替構文も可能になるだろう:
+
+<code><pre>a.get&lt;0&gt;() == a.get(_1st) == a[_1st] == a(_1st);
+</pre></code>
+
+<!--
+We chose not to provide more than one indexing method for the following reasons:
+<ul>
+<li>0-based indexing might not please everyone, but once its fixed, it is less confusing than having two different methods (would anyone want such constants for arrays?).</li>
+<li>Adding the other indexing scheme doesn't really provide anything new (like a new feature) to the user of the library.</li>
+<li>C++ variable and constant naming rules don't give many possibilities for defining short and nice index constants (like <code>_1st</code>, ...). 
+Let the binding and lambda libraries use these for a better purpose.</li>
+<li>The access syntax <code>a[_1st]</code> (or <code>a(_1st)</code>) is appealing, and almost made us add the index constants after all. However, 0-based subscripting is so deep in C++, that we had a fear for confusion.</li>
+<li>
+Such constants are easy to add.
+</li>
+</ul>
+-->
+だが、0-ベース以外のインデックスを提供するのはやめることにした。次の理由による:
+<ul>
+<li>0-ベースのインデックスは、全員を満足させないだろうが、一度決定されれば、2種類のインデックスを持った場合より混乱は少ないだろう(配列のためにこのような定数を望むものがいるだろうか?)。</li>
+<li>他の種類のインデックスを追加しても、ライブラリの利用者に、本当に新しい何か(新機能とか)を提供することにはならない。</li>
+<li>C++の変数と定数の命名規則では、短くて適切なインデックス用の定数(<code>_1st</code>, ...のような)を定義する余地は少ない。
+それらは、bindingやlambdaライブラリに譲り、より良い用途に使ってもらおう。</li>
+<li><code>a[_1st]</code>(または<code>a(_1st)</code>)構文は魅力的で、もう少しで我々にインデックス用の定数を追加させるところだった。しかし、0-ペースの添字はC++に深く深く根ざしている。我々は混乱を恐れた。</li>
+<li>こんな定数、追加しようと思えばいつでもできる。</li>
+</ul>
+
+<!--
+<h2>Tuple comparison</h2>
+-->
+<h2>タプルの比較</h2>
+
+<!--
+The comparison operator implements lexicographical order. 
+Other orderings were considered, mainly dominance (<i>a &lt; b iff for each i a(i) < b(i)</i>). 
+Our belief is, that lexicographical ordering, though not mathematically the most natural one, is the most frequently needed ordering in everyday programming.
+-->
+比較演算子は辞書的順序を実装する。
+他の順序付け、主にdominance (<i>a &lt; b iff for each i a(i) &lt; b(i)</i>)も考慮された。
+我々は、辞書的順序は、最も自然な数学的順序付けではないが、日々のプログラミングで最も頻繁に必要とされると信じている。
+
+<!--
+<h2>Streaming</h2>
+-->
+<h2>ストリーム化</h2>
+
+<!--
+<p>
+The characters specified with tuple stream manipulators are stored within the space allocated by <code>ios_base::xalloc</code>, which allocates storage for <code>long</code> type objects.
+<code>static_cast</code> is used in casting between <code>long</code> and the stream's character type. 
+Streams that have character types not convertible back and forth to long thus fail to compile.
+-->
+<p>
+タプルのストリーム マニピュレータに設定された文字は、<code>ios_base::xalloc</code>によって確保された<code>long</code>型のオブジェクト用の記憶域に格納される。
+<code>long</code>とストリームの文字型との間の変換には<code>static_cast</code>が使われる。
+従って、longと相互に変換できない文字型を持つストリームでは、コンパイルに失敗する。
+
+<!--
+This may be revisited at some point. The two possible solutions are:
+<ul>
+<li>Allow only plain <code>char</code> types as the tuple delimiters and use <code>widen</code> and <code>narrow</code> to convert between the real character type of the stream. 
+This would always compile, but some calls to set manipulators might result in a different
+  character than expected (some default character).</li>
+<li>Allocate enough space to hold the real character type of the stream. 
+This means memory for holding the delimiter characters must be allocated separately, and that pointers to this memory are stored in the space allocated with <code>ios_base::xalloc</code>.
+Any volunteers?</li>
+</ul>
+-->
+この問題はいつか再考されよう。可能な解決が二つある:
+<ul>
+<li>通常の<code>char</code>型のみをタプルの区切り文字として認め、ストリームの文字型との間の変換に<code>widen</code>と<code>narrow</code>を使う。
+これは常にコンパイルされるだろうが、一部のマニピュレータ呼び出しで、(数個のデフォルトの文字が)期待したのと違う字になるかもしれない。</li>
+<li>ストリームの文字型を格納するのに十分な領域を確保する。この意味するところは、区切り文字を保持するメモリを別に確保して、それへのポインタを<code>ios_base::xalloc</code>で確保した空間に入れるということである。
+誰かやってくんない?</li>
+</ul>
+
+<A href="tuple_users_guide.html">Back to the user's guide</A>
+<hr><p>&copy; Copyright Jaakko J&auml;rvi 2001. 
+
+<p>Japanese Translation Copyright (C) 2003 Yoshinori Tagawa.
+オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の 複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」 に提供されており、いかなる明示的、暗黙的保証も行わない。また、 いかなる目的に対しても、その利用が適していることを関知しない。</p>
+</body>
+</html>
+

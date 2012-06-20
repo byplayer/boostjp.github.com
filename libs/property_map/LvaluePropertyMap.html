@@ -1,0 +1,162 @@
+<HTML>
+<!--
+  -- Copyright (c) Jeremy Siek 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  Silicon Graphics makes no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<!--LvaluePropertyMap-->
+<Title>LvaluePropertyMap(左辺値プロパティマップ)</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+	ALINK="#ff0000"> 
+<IMG SRC="../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+<H2><A NAME="concept:LvaluePropertyMap"></A>
+<!--LvaluePropertyMap-->LvaluePropertyMap(左辺値プロパティマップ)
+</H2>
+
+<!--The LvaluePropertyMap provides an interface for accessing a
+reference to a property object (instead of a copy of the object as in
+the <TT>get()</TT> function required by <a
+href="./ReadablePropertyMap.html">ReadablePropertyMap</a>). An
+LvaluePropertyMap can be <I>mutable</I> or
+<I>non-mutable</I>. The mutable LvaluePropertyMap returns a
+reference whereas the non-mutable returns a const reference.
+-->
+LvaluePropertyMap(左辺値プロパティマップ)は、プロパティオブジェクトへの参照を取得するためのインターフェースを提供する。(<a href="./ReadablePropertyMap.html">ReadablePropertyMap</a>が必要とする<TT>get()</TT>関数のようにオブジェクトの複製を返すことはない。) LvaluePropertyMapは、<I>mutable</I>であってもよいし、<I>non-mutable</I>であってもよい。mutableなLvaluePropertyMapは、参照を返すのに対し、mutableでない場合は、constの参照を返す。
+
+<H3>下記のクラスの発展型</H3>
+
+<a href="./ReadablePropertyMap.html">ReadablePropertyMap</a>
+(mutableでない場合) もしくは、<a href="./ReadWritePropertyMap.html">ReadWritePropertyMap</a>(mutableな場合)
+
+<h3><!--Notation-->記法</h3>
+
+<Table>
+<TR>
+<TD><tt>PMap</tt></TD>
+<TD><!--A type that is a model of LvaluePropertyMap.-->LvaluePropertyMapのモデルである型</TD>
+</TR>
+<TR>
+<TD><tt>pmap</tt></TD>
+<TD><!--An object of type <tt>PMap</tt>.--><tt>PMap</tt>型のオブジェクト</td>
+</TR>
+<TR>
+<TD><tt>key</tt></TD>
+<TD><!--An object of type <tt>boost::property_traits&lt;PMap&gt;::key_type</tt>.-->
+<tt>boost::property_traits&lt;PMap&gt;::key_type</tt>型のオブジェクト</td>
+</TR>
+
+</table>
+
+
+<h3><!--Associated Types-->関連型</h3>
+
+<table border>
+
+<tr>
+<td><!--Reference Type-->参照型(Reference Type)</td>
+<td><TT>boost::property_traits&lt;PMap&gt;::reference</TT></td> 
+<td>
+<!--The reference type, which must be a reference or const reference to
+the value typeof the property map.-->
+参照型。プロパティマップの値型への参照か、constな参照でなければならない。
+</td>
+</tr>
+
+<tr>
+<td><!--Property Map Category -->プロパティマップカテゴリ
+<td><TT>boost::property_traits&lt;PMap&gt;::category</TT></td> 
+<td>
+<!--The category of the property: a type convertible to
+<TT>boost::lvalue_property_map_tag</TT>.-->
+プロパティのカテゴリ: <TT>boost::lvalue_property_map_tag</TT>に変換可能である。
+
+</td>
+</tr>
+
+</table>
+
+<h3><!--Valid Expressions-->妥当な表式</h3>
+
+<table border>
+<tr>
+<th><!--Name-->名前</th><th><!--Expression-->表現</th><th><!--Return Type-->戻り値型</th><th><!--Description-->説明</th>
+</tr>
+
+
+<tr>
+<td><!--Access Property Value -->プロパティ値へのアクセス</td>
+<TD><TT>pmap[key]</TT></TD>
+<TD>
+<TT>
+<!--value_type&amp;</TT> for mutable, <TT>const value_type&amp;</TT>
+otherwise.-->
+value_type&amp;</TT>(mutableな場合), <TT>const value_type&amp;</TT>
+(それ以外の場合)
+</TD>
+<TD><!--Obtain a reference to the property identified by <TT>key</TT>.-->
+<TT>key</TT>により識別されるプロパティへのリファレンスを取得する。
+</TD>
+</TR>
+</TABLE>
+
+<h3><!--Concep Checking Class-->コンセプトチェッククラス(Concept Checking Class)</h3>
+
+<pre>  template &lt;class PMap, class Key&gt;
+  struct LvaluePropertyMapConcept
+  {
+    typedef typename property_traits&lt;PMap&gt;::category Category;
+    typedef boost::lvalue_property_map_tag LvalueTag;
+    typedef const typename property_traits&lt;PMap&gt;::value_type&amp; const_reference;
+    void constraints() {
+      function_requires&lt; ReadWritePropertyMapConcept&lt;PMap, Key&gt; &gt;();
+      function_requires&lt; ConvertibleConcept&lt;Category, LvalueTag&gt; &gt;();
+
+      const_reference ref = pmap[k];
+    }
+    PMap pmap;
+    Key k;
+  };
+
+  template &lt;class PMap, class Key&gt;
+  struct Mutable_LvaluePropertyMapConcept
+  {
+    typedef typename property_traits&lt;PMap&gt;::category Category;
+    typedef boost::lvalue_property_map_tag LvalueTag;
+    typedef typename property_traits&lt;PMap&gt;::value_type&amp; reference;
+    void constraints() { 
+      function_requires&lt; ReadWritePropertyMapConcept&lt;PMap, Key&gt; &gt;();
+      function_requires&lt;ConvertibleConcept&lt;Category, LvalueTag&gt; &gt;();
+
+      reference ref = pmap[k];
+    }
+    PMap pmap;
+    Key k;
+  };</pre>
+
+<h3><!--See Also-->参照</h3>
+
+<a href="./property_map.html">Property map concepts</a>
+
+
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000</TD><TD>
+<a HREF="../../people/jeremy_siek.htm">Jeremy Siek</a>, Univ.of Notre Dame (<A HREF="mailto:jsiek@lsc.nd.edu">jsiek@lsc.nd.edu</A>)
+</TD></TR></TABLE>
+
+</BODY>
+</HTML> 

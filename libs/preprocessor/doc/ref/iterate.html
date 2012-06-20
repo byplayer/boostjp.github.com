@@ -1,0 +1,78 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=EUC-JP"><!--*- encoding: euc-jp -*-->
+	<title>BOOST_PP_ITERATE</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">
+</head>
+<body>
+	<div style="margin-left:  0px;">
+		<b>BOOST_PP_ITERATE</b> マクロは <i>ファイル繰り返し</i> を開始する。
+	</div>
+	<h4>Usage</h4>
+		<div class="code">
+			#include <b>BOOST_PP_ITERATE</b>()
+		</div>
+	<h4>Remarks</h4>
+		<div>
+		このマクロへの引数は <i>外部で名前付けされた引数</i> として渡される。
+		これには二つの方法がある。
+		ひとつは <b>BOOST_PP_FILENAME_<i>x</i></b> によるもので、
+		ひとつは <b>BOOST_PP_ITERATION_PARAMS_<i>x</i></b> に寄るものである。
+		</div>
+		<div>
+		<i>ファイル繰り返し</i> を行うには3つの情報が必要である。
+		まず、繰り返されるファイルの名前であり、
+		これは <b>BOOST_PP_FILENAME_<i>x</i></b> <i>又は</i>
+		<b>BOOST_PP_ITERATION_PARAMS_<i>x</i></b> の一部として渡される。
+		<i>ファイル繰り返し</i> 機構は、下限から上限まで (これが、2番目と3番目の 
+		<i>必要とされる</i> パラメータである) の範囲の反復値で、
+		このファイルを繰り返しインクルードする。
+		これらの上限と下限は、 <b>BOOST_PP_ITERATION_LIMITS</b> <i>又は</i>
+		<b>BOOST_PP_ITERATION_PARAMS_<i>x</i></b> の一部として渡される。
+		</div>
+		<div>
+		省略可能な4番目のパラメータを渡すことが出来る。これは繰り返しに関するフラグである。
+		これらのフラグは基本的には、ある繰り返しを、同じファイルの別の繰り返しから区別するのに役立つ。
+		このパラメータは <b>BOOST_PP_ITERATION_PARAMS_<i>x</i></b> によってのみ渡すことが出来る。
+		</div>
+		<div>
+		<i>ファイル繰り返し</i> の進行中は、 <b>BOOST_PP_IS_ITERATING</b> が <i>1</i> に定義される。
+		</div>
+	<h4>See Also</h4>
+		<ul>
+			<li><a href="filename_x.html">BOOST_PP_FILENAME_<i>x</i></a></li>
+			<li><a href="is_iterating.html">BOOST_PP_IS_ITERATING</a></li>
+			<li><a href="iteration_limits.html">BOOST_PP_ITERATION_LIMITS</a></li>
+			<li><a href="iteration_params_x.html">BOOST_PP_ITERATION_PARAMS_<i>x</i></a></li>
+		</ul>
+	<h4>Requirements</h4>
+		<div>
+			<b>Header:</b> &nbsp;<a href="../headers/iteration/iterate.hpp.html">&lt;boost/preprocessor/iteration/iterate.hpp&gt;</a>
+		</div>
+	<h4>Sample Code</h4>
+<div><pre>
+// file.h
+#if !<a href="is_iterating.html">BOOST_PP_IS_ITERATING</a>
+
+   #ifndef FILE_H_
+   #define FILE_H_
+
+   #include &lt;<a href="../headers/iteration/iterate.hpp.html">boost/preprocessor/iteration/iterate.hpp</a>&gt;
+
+   #define <a href="iteration_params_x.html">BOOST_PP_ITERATION_PARAMS_1</a> (3, (1, 10, "file.h"))
+   #include <a href="iterate.html">BOOST_PP_ITERATE</a>()
+
+   #define <a href="filename_x.html">BOOST_PP_FILENAME_1</a> "file.h"
+   #define <a href="iteration_limits.html">BOOST_PP_ITERATION_LIMITS</a> (11, 20)
+   #include <a href="iterate.html">BOOST_PP_ITERATE</a>()
+
+   #endif
+
+#else
+
+   current iteration value is <a href="iteration.html">BOOST_PP_ITERATION</a>()
+
+#endif
+</pre></div>
+</body>
+</html>

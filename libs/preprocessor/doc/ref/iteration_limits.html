@@ -1,0 +1,52 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=EUC-JP"><!--*- encoding: euc-jp -*-->
+	<title>BOOST_PP_ITERATION_LIMITS</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">
+	
+</head>
+<body>
+	<div style="margin-left:  0px;">
+		<b>BOOST_PP_ITERATION_LIMITS</b> マクロは <i>BOOST_PP_ITERATE</i>
+		で利用される ユーザ定義の <i>名前付けされた外部引数</i> である。
+		これは <i>ファイル繰り返し</i> の下限と上限を表す。
+	</div>
+	<h4>Usage</h4>
+		<div class="code">
+			#define <b>BOOST_PP_ITERATION_LIMITS</b> (<i>start</i>, <i>finish</i>)
+		</div>
+	<h4>Arguments</h4>
+		<dl>
+			<dt>start</dt>
+			<dd>
+			<i>ファイル繰り返し</i> の下限(この数を含む)。
+			有効な値の範囲は <i>0</i> から <b>BOOST_PP_LIMIT_ITERATION</b> までである。
+			</dd>
+			<dt>finish</dt>
+			<dd>
+			<i>ファイル繰り返し</i> の上限(この数を含む)。				
+			有効な値の範囲は <i>0</i> から <b>BOOST_PP_LIMIT_ITERATION</b> までである。
+			</dd>
+		</dl>
+	<h4>Remarks</h4>
+		<div>
+		マクロ識別子の後に空白文字があることに注意せよ。
+		</div>
+		<div>
+		このマクロは、 <b>BOOST_PP_ITERATE</b> に引数を渡す2番目の方法の一部である。
+		他の部分は、 <b>BOOST_PP_FILENAME_<i>x</i></b> である。
+		<i>start</i> と <i>finish</i> は両方とも <i>評価済みのパラメータ</i>である。
+		つまり、これらがただの数式であることを意味する。
+		</div>
+		<div>
+		このマクロは <b>BOOST_PP_ITERATE</b> が呼ばれたら、
+		再び利用するために自動的に未定義にされる。
+		</div>
+	<h4>See Also</h4>
+		<ul>
+			<li><a href="filename_x.html">BOOST_PP_FILENAME_<i>x</i></a></li>
+			<li><a href="iterate.html">BOOST_PP_ITERATE</a></li>
+			<li><a href="limit_iteration.html">BOOST_PP_LIMIT_ITERATION</a></li>
+		</ul>
+</body>
+</html>

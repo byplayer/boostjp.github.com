@@ -1,0 +1,54 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+	<title>BOOST_PP_APPLY</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">
+</head>
+<body>
+	<div style="margin-left:  0px;">
+		<b>BOOST_PP_APPLY</b> マクロは、その引数と空文字との違いを吸収する。
+	</div>
+	<h4>Usage</h4>
+		<div class="code">
+			<b>BOOST_PP_APPLY</b>(<i>x</i>)
+		</div>
+	<h4>Arguments</h4>
+		<dl>
+			<dt>x</dt>
+			<dd>
+				取り出された引数。
+				この引数は <b>BOOST_PP_NIL</b> か、または <i>(arg)</i> や <i>((a, b))</i> のような一要素の<i>タプル</i>である。
+			</dd>
+		</dl>
+	<h4>Remarks</h4>
+		<div>
+			<i>x</i> が <b>BOOST_PP_NIL</b> ならば、このマクロは空文字に展開される。
+			<i>x</i> が一要素の<i>タプル</i>ならば、その<i>タプル</i>の内容に展開される。
+		</div>
+	<h4>See Also</h4>
+		<ul>
+			<li><a href="nil.html">BOOST_PP_NIL</a></li>
+		</ul>
+	<h4>Requirements</h4>
+		<div>
+			<b>Header:</b> &nbsp;<a href="../headers/facilities/apply.hpp.html">&lt;boost/preprocessor/facilities/apply.hpp&gt;</a>
+		</div>
+	<h4>Sample Code</h4>
+<div><pre>
+#include &lt;<a href="../headers/facilities/apply.hpp.html">boost/preprocessor/facilities/apply.hpp</a>&gt;
+#include &lt;<a href="../headers/tuple/elem.hpp.html">boost/preprocessor/tuple/elem.hpp</a>&gt;
+
+#define CV(i) \
+   <a href="apply.html">BOOST_PP_APPLY</a>( \
+      <a href="tuple_elem.html">BOOST_PP_TUPLE_ELEM</a>( \
+         4, i, \
+         (<a href="nil.html">BOOST_PP_NIL</a>, (const), (volatile), (const volatile)) \
+      ) \
+   ) \
+   /**/
+
+CV(0) // 無くなる
+CV(1) // const に展開される
+</pre></div>
+</body>
+</html>

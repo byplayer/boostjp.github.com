@@ -1,0 +1,151 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=EUC-JP"><!--*- encoding: euc-jp -*-->
+	<title>BOOST_PP_FOR_r</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">
+</head>
+<body>
+	<div style="margin-left:  0px;">
+		<b>BOOST_PP_FOR_<i>r</i></b> マクロは <b>BOOST_PP_FOR</b> の繰り返しの構築への再入を表す。
+	</div>
+	<h4>Usage</h4>
+		<div class="code">
+			<b>BOOST_PP_FOR_</b> ## <i>r</i>(<i>state</i>, <i>pred</i>, <i>op</i>, <i>macro</i>)
+		</div>
+	<h4>Arguments</h4>
+		<dl>
+			<dt>r</dt>
+			<dd>
+			利用可能な次の <b>BOOST_PP_FOR</b> の繰り返し。
+			</dd>
+			<dt>state</dt>
+			<dd>
+			初期状態。
+			</dd>
+			<dt>pred</dt>
+			<dd>
+			<i>pred</i>(<i>r</i>, <i>state</i>) という形の2項述語。
+			このマクロは <i>0</i> から <b>BOOST_PP_LIMIT_MAG</b> 
+			までの範囲の整数値に展開されなければならない。
+			<b>BOOST_PP_FOR</b> はこの述語が非0を返す間、 <i>macro</i> を繰り返し展開する。
+			このマクロは利用可能な次の <b>BOOST_PP_FOR</b> の繰り返しと、
+			現在の <i>state</i> と共に呼び出される。
+			</dd>
+			<dt>op</dt>
+			<dd>
+			<i>op</i>(<i>r</i>, <i>state</i>) という形の2項演算。
+			この演算は <b>BOOST_PP_FOR</b> によって、
+			利用可能な次の <b>BOOST_PP_FOR</b> の繰り返しと、現在の <i>state</i> と共に展開される。
+			このマクロは <i>pred</i> が <i>0</i> を返すまで、
+			新しい <i>state</i> を作りながら、 <i>state</i> に繰り返し適用される。
+			</dd>
+			<dt>macro</dt>
+			<dd>
+			<i>macro</i>(<i>r</i>, <i>state</i>) という形の2項演算。
+			このマクロは <b>BOOST_PP_FOR</b> によって、
+			利用可能な次の <b>BOOST_PP_FOR</b> の繰り返しと、現在の <i>state</i> と共に展開される。
+			このマクロは <b>BOOST_PP_FOR</b> によって、
+			<i>pred</i> が <i>0</i> を返すまで繰り返される。
+			</dd>
+		</dl>
+	<h4>Remarks</h4>
+		<div>
+		このマクロは次のシーケンスに展開される:
+			<div>
+				<i>macro</i>(<i>r</i>, <i>state</i>) <i>macro</i>(<i>r</i>, <i>op</i>(<i>r</i>, <i>state</i>)) ... <i>macro</i>(<i>r</i>, <i>op</i>(<i>r</i>, ... <i>op</i>(<i>r</i>, <i>state</i>) ... ))
+			</div>
+		</div>
+		<div>
+		プリプロセッサのトークン解析演算ではなく <b>BOOST_PP_CAT</b> 
+		での文字列連結を使う必要があるときが、あるだろう。
+		これは、 <i>r</i> の値がマクロ呼び出しそのものであるようなときに起こる。
+		これは、展開の遅延を必要とする。そのような状況での構文は、次のようになる:
+			<div>
+				<b>BOOST_PP_CAT</b>(<b>BOOST_PP_FOR_</b>, <i>r</i>)(<i>state</i>, <i>pred</i>, <i>op</i>, <i>macro</i>)
+			</div>
+		</div>
+	<h4>See Also</h4>
+		<ul>
+			<li><a href="cat.html">BOOST_PP_CAT</a></li>
+			<li><a href="for.html">BOOST_PP_FOR</a></li>
+			<li><a href="limit_mag.html">BOOST_PP_LIMIT_MAG</a></li>
+		</ul>
+	<h4>Requirements</h4>
+		<div>
+			<b>Header:</b> &nbsp;<a href="../headers/repetition/for.hpp.html">&lt;boost/preprocessor/repetition/for.hpp&gt;</a>
+		</div>
+	<h4>Sample Code</h4>
+<div><pre>
+#include &lt;<a href="../headers/arithmetic/dec.hpp.html">boost/preprocessor/arithmetic/dec.hpp</a>&gt;
+#include &lt;<a href="../headers/arithmetic/inc.hpp.html">boost/preprocessor/arithmetic/inc.hpp</a>&gt;
+#include &lt;<a href="../headers/comparison/not_equal.hpp.html">boost/preprocessor/comparison/not_equal.hpp</a>&gt;
+#include &lt;<a href="../headers/punctuation/comma_if.hpp.html">boost/preprocessor/punctuation/comma_if.hpp</a>&gt;
+#include &lt;<a href="../headers/repetition/for.hpp.html">boost/preprocessor/repetition/for.hpp</a>&gt;
+#include &lt;<a href="../headers/tuple/elem.hpp.html">boost/preprocessor/tuple/elem.hpp</a>&gt;
+
+#define PRED(r, state) \
+   <a href="not_equal.html">BOOST_PP_NOT_EQUAL</a>( \
+      <a href="tuple_elem.html">BOOST_PP_TUPLE_ELEM</a>(4, 0, state), \
+      <a href="inc.html">BOOST_PP_INC</a>( \
+         <a href="tuple_elem.html">BOOST_PP_TUPLE_ELEM</a>(4, 1, state) \
+      ) \
+   ) \
+   /**/
+
+#define OP(r, state) \
+   ( \
+      <a href="inc.html">BOOST_PP_INC</a>( \
+         <a href="tuple_elem.html">BOOST_PP_TUPLE_ELEM</a>(4, 0, state) \
+      ), \
+      <a href="tuple_elem.html">BOOST_PP_TUPLE_ELEM</a>(4, 1, state), \
+      <a href="tuple_elem.html">BOOST_PP_TUPLE_ELEM</a>(4, 2, state), \
+      <a href="inc.html">BOOST_PP_INC</a>( \
+         <a href="tuple_elem.html">BOOST_PP_TUPLE_ELEM</a>(4, 3, state) \
+      ) \
+   ) \
+   /**/
+
+#define MACRO(r, state) \
+   <a href="comma_if.html">BOOST_PP_COMMA_IF</a>( \
+      <a href="tuple_elem.html">BOOST_PP_TUPLE_ELEM</a>(4, 3, state) \
+   ) template&lt; \
+      <a href="for_r.html">BOOST_PP_FOR_</a> ## r( \
+         (0, <a href="tuple_elem.html">BOOST_PP_TUPLE_ELEM</a>(4, 0, state), _, 0), \
+         PRED_2, OP, MACRO_2 \
+      ) \
+   &gt; class <a href="cat.html">BOOST_PP_CAT</a>( \
+      <a href="tuple_elem.html">BOOST_PP_TUPLE_ELEM</a>(4, 2, state), \
+      <a href="tuple_elem.html">BOOST_PP_TUPLE_ELEM</a>(4, 0, state) \
+   ) \
+   /**/
+
+#define PRED_2(r, state) \
+   <a href="not_equal.html">BOOST_PP_NOT_EQUAL</a>( \
+      <a href="tuple_elem.html">BOOST_PP_TUPLE_ELEM</a>(4, 0, state), \
+      <a href="tuple_elem.html">BOOST_PP_TUPLE_ELEM</a>(4, 1, state) \
+   ) \
+   /**/
+
+#define MACRO_2(r, state) \
+   <a href="comma_if.html">BOOST_PP_COMMA_IF</a>( \
+      <a href="tuple_elem.html">BOOST_PP_TUPLE_ELEM</a>(4, 0, state) \
+   ) class \
+   /**/
+
+#define TEMPLATE_TEMPLATE(low, high, name) \
+   <a href="for.html">BOOST_PP_FOR</a>( \
+      (low, high, name, 0), \
+      PRED, OP, MACRO \
+   ) \
+   /**/
+
+TEMPLATE_TEMPLATE(2, 4, T)
+/*
+   expands to...
+   template&lt;class, class&gt; class T2,
+   template&lt;class, class, class&gt; class T3,
+   template&lt;class, class, class, class&gt; class T4
+*/
+</pre></div>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+	<title>BOOST_PP_ADD</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">
+</head>
+<body>
+	<div style="margin-left:  0px;">
+		<b>BOOST_PP_ADD</b> マクロは引数の和に展開される。
+	</div>
+	<h4>Usage</h4>
+		<div class="code">
+			<b>BOOST_PP_ADD</b>(<i>x</i>, <i>y</i>)
+		</div>
+	<h4>Arguments</h4>
+		<dl>
+			<dt>x</dt>
+			<dd>
+				演算における一つ目の加数。
+				有効な値の範囲は <i>0</i> から <b>BOOST_PP_LIMIT_MAG</b> まで。
+			</dd>
+			<dt>y</dt>
+			<dd>
+				演算における二つ目の加数。
+				有効な値の範囲は <i>0</i> から <b>BOOST_PP_LIMIT_MAG</b> まで。
+			</dd>
+		</dl>
+	<h4>Remarks</h4>
+		<div>
+		  もし <i>x</i> と <i>y</i> の和が <b>BOOST_PP_LIMIT_MAG</b> よりも大きければ、演算結果は <b>BOOST_PP_LIMIT_MAG</b> に丸められる。
+		</div>
+		<div>
+			以前、このマクロは <b>BOOST_PP_WHILE</b> の中では使えなかったが、
+			現在ではこのような制限はない。
+			しかし、そのような状況では <b>BOOST_PP_ADD_D</b> を用いたほうが効率がよい。
+		</div>
+		<div>
+			<i>x</i> が<i>y</i> より小さいかまたは同じとき、このマクロは最も効率的である。
+			しかしながら、その効率利得にはマクロ発動に先立って実際に二つの引数を比較するほどの価値はない。
+			言い換えれば、<i>x</i> は二つのオペランドのうち大きい方である可能性が<i>たぶん</i><font color="green">高そうな(逆じゃない?)</font>方であるべきだ。
+		</div>
+	<h4>See Also</h4>
+		<ul>
+			<li><a href="add_d.html">BOOST_PP_ADD_D</a></li>
+			<li><a href="limit_mag.html">BOOST_PP_LIMIT_MAG</a></li>
+		</ul>
+	<h4>Requirements</h4>
+		<div>
+			<b>Header:</b> &nbsp;<a href="../headers/arithmetic/add.hpp.html">&lt;boost/preprocessor/arithmetic/add.hpp&gt;</a>
+		</div>
+	<h4>Sample Code</h4>
+<div><pre>
+#include <a href="../headers/arithmetic/add.hpp.html">&lt;boost/preprocessor/arithmetic/add.hpp&gt;</a>
+
+<a href="add.html">BOOST_PP_ADD</a>(4, 3) // 7 に展開される
+</pre></div>
+</body>
+</html>

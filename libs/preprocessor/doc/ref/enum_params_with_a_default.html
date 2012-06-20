@@ -1,0 +1,72 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+	<title>BOOST_PP_ENUM_PARAMS_WITH_A_DEFAULT</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">
+</head>
+<body>
+	<div style="margin-left:  0px;">
+		<b>BOOST_PP_ENUM_PARAMS_WITH_A_DEFAULT</b> マクロはコンマで区切られた一種類のデフォルト引数付きのパラメータリストを生成する。
+	</div>
+	<h4>Usage</h4>
+		<div class="code">
+			<b>BOOST_PP_ENUM_PARAMS_WITH_A_DEFAULT</b>(<i>count</i>, <i>param</i>, <i>def</i>)
+		</div>
+	<h4>Arguments</h4>
+		<dl>
+			<dt>count</dt>
+			<dd>
+				生成するパラメータの個数。
+				有効な値の範囲は <i>0</i> から <b>BOOST_PP_LIMIT_REPEAT</b> まで。
+			</dd>
+			<dt>param</dt>
+			<dd>
+				パラメータのテキスト部。
+				<b>BOOST_PP_ENUM_PARAMS_WITH_A_DEFAULT</b> は生成したパラメータと <i>0</i> から <i>count</i> - <i>1</i> までの範囲の数字とを結合する。
+			</dd>
+			<dt>def</dt>
+			<dd>
+				全てのパラメータにかかるデフォルト値。
+			</dd>
+		</dl>
+	<h4>Remarks</h4>
+		<div>
+			このマクロはコンマ区切りのシーケンスに展開される:
+			<div>
+				<i>param</i> ## <i>0</i> = <i>def</i>, <i>param</i> ## <i>1</i> = <i>def</i>, ... <i>param</i> ## <i>count</i> - <i>1</i> = <i>def</i>
+			</div>
+		</div>
+		<div>
+			以前、このマクロは <b>BOOST_PP_REPEAT</b> の中で再帰的に使うことは出来なかった。
+			この制限はもう存在しない。ライブラリは自動的に実行可能な次の再帰の深さを発見できるからである。
+		</div>
+		<div>
+			このマクロは廃止された。
+			これは後方互換性のためにのみ存在する。
+			代わりに <b>BOOST_PP_INTERCEPT</b> を使用した <b>BOOST_PP_ENUM_BINARY_PARAMS</b> を用いよ。
+			<div>
+				<b>BOOST_PP_ENUM_BINARY_PARAMS</b>(<i>count</i>, <i>param</i>, = <i>def</i> <b>BOOST_PP_INTERCEPT</b>)
+			</div>
+		</div>
+	<h4>See Also</h4>
+		<ul>
+			<li><a href="enum_binary_params.html">BOOST_PP_ENUM_BINARY_PARAMS</a></li>
+			<li><a href="intercept.html">BOOST_PP_INTERCEPT</a></li>
+			<li><a href="limit_repeat.html">BOOST_PP_LIMIT_REPEAT</a></li>
+		</ul>
+	<h4>Requirements</h4>
+		<div>
+			<b>Header:</b> &nbsp;<a href="../headers/repetition/enum_params_with_a_default.hpp.html">&lt;boost/preprocessor/repetition/enum_params_with_a_default.hpp&gt;</a>
+		</div>
+	<h4>Sample Code</h4>
+<div><pre>
+#include &lt;<a href="../headers/repetition/enum_params_with_a_default.hpp.html">boost/preprocessor/repetition/enum_params_with_a_default.hpp</a>&gt;
+
+<a href="enum_params_with_a_default.html">BOOST_PP_ENUM_PARAMS_WITH_A_DEFAULT</a>(3, class T, int)
+   // T0 = int, T1 = int, T2 = int に展開される
+
+<a href="enum_binary_params.html">BOOST_PP_ENUM_BINARY_PARAMS</a>(3, class T, = int <a href="intercept.html">BOOST_PP_INTERCEPT</a>)
+   // T0 = int, T1 = int, T2 = int に展開される
+</pre></div>
+</body>
+</html>

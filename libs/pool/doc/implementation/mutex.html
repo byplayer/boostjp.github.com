@@ -1,0 +1,135 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> 
+<HTML>
+<HEAD>
+<TITLE>mutex - Mutex</TITLE>
+<LINK HREF="../pool.css" REL="stylesheet" TYPE="text/css">
+</HEAD>
+<BODY>
+
+<IMG SRC="../../../../c++boost.gif" WIDTH=276 HEIGHT=86 ALT="C++ Boost">
+
+<H1 ALIGN=CENTER>mutex - Mutex</H1>
+
+<P>
+<H2>はじめに</H2>
+
+<P>
+detail/mutex.hpp は OS 提供の mutex 型に対する首尾一貫したインターフェースを提供するいくつかの mutex 型を提供する。
+それらはすべて thread-level mutex であり、プロセス間 mutex はサポートされていない。
+<P>
+<H2>Configuration</H2>
+
+<P>
+このヘッダファイルは、それがどのような種類のシステムに存在しているかを考えようとする。
+Win32 もしくは POSIX + pthread システムについては自身を自動コンフィグする。
+すべての mutex code をもみ消すため、自動コンフィグレーションをバイパスし、このヘッダをインクルードするより前に <SPAN CLASS="code">#define BOOST_NO_MT</SPAN> しなくてはならない。
+単一定義規則(ODR)違反を防ぐため、これはライブラリファイルも含めてあなたのプロジェクトの<STRONG>すべての</STRONG>翻訳単位で定義されていなくてはならない。
+
+<P>
+<H2>梗概</H2>
+
+<PRE CLASS="code">namespace details {
+namespace pool {
+
+// Win32 システムでのみ存在する
+class Win32_mutex
+{
+  private:
+    Win32_mutex(const Win32_mutex &amp;);
+    void operator=(const Win32_mutex &amp;);
+
+  public:
+    Win32_mutex();
+    ~Win32_mutex();
+
+    void lock();
+    void unlock();
+};
+
+// POSIX+pthread システムでのみ存在する
+class pthread_mutex
+{
+  private:
+    pthread_mutex(const pthread_mutex &amp;);
+    void operator=(const pthread_mutex &amp;);
+
+  public:
+    pthread_mutex();
+    ~pthread_mutex();
+
+    void lock();
+    void unlock();
+};
+
+// すべてのシステムに存在する
+class null_mutex
+{
+  private:
+    null_mutex(const null_mutex &amp;);
+    void operator=(const null_mutex &amp;);
+
+  public:
+    null_mutex();
+    ~null_mutex();
+
+    static void lock();
+    static void unlock();
+};
+
+// 上記の型のひとつ
+typedef ... default_mutex;
+
+} // namespace pool
+} // namespace details</PRE>
+
+<P>
+<H2>意味</H2>
+
+<P>
+<TABLE BORDER ALIGN=CENTER>
+<CAPTION><EM>Symbol Table</EM></CAPTION>
+<TR><TH>Symbol<TH>Meaning
+<TR><TD CLASS="code">Mutex<TD>このヘッダで定義されている任意の型
+<TR><TD CLASS="code">t<TD>value of type <SPAN CLASS="code">Mutex</SPAN>
+</TABLE>
+
+<P>
+<TABLE BORDER ALIGN=CENTER>
+<CAPTION><EM><SPAN CLASS="code">mutex</SPAN>が満たすべき要求</EM></CAPTION>
+<TR><TH>Expression<TH>Return Type<TH>Assertion/Note/Pre/Post-Condition
+<TR><TD CLASS="code">m.lock()<TD>not used<TD>mutexをロックする
+<TR><TD CLASS="code">m.unlock()<TD>not used<TD>mutexをアンロックする
+</TABLE>
+
+<P>
+すべての mutex は owned または unowned のいずれかである。
+owned の場合、特定のスレッドに所有されている。
+mutex を&quot;ロック&quot;するとは、その mutex が unowned になるまで待ち、カレントスレッドによって owned された状態にすることを意味する。
+mutex を&quot;アンロック&quot;するとは、カレントスレッドによる所有を放棄すること意味する(カレントスレッドは所有を放棄する mutex を所有していなくては<STRONG>ならない</STRONG>ことに注意)。
+特別な場合として <SPAN CLASS="code">null_mutex</SPAN> は待たれることがない。
+<P>
+<H2>依存性</H2>
+
+<P>
+システムヘッダー <SPAN CLASS="code">&lt;windows.h&gt;</SPAN>、<SPAN CLASS="code">&lt;unistd.h&gt;</SPAN>、および/または <SPAN CLASS="code">&lt;pthread.h&gt;</SPAN> をインクルードすることがある。
+
+<P>
+<H2>将来の方向性</H2>
+
+<P>
+このヘッダーはいつかは Boost multithreading library で置き換えられるであろう。
+
+<P>
+<HR>
+
+<P>
+Copyright &copy; 2000, 2001 Stephen Cleary (<A HREF="mailto:shammah@voyager.net">shammah@voyager.net</A>)
+
+<P>
+This file can be redistributed and/or modified under the terms found in <A HREF="../copyright.html">copyright.html</A>
+
+<P>
+This software and its documentation is provided &quot;as is&quot; without express or implied warranty, and with no claim as to its suitability for any purpose.
+
+</BODY>
+</HTML>

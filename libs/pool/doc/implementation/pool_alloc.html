@@ -1,0 +1,129 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> 
+<HTML>
+<HEAD>
+<TITLE>pool_alloc - Boost Pool Standard Allocators Implementation</TITLE>
+<LINK HREF="../pool.css" REL="stylesheet" TYPE="text/css">
+</HEAD>
+<BODY>
+
+<IMG SRC="../../../../c++boost.gif" WIDTH=276 HEIGHT=86 ALT="C++ Boost">
+
+<H1 ALIGN=CENTER>pool_alloc - Boost Pool Standard Allocators Implementation</H1>
+
+<P>
+<H2>依存性</H2>
+
+<P>
+システムヘッダ<SPAN CLASS="code">&lt;new&gt;</SPAN> と <SPAN CLASS="code">&lt;limits&gt;</SPAN>をインクルードしている。
+
+<P>
+Boostヘッダ<SPAN CLASS="code">&quot;singleton_pool.hpp&quot;</SPAN> (<A HREF="singleton_pool.html">singleton_pool.html</A>を見よ) および <SPAN CLASS="code">&quot;detail/mutex.hpp&quot;</SPAN> (<A HREF="mutex.html">mutex.html</A>を見よ)をインクルードしている。
+<P>
+<H2>梗概</H2>
+
+<PRE CLASS="code">template &lt;typename T,
+    typename UserAllocator = default_user_allocator_new_delete,
+    typename Mutex = details::pool::default_mutex,
+    unsigned NextSize = 32&gt;
+class pool_allocator
+{
+  public:
+    ... // 公開インタフェース
+
+  public: // extensions to public interface
+    typedef Mutex mutex;
+    static const unsigned next_size = NextSize;
+
+    template &lt;typename U&gt;
+    struct rebind
+    {
+      typedef pool_allocator&lt;U, UserAllocator, Mutex, NextSize&gt; other;
+    };
+};
+
+template &lt;typename T,
+    typename UserAllocator = default_user_allocator_new_delete,
+    typename Mutex = details::pool::default_mutex,
+    unsigned NextSize = 32&gt;
+class fast_pool_allocator
+{
+  public:
+    ... // 公開インタフェース
+
+  public: // extensions to public interface
+    typedef Mutex mutex;
+    static const unsigned next_size = NextSize;
+
+    template &lt;typename U&gt;
+    struct rebind
+    {
+      typedef fast_pool_allocator&lt;U, UserAllocator, Mutex, NextSize&gt; other;
+    };
+};</PRE>
+
+<P>
+<H2>公開インタフェースの拡張</H2>
+
+<P>
+<H3>Additional template parameters</H3>
+
+<P>
+<H4 CLASS="code">Mutex</H4>
+
+<P>
+このパラメーターで、ユーザーに基底となるシングルトンプールで使用される同期の型を決定することができる。
+より多くの情報は <A HREF="singleton_pool.html">singleton pool</A> の公開インタフェースの拡張を見よ。
+
+<P>
+<H4 CLASS="code">NextSize</H4>
+
+<P>
+このパラメーターの値は基底となる Pool が生成されるときに渡される。
+より詳しい情報は <A HREF="pool.html">pool</A> の公開インタフェースの拡張を見よ。
+
+<P>
+<H3><SPAN CLASS="code">rebind</SPAN> の修正</H3>
+
+<P>
+構造体 <SPAN CLASS="code">rebind</SPAN> が、追加のテンプレートパラメータの値を保護するために再定義されている。
+<P>
+<H3>追加メンバー</H3>
+
+<P>
+typedef である <SPAN CLASS="code">mutex</SPAN> と静的定数値 <SPAN CLASS="code">next_size</SPAN> はテンプレートパラメータの値 <SPAN CLASS="code">Mutex</SPAN> と <SPAN CLASS="code">NextSize</SPAN> をそれぞれクラス外へ見せる。
+<P>
+<H2>注意事項</H2>
+
+<P>
+多くのよく使われる STL ライブラリがアロケータの使い方でバグを含んでいる。
+具体的に言うと、それらは <SPAN CLASS="code">deallocate</SPAN> 関数にヌルポインタを渡しており、それは標準[20.1.5 Table 32]ではっきりと禁止されている。
+
+PoolAlloc は、それを発見すれば、これらのライブラリのバグ回避する。
+現状でのバグ回避:
+<UL>
+<LI>Borland C++ (Builder and command-line compiler) with default (RogueWave) library, ver. 5 and earlier</LI>
+<LI>STLport (with any compiler), ver. 4.0 and earlier</LI>
+</UL>
+
+<P>
+<H2>将来の方向性</H2>
+
+<P>
+Boost multithreading library が完成すれば、<SPAN CLASS="code">Mutex</SPAN> パラメーターは同様の柔軟性を提供する、そのライブラリーの何かで置き換えられ、実装の詳細からインタフェース仕様へ移されることになるだろう。
+<P>
+<H2><A HREF="../interfaces/pool_alloc.html">Interface Description</A></H2>
+
+<P>
+<HR>
+
+<P>
+Copyright &copy; 2000, 2001 Stephen Cleary (<A HREF="mailto:shammah@voyager.net">shammah@voyager.net</A>)
+
+<P>
+This file can be redistributed and/or modified under the terms found in <A HREF="../copyright.html">copyright.html</A>
+
+<P>
+This software and its documentation is provided &quot;as is&quot; without express or implied warranty, and with no claim as to its suitability for any purpose.
+
+</BODY>
+</HTML>

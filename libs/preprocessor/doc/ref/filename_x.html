@@ -1,0 +1,45 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=EUC-JP"><!--*- encoding: euc-jp -*-->
+	<title>BOOST_PP_FILENAME_x</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">
+</head>
+<body>
+	<div style="margin-left:  0px;">
+		<b>BOOST_PP_FILENAME_<i>x</i></b> マクロは <b>BOOST_PP_ITERATE</b> で使われる、
+		ユーザ定義の <i>名前付けされた外部引数</i> である。
+		これは、繰り返されるファイルを表す。
+	</div>
+	<h4>Usage</h4>
+		<div class="code">
+			#define <b>BOOST_PP_FILENAME_<i>x</i></b> <i>filename</i>
+		</div>
+	<h4>Arguments</h4>
+		<dl>
+			<dt>x</dt>
+			<dd>
+			次の <i>ファイル繰り返し</i> の繰り返しの深さ。
+			この値は現在の繰り返しの深さ <i>+ 1</i> で <i>なければならない。</i>
+			</dd>
+			<dt>filename</dt>
+			<dd>
+			<i>ファイル繰り返し</i> のターゲットとして使われる、
+			引用符、またはカギ括弧で囲まれたファイル名。
+			</dd>
+		</dl>
+	<h4>Remarks</h4>
+		<div>
+		このマクロは <b>BOOST_PP_ITERATE</b> に引数を渡す第2の方法の一部である。
+		他の一部は <b>BOOST_PP_ITERATION_LIMITS</b> である。
+		</div>
+		<div>
+		このマクロは <b>BOOST_PP_ITERATE</b> の呼び出しによって、
+		再利用のために自動的に未定義にされる。
+		</div>
+	<h4>See Also</h4>
+		<ul>
+			<li><a href="iterate.html">BOOST_PP_ITERATE</a></li>
+			<li><a href="iteration_limits.html">BOOST_PP_ITERATION_LIMITS</a></li>
+		</ul>
+</body>
+</html>

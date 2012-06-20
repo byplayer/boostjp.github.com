@@ -1,0 +1,108 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type"
+content="text/html; charset=utf-8">
+<meta name="GENERATOR" content="Microsoft FrontPage Express 2.0">
+<title>Introduction</title>
+</head>
+
+<body bgcolor="#FFFFFF">
+
+<p><img src="../../c++boost.gif" alt="C++ Boost" width="277"
+height="86"> <br>
+</p>
+
+<h1 align="center">Introduction</h1>
+
+<p align="left">boostのTokenizerは、文字列や他の文字記号の列をトークンの組に簡単に分解でき、しかも融通が利く。
+以下に文章を単語毎に分解する簡単な例を示す。</p>
+<div align="left">
+
+<pre>// simple_example_1.cpp
+#include&lt;iostream&gt;
+#include&lt;boost/tokenizer.hpp&gt;
+#include&lt;string&gt;
+
+int main(){
+   using namespace std;
+   using namespace boost;
+   string s = &quot;This is,  a test&quot;;
+   tokenizer&lt;&gt; tok(s);
+   for(tokenizer&lt;&gt;::iterator beg=tok.begin(); beg!=tok.end();++beg){
+       cout &lt;&lt; *beg &lt;&lt; &quot;\n&quot;;
+   }
+}</pre>
+</div>
+
+<p align="left">文字列を分解する方法は TokenizerFunction によって指定可能である。
+もしなにも指定しなければ、デフォルトの TokenizerFunction としてchar_delimiters_separator&lt;char&gt;が使用される。
+char_delimiters_separator&lt;char&gt;は、空白や句読点で文字列を区切る。
+ここでは、escaped_list_separator と呼ばれる別の TokenizerFunction を使用した例を挙げる。
+この TokenizerFunction はコンマで区切られた値 (csv) の上位集合の行を構文解析する。
+そのフォーマットは以下のような感じである。
+</p>
+
+<p align="left">Field 1,&quot;putting quotes around fields,
+allows commas&quot;,Field 3</p>
+
+<p align="left">以下に処理前の文字列を3つの部分に分解する例を示す。</p>
+<div align="left">
+
+<pre>// simple_example_2.cpp
+#include&lt;iostream&gt;
+#include&lt;boost/tokenizer.hpp&gt;
+#include&lt;string&gt;
+
+int main(){
+   using namespace std;
+   using namespace boost;
+   string s = &quot;Field 1,\&quot;putting quotes around fields, allows commas\&quot;,Field 3&quot;;
+   tokenizer&lt;escaped_list_separator&lt;char&gt; &gt; tok(s);
+   for(tokenizer&lt;escaped_list_separator&lt;char&gt; &gt;::iterator beg=tok.begin(); beg!=tok.end();++beg){
+       cout &lt;&lt; *beg &lt;&lt; &quot;\n&quot;;
+   }
+}</pre>
+</div>
+
+<p align="left">また、何か面白いことをするには TokenizerFunctions をコンストラクタに渡さなければならない。
+一つの例として offset_separator がある。このクラスは文字列をオフセットに基づいたトークンに分解する。</p>
+
+<p align="left">文字列 12252001 をオフセット2,2,4で構文解析すると 12 25 2001 となる。
+以下にその構文解析の例を示す。</p>
+<div align="left">
+
+<pre>// simple_example_3.cpp
+#include&lt;iostream&gt;
+#include&lt;boost/tokenizer.hpp&gt;
+#include&lt;string&gt;
+
+int main(){
+   using namespace std;
+   using namespace boost;
+   string s = &quot;12252001&quot;;
+   int offsets[] = {2,2,4};
+   offset_separator f(offsets, offsets+3);
+   tokenizer&lt;offset_separator&gt; tok(s,f);
+   for(tokenizer&lt;offset_separator&gt;::iterator beg=tok.begin(); beg!=tok.end();++beg){
+       cout &lt;&lt; *beg &lt;&lt; &quot;\n&quot;;
+   }
+}</pre>
+</div>
+
+<p align="left">&nbsp;</p>
+
+<hr>
+
+<p>&copy; Copyright John R. Bandela 2001. Permission to copy, use,
+modify, sell and distribute this document is granted provided
+this copyright notice appears in all copies. This document is
+provided &quot;as is&quot; without express or implied warranty,
+and with no claim as to its suitability for any purpose.</p>
+
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:yamasaki@mail.ne.jp">Akihiro Yamasaki</a><br>
+<small>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</small></p>
+
+<p align="left">&nbsp;</p>
+</body>
+</html>

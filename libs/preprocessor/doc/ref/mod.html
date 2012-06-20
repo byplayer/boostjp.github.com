@@ -1,0 +1,53 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=EUC-JP"><!--*- encoding: euc-jp -*-->
+	<title>BOOST_PP_MOD</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">
+</head>
+<body>
+	<div style="margin-left:  0px;">
+		<b>BOOST_PP_MOD</b> マクロは引数の余りに展開される。
+	</div>
+	<h4>Usage</h4>
+		<div class="code">
+			<b>BOOST_PP_MOD</b>(<i>x</i>, <i>y</i>)
+		</div>
+	<h4>Arguments</h4>
+		<dl>
+			<dt>x</dt>
+			<dd>
+			演算の割られる方(分子)。
+			有効な値の範囲は <i>0</i> から <b>BOOST_PP_LIMIT_MAG</b> までである。
+			</dd>
+			<dt>y</dt>
+			<dd>
+			演算の割る方(分母)。
+			有効な値の範囲は <i>0</i> から <b>BOOST_PP_LIMIT_MAG</b> までである。
+			</dd>
+		</dl>
+	<h4>Remarks</h4>
+		<div>
+		以前、このマクロは <b>BOOST_PP_WHILE</b> の中で利用することが出来なかった。
+		この制約は今は存在しない。
+		しかし、より効率的にするには、そのような状況では <b>BOOST_PP_MOD_D</b> を使うこと。
+		</div>
+		<div>
+		もし <i>y</i> が <i>0</i> なら、結果は未定義である。
+		</div>
+	<h4>See Also</h4>
+		<ul>
+			<li><a href="limit_mag.html">BOOST_PP_LIMIT_MAG</a></li>
+			<li><a href="mod_d.html">BOOST_PP_MOD_D</a></li>
+		</ul>
+	<h4>Requirements</h4>
+		<div>
+			<b>Header:</b> &nbsp;<a href="../headers/arithmetic/mod.hpp.html">&lt;boost/preprocessor/arithmetic/mod.hpp&gt;</a>
+		</div>
+	<h4>Sample Code</h4>
+<div><pre>
+#include &lt;<a href="../headers/arithmetic/mod.hpp.html">boost/preprocessor/arithmetic/mod.hpp</a>&gt;
+
+<a href="mod.html">BOOST_PP_MOD</a>(11, 5) // expands to 1
+</pre></div>
+</body>
+</html>

@@ -1,0 +1,327 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+	<head>
+		<title>Smart Pointers</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	</head>
+	<body bgcolor="#ffffff" text="#000000">
+		<h1><img src="../../c++boost.gif" alt="c++boost.gif (8819 bytes)" align="middle" width="277" height="86">Smart 
+			Pointers</h1>
+
+		<p>スマートポインタは動的に割り当てられた(ヒープ上の)
+			オブジェクトへのポインタを保持するオブジェクトである。
+			これは C++ 組み込みポインタのように振舞うが、
+			指されたオブジェクトを適当なタイミングで自動的に削除する。
+			スマートポインタは、
+			動的に割り当てられたオブジェクトを、
+			例外が発生しても確実に破棄したいようなときに特に役立つ。
+			また複数の所有者に共有されている、
+			動的に割り当てられたオブジェクトを管理するのにも使える。</p>
+
+		<p>概念的にはスマートポインタは指されたオブジェクトを所有しているように見える。
+			そしてオブジェクトがもはや必要なくなった時、責任を持って削除する。</p>
+
+<p>スマートポインタライブラリは5種類のスマートポインタクラステンプレートを提供する:</p>
+		<div align="left">
+			<table border="1" cellpadding="4" cellspacing="4">
+				<tr>
+					<td><a href="scoped_ptr.htm"><b>scoped_ptr</b></a></td>
+					<td><a href="../../boost/scoped_ptr.hpp">&lt;boost/scoped_ptr.hpp&gt;</a></td>
+					<td>オブジェクトの所有権を独占する単純なスマートポインタ。コピー不可。</td>
+					<!--td>シンプルで、ひとつのオブジェクトにひとつの所有権。コピー不可。</td-->
+
+				</tr>
+				<tr>
+					<td><a href="scoped_array.htm"><b>scoped_array</b></a></td>
+					<td><a href="../../boost/scoped_array.hpp">&lt;boost/scoped_array.hpp&gt;</a></td>
+					<td>配列を独占的に所有する単純なスマートポインタ。コピー不可。</td>
+					<!--td>シンプルで、配列に対するひとつの所有権。コピー不可。</td-->
+				</tr>
+				<tr>
+					<td><a href="shared_ptr.htm"><b>shared_ptr</b></a></td>
+
+					<td><a href="../../boost/shared_ptr.hpp">&lt;boost/shared_ptr.hpp&gt;</a></td>
+					<td>複数のポインタでオブジェクトの所有権を共有するスマートポインタ。</td>
+					<!--td>複数のポインタで共有される、オブジェクトの所有権。</td-->
+				</tr>
+				<tr>
+					<td><a href="shared_array.htm"><b>shared_array</b></a></td>
+					<td><a href="../../boost/shared_array.hpp">&lt;boost/shared_array.hpp&gt;</a></td>
+					<td>複数のポインタで配列の所有権を共有するスマートポインタ。</td>
+					<!--td>複数のポインタで共有される、配列の所有権。</td-->
+
+				</tr>
+				<tr>
+					<td><a href="weak_ptr.htm"><b>weak_ptr</b></a></td>
+					<td><a href="../../boost/weak_ptr.hpp">&lt;boost/weak_ptr.hpp&gt;</a></td>
+					<td><b>shared_ptr</b> が所有するオブジェクトを、所有しないで利用するスマートポインタ。</td>
+				<!--td><b>shared_ptr</b>が所有するオブジェクトを、所有しないで観察する。</td-->
+				</tr>
+			</table>
+
+		</div>
+
+		<p>これらのテンプレートは <b>std::auto_ptr</b> テンプレートを補完するように設計されている。</p>
+
+		<p>これらは
+			&quot; Resource Acquisition Is Initialization &quot; イディオム
+			(訳注:RAIIイディオム、「資源獲得を初期化時に行う」ことによりオブジェクトの所有権の所在を明確にする)
+			の典型例である。
+			このイディオムは Bjarne Stroustrup の
+			"The C++ Programming Language" 第 3 版 14.4 章、資源管理の項で述べられている。
+		</p>
+
+		<p>テストプログラム <a href="smart_ptr_test.cpp">smart_ptr_test.cpp</a>
+			が正しい操作を確認するために提供されている。
+		</p>
+
+		<p>
+			Boost smart pointer ライブラリの古いバージョンについてのページ
+			<a href="compatibility.htm">compatibility</a> は、
+			以前のバージョンのスマートポインタの実装からの変更について述べている。
+		</p>
+
+		<p>
+			<a href="smarttests.htm">smart pointer timings</a> はパフォーマンスの
+			問題についての興味である。
+		</p>
+
+		<h2><a name="Common requirements">Common Requirements</a></h2>
+<p>これらのスマートポインタクラステンプレートはテンプレートパラメータ<b>T</b>をもつ。
+これはスマートポインタが指すオブジェクトの方を特定する。
+スマートポインタテンプレートの振る舞いは、<b>T</b>型のオブジェクトの
+デストラクタか<b>delete演算子</b>が例外を投げるなら、未定義である。</p>
+<p><b>T</b>はスマートポインタの宣言という点で、不完全な型かもしれない。
+通常、<b>T</b>はスマートポインタの実体化という点で完全な型である必要がある。
+不完全な型の削除を含めて、この要求を脅かすこと全てを診断する(エラーとして扱う)
+ような実装が必要である。<a href="../utility/utility.htm#checked_delete">
+
+<b>checked_delete</b></a> 関数テンプレートの記述を参考にせよ。</p>
+<p><strong>shared_ptr</strong>はこの制限を持たず、メンバ関数の多くは<strong>T</strong>
+が完全な型であることを要求しないことに注意せよ。</p>
+
+		<h3>Rationale</h3>
+<p><b>T</b>への要求は、安全性を最大化しつつ、扱いやすいように、という格言の下で
+注意深く作られている。この格言の中ではスマートポインタは、
+<b>T</b>が不完全な型である翻訳単位の中で現れる。
+これは実装とインタフェースを分離し、インタフェースが利用される翻訳単位から実装を隠す。
+それぞれのスマートポインタについてのこのドキュメントでの例は、
+このようなスマートポインタの利用を説明している。</p>
+
+<p><b>scoped_ptr</b>は<b>T</b>がデストラクト時に完全な型であることを要求するが、
+<b>shared_ptr</b>はそうでないことに注意せよ。</p>
+
+		<h2>Exception Safety</h2>
+<p>これらのスマートポインタクラスの多くの関数は、もし例外が投げられれば
+「効果なし」あるいは「これこれ以外は効果なし」として明示されている。
+これはこれらのクラスの一つのオブジェクトが例外を投げた時、プログラムの
+状態全てが、結果的に例外を発生した関数が呼び出される前の状態と同じである
+ことを意味している。つまり発見しうる副作用がないことを保証している。
+そうでない関数は決して例外を投げない。関数が投げる唯一の例外は
+<b>std::bad_alloc</b>である(<b>T</b>が
+ <a href="#Common requirements">common requirements</a>を満たしていることを仮定する)。
+
+<b>std::bad_alloc</b>を投げる可能性があると、明示的にドキュメントに書かれている
+関数だけが、この例外を投げる。</p>
+
+		<h2>Exception-specifications</h2>
+		<p>Exception-specificationsは利用されない。
+<a href="../../more/lib_guide.htm#Exception-specification">
+exception-specification rationale</a>を参考にせよ。</p>
+<p>全てのスマートポインタテンプレートは決して例外を投げないメンバ関数を持っている。
+決して例外を投げないというのは、自分自身に例外を投げることも、
+例外を投げる他の関数を呼び出すこともないということである。
+これらのメンバはコメント: <code> //never throws </code>と明示されている。</p>
+
+<p>指されたオブジェクト型を破壊(destroy)する関数は
+<a href="#Common requirements">common requirements</a>によって
+例外を投げることを禁止されている。</p>
+
+		<h2>History and Acknowledgements</h2>
+		<!--
+			この項の日本語訳は、日本語として自然な形になるように、
+				developer_name により do_something された。
+			という文型に統一した。
+		-->
+		<!--
+		<p>January 2002. Peter Dimov reworked all four classes, adding features, fixing 
+			bugs, and splitting them into four separate headers, and added <b>weak_ptr</b>. 
+			See the <a href="compatibility.htm">compatibility</a> page for a summary of the 
+			changes.</p>
+		-->
+		<p>
+			2002 年 1 月。
+			Peter Dimov により 4 つのクラスの全てが作り直された。
+			機能の追加とバグの修正が行われ、
+			それぞれのクラスが 4 つのヘッダファイルに分割された。
+			<b>weak_ptr</b> が追加された。
+			変更箇所については <a href="compatibility.htm">互換性</a> のページを参照せよ。</p>
+
+		<!--
+		<p>May 2001. Vladimir Prus suggested requiring a complete type on destruction. 
+			Refinement evolved in discussions including Dave Abrahams, Greg Colvin, Beman 
+			Dawes, Rainer Deyke, Peter Dimov, John Maddock, Vladimir Prus, Shankar Sai, and 
+			others.</p>
+		-->
+		<p>
+			2001 年 5 月。
+			Vladimir Prus により、デストラクト時における完全型の必要性が提案された。
+			Dave Abrahams、Greg Colvin、Beman Dawes、Rainer Deyke、Peter Dimov、John Maddock、Vladimir Prus、Shankar Sai 等を含めて行われた
+			<!--discussion-->評議<!>により、改善策が導き出された。</p>
+
+		<!--
+		<p>November 1999. Darin Adler provided <b>operator ==</b>, <b>operator !=</b>, and <b>std::swap</b>
+			and <b>std::less</b> specializations for shared types.</p>
+		-->
+		<p>
+			1999 年 11 月。
+			Darin Adler により、共有スマートポインタ型の為の
+			<b>operator ==</b>、<b>operator !=</b>、及び
+			<b>std::swap</b>、<b>std::less</b> の特殊化版が提供された。
+		</p>
+		<!--
+		<p>September 1999. Luis Coelho provided <b>shared_ptr::swap</b> and <b>shared_array::swap</b></p>
+		-->
+		<p>
+			1999 年 9 月。
+			Luis Coelho により、
+			<b>shared_ptr::swap</b> と <b>shared_array::swap</b> 
+			が提供された。
+		</p>
+
+		<!--
+		<p>May 1999. In April and May, 1999, Valentin Bonnard and David Abrahams made a 
+			number of suggestions resulting in numerous improvements.</p>
+		-->
+		<p>
+			1999 年 4 月。
+			1999 年の 4 月、5 月に、
+			<!--自信なし-->
+			Valetin Bonnard と David Abrahams により
+			非常に多くの改善に起因する提案が為される。
+			<!>
+		</p>
+
+		<!--
+		<p>October 1998. In 1994 Greg Colvin proposed to the C++ Standards Committee 
+			classes named <b>auto_ptr</b> and <b>counted_ptr</b> which were very similar to 
+			what we now call <b>scoped_ptr</b> and <b>shared_ptr</b>. The committee 
+			document was 94-168/N0555, Exception Safe Smart Pointers. In one of the very 
+			few cases where the Library Working Group's recommendations were not followed 
+			by the full committee, <b>counted_ptr</b> was rejected and surprising 
+			transfer-of-ownership semantics were added to <b>auto_ptr</b>.</p>
+		-->
+		<p>
+			1998 年 10 月。
+			1994 年に Greg Colvin により、C++ 標準化委員会にクラス <b>auto_ptr</b>
+			とクラス <b>counted_ptr</b> が提案された。
+			<b>counted_ptr</b> は、現在の <b>scoped_ptr</b> や <b>shared_ptr</b> 
+			とほぼ同様のものである。
+			標準ドキュメントの 94-168/N0555、例外安全スマートポインタ(Exception Safe Smart Pointers) の項に当たる。
+			委員会により<!--Library Working Group-->ライブラリワーキンググループ<!>の勧告が否決された数少ない事例の一つとして
+			<b>counted_ptr</b> は棄却され、所有権の譲渡のセマンティクスは驚くべき事に <b>auto_ptr</b> に追加された。
+		</p>
+
+		<!--
+		<p>Beman Dawes proposed reviving the original semantics under the names <b>safe_ptr</b>
+			and <b>counted_ptr</b> at an October, 1998, meeting of Per Andersson, Matt 
+			Austern, Greg Colvin, Sean Corfield, Pete Becker, Nico Josuttis, Dietmar K?l, 
+			Nathan Myers, Chichiang Wan and Judy Ward. During the discussion, the four 
+			class names were finalized, it was decided that there was no need to exactly 
+			follow the <b>std::auto_ptr</b> interface, and various function signatures and 
+			semantics were finalized.</p>
+		-->
+		<p>
+			1998 年の 10 月に行われた、
+			Per Andersson、Matt Austern、Greg Colvin、Sean Corfield、
+			Pete Becker、Nico Josuttis、Dietmar K?l、Nathan Myers、
+			Chichiang Wan、Judy Ward 等による会議に於いて、
+			Beman Dawes により
+			当初のセマンティクスを <b>safe_ptr</b> と <b>counted_ptr</b> という名前で復活させることが提案された。
+			議論の中で、4 つのクラスの名前が決定され、
+			<b>std::auto_ptr</b> のインターフェースに厳密に準拠する必要はないという結論に達した。
+			そして、それぞれの関数のシグネチャとセマンティクスが決定された。
+		</p>
+
+		<!--
+		<p>Over the next three months, several implementations were considered for <b>shared_ptr</b>, 
+			and discussed on the <a href="http://www.boost.org">boost.org</a> mailing list. 
+			The implementation questions revolved around the reference count which must be 
+			kept, either attached to the pointed to object, or detached elsewhere. Each of 
+			those variants have themselves two major variants:
+			<ul>
+
+				<li>
+				Direct detached: the shared_ptr contains a pointer to the object, and a pointer 
+				to the count.
+				<li>
+				Indirect detached: the shared_ptr contains a pointer to a helper object, which 
+				in turn contains a pointer to the object and the count.
+				<li>
+				Embedded attached: the count is a member of the object pointed to.
+				<li>
+					Placement attached: the count is attached via operator new manipulations.</li>
+			</ul>
+		</p>
+		-->
+		<p>
+			その後の 3 ヶ月以上、<b>shared_ptr</b> のために幾つかの実装が熟考され、
+			<a href="http://www.boost.org">boost.org</a> のメーリングリストで議論された。
+
+			実装に関する議論では、参照カウントの実装方法について繰り返し論じられた。
+			参照カウントをスマートポインタに指されるオブジェクトに結びつけて管理する方法と、
+			指されるオブジェクトとは別に管理する方法のいずれに於いても、
+			参照カウントの値が保持されなければならない。
+			そのためには、それぞれの方法に対し大きく分けて二つの実装が考えられた。
+			<ul>
+
+				<li>
+				直接的な分離カウンタ : shared_ptr オブジェクトは、保持するオブジェクトへのポインタとカウンタへのポインタを持つ。
+				<li>
+				間接的な分離カウンタ : shared_ptr オブジェクトは、ヘルパオブジェクト<!--補助的なオブジェクトとすべきか-->
+				へのポインタを持ち、そのヘルパオブジェクトが保持するオブジェクトへのポインタと
+				カウンタへのポインタを持つ。
+				<li>
+				埋め込み結合カウンタ : カウンタを保持するオブジェクトのメンバにする。
+				<li>
+				プレースメント結合カウンタ : new 演算子の操作でカウンタを結びつける。
+			</ul>
+		</p>
+
+		<p>Each implementation technique has advantages and disadvantages. We went so far 
+			as to run various timings of the direct and indirect approaches, and found that 
+			at least on Intel Pentium chips there was very little measurable difference. 
+			Kevlin Henney provided a paper he wrote on "Counted Body Techniques." Dietmar 
+			K?l suggested an elegant partial template specialization technique to allow 
+			users to choose which implementation they preferred, and that was also 
+			experimented with.</p>
+
+		<p>But Greg Colvin and Jerry Schwarz argued that "parameterization will discourage 
+			users", and in the end we choose to supply only the direct implementation.</p>
+		<hr>
+		<p>Revised <!--webbot bot="Timestamp" s-type="EDITED" s-format="%d %B %Y" startspan
+--> 
+			4 February 2002<!--webbot bot="Timestamp" endspan i-checksum="40737"
+--></p>
+
+		<p>Copyright 1999 Greg Colvin and Beman Dawes. Copyright 2002 Darin Adler. 
+			Permission to copy, use, modify, sell and distribute this document is granted 
+			provided this copyright notice appears in all copies. This document is provided 
+			"as is" without express or implied warranty, and with no claim as to its 
+			suitability for any purpose.
+		</p>
+
+		<p>
+			Japanese Translation Copyright (C) 2003
+			<a href="mailto:kohske@msc.biglobe.ne.jp">Kohske Takahashi</a>,
+			<a href="mailto:lenoir@zeroscape.org">Ryo Kobayashi</a>.
+
+			オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の
+			複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」
+			に提供されており、いかなる明示的、暗黙的保証も行わない。また、
+			いかなる目的に対しても、その利用が適していることを関知しない。
+		</p>
+
+	</body>
+</html>
+

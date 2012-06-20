@@ -1,0 +1,37 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=EUC-JP"><!--*- encoding: euc-jp -*-->
+	<title>BOOST_PP_RELATIVE_START</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">
+	
+</head>
+<body>
+	<div style="margin-left:  0px;">
+		<b>BOOST_PP_RELATIVE_FINISH</b> マクロは <i>ファイル繰り返し</i>
+		 の現在の深さと相対的なの深さの下限に展開される。
+	</div>
+	<h4>Usage</h4>
+		<div class="code">
+			<b>BOOST_PP_RELATIVE_START</b>(<i>i</i>)
+		</div>
+	<h4>Arguments</h4>
+		<dl>
+			<dt>i</dt>
+			<dd>
+			その下限が検索されるフレームの相対的な深さ。
+			有効な値の範囲は <i>0</i> から <b>BOOST_PP_ITERATION_DEPTH</b>() - <i>1</i> までである。
+			</dd>
+		</dl>
+	<h4>Remarks</h4>
+		<div>
+		このマクロは <i>ファイル繰り返し</i> が進行中の時のみ有効である。
+		</div>
+		<div>
+		引数 <i>i</i> は現在のフレームより <i>外側の</i> フレームの数として解釈される。
+		</div>
+	<h4>Requirements</h4>
+		<div>
+			<b>Header:</b> &nbsp;<a href="../headers/iteration/iterate.hpp.html">&lt;boost/preprocessor/iteration/iterate.hpp&gt;</a>
+		</div>
+</body>
+</html>

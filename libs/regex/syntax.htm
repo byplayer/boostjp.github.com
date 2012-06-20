@@ -1,0 +1,1099 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type"
+content="text/html; charset=utf-8">
+<meta name="Template"
+content="C:\PROGRAM FILES\MICROSOFT OFFICE\OFFICE\html.dot">
+<meta name="GENERATOR" content="Microsoft FrontPage Express 2.0">
+<title>Regex++, Regular Expression Syntax</title>
+</head>
+
+<body bgcolor="#FFFFFF" link="#0000FF" vlink="#800080">
+
+<p>&nbsp; </p>
+
+<table border="0" cellpadding="7" cellspacing="0" width="100%">
+    <tr>
+        <td valign="top"><h3><img src="../../c++boost.gif"
+        alt="C++ Boost" width="276" height="86"></h3>
+        </td>
+        <td valign="top"><h3 align="center">Regex++, Regular
+        Expression Syntax.</h3>
+        <p align="left"><i>Copyright (c) 1998-2001 </i></p>
+        <p align="left"><i>Dr John Maddock</i></p>
+        <p align="left"><i>Permission to use, copy, modify,
+        distribute and sell this software and its documentation
+        for any purpose is hereby granted without fee, provided
+        that the above copyright notice appear in all copies and
+        that both that copyright notice and this permission
+        notice appear in supporting documentation. Dr John
+        Maddock makes no representations about the suitability of
+        this software for any purpose. It is provided &quot;as is&quot;
+        without express or implied warranty.</i></p>
+        </td>
+    </tr>
+</table>
+
+<hr>
+
+<h3><a name="syntax"></a><i>Regular expression syntax</i></h3>
+
+<!--<p>This section covers the regular expression syntax used by this
+library, this is a programmers guide, the actual syntax presented
+to your program's users will depend upon the flags used during
+expression compilation. </p>-->
+<p>この章では、このライブラリで使われる正規表現文法について述べる。
+これは、プログラマーズガイドであって、
+プログラムの中でユーザに与えられる実際の文法は
+正規表現の翻訳の間に使われるフラグに依存する。</p>
+
+<p><i>Literals</i> </p>
+
+<!--<p>All characters are literals except: &quot;.&quot;, &quot;|&quot;,
+&quot;*&quot;, &quot;?&quot;, &quot;+&quot;, &quot;(&quot;,
+&quot;)&quot;, &quot;{&quot;, &quot;}&quot;, &quot;[&quot;,
+&quot;]&quot;, &quot;^&quot;, &quot;$&quot; and &quot;\&quot;.
+These characters are literals when preceded by a &quot;\&quot;. A
+literal is a character that matches itself, or matches the result
+of traits_type::translate(), where traits_type is the traits
+template parameter to class reg_expression. <br>
+&nbsp; <br>
+&nbsp; </p>-->
+<p>以下のものを除く全ての文字はリテラルである: &quot;.&quot;, &quot;|&quot;,
+&quot;*&quot;, &quot;?&quot;, &quot;+&quot;, &quot;(&quot;,
+&quot;)&quot;, &quot;{&quot;, &quot;}&quot;, &quot;[&quot;,
+&quot;]&quot;, &quot;^&quot;, &quot;$&quot;, &quot;\&quot; 。
+これらの文字列は、&quot;\&quot; に続いたときはリテラルである。
+リテラルはそれ自身にマッチするか、または、
+traits_type::translate() の結果にマッチする文字である。
+traits_type は reg_expression クラスの特性テンプレートパラメータである。<br>
+&nbsp; <br>
+&nbsp; </p>
+
+<p><i>ワイルドカード</i> </p>
+
+<!--<p>The dot character &quot;.&quot; matches any single character
+except : when <i>match_not_dot_null</i> is passed to the matching
+algorithms, the dot does not match a null character; when <i>match_not_dot_newline</i>
+is passed to the matching algorithms, then the dot does not match
+a newline character. <br>
+&nbsp; <br>
+&nbsp; </p>-->
+<p>ドット文字 &quot;.&quot; はあらゆる1文字にマッチする。
+例外: <i>match_not_dot_null</i> がマッチアルゴリズムに渡されたときは、
+ドットはヌル文字にはマッチしない。
+<i>match_not_dot_newline</i> がマッチアルゴリズムに渡されたときは、
+ドットは改行文字にはマッチしない。<br>
+&nbsp; <br>
+&nbsp; </p>
+
+<p><i>繰り返し</i> </p>
+
+<!--<p>A repeat is an expression that is repeated an arbitrary number
+of times. An expression followed by &quot;*&quot; can be repeated
+any number of times including zero. An expression followed by
+&quot;+&quot; can be repeated any number of times, but at least
+once, if the expression is compiled with the flag regbase::bk_plus_qm
+then &quot;+&quot; is an ordinary character and &quot;\+&quot;
+represents a repeat of once or more. An expression followed by
+&quot;?&quot; may be repeated zero or one times only, if the
+expression is compiled with the flag regbase::bk_plus_qm then
+&quot;?&quot; is an ordinary character and &quot;\?&quot;
+represents the repeat zero or once operator. When it is necessary
+to specify the minimum and maximum number of repeats explicitly,
+the bounds operator &quot;{}&quot; may be used, thus &quot;a{2}&quot;
+is the letter &quot;a&quot; repeated exactly twice, &quot;a{2,4}&quot;
+represents the letter &quot;a&quot; repeated between 2 and 4
+times, and &quot;a{2,}&quot; represents the letter &quot;a&quot;
+repeated at least twice with no upper limit. Note that there must
+be no white-space inside the {}, and there is no upper limit on
+the values of the lower and upper bounds. When the expression is
+compiled with the flag regbase::bk_braces then &quot;{&quot; and
+&quot;}&quot; are ordinary characters and &quot;\{&quot; and
+&quot;\}&quot; are used to delimit bounds instead. All repeat
+expressions refer to the shortest possible previous sub-expression:
+a single character; a character set, or a sub-expression grouped
+with &quot;()&quot; for example. </p>-->
+<p>繰り返しは任意の回数繰り返される正規表現である。
+&quot;*&quot; が続く正規表現はゼロを含む何回の繰り返しも可能である。
+&quot;+&quot; が続く正規表現は1回以上の何回の繰り返しも可能である。
+もし正規表現が regbase::bk_plus_qm フラグ付きで翻訳されるなら、
+&quot;+&quot; は通常の文字であり、 &quot;\+&quot; が1回以上の繰り返しを表す。
+&quot;?&quot; が続く正規表現は0回か1回の繰り返しである。
+もし正規表現が regbase::bk_plus_qm フラグ付きで翻訳されるなら、
+&quot;?&quot; は通常の文字であり、 $quot;\?&quot; が0回か1回の繰り返しを示す。
+繰り返しの最小回数と最大回数を明示する必要があるなら、
+範囲指定子 &quot;{}&quot; が使われる。
+&quot;a{2}&quot; は、ちょうど2回だけ繰り返される文字 &quot;a&quot である。
+&quot;a{2,4}&quot; は2回以上4回以下繰り返される文字 &quot;a&quot; であり、
+&quot;a{2,}&quot; は2回以上上限なく繰り返される文字 &quot;a&quot; である。
+{}の中に空白があってはいけないこと、
+最小回数と最大回数の指定に上限がないことに注意せよ。
+正規表現が regbase::bk_braces フラグ付で翻訳されるとき、
+&quot;{&quot; と &quot;}&quot; は通常の文字であり、
+代わりに &quot;\{&quot; と &quot;\}&quot; が範囲指定に使われる。
+全ての繰り返し表現は、可能な限り短く、前方の子表現を参照する。
+例えば、1文字、文字集合、
+&quot;()&quot; で囲まれた子表現を参照する。</p>
+
+<p>例: </p>
+
+<!--<p>&quot;ba*&quot; will match all of &quot;b&quot;, &quot;ba&quot;,
+&quot;baaa&quot; etc. </p>-->
+<p>&quot;ba*&quot; は &quot;b&quot;, &quot;ba&quot;, &quot;baaa&quot;
+などの全てにマッチする。</p>
+
+<!--<p>&quot;ba+&quot; will match &quot;ba&quot; or &quot;baaaa&quot;
+for example but not &quot;b&quot;. </p>-->
+<p>&quot;ba+&quot; は &quot;ba&quot; や &quot;baaaa&quot; にマッチするが、
+例えば &quot;b&quot; にはマッチしない。</p>
+
+<!--<p>&quot;ba?&quot; will match &quot;b&quot; or &quot;ba&quot;. </p>-->
+<p>&quot;ba?&quot; は &quot;b&quot; と &quot;ba&quot; にマッチする。 </p>
+
+<!--<p>&quot;ba{2,4}&quot; will match &quot;baa&quot;, &quot;baaa&quot;
+and &quot;baaaa&quot;. </p>-->
+<p>&quot;ba{2,4}&quot; は &quot;baa&quot; と  &quot;baaa&quot; と
+&quot;baaaa&quot; にマッチする。 </p>
+
+<!--<p><i>Non-greedy repeats</i> </p>-->
+<p><i>貪欲でない繰り返し</i> </p>
+
+<!--<p>Whenever the &quot;extended&quot; regular expression syntax is
+in use (the default) then non-greedy repeats are possible by
+appending a '?' after the repeat; a non-greedy repeat is one
+which will match the <i>shortest</i> possible string. </p>-->
+<p>「拡張」正規表現構文が(デフォルトで)使われるときはいつでも、
+繰り返しのあとに '?' を付け足すことで、貪欲でない繰り返しが可能である。
+貪欲でない繰り返しとは、 可能な限り<i>もっとも短い</i>文字列にマッチするものである。</p>
+
+<!--<p>For example to match html tag pairs one could use something
+like: </p>-->
+<p>例えば、一組の html タグのマッチには次のようにすることができる: </p>
+
+<p>&quot;&lt;\s*tagname[^&gt;]*&gt;(.*?)&lt;\s*/tagname\s*&gt;&quot;
+</p>
+
+<!--<p>In this case $1 will contain the text between the tag pairs,
+and will be the shortest possible matching string. <br>
+&nbsp; <br>
+&nbsp; </p>-->
+<p>この場合、 $1 はタグに挟まれたテキストを保持する。
+これが、可能な限り最も短い文字列である。<br>
+&nbsp; <br>
+&nbsp; </p>
+
+<!--<p><i>Parenthesis</i> </p>-->
+<p><i>丸括弧</i> </p>
+
+<!--<p>Parentheses serve two purposes, to group items together into a
+sub-expression, and to mark what generated the match. For example
+the expression &quot;(ab)*&quot; would match all of the string
+&quot;ababab&quot;. The matching algorithms <a
+href="template_class_ref.htm#query_match">regex_match</a> and <a
+href="template_class_ref.htm#reg_search">regex_search</a> each
+take an instance of <a href="template_class_ref.htm#reg_match">match_results</a>
+that reports what caused the match, on exit from these functions
+the <a href="template_class_ref.htm#reg_match">match_results</a>
+contains information both on what the whole expression matched
+and on what each sub-expression matched. In the example above
+match_results[1] would contain a pair of iterators denoting the
+final &quot;ab&quot; of the matching string. It is permissible
+for sub-expressions to match null strings. If a sub-expression
+takes no part in a match - for example if it is part of an
+alternative that is not taken - then both of the iterators that
+are returned for that sub-expression point to the end of the
+input string, and the <i>matched</i> parameter for that sub-expression
+is <i>false</i>. Sub-expressions are indexed from left to right
+starting from 1, sub-expression 0 is the whole expression. </p>-->
+<p>丸括弧はふたつの目的で使われる。
+一つは子表現をまとめることであり、もう一つはマッチを生成したものを
+印付けることである。例えば、正規表現 &quot;(ab)*&quot; 
+は文字列 &quot;ababab&quot; の全てにマッチする。
+マッチアルゴリズム
+<a href="template_class_ref.htm#query_match">regex_match</a> と
+<a href="template_class_ref.htm#reg_search">regex_search</a>
+はそれぞれ、何がマッチを引き起こしたかを報告する、
+<a href="template_class_ref.htm#reg_match">match_results</a>
+のインスタンスを得る。これらの関数から抜けるとき、
+<a href="template_class_ref.htm#reg_match">match_results</a> は、
+正規表現全体が何とマッチしたか、そしてそれぞれの子表現が
+何とマッチしたかについての情報を保持している。
+上の例では、 match_results[1] は マッチした文字列の最後の
+&quot;ab&quot; を示す一組のイテレータを保持している。
+子表現がヌル文字列にマッチすることも許されている。
+もし子表現がどの部分ともマッチしなければ、例えばそれが、
+マッチしなかった選択肢の一部なら、その子表現に対して返される両方のイテレータは、
+入力文字列の終端を指していて、 その子表現に対する <i>matched</i> パラメータは
+<i> false </i> である。子表現は1で始まり左から右に数えられる。
+子表現 0 は正規表現全体である。</p>
+
+<!--<p><i>Non-Marking Parenthesis</i> </p>-->
+<p><i>印付けをしない丸括弧</i> </p>
+
+<!--<p>Sometimes you need to group sub-expressions with parenthesis,
+but don't want the parenthesis to spit out another marked sub-expression,
+in this case a non-marking parenthesis (?:expression) can be used.
+For example the following expression creates no sub-expressions: </p>-->
+<p>丸括弧で子表現をグループ化したいが、
+丸括弧に子表現の印を作って欲しくないようなときは、
+印付けをしない丸括弧 (?:expression) を使うことができる。
+例えば、 次の正規表現は子表現を作らない: 
+(訳注: 子表現を作らないいうよりは、子表現に印付けをしないということ)</p>
+
+<p>&quot;(?:abc)*&quot;</p>
+
+<!--<p><em>Forward Lookahead Asserts</em>&nbsp; </p>-->
+<p><em>前方先読み宣言</em>&nbsp; </p>
+
+<!--<p>There are two forms of these; one for positive forward
+lookahead asserts, and one for negative lookahead asserts:</p>-->
+<p>これにはふたつの形式がある。
+一つは肯定的前方先読み宣言であり、
+もう一つは否定的前方先読み宣言である: </p>
+
+<!--<p>&quot;(?=abc)&quot; matches zero characters only if they are
+followed by the expression &quot;abc&quot;.</p>-->
+<p>&quot;(?=abc)&quot; はゼロ文字列に正規表現 &quot;abc&quot; 
+が続くときのみ、そのゼロ文字列にマッチする。</p>
+
+<!--<p>&quot;(?!abc)&quot; matches zero characters only if they are
+not followed by the expression &quot;abc&quot;.</p>-->
+<p>&quot;(?!abc)&quot; はゼロ文字列に正規表現 &quot;abc&quot; 
+が続かないときのみ、そのゼロ文字列にマッチする。</p>
+
+<!--<p><i>Alternatives</i> </p>-->
+<p><i>選択</i> </p>
+
+<!--<p>Alternatives occur when the expression can match either one
+sub-expression or another, each alternative is separated by a
+&quot;|&quot;, or a &quot;\|&quot; if the flag regbase::bk_vbar
+is set, or by a newline character if the flag regbase::newline_alt
+is set. Each alternative is the largest possible previous sub-expression;
+this is the opposite behaviour from repetition operators. </p>-->
+<p>選択は、正規表現がある子表現か、別の子表現のいずれかにマッチするときに起こる。
+それぞれの選択肢は &quot;|&quot; か、
+regbase::bk_vbar フラグが設定されているなら &quot;\|&quot; 
+または regbase::newline_alt フラグが設定されていれば改行文字によって区切られる。
+それぞれの選択肢は先行する可能な限り大きな子表現である。
+これは繰り返し演算子とは逆の動作である。</p>
+
+<!--<p>Examples: </p>-->
+<p>例: </p>
+
+<!--<p>&quot;a(b|c)&quot; could match &quot;ab&quot; or &quot;ac&quot;.
+</p>-->
+<p>&quot;a(b|c)&quot; は &quot;ab&quot; または &quot;ac&quot; にマッチする。
+</p>
+
+<!--<p>&quot;abc|def&quot; could match &quot;abc&quot; or &quot;def&quot;.
+<br>
+&nbsp; <br>
+&nbsp; </p>-->
+<p>&quot;abc|def&quot; は &quot;abc&quot; または &quot;def&quot; にマッチする。
+<br>
+&nbsp; <br>
+&nbsp; </p>
+
+<!--<p><i>Sets</i> </p>-->
+<p><i>集合</i> </p>
+
+<!--<p>A set is a set of characters that can match any single
+character that is a member of the set. Sets are delimited by
+&quot;[&quot; and &quot;]&quot; and can contain literals,
+character ranges, character classes, collating elements and
+equivalence classes. Set declarations that start with &quot;^&quot;
+contain the compliment of the elements that follow. </p>-->
+<p>集合は、集合の要素であるあらゆる1文字とマッチすることができる文字集合である。
+文字集合は &quot;[&quot; と &quot;]&quot; で囲まれていて、
+リテラル、文字範囲、文字クラス、照合要素、等価クラスを含むことができる。
+&quot;^&quot; で始まる文字集合の宣言は、それに続く要素以外を含む。</p>
+
+<!--<p>Examples: </p>-->
+<p>例: </p>
+
+<!--<p>Character literals: </p>-->
+<p>文字リテラル: </p>
+
+<p>&quot;[abc]&quot; は &quot;a&quot; , &quot;b&quot; , &quot;c&quot;
+のいずれかとマッチする。 </p>
+
+<!--<p>&quot;[^abc] will match any character other than &quot;a&quot;,
+&quot;b&quot;, or &quot;c&quot;. </p>-->
+<p>&quot;[^abc] は &quot;a&quot;, &quot;b&quot;, or &quot;c&quot; 
+以外のあらゆる文字にマッチする。 </p>
+
+
+<!--<p>Character ranges: </p>-->
+<p>文字範囲: </p>
+
+<!--<p>&quot;[a-z]&quot; will match any character in the range &quot;a&quot;
+to &quot;z&quot;. </p>-->
+<p>&quot;[a-z]&quot; は &quot;a&quot; から &quot;z&quot; 
+の範囲にあるあらゆる文字にマッチする。 </p>
+
+<!--<p>&quot;[^A-Z]&quot; will match any character other than those
+in the range &quot;A&quot; to &quot;Z&quot;. </p>-->
+<p>&quot;[^A-Z]&quot; は &quot;A&quot; から &quot;Z&quot; 
+の範囲にある文字以外の、あらゆる文字にマッチする。 </p>
+
+<!--<p>Note that character ranges are highly locale dependent: they
+match any character that collates between the endpoints of the
+range, ranges will only behave according to ASCII rules when the
+default &quot;C&quot; locale is in effect. For example if the
+library is compiled with the Win32 localization model, then [a-z]
+will match the ASCII characters a-z, and also 'A', 'B' etc, but
+not 'Z' which collates just after 'z'. This locale specific
+behaviour can be disabled by specifying regbase::nocollate when
+compiling, this is the default behaviour when using regbase::normal,
+and forces ranges to collate according to ASCII character code.
+Likewise, if you use the POSIX C API functions then setting
+REG_NOCOLLATE turns off locale dependent collation. </p>-->
+<p>文字範囲は、ロケールに強く依存することに注意せよ: 
+これは、その範囲の両端の間に並んでいる、あらゆる文字にマッチする。
+デフォルトの &quot;C&quot; ロケールが有効なときは、文字範囲は
+ASCII に基づいて振舞うだけである。しかし、例えばライブラリが、
+Win32 ロケールモデルでコンパイルされていれば、 [a-z] 
+は ASCII 文字 a-z 、そして 'A'、'B'などにもマッチするが、
+'z'のすぐあとに並んでいる 'Z'にはマッチしない。
+このロケール特有の振る舞いは 翻訳するときにregbase::nocollate 
+フラグを設定することで、不可能にすることができる。
+これは regbase::normal を使ったときのデフォルトの振る舞いであり、
+文字範囲が ASCII 文字コードに基づいて並んでいることを強制する。
+同様に、もし POSIX C API 関数をつかうなら、 REG_NOCOLLATE 
+を設定することでロケールに依存する並びを無効にすることができる。</p>
+
+<!--<p>Character classes are denoted using the syntax &quot;[:classname:]&quot;
+within a set declaration, for example &quot;[[:space:]]&quot; is
+the set of all whitespace characters. Character classes are only
+available if the flag regbase::char_classes is set. The available
+character classes are: <br>
+&nbsp; </p>-->
+<p>文字クラスは、文字集合の中で、構文 &quot;[:classname:]&quot; を使うことで表現される。
+例えば、 &quot;[[:space:]]&quot; は全ての空白文字の集合である。
+文字クラスは regbase::char_classes フラグが設定されているときのみ利用できる。
+利用できる文字クラスは:<br>
+&nbsp; </p>
+
+<table border="0" cellpadding="7" cellspacing="0" width="100%">
+    <tr>
+        <td width="5%">&nbsp;</td>
+        <td valign="top" width="50%">alnum</td>
+<!--        <td valign="top" width="50%">Any alpha numeric character.</td>-->
+        <td valign="top" width="50%">全ての数字とアルファベット</td>
+        <td width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td valign="top" width="50%">alpha</td>
+<!--        <td valign="top" width="50%">Any alphabetical character a-z
+        and A-Z. Other characters may also be included depending
+        upon the locale.</td>-->
+        <td valign="top" width="50%">a-z と A-Z の全てのアルファベット。
+	ロケールによっては他の文字も含まれるかもしれない。</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td valign="top" width="50%">blank</td>
+<!--        <td valign="top" width="50%">Any blank character, either
+        a space or a tab.</td>-->
+        <td valign="top" width="50%">スペースかタブの、あらゆる空白文字</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td valign="top" width="50%">cntrl</td>
+<!--        <td valign="top" width="50%">Any control character.</td>-->
+        <td valign="top" width="50%">全ての制御文字</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td valign="top" width="50%">digit</td>
+<!--        <td valign="top" width="50%">Any digit 0-9.</td>-->
+        <td valign="top" width="50%">0-9 の全ての数字</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td valign="top" width="50%">graph</td>
+<!--        <td valign="top" width="50%">Any graphical character.</td>-->
+        <td valign="top" width="50%">空白以外の印刷可能文字</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td valign="top" width="50%">lower</td>
+<!--        <td valign="top" width="50%">Any lower case character a-z.
+        Other characters may also be included depending upon the
+        locale.</td>-->
+        <td valign="top" width="50%">a-z の全ての小文字。
+	ロケールによっては他の文字も含まれるかもしれない。</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td valign="top" width="50%">print</td>
+<!--        <td valign="top" width="50%">Any printable character.</td>-->
+        <td valign="top" width="50%">全ての印刷可能な文字</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td valign="top" width="50%">punct</td>
+<!--        <td valign="top" width="50%">Any punctuation character.</td>-->
+        <td valign="top" width="50%">全ての句読点</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td valign="top" width="50%">space</td>
+        <td valign="top" width="50%">全ての空白文字</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td valign="top" width="50%">upper</td>
+<!--        <td valign="top" width="50%">Any upper case character A-Z.
+        Other characters may also be included depending upon the
+        locale.</td>-->
+        <td valign="top" width="50%">A-Z の全ての大文字。
+	ロケールによっては他の文字も含まれるかもしれない。</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td valign="top" width="50%">xdigit</td>
+<!--        <td valign="top" width="50%">Any hexadecimal digit
+        character, 0-9, a-f and A-F.</td>-->
+        <td valign="top" width="50%">全ての16進文字。0-9, a-f, A-F。</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td valign="top" width="50%">word</td>
+<!--        <td valign="top" width="50%">Any word character - all
+        alphanumeric characters plus the underscore.</td>-->
+        <td valign="top" width="50%">全ての単語形成文字。つまり、
+	全てのアルファベットとアンダースコア。</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td valign="top" width="50%">unicode</td>
+<!--        <td valign="top" width="50%">Any character whose code is
+        greater than 255, this applies to the wide character
+        traits classes only.</td>-->
+        <td valign="top" width="50%">文字コードが 255 より大きい全ての文字。
+	これはワイド文字特性クラスだけに適用される。</td>
+        <td>&nbsp;</td>
+    </tr>
+</table>
+
+<!--<p>There are some shortcuts that can be used in place of the
+character classes, provided the flag regbase::escape_in_lists is
+set then you can use: </p>-->
+<p>文字クラスの代わりに使うことができる略記がいくつかある。
+これらは regbase::escape_in_lists フラグが設定されていときに使うことができる。</p>
+
+<!--<p>\w in place of [:word:] </p>
+
+<p>\s in place of [:space:] </p>
+
+<p>\d in place of [:digit:] </p>
+
+<p>\l in place of [:lower:] </p>
+
+<p>\u in place of [:upper:] <br>
+&nbsp; <br>
+&nbsp; </p>-->
+<p>\w in place of [:word:] </p>
+
+<p>\s in place of [:space:] </p>
+
+<p>\d in place of [:digit:] </p>
+
+<p>\l in place of [:lower:] </p>
+
+<p>\u in place of [:upper:] <br>
+&nbsp; <br>
+&nbsp; </p>
+
+<!--<p>Collating elements take the general form [.tagname.] inside a
+set declaration, where <i>tagname</i> is either a single
+character, or a name of a collating element, for example [[.a.]]
+is equivalent to [a], and [[.comma.]] is equivalent to [,]. The
+library supports all the standard POSIX collating element names,
+and in addition the following digraphs: &quot;ae&quot;, &quot;ch&quot;,
+&quot;ll&quot;, &quot;ss&quot;, &quot;nj&quot;, &quot;dz&quot;,
+&quot;lj&quot;, each in lower, upper and title case variations.
+Multi-character collating elements can result in the set matching
+more than one character, for example [[.ae.]] would match two
+characters, but note that [^[.ae.]] would only match one
+character. <br>
+&nbsp; <br>
+&nbsp; </p>-->
+<p>照合要素は文字集合宣言の中での [.tagname.] という一般的な形式をとる。
+<i>tagname</i> は一文字か、照合要素の名前である。
+たとえば、 [[.a.]] は [a] と等価であり、 [[.comma.]] は [,] と等価である。
+ライブラリは全ての標準 POSIX の照合要素名に加えて、以下の連字サポートしている:
+&quot;ae&quot;, &quot;ch&quot;, &quot;ll&quot;, &quot;ss&quot;, 
+&quot;nj&quot;, &quot;dz&quot;, &quot;lj&quot;, それぞれ小文字、大文字、
+タイトルケース版がある。
+マルチ文字照合要素は結局、一文字より多くにマッチする集合である。
+例えば、 [[.ae.]] は2文字にマッチするが、 [^[.ae.]] は一文字にしかマッチしないことに
+注意せよ。<br>
+&nbsp; <br>
+&nbsp; </p>
+
+<!--<p>Equivalence classes take the general form [=tagname=] inside a
+set declaration, where <i>tagname</i> is either a single
+character, or a name of a collating element, and matches any
+character that is a member of the same primary equivalence class
+as the collating element [.tagname.]. An equivalence class is a
+set of characters that collate the same, a primary equivalence
+class is a set of characters whose primary sort key are all the
+same (for example strings are typically collated by character,
+then by accent, and then by case; the primary sort key then
+relates to the character, the secondary to the accentation, and
+the tertiary to the case). If there is no equivalence class
+corresponding to <i>tagname</i>, then [=tagname=] is exactly the
+same as [.tagname.]. Unfortunately there is no locale independent
+method of obtaining the primary sort key for a character, except
+under Win32. For other operating systems the library will &quot;guess&quot;
+the primary sort key from the full sort key (obtained from <i>strxfrm</i>),
+so equivalence classes are probably best considered broken under
+any operating system other than Win32. <br>
+&nbsp; <br>
+&nbsp; </p>-->
+<p>等価クラスは文字集合宣言の中で [=tagname=] という一般的な形式をとる。
+<i>tagname</i> は一文字か、照合要素の名前である。
+これは、照合要素 [.tagname.] と同じ第一等価クラスの要素である、
+あらゆる文字とマッチする。
+等価クラスは照合順序が同じ文字集合である。
+第一等価クラスは、第一のソートキーがすべて同じである文字集合である
+(例えば文字列は典型的に文字によって並べられ、続いてアクセント、
+そして大文字/小文字によって並べられる。この時、第一のソートキーは文字に関係し、
+第二のそれはアクセントに、第三のそれは大文字/小文字である)。
+もし <i>tagname</i> に対応する等価クラスがなければ、[=tagname=] 
+は実際には [.tagname.] と同じである。 不幸にも、Win32 環境を除いては、
+文字に対する第一のソートキーをロケールに依存しないで得る方法はない。
+他のOSでは、ライブラリは(<i>strxfrm</i>から得た)全部のソートキーから、
+第一のソートキーを「推測する」ので、等価クラスはおそらく、 Win32 以外の
+OS では最も不確実だと考えられる。<br>
+&nbsp; <br>
+&nbsp; </p>
+
+<!--<p>To include a literal &quot;-&quot; in a set declaration then:
+make it the first character after the opening &quot;[&quot; or
+&quot;[^&quot;, the endpoint of a range, a collating element, or
+if the flag regbase::escape_in_lists is set then precede with an
+escape character as in &quot;[\-]&quot;. To include a literal
+&quot;[&quot; or &quot;]&quot; or &quot;^&quot; in a set then
+make them the endpoint of a range, a collating element, or
+precede with an escape character if the flag regbase::escape_in_lists
+is set. <br>
+&nbsp; <br>
+&nbsp; </p>-->
+<p>文字集合の中にリテラル &quot;-&quot; を含むためには、
+それを 開き括弧 &quot;[&quot; 、 &quot;[^&quot; 、
+範囲指定の端、または照合要素に続く最初の文字にしなければならない。
+regbase::escape_in_lists フラグが設定されているなら、
+&quot;[\-]&quot; のようにエスケープ文字に続けてもよい。
+リテラル &quot;[&quot; 、 &quot;]&quot; と &quot;^&quot; を文字集合に含めるには、
+範囲指定の端、照合要素、またはもし regbase::escape_in_lists フラグが設定されているなら、
+エスケープ文字に続けてもよい。<br>
+&nbsp; <br>
+&nbsp; </p>
+
+<!--<p><i>Line anchors</i> </p>-->
+<p><i>ラインアンカ</i> </p>
+
+<!--<p>An anchor is something that matches the null string at the
+start or end of a line: &quot;^&quot; matches the null string at
+the start of a line, &quot;$&quot; matches the null string at the
+end of a line. <br>
+&nbsp; <br>
+&nbsp; </p>-->
+<p>アンカは 行頭及び行末で null 文字に一致するものである:
+&quot;^&quot; は行頭の null 文字に一致し、
+&quot;$&quot; は行末の null 文字に一致する。<br>
+&nbsp; <br>
+&nbsp; </p>
+
+<!--<p><i>Back references</i> </p>-->
+<p><i>後方参照</i> </p>
+
+<!--<p>A back reference is a reference to a previous sub-expression
+that has already been matched, the reference is to what the sub-expression
+matched, not to the expression itself. A back reference consists
+of the escape character &quot;\&quot; followed by a digit &quot;1&quot;
+to &quot;9&quot;, &quot;\1&quot; refers to the first sub-expression,
+&quot;\2&quot; to the second etc. For example the expression
+&quot;(.*)\1&quot; matches any string that is repeated about its
+mid-point for example &quot;abcabc&quot; or &quot;xyzxyz&quot;. A
+back reference to a sub-expression that did not participate in
+any match, matches the null string: NB this is different to some
+other regular expression matchers. Back references are only
+available if the expression is compiled with the flag regbase::bk_refs
+set. <br>
+&nbsp; <br>
+&nbsp; </p>-->
+<p>後方参照は、既に一致した、先行する子表現への参照である。
+これは、一致した子表現に対する参照であり、表現そのものに対する参照ではない。
+後方参照はエスケープ文字 &quot;\&quot; に数字 &quot;1&quot; から
+&quot;9&quot; を続けることで出来る。
+&quot;\1&quot; は最初の子表現に、 &quot;\2&quot; は2番目の正規表現に、
+といった具合である。
+例えば正規表現 &quot;(.*)\1&quot; は中間点について繰り返される
+あらゆる文字列に一致する(訳注:文字列の前半と後半が同じであるということ)。
+例えば、 &quot;abcabc&quot; や &quot;xyzxyz&quot; である。
+どんな一致も起こらない子表現への後方参照は、 null 文字列に一致する:
+これが他のいくつかの正規表現の一致とは異なることに注意せよ。
+後方参照は正規表現がフラグ regbase::bk_refs を設定されてコンパイルされた時のみ
+利用できる。<br>
+&nbsp; <br>
+&nbsp; </p>
+
+<!--<p><i>Characters by code</i> </p>-->
+<p><i>コードによる文字</i> </p>
+
+<!--<p>This is an extension to the algorithm that is not available in
+other libraries, it consists of the escape character followed by
+the digit &quot;0&quot; followed by the octal character code. For
+example &quot;\023&quot; represents the character whose octal
+code is 23. Where ambiguity could occur use parentheses to break
+the expression up: &quot;\0103&quot; represents the character
+whose code is 103, &quot;(\010)3 represents the character 10
+followed by &quot;3&quot;. To match characters by their
+hexadecimal code, use \x followed by a string of hexadecimal
+digits, optionally enclosed inside {}, for example \xf0 or
+\x{aff}, notice the latter example is a Unicode character. <br>
+&nbsp; <br>
+&nbsp; </p>-->
+<p>これは他のライブラリでは利用できないアルゴリズムへの拡張である。
+コードはエスケープ文字と、それに続く数字 &quot;0&quot; と、
+更にそれに、8進数の文字コードを続けることで成り立つ。
+例えば、 &quot;\023&quot; はその8進文字コードが 23 である文字をあらわす。
+曖昧になるような場合、正規表現を区切るのに丸括弧を利用すること:
+&quot;\0103&quot; は文字コードが 103 の文字をあらわし、
+&quot;(\010)3&quot; は文字コードが 10 の文字と、それに続く
+&quot;3&quot; をあらわす。
+16進コードで文字を一致させるには、 \x に 16 進の文字列を続ける。
+この文字列は {} の中に閉じ込めることも可能である。例えば、
+\xf0 や \x{aff} など。後者はユニコード文字である。<br>
+&nbsp; <br>
+&nbsp; </p>
+
+<!--<p><i>Word operators</i> </p>-->
+<p><i>単語演算子</i> </p>
+
+<!--<p>The following operators are provided for compatibility with
+the GNU regular expression library. </p>-->
+<p>次の演算子は GNU 正規表現ライブラリとの互換性のために提供されている。</p>
+
+<!--<p>&quot;\w&quot; matches any single character that is a member
+of the &quot;word&quot; character class, this is identical to the
+expression &quot;[[:word:]]&quot;. </p>-->
+<p>&quot;\w&quot; は &quot;word&quot 文字クラスの要素であるあらゆる1文字に一致する。
+これは表現 &quot;[[:word:]]&quot; と同じである。</p>
+
+<!--<p>&quot;\W&quot; matches any single character that is not a
+member of the &quot;word&quot; character class, this is identical
+to the expression &quot;[^[:word:]]&quot;. </p>-->
+<p>&quot;\W&quot; は &quot;word&quot 文字クラスの要素ではないあらゆる1文字に一致する。
+これは表現 &quot;[^[:word:]]&quot; と同じである。</p>
+
+<!--<p>&quot;\&lt;&quot; matches the null string at the start of a
+word. </p>
+
+<p>&quot;\&gt;&quot; matches the null string at the end of the
+word. </p>-->
+<p>&quot;\&lt;&quot; は単語の先頭の null 文字列に一致する。</p>
+
+<p>&quot;\&gt;&quot; は単語の終端の null 文字列に一致する。</p>
+
+<!--<p>&quot;\b&quot; matches the null string at either the start or
+the end of a word. </p>-->
+<p>&quot;\b&quot; は単語の先頭及び終端の null 文字列に一致する。</p>
+
+<!--<p>&quot;\B&quot; matches a null string within a word. </p>-->
+<p>&quot;\B&quot; は単語の中の null 文字列に一致する。</p>
+
+<!--<p>The start of the sequence passed to the matching algorithms is
+considered to be a potential start of a word unless the flag
+match_not_bow is set. The end of the sequence passed to the
+matching algorithms is considered to be a potential end of a word
+unless the flag match_not_eow is set. <br>
+&nbsp; <br>
+&nbsp; </p>-->
+<p>一致判定アルゴリズムに渡されるシーケンスの先頭は、
+フラグ match_not_bow が設定されていない限り、
+単語の先頭の可能性があると考えられる。
+一致判定アルゴリズムに渡されるシーケンスの終端は、
+フラグ match_not_eow が設定されていない限り、
+単語の終端の可能性があると考えられる。<br>
+&nbsp; <br>
+&nbsp; </p>
+
+<!--<p><i>Buffer operators</i> </p>-->
+<p><i>バッファ演算子</i> </p>
+
+<!--<p>The following operators are provide for compatibility with the
+GNU regular expression library, and Perl regular expressions: </p>-->
+<p>次の演算子は GNU 正規表現ライブラリ、及び Perl 正規表現との互換性のために
+提供されている:</p>
+
+<!--<p>&quot;\`&quot; matches the start of a buffer. </p>
+
+<p>&quot;\A&quot; matches the start of the buffer. </p>
+
+<p>&quot;\'&quot; matches the end of a buffer. </p>
+
+<p>&quot;\z&quot; matches the end of a buffer. </p>
+
+<p>&quot;\Z&quot; matches the end of a buffer, or possibly one or
+more new line characters followed by the end of the buffer. </p>-->
+<p>&quot;\`&quot; はバッファの先頭に一致する。</p>
+
+<p>&quot;\A&quot; はバッファの先頭に一致する。</p>
+
+<p>&quot;\'&quot; はバッファの終端に一致する。</p>
+
+<p>&quot;\z&quot; はバッファの終端に一致する。</p>
+
+<p>&quot;\Z&quot; はバッファの終端に一致する。
+または可能であれば、バッファの終端が続く1つ以上の改行文字に一致する。</p>
+
+<!--<p>A buffer is considered to consist of the whole sequence passed
+to the matching algorithms, unless the flags match_not_bob or
+match_not_eob are set. <br>
+&nbsp; <br>
+&nbsp; </p>-->
+<p>フラグ match_not_bob 及び match_not_eob が設定されていない限り、
+バッファは一致判定アルゴリズムに渡されるシーケンス全体で出来ていると考えられる。<br>
+&nbsp; <br>
+&nbsp; </p>
+
+<!--<p><i>Escape operator</i> </p>-->
+<p><i>エスケープ演算子</i> </p>
+
+<!--<p>The escape character &quot;\&quot; has several meanings. </p>-->
+<p>エスケープ文字 &quot;\&quot; は多くの一致を持つ。</p>
+
+<!--<p>Inside a set declaration the escape character is a normal
+character unless the flag regbase::escape_in_lists is set in
+which case whatever follows the escape is a literal character
+regardless of its normal meaning. </p>-->
+<p>集合宣言の中ではエスケープ文字は、フラグ regbase::escape_in_lists
+が設定されていない限り通常の文字である。
+この場合、エスケープに続くどんな文字も、その通常の意味に関わらずリテラル文字である。</p>
+
+<!--<p>The escape operator may introduce an operator for example:
+back references, or a word operator. </p>-->
+<p>エスケープ演算子は例えば、後方参照や単語演算子などの演算子を導入する。</p>
+
+<!--<p>The escape operator may make the following character normal,
+for example &quot;\*&quot; represents a literal &quot;*&quot;
+rather than the repeat operator. <br>
+&nbsp; <br>
+&nbsp; </p>-->
+<p>エスケープ演算子は、それに続く文字を通常の文字にすることもある。
+例えば、&quot;\*&quot; は繰り返し演算子ではなく、
+リテラル &quot;*&quot; をあらわす。<br>
+&nbsp; <br>
+&nbsp; </p>
+
+<!--<p><i>Single character escape sequences</i> </p>-->
+<p><i>単一文字エスケープシーケンス</i> </p>
+
+<!--<p>The following escape sequences are aliases for single
+characters: <br>
+&nbsp; </p>-->
+<p>次のエスケープシーケンスは単一文字の略記である:<br>
+&nbsp; </p>
+
+<table border="0" cellpadding="7" cellspacing="0" width="100%">
+    <tr>
+        <td width="5%">&nbsp;</td>
+<!--        <td valign="top" width="33%">Escape sequence </td>
+        <td valign="top" width="33%">Character code </td>
+        <td valign="top" width="33%">Meaning </td>-->
+        <td valign="top" width="33%">エスケープシーケンス </td>
+        <td valign="top" width="33%">文字コード </td>
+        <td valign="top" width="33%">意味 </td>
+        <td width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td valign="top" width="33%">\a </td>
+        <td valign="top" width="33%">0x07 </td>
+<!--        <td valign="top" width="33%">Bell character. </td>-->
+        <td valign="top" width="33%">ベル文字 </td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td valign="top" width="33%">\f </td>
+        <td valign="top" width="33%">0x0C </td>
+<!--        <td valign="top" width="33%">Form feed. </td>-->
+        <td valign="top" width="33%">フォームフィード(FF)文字 </td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td valign="top" width="33%">\n </td>
+        <td valign="top" width="33%">0x0A </td>
+<!--        <td valign="top" width="33%">Newline character. </td>-->
+        <td valign="top" width="33%">改行文字 </td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td valign="top" width="33%">\r </td>
+        <td valign="top" width="33%">0x0D </td>
+<!--        <td valign="top" width="33%">Carriage return. </td>-->
+        <td valign="top" width="33%">復帰(キャリッジリターン) </td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td valign="top" width="33%">\t </td>
+        <td valign="top" width="33%">0x09 </td>
+<!--        <td valign="top" width="33%">Tab character. </td>-->
+        <td valign="top" width="33%">タブ文字 </td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td valign="top" width="33%">\v </td>
+        <td valign="top" width="33%">0x0B </td>
+<!--        <td valign="top" width="33%">Vertical tab. </td>-->
+        <td valign="top" width="33%">垂直タブ </td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td valign="top" width="33%">\e </td>
+        <td valign="top" width="33%">0x1B </td>
+<!--        <td valign="top" width="33%">ASCII Escape character. </td>-->
+        <td valign="top" width="33%">ASCII エスケープ文字</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td valign="top" width="33%">\0dd </td>
+        <td valign="top" width="33%">0dd </td>
+<!--        <td valign="top" width="33%">An octal character code,
+        where <i>dd</i> is one or more octal digits. </td>-->
+        <td valign="top" width="33%">8進文字コード。 <i>dd</i> は1文字以上の8進文字</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td valign="top" width="33%">\xXX </td>
+        <td valign="top" width="33%">0xXX </td>
+<!--        <td valign="top" width="33%">A hexadecimal character
+        code, where XX is one or more hexadecimal digits. </td>-->
+        <td valign="top" width="33%">16進文字コード。 XX は1文字以上の16進文字</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td valign="top" width="33%">\x{XX} </td>
+        <td valign="top" width="33%">0xXX </td>
+<!--        <td valign="top" width="33%">A hexadecimal character
+        code, where XX is one or more hexadecimal digits,
+        optionally a unicode character. </td>-->
+        <td valign="top" width="33%">16進文字コード。 XX は1文字以上の16進文字。
+	ユニコード文字でもよい。</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td valign="top" width="33%">\cZ </td>
+        <td valign="top" width="33%">z-@ </td>
+<!--        <td valign="top" width="33%">An ASCII escape sequence
+        control-Z, where Z is any ASCII character greater than or
+        equal to the character code for '@'. </td>-->
+        <td valign="top" width="33%">ASCII エスケープシーケンス control-Z。
+	Z は '@' の文字コードに等しいか、それより大きければどんな ASCII 文字でもよい。</td>
+        <td>&nbsp;</td>
+    </tr>
+</table>
+
+<p><br>
+&nbsp; </p>
+
+<!--<p><i>Miscellaneous escape sequences:</i> </p>-->
+<p><i>様々なエスケープシーケンス</i></p>
+
+<!--<p>The following are provided mostly for perl compatibility, but
+note that there are some differences in the meanings of \l \L \u
+and \U: <br>
+&nbsp; </p>-->
+<p>次のものの多くは perl との互換性のために提供されている。
+しかし、 \l \L \u \U の意味はいくらか異なることに注意せよ。<br>
+&nbsp; </p>
+
+<table border="0" cellpadding="6" cellspacing="0" width="100%">
+    <tr>
+        <td width="5%">&nbsp;</td>
+        <td valign="top" width="45%">\w </td>
+<!--        <td valign="top" width="45%">Equivalent to [[:word:]]. </td>-->
+        <td valign="top" width="45%">[[:word:]] と等価 </td>
+        <td width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td width="5%">&nbsp;</td>
+        <td valign="top" width="45%">\W </td>
+<!--        <td valign="top" width="45%">Equivalent to [^[:word:]]. </td>-->
+        <td valign="top" width="45%"> [^[:word:]] と等価 </td>
+        <td width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td width="5%">&nbsp;</td>
+        <td valign="top" width="45%">\s </td>
+<!--        <td valign="top" width="45%">Equivalent to [[:space:]]. </td>-->
+        <td valign="top" width="45%"> [[:space:]] と等価 </td>
+        <td width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td width="5%">&nbsp;</td>
+        <td valign="top" width="45%">\S </td>
+<!--        <td valign="top" width="45%">Equivalent to [^[:space:]]. </td>-->
+        <td valign="top" width="45%"> [^[:space:]] と等価</td>
+        <td width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td width="5%">&nbsp;</td>
+        <td valign="top" width="45%">\d </td>
+<!--        <td valign="top" width="45%">Equivalent to [[:digit:]]. </td>-->
+        <td valign="top" width="45%"> [[:digit:]] と等価 </td>
+        <td width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td width="5%">&nbsp;</td>
+        <td valign="top" width="45%">\D </td>
+<!--        <td valign="top" width="45%">Equivalent to [^[:digit:]]. </td>-->
+        <td valign="top" width="45%"> [^[:digit:]] と等価 </td>
+        <td width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td width="5%">&nbsp;</td>
+        <td valign="top" width="45%">\l </td>
+<!--        <td valign="top" width="45%">Equivalent to [[:lower:]]. </td>-->
+        <td valign="top" width="45%"> [[:lower:]] と等価 </td>
+        <td width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td width="5%">&nbsp;</td>
+        <td valign="top" width="45%">\L </td>
+<!--        <td valign="top" width="45%">Equivalent to [^[:lower:]]. </td>-->
+        <td valign="top" width="45%"> [^[:lower:]] と等価 </td>
+        <td width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td width="5%">&nbsp;</td>
+        <td valign="top" width="45%">\u </td>
+<!--        <td valign="top" width="45%">Equivalent to [[:upper:]]. </td>-->
+        <td valign="top" width="45%"> [[:upper:]] と等価 </td>
+        <td width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td width="5%">&nbsp;</td>
+        <td valign="top" width="45%">\U </td>
+<!--        <td valign="top" width="45%">Equivalent to [^[:upper:]]. </td>-->
+        <td valign="top" width="45%"> [^[:upper:]] と等価 </td>
+        <td width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td width="5%">&nbsp;</td>
+        <td valign="top" width="45%">\C </td>
+<!--        <td valign="top" width="45%">Any single character,
+        equivalent to '.'. </td>-->
+        <td valign="top" width="45%">あらゆる1文字。 '.' と等価 </td>
+        <td width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td width="5%">&nbsp;</td>
+        <td valign="top" width="45%">\X </td>
+<!--        <td valign="top" width="45%">Match any Unicode combining
+        character sequence, for example &quot;a\x 0301&quot; (a
+        letter a with an acute). </td>-->
+        <td valign="top" width="45%">あらゆるユニコード複合文字シーケンスに一致する。
+	例えば、 &quot;a\x 0301&quot; (鋭アクセントをもつ文字)</td>
+        <td width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td width="5%">&nbsp;</td>
+        <td valign="top" width="45%">\Q </td>
+<!--        <td valign="top" width="45%">The begin quote operator,
+        everything that follows is treated as a literal character
+        until a \E end quote operator is found. </td>-->
+        <td valign="top" width="45%">引用符開始演算子。
+	これに続く全ては 引用符終了演算子 \E が発見されるまでリテラル文字として扱われる。</td>
+        <td width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td width="5%">&nbsp;</td>
+        <td valign="top" width="45%">\E </td>
+<!--        <td valign="top" width="45%">The end quote operator,
+        terminates a sequence begun with \Q. </td>-->
+        <td valign="top" width="45%">引用符終了演算子。 \Q で始まったシーケンスを終了させる。</td>
+        <td width="5%">&nbsp;</td>
+    </tr>
+</table>
+
+<p><br>
+&nbsp; </p>
+
+<!--<p><i>What gets matched?</i> </p>-->
+<p><i>何が一致するのか?</i> </p>
+
+<!--<p>The regular expression library will match the first possible
+matching string, if more than one string starting at a given
+location can match then it matches the longest possible string,
+unless the flag match_any is set, in which case the first match
+encountered is returned. Use of the match_any option can reduce
+the time taken to find the match - but is only useful if the user
+is less concerned about what matched - for example it would not
+be suitable for search and replace operations. In cases where
+their are multiple possible matches all starting at the same
+location, and all of the same length, then the match chosen is
+the one with the longest first sub-expression, if that is the
+same for two or more matches, then the second sub-expression will
+be examined and so on. <br>
+</p>-->
+<p>正規表現ライブラリは、可能な限り最初の一致文字列と一致する。
+もし与えられた場所で始まる一つ以上の文字列が一致可能なら、
+フラグ match_any が設定されていない限り、
+可能な限り長い文字列に一致する。
+そして出会った最初の一致が返される。
+match_any フラグを設定することで、一致を発見するのにかかる時間を削減することが出来る。
+しかしこれは、ユーザが何が一致するかに関心がないときのみ役に立つ。
+例えば、検索と置換の操作には適していない。
+同じ場所で始まる複数の可能な一致があるような場合、
+そしてそれら全てが同じ長さである場合、
+選ばれる一致は最も長い最初の子表現を持つものである。
+ふたつ目以上の一致でもそれが同じなら、2番目の子表現が試され、
+3番目・・・と続いていく。<br>
+</p>
+
+<hr>
+
+<p><i>Copyright </i><a href="mailto:John_Maddock@compuserve.com"><i>Dr
+John Maddock</i></a><i> 1998-2000 all rights reserved.</i> </p>
+<hr align="left">
+<p><i>Japanese Translation Copyright (C) 2003 <a href="mailto:k_takahashi@cppll.jp">Kohske Takahashi</a></i></p>
+<p>
+オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の
+複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」
+に提供されており、いかなる明示的、暗黙的保証も行わない。また、
+いかなる目的に対しても、その利用が適していることを関知しない。
+</p>
+
+</body>
+</html>

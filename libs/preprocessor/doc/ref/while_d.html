@@ -1,0 +1,122 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=EUC-JP"><!--*- encoding: euc-jp -*-->
+	<title>BOOST_PP_WHILE_d</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">
+</head>
+<body>
+	<div style="margin-left:  0px;">
+		<b>BOOST_PP_WHILE_<i>d</i></b> マクロは <b>BOOST_PP_WHILE</b> のループ構築への再入を表す。
+	</div>
+	<h4>Usage</h4>
+		<div class="code">
+			<b>BOOST_PP_WHILE_</b> ## <i>d</i>(<i>pred</i>, <i>op</i>, <i>state</i>)
+		</div>
+	<h4>Arguments</h4>
+		<dl>
+			<dt>d</dt>
+			<dd>
+			利用可能な次の <b>BOOST_PP_WHILE</b> の繰り返し。
+			</dd>
+			<dt>pred</dt>
+			<dd>
+			<i>pred</i>(<i>d</i>, <i>state</i>) という形の二項述語。
+			この述語は <b>BOOST_PP_WHILE</b> によって、
+			利用可能な次の繰り返し <i>d</i> と現在の <i>state</i> に展開される。
+			この述語は <i>0</i> から <b>BOOST_PP_LIMIT_MAG</b> までの範囲の値に展開されなければならない。
+			構築は、述語が <i>0</i> を返すまでループし続ける。
+			この述語が <i>0</i> を返したとき、 <b>BOOST_PP_WHILE</b> は現在の <i>state</i> を返す。
+			</dd>
+			<dt>op</dt>
+			<dd>
+			<i>op</i>(<i>d</i>, <i>state</i>) という形の二項演算。
+			この演算は <b>BOOST_PP_WHILE</b> によって利用可能な次の繰り返し <i>d</i>
+			と現在の <i>state</i> に展開される。
+			このマクロは <i>pred</i> が <i>0</i> を返すまで、
+			新しい <i>state</i> を生成しながら、繰り返し <i>state</i> に展開される。
+			</dd>
+			<dt>state</dt>
+			<dd>
+			初期状態。
+			この引数はたいてい <i>タプル</i> である。
+			</dd>
+		</dl>
+	<h4>Remarks</h4>
+		<div>
+		このマクロは <i>pred</i>(<i>d</i>, <i>state</i>) が非 0 の間、
+		<i>op</i>(<i>d</i>, <i>state</i>) を繰り返す。
+		すなわち、次のように展開される:
+			<div>
+				<i>op</i>(<i>d</i>, ... <i>op</i>(<i>d</i>, <i>op</i>(<i>d</i>, <i>state</i>)) ... ).
+			</div>
+		</div>
+		<div>
+		ある時は、プリプロセッサのトークンペースト演算子ではなく、
+		<b>BOOST_PP_CAT</b> で文字列結合をする必要があるかもしれない。
+		この時は <i>d</i> の値はマクロ呼び出しそのものである。
+		これを展開するには遅延が必要である。
+		このような状況での構文は次のようになるだろう。
+			<div>
+				<b>BOOST_PP_CAT</b>(<b>BOOST_PP_WHILE_</b>, <i>d</i>)(<i>pred</i>, <i>op</i>, <i>state</i>).
+			</div>
+		</div>
+		<div>
+		以前、 <i>d</i> を直接 <b>BOOST_PP_WHILE</i> につなげる (アンダースコアを挟まない) ことが可能だった。
+		これは現在ではサポートされていない。
+		</div>
+	<h4>See Also</h4>
+		<ul>
+			<li><a href="cat.html">BOOST_PP_CAT</a></li>
+			<li><a href="limit_mag.html">BOOST_PP_LIMIT_MAG</a></li>
+			<li><a href="while.html">BOOST_PP_WHILE</a></li>
+		</ul>
+	<h4>Requirements</h4>
+		<div>
+			<b>Header:</b> &nbsp;<a href="../headers/control/while.hpp.html">&lt;boost/preprocessor/control/while.hpp&gt;</a>
+		</div>
+	<h4>Sample Code</h4>
+<div><pre>
+#include &lt;<a href="../headers/arithmetic/add.hpp.html">boost/preprocessor/arithmetic/add.hpp</a>&gt;
+#include &lt;<a href="../headers/arithmetic/dec.hpp.html">boost/preprocessor/arithmetic/dec.hpp</a>&gt;
+#include &lt;<a href="../headers/array/elem.hpp.html">boost/preprocessor/array/elem.hpp</a>&gt;
+#include &lt;<a href="../headers/array/size.hpp.html">boost/preprocessor/array/size.hpp</a>&gt;
+#include &lt;<a href="../headers/control/while.hpp.html">boost/preprocessor/control/while.hpp</a>&gt;
+#include &lt;<a href="../headers/tuple/elem.hpp.html">boost/preprocessor/tuple/elem.hpp</a>&gt;
+
+#define PRED(d, data) <a href="tuple_elem.html">BOOST_PP_TUPLE_ELEM</a>(3, 1, data)
+
+#define OP(d, data) \
+   OP_D( \
+      d, \
+      <a href="tuple_elem.html">BOOST_PP_TUPLE_ELEM</a>(3, 0, data), \
+      <a href="tuple_elem.html">BOOST_PP_TUPLE_ELEM</a>(3, 1, data), \
+      <a href="tuple_elem.html">BOOST_PP_TUPLE_ELEM</a>(3, 2, data) \
+   ) \
+   /**/
+
+#define OP_D(d, res, i, array) \
+   ( \
+      <a href="add_d.html">BOOST_PP_ADD_D</a>( \
+         d, res, \
+         <a href="array_elem.html">BOOST_PP_ARRAY_ELEM</a>(<a href="dec.html">BOOST_PP_DEC</a>(i), array)), \
+      <a href="dec.html">BOOST_PP_DEC</a>(i), \
+      array \
+   ) \
+   /**/
+
+#define ACCUMULATE_D(d, array) \
+   <a href="tuple_elem.html">BOOST_PP_TUPLE_ELEM</a>( \
+      3, 0, \
+      <a href="while_d.html">BOOST_PP_WHILE_</a> ## d( \
+         PRED, OP, \
+         (0, <a href="array_size.html">BOOST_PP_ARRAY_SIZE</a>(array), array) \
+      ) \
+   ) \
+   /**/
+
+#define ARRAY (4, (1, 2, 3, 4))
+
+ACCUMULATE_D(1, ARRAY)// expands to 10
+</pre></div>
+</body>
+</html>

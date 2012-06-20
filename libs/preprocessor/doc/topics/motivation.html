@@ -1,0 +1,96 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=euc-jp"></meta>
+	<title>motivation.html</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">
+</head>
+<body>
+<h4>動機</h4>
+<div>
+	C++の関数やテンプレートの引数リストは特別な構文によって組み立てられるもので、C++の式によって構成したり操作したりできない。このことによってコードを無駄に反復してしまうことがある。
+</div>
+<div>
+	例としてBoostの<code>is_function&lt;&gt;</code>メタ関数の実装を見てみよう。
+	この実装は、型が関数へのポインタへ変換できるかどうかを調べる<code>is_function_tester()</code>多重定義関数を使っている。
+	引数リストは特別な取扱いがされるため、任意個の引数を持つ関数に直接マッチさせることはできない。
+	そのかわりに、関数<code>is_function_tester()</code>はサポートされる全ての引数の個数ごとに別々に定義されなければならない。
+	例えば次の通り:
+</div>
+<div class="code"><pre>
+template&lt;class R&gt;
+yes_type is_function_tester(R (*)());
+
+template&lt;class R, class A0&gt;
+yes_type is_function_tester(R (*)(A0));
+
+template&lt;class R, class A0, class A1&gt;
+yes_type is_function_tester(R (*)(A0, A1));
+
+template&lt;class R, class A0, class A1, class A2&gt;
+yes_type is_function_tester(R (*)(A0, A1, A2));
+
+// ...
+</pre></div>
+<div>
+	このような種類の繰り返しは総称的なコンポーネントやメタプログラミングのための機能の実装をする際に頻繁に起きる。
+</div>
+<h4>典型的な解決法</h4>
+<div>
+	典型的には、このような繰り返しは手動で解決される。
+	手動による繰り返しは生産的ではないが、訓練されていない人間の目にはそのようなコードが読みやすいことがある。
+</div>
+<div>
+	ほかの解決法としては、繰り返しを生成する外部プログラムを使うことや、高度なエディタなどを使う方法がある。
+	残念ながら、外部の生成プログラムを使う方法はたくさんの欠点がある:
+	<ul>
+		<li>生成プログラムを書くのは時間がかかる。(標準的な生成プログラムを使うと楽になるが。)</li>
+		<li>生成されたC++コードを直接変更できない。</li>
+		<li>生成プログラムを呼ぶのは難しいかもしれない。</li>
+		<li>特定の環境においては生成プログラムの呼び出しを自動化するのは難しいかもしれない。(呼び出しの自動化は頻繁に変更されるライブラリにとっては魅力的である。)</li>
+		<li>生成プログラムの移植や配布は難しいかもしれないし、時間を消費する。</li>
+	</ul>
+</div>
+<h4>プリプロセッサではどうか？</h4>
+<div>
+	C++にはプリプロセッサが付いているので、このような需要に向いていると考えるかもしれない。
+	実際、プリプロセッサはこのようなケースに極めて妥当である。なぜなら:
+	<ul>
+		<li>プリプロセッサはポータブルである。</li>
+		<li>プリプロセッサはコンパイルの一部として自動的に実行される。</li>
+		<li>プリプロセッサのコードは直接C++のコードに埋め込むことができる。</li>
+		<li>コンパイラは通常、プリプロセッサの出力を見ることができるようになっているが、これは生成されたコードをデバグしたりコピーするのに便利である。</li>
+	</ul>
+</div>
+<div>
+	残念ながらプリプロセッサは非常に低レベルなものであり、繰り返しや再帰的マクロをサポートしていない。したがってライブラリによるサポートが必要である。
+</div>
+<div>
+	<i>詳細なプリプロセッサの機能と制限については、C++標準<a href="bibliography.html#std">[Std]</a>を参照してほしい。</i>
+</div>
+<h4>ふたたび先の例</h4>
+<div>
+	プリプロセッサライブラリを使用すると、<code>is_function_tester()</code>は次のように実装できる:
+</div>
+<div class="code"><pre>
+#define IS_FUNCTION_TESTER(Z, N, _) \
+   template&lt;class R BOOST_PP_COMMA_IF(N) BOOST_PP_ENUM_PARAMS(N, class A)&gt; \
+   yes_type is_function_tester(R (*)(BOOST_PP_ENUM_PARAMS(N, A))); \
+   /**/
+
+BOOST_PP_REPEAT(BOOST_PP_INC(MAX_IS_FUNCTION_TESTER_PARAMS), IS_FUNCTION_TESTER, _)
+
+#undef IS_FUNCTION_TESTER
+</pre></div>
+<div>
+	サポートする引数の最大個数を変更するには、単に<code>MAX_IS_FUNCTION_TESTER_PARAMS</code>を変更してコンパイルしなおせばよい。
+</div>
+<hr size="1">
+<div style="margin-left: 0px;">
+	<i>&copy; Copyright <a href="http://www.housemarque.com" target="_top">Housemarque Oy</a> 2002</i>
+</div>
+<div style="margin-left: 0px;">
+Permission to copy, use, modify, sell and distribute this document is granted provided this copyright notice appears in all copies.&nbsp;
+This document is provided "as is" without express or implied warranty and with no claim as to its suitability for any purpose.
+</div>
+</body>
+</html>

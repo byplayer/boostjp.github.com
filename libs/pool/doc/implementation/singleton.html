@@ -1,0 +1,95 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> 
+<HTML>
+<HEAD>
+<TITLE>singleton - Singleton</TITLE>
+<LINK HREF="../pool.css" REL="stylesheet" TYPE="text/css">
+</HEAD>
+<BODY>
+
+<IMG SRC="../../../../c++boost.gif" WIDTH=276 HEIGHT=86 ALT="C++ Boost">
+
+<H1 ALIGN=CENTER>singleton - Singleton</H1>
+
+<P>
+<H2>はじめに</H2>
+
+<P>
+detail/singleton.hpp はクラス型のシングルトンへのアクセスを提供する。
+これは汎用のシングルトン解では<STRONG>ない</STRONG>。
+それはデフォルトコンストラクタを持つクラス型に限定される。
+
+<P>
+<H2>梗概</H2>
+
+<PRE CLASS="code">namespace details {
+namespace pool {
+
+template &lt;typename T&gt;
+class singleton_default
+{
+  private:
+    singleton_default();
+
+  public:
+    typedef T object_type;
+
+    static object_type & instance();
+};
+
+} // namespace pool
+} // namespace details</PRE>
+
+<P>
+<H2>意味</H2>
+
+<P>
+<TABLE BORDER ALIGN=CENTER>
+<CAPTION><EM>Symbol Table</EM></CAPTION>
+<TR><TH>Symbol<TH>Meaning
+<TR><TD CLASS="code">T<TD>例外を投げないデフォルトコンストラクタと例外を投げないデストラクタを持つ任意のクラス
+</TABLE>
+
+<P>
+<TABLE BORDER ALIGN=CENTER>
+<CAPTION><EM><SPAN CLASS="code">singleton_default&lt;T&gt;</SPAN>が満たすべき要件</EM></CAPTION>
+<TR><TH>式<TH>戻り型<TH>アサーション/注意事項/事前/事後条件
+<TR><TD CLASS="code">singleton_default&lt;T&gt;::instance()<TD CLASS="code">T &amp;<TD>シングルトンインスタンスへの参照を返す
+</TABLE>
+
+<P>
+<H2>保証</H2>
+
+<P>
+シングルトンインスタンスは <SPAN CLASS="code">main()</SPAN> 開始前に構築され、<SPAN CLASS="code">main()</SPAN> 終了後に破棄されることが保証される。
+さらに、<SPAN CLASS="code">singleton_default&lt;T&gt;::instance()</SPAN> への最初の呼び出しが完了する前に(たとえそれが <SPAN CLASS="code">main()</SPAN> の呼び出し前であっても)構築されていることが保証される。
+したがって <SPAN CLASS="code">main()</SPAN> の中以外では複数のスレッドが実行されておらず、シングルトンへのすべてのアクセスが mutexes によって制限されているならば、この保証によってスレッドセーフなシングルトンになる。
+
+<P>
+<H2>詳細</H2>
+
+<P>
+我々がどのように上記の保証を提供しているかの詳細は、ヘッダーファイルのコメントを見よ。
+<P>
+<H2>依存性</H2>
+
+<P>
+なし。
+<P>
+<H2>将来の方向性</H2>
+
+<P>
+Boost singleton library によって置き換えられるかもしれない。
+<P>
+<HR>
+
+<P>
+Copyright &copy; 2000, 2001 Stephen Cleary (<A HREF="mailto:shammah@voyager.net">shammah@voyager.net</A>)
+
+<P>
+This file can be redistributed and/or modified under the terms found in <A HREF="../copyright.html">copyright.html</A>
+
+<P>
+This software and its documentation is provided &quot;as is&quot; without express or implied warranty, and with no claim as to its suitability for any purpose.
+
+</BODY>
+</HTML>

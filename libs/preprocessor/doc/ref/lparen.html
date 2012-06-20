@@ -1,0 +1,42 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=EUC-JP"><!--*- encoding: euc-jp -*-->
+	<title>BOOST_PP_LPAREN</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">
+</head>
+<body>
+	<div style="margin-left:  0px;">
+		<b>BOOST_PP_LPAREN</b> マクロは開き丸括弧に展開される。
+	</div>
+	<h4>Usage</h4>
+		<div class="code">
+			<b>BOOST_PP_LPAREN</b>()
+		</div>
+	<h4>Remarks</h4>
+		<div>
+			プリプロセッサは丸括弧をマクロ呼び出しではデリミタとして解釈する。&nbsp;
+			このため、丸括弧は特別な扱いを必要とする。
+		</div>
+	<h4>See Also</h4>
+		<ul>
+			<li><a href="rparen.html">BOOST_PP_RPAREN</a></li>
+		</ul>
+	<h4>Requirements</h4>
+		<div>
+			<b>Header:</b> &nbsp;<a href="../headers/punctuation/paren.hpp.html">&lt;boost/preprocessor/punctuation/paren.hpp&gt;</a>
+		</div>
+	<h4>Sample Code</h4>
+<div><pre>
+#include &lt;<a href="../headers/punctuation/paren.hpp.html">boost/preprocessor/punctuation/paren.hpp</a>&gt;
+
+#define X(x) x
+#define MACRO(p, x) X p x )
+
+MACRO(<a href="lparen.html">BOOST_PP_LPAREN</a>(), abc) // abc に展開される
+
+#define Y(x)
+
+MACRO((10) Y <a href="lparen.html">BOOST_PP_LPAREN</a>(), result) // 10 に展開される
+</pre></div>
+</body>
+</html>

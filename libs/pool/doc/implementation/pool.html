@@ -1,0 +1,264 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> 
+<HTML>
+<HEAD>
+<TITLE>Pool Implementation</TITLE>
+<LINK HREF="../pool.css" REL="stylesheet" TYPE="text/css">
+</HEAD>
+<BODY>
+
+<IMG SRC="../../../../c++boost.gif" WIDTH=276 HEIGHT=86 ALT="C++ Boost">
+
+<H1 ALIGN=CENTER>Pool の実装</H1>
+
+<P>
+<H2>依存性</H2>
+
+<P>
+システムヘッダー<SPAN CLASS="code">&lt;functional&gt;</SPAN>、<SPAN CLASS="code">&lt;new&gt;</SPAN>、<SPAN CLASS="code">&lt;cstddef&gt;</SPAN>、<SPAN CLASS="code">&lt;cstdlib&gt;</SPAN>、<SPAN CLASS="code">&lt;exception&gt;</SPAN>をインクルードしている。
+
+<P>
+Boost ヘッダー <SPAN CLASS="code">&quot;detail/ct_gcd_lcm.hpp&quot;</SPAN> (<A HREF="ct_gcd_lcm.html">ct_gcd_lcm.html</A> を見よ)、<SPAN CLASS="code">&quot;detail/gcd_lcm.hpp&quot;</SPAN> (<A HREF="gcd_lcm.html">gcd_lcm.html</A>を見よ)、<SPAN CLASS="code">&quot;simple_segregated_storage.hpp&quot;</SPAN> をインクルードしている。( <A HREF="simple_segregated_storage.html">simple_segregated_storage.html</A>を見よ)。
+
+<P>
+<H2>梗概</H2>
+
+<PRE CLASS="code">namespace details {
+
+template &lt;typename SizeType&gt;
+class PODptr
+{
+  public:
+    typedef SizeType size_type;
+
+    PODptr(char * ptr, size_type size);
+    PODptr();
+
+    // コピーコンストラクタ、代入演算子、デストラクターを許可
+
+    bool valid() const;
+    void invalidate();
+    char * & begin();
+    char * begin() const;
+    char * end() const;
+    size_type total_size() const;
+    size_type element_size() const;
+
+    size_type & next_size() const;
+    char * & next_ptr() const;
+
+    PODptr next() const;
+    void next(const PODptr & arg) const;
+};
+
+} // namespace details
+
+template &lt;typename UserAllocator = default_user_allocator_new_delete&gt;
+class pool: protected simple_segregated_storage&lt;typename UserAllocator::size_type&gt;
+{
+  ... // 公開インターフェース
+
+  protected:
+    details::PODptr&lt;size_type&gt; list;
+
+    simple_segregated_storage&lt;size_type&gt; & store();
+    const simple_segregated_storage&lt;size_type&gt; & store() const;
+
+    const size_type requested_size;
+    size_type next_size;
+
+    details::PODptr&lt;size_type&gt; find_POD(void * chunk) const;
+    static bool is_from(void * chunk, char * i, size_type sizeof_i);
+    size_type alloc_size() const;
+
+  public: // 公開インターフェースの拡張
+    pool(size_type requested_size, size_type next_size);
+    size_type get_next_size() const;
+    void set_next_size(size_type);
+};</PRE>
+
+<P>
+<H2>公開インターフェースの拡張</H2>
+
+<P>
+<SPAN CLASS="code">pool</SPAN> がシステムからメモリーを必要とするときはいつでも、テンプレートパラメータである <SPAN CLASS="code">UserAllocator</SPAN> からシステムへ要求が出される。
+システムにリクエストする量はダブリングアルゴリズムによって決定される。
+言い換えると、追加でシステムメモリーを確保するときは、要求する量を2倍にするということである。
+ユーザーは以下に述べる拡張によってダブリングアルゴリズムを管理することができる。
+
+<P>
+<H3>追加のコンストラクターのパラメータ</H3>
+
+<P>
+ユーザーは <SPAN CLASS="code">pool</SPAN> のコンストラクターに追加のパラメータを渡すことができる。
+このパラメーターは <SPAN CLASS="code">size_type</SPAN> 型で、そのオブジェクトがシステムメモリーを初めて必要とするときに要求するチャンクの数である。
+既定値は 32 である。このパラメーターは 0 であってはならない。
+
+<P>
+<H3><SPAN CLASS="code">next_size</SPAN> アクセサ関数</H3>
+
+<P>
+関数 <SPAN CLASS="code">size_type get_next_size() const;</SPAN> と <SPAN CLASS="code">void set_next_size(size_type);</SPAN> のペアはユーザーに明示的な <SPAN CLASS="code">next_size</SPAN> への読み書きを許す。
+この値はオブジェクトが次にシステムメモリーからの割り当てが必要になったときに要求するチャンクの数である。
+この値を 0 に設定してはならない。
+
+<P>
+<H2>Class <SPAN CLASS="code">PODptr</SPAN></H2>
+
+<P>
+
+<SPAN CLASS="code">PODptr</SPAN> は現実には存在しない異なるクラス型へのポインタであるかのように振舞うクラスである。
+それは、それが指す &quot;object&quot; の &quot;data&quot; にアクセスするメンバー関数を提供する。
+これらの &quot;class&quot; 型はサイズが異なり、メモリーの最後に何か情報を持っているため、<SPAN CLASS="code">PODptr</SPAN>は、この &quot;class&quot; のサイズを知っている必要がある。
+まるで &quot;class&quot; へのポインタと同様に。
+
+<P>
+<SPAN CLASS="code">PODptr</SPAN> はシステムから割り当てられたメモリーブロックの場所とサイズを保持している。
+個々のメモリーブロックは論理的に3つのセクションに分かれている。
+<OL>
+<LI>チャンクエリア。
+このセクションは異なるサイズである。
+<SPAN CLASS="code">PODptr</SPAN> はチャンクのサイズには注意しないが、チャンク領域のトータルサイズには注意を払い、追跡している。
+
+</LI>
+<LI>
+次へのポインタ。
+このセクションは与えられた <SPAN CLASS="code">SizeType</SPAN> により常に同じサイズである。
+それはメモリーブロックリスト中の次のメモリーブロックの場所を保持する。
+次のブロックがなければ 0 を保持する。
+</LI>
+<LI>
+次のサイズ。
+このセクションは与えられた <SPAN CLASS="code">SizeType</SPAN> により常に同じサイズである。
+それはメモリーブロックリスト中の次のメモリーブロックのサイズを保持する。
+</LI>
+</OL>
+
+<P>
+<SPAN CLASS="code">PODptr</SPAN> クラスは生のメモリーブロックを扱うよりはクリーンな方法を提供するのみである。
+<P>
+<H3>有効・無効性</H3>
+
+<P>
+<SPAN CLASS="code">PODptr</SPAN> は <EM>valid</EM> もしくは <EM>invalid</EM> のいずれかである。
+invalid な <SPAN CLASS="code">PODptr</SPAN> は null ポインタのアナロジーである。
+
+<P>
+<SPAN CLASS="code">PODptr</SPAN> のデフォルトコンストラクタは無効な(invalid)なオブジェクトを作る。
+メンバー関数 <SPAN CLASS="code">invalidate</SPAN> の呼び出しは、そのオブジェクトを無効にする。
+メンバー関数 <SPAN CLASS="code">valid</SPAN> は、有効・無効性のテストに使用することができる。
+
+<P>
+<H3><SPAN CLASS="code">PODptr</SPAN> オブジェクトを得る</H3>
+
+<P>
+<SPAN CLASS="code">PODptr</SPAN> は、コンストラクタにメモリーブロックのアドレスとサイズを渡すことでメモリーブロックを指すように作られることもある。
+この方法で生成された <SPAN CLASS="code">PODptr</SPAN> は有効(valid)である。
+
+<P>
+<SPAN CLASS="code">PODptr</SPAN> はメンバー関数 <SPAN CLASS="code">next</SPAN> の呼び出しによって生成されることもある。
+このメンバー関数は、メモリーブロックリストの中の次のメモリーブロックを指す <SPAN CLASS="code">PODptr</SPAN> を返す。もしくは、次のブロックが存在しないならば無効な <SPAN CLASS="code">PODptr</SPAN> を返す。
+
+<P>
+<H3>&quot;pointer&quot; データにアクセスする</H3>
+
+<P>
+個々の <SPAN CLASS="code">PODptr</SPAN> は、そのメモリーブロックのアドレスとサイズを保持している。
+このアドレスはメンバー関数 <SPAN CLASS="code">begin</SPAN> で、読み書きされる。
+メモリーブロックのサイズはメンバー関数 <SPAN CLASS="code">total_size</SPAN> による読みのみが許されている。
+
+<P>
+<H3>メモリーブロックの各領域へのアクセス</H3>
+
+<P>
+チャンク領域は <SPAN CLASS="code">element_size</SPAN> と連携して、メンバー関数< SPAN CLASS="code">begin</SPAN> と <SPAN CLASS="code">end</SPAN> によってアクセスすることができる。
+<SPAN CLASS="code">end</SPAN> によって返される値は、つねに <SPAN CLASS="code">begin</SPAN> によって返される値に <SPAN CLASS="code">element_size</SPAN> を加えた値である。
+<SPAN CLASS="code">begin</SPAN> のみが書き込み可能である。
+<SPAN CLASS="code">end</SPAN> は past-the-end 値(末尾の要素の次)である。
+<SPAN CLASS="code">begin</SPAN> に始まり<SPAN CLASS="code">end</SPAN> の前で終わるポインタの使用はメモリーブロックのチャンクを通しで反復することができる。
+
+<P>
+メンバー関数 <SPAN CLASS="code">next_ptr</SPAN> によって次ポインタ領域にアクセスすることができる。
+メンバー関数<SPAN CLASS="code">next_size</SPAN>によって次サイズ領域にアクセスすることができる。
+両者とも書き込み可能である。
+両者とも、メンバー関数 <SPAN CLASS="code">next</SPAN> を使って、同時に読むまたは変更ができる。
+<P>
+<H2>Protected インタフェース</H2>
+
+<P>
+<H3>Protected 導出</H3>
+
+Pool は protected 導出を使って単純分離記憶域から導出されている。
+これは <A HREF="simple_segregated_storage.html"> 単純分離記憶域の実装の詳細</A>のすべてを、Poolから導出されるすべてのクラスにも同じように開示している。
+
+<P>
+<H3 CLASS="code">details::PODptr&lt;size_type&gt; list;</H3>
+
+<P>
+これは、このPoolオブジェクトによって割り当てられたメモリーブロックのリストである。
+(<SPAN CLASS="code">first</SPAN> として単純分離記憶域によって開示された)未使用のメモリーチャンクのリストと同じものでは<STRONG>ない</STRONG>。
+
+<P>
+<H3><SPAN CLASS="code">store</SPAN> functions</H3>
+
+<P>
+基底クラスである単純分離記憶域オブジェクトを返すのに使われる、便宜関数がある。
+<P>
+<H3 CLASS="code">const size_type requested_size;</H3>
+
+<P>
+最初の引数はコンストラクタへ渡される。
+ユーザーによって要求されたチャンクのバイト数を表現している。
+チャンクの実際のサイズは異なっているかもしれない。
+下記の <SPAN CLASS="code">alloc_size</SPAN> を見よ。
+
+<P>
+<H3 CLASS="code">size_type next_size</H3>
+
+<P>
+我々が次にシステムメモリーを割り当てるとき <SPAN CLASS="code">UserAllocator</SPAN> が要求するチャンクの数。
+上記の拡張の説明を見よ。
+
+<P>
+<H3 CLASS="code">details::PODptr&lt;size_type&gt; find_POD(void * chunk) const;</H3>
+
+<P>
+メモリーブロックリストを通しで調べて、その <SPAN CLASS="code">chunk</SPAN> がそこから割り当てられている、または将来割り当てられことがあり得るブロックを探す。
+もし見つかれば、そのブロックを返す。<SPAN CLASS="code">chunk</SPAN> が他の Pool から割り当てられている、もしくは将来他の Pool から割り当てられことがあり得る場合は無効な値を返す。
+それ以外の <SPAN CLASS="code">chunk</SPAN> の値は、不正な結果を招く。
+
+<P>
+<H3 CLASS="code">static bool is_from(void * chunk, char * i, size_type sizeof_i);</H3>
+
+<P>
+<SPAN CLASS="code">chunk</SPAN> が 要素サイズが <SPAN CLASS="code">sizeof_i</SPAN> のメモリーチャンク <SPAN CLASS="code">i</SPAN> から割り当てられていると見える(思われる)かどうかをテストする。
+<SPAN CLASS="code">sizeof_i</SPAN> はそのブロックのチャンク領域のサイズであり、ブロックのトータルサイズではないことに注意せよ。
+
+<P>
+<SPAN CLASS="code">chunk</SPAN> がそのメモリーブロックから割り当てられているか、将来そのメモリーブロックから割り当てられることがあり得る場合に <SPAN CLASS="code">true</SPAN> を返す。
+<SPAN CLASS="code">chunk</SPAN> が他のブロックから割り当てられているか、将来他のブロックから割り当てられることがあり得る場合には <SPAN CLASS="code">false</SPAN> を返す。
+それ以外の <SPAN CLASS="code">chunk</SPAN> の値は不正な結果を招く。
+
+<P>
+<H3 CLASS="code">size_type alloc_size() const;</H3>
+
+<P>
+この Pool によって割り当てられるメモリーチャンクの計算されたサイズを返す。
+<A HREF="alignment.html">アラインメントの都合で</A>、<SPAN CLASS="code">lcm(requested_size, sizeof(void *), sizeof(size_type))</SPAN> と定義されている。
+
+<P>
+<H2><A HREF="../interfaces/pool.html">インタフェースの説明</A></H2>
+
+<P>
+<HR>
+
+<P>
+Copyright &copy; 2000, 2001 Stephen Cleary (<A HREF="mailto:shammah@voyager.net">shammah@voyager.net</A>)
+
+<P>
+This file can be redistributed and/or modified under the terms found in <A HREF="../copyright.html">copyright.html</A>
+
+<P>
+This software and its documentation is provided &quot;as is&quot; without express or implied warranty, and with no claim as to its suitability for any purpose.
+
+</BODY>
+</HTML>

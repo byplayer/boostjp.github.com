@@ -1,0 +1,75 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=EUC-JP"><!--*- encoding: euc-jp -*-->
+	<title>BOOST_PP_ITERATION_PARAMS_x</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">
+	
+</head>
+<body>
+	<div style="margin-left:  0px;">
+		<b>BOOST_PP_ITERATION_PARAMS_<i>x</i></b> マクロは <b>BOOST_PP_ITERATE</b> で使われる、
+		ユーザ定義の <i>名前付けされた外部引数</i> である。
+		これは <i>ファイル繰り返し</i> の下限、上限、ファイル名を表す。
+		また同様に、 <i>ファイル繰り返し</i> に関連するフラグを示すことも可能である。
+	</div>
+	<h4>Usage</h4>
+		<div class="code">
+			#define <b>BOOST_PP_ITERATION_PARAMS_<i>x</i></b> (<i>c</i>, (<i>start</i>, <i>finish</i>, <i>filename</i> [, <i>flags</i>]))
+		</div>
+	<h4>Arguments</h4>
+		<dl>
+			<dt>x</dt>
+			<dd>
+			次の <i>ファイル繰り返し</i> の繰り返しの深さ。
+			この値は、現在の繰り返しの深さ +<i>1</i> <i> でなければならない。</i>
+			</dd>
+			<dt>c</dt>
+			<dd>
+			パラメータの数。
+			<i>flags</i> が特定されるなら、この値は <i>4</i> でなければならない。
+			そうでなければ、 <i>3</i> でなければならない。
+			</dd>
+			<dt>start</dt>
+			<dd>
+			<i>ファイル繰り返し</i> の下限(この数を含む)。
+			有効な値の範囲は <i>0</i> から <b>BOOST_PP_LIMIT_ITERATION</b> までである。
+			</dd>
+			<dt>finish</dt>
+			<dd>
+			<i>ファイル繰り返し</i> の上限(この数を含む)。				
+			有効な値の範囲は <i>0</i> から <b>BOOST_PP_LIMIT_ITERATION</b> までである。
+			</dd>
+			<dt>filename</dt>
+			<dd>
+			<i>ファイル繰り返し</i> のターゲットとして使われる、
+			引用符付きの、又はかぎ括弧付きのファイル名。
+			</dd>
+			<dt>[flags]</dt>
+			<dd>
+			<i>ファイル繰り返し</i> のターゲットとして使われる、
+			引用符付きの、又はかぎ括弧付きのファイル名。
+			(訳注: 原文は誤り。正しくは、<i>ファイル繰り返し</i> に関連するフラグ。省略可。)
+			</dd>
+		</dl>
+	<h4>Remarks</h4>
+		<div>
+		マクロ識別子の後に空白文字があることに注意すること。
+		</div>
+		<div>
+		このマクロは上の二つの形式 (<i>flags</i> 有りと無し) のうちのひとつのなかで、
+		引数の <i>配列</i> として定義される。
+		これは <b>BOOST_PP_ITERATE</b> に引数を渡す第1の方法である。
+		<i>start</i> と <i>finish</i> は <i>評価済みのパラメータ</i> であり、
+		ただの数式が使われなければならない。
+		</div>
+		<div>
+		このマクロは <b>BOOST_PP_ITERATE</b> の呼び出しにより、
+		再利用のために自動的に未定義にされる。
+		</div>
+	<h4>See Also</h4>
+		<ul>
+			<li><a href="iterate.html">BOOST_PP_ITERATE</a></li>
+			<li><a href="limit_iteration.html">BOOST_PP_LIMIT_ITERATION</a></li>
+		</ul>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+	<title>BOOST_PP_ENUM_TRAILING_BINARY_PARAMS_Z</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">
+</head>
+<body>
+	<div style="margin-left:  0px;">
+		<b>BOOST_PP_ENUM_TRAILING_BINARY_PARAMS_Z</b> マクロはコンマの先行した、コンマで区切られた二項パラメータリストを生成する。
+		これは <b>BOOST_PP_REPEAT</b> に最も効率よく再入する。
+	</div>
+	<h4>Usage</h4>
+		<div class="code">
+			<b>BOOST_PP_ENUM_TRAILING_BINARY_PARAMS_Z</b>(<i>z</i>, <i>count</i>, <i>p1</i>, <i>p2</i>)
+		</div>
+	<h4>Arguments</h4>
+		<dl>
+			<dt>z</dt>
+			<dd>
+				利用可能な次の <b>BOOST_PP_REPEAT</b> の次元。
+			</dd>
+			<dt>count</dt>
+			<dd>
+				生成するパラメータの数。
+				有効な値の範囲は <i>0</i> から <b>BOOST_PP_LIMIT_REPEAT</b> まで。
+			</dd>
+			<dt>p1</dt>
+			<dd>
+				パラメータの第一部分のテキスト部。
+				<b>BOOST_PP_ENUM_TRAILING_BINARY_PARAMS_Z</b> は生成したパラメータと <i>0</i> から <i>count</i> - <i>1</i> までの範囲の数字とを結合する。
+			</dd>
+			<dt>p2</dt>
+			<dd>
+				パラメータの第二（※訳注：原文では first。間違いか）部分のテキスト部。
+				<b>BOOST_PP_ENUM_TRAILING_BINARY_PARAMS_Z</b> は生成したパラメータと <i>0</i> から <i>count</i> - <i>1</i> までの範囲の数字とを結合する。
+			</dd>
+		</dl>
+	<h4>Remarks</h4>
+		<div>
+			このマクロはコンマ区切りのシーケンスに展開される:
+			<div>
+				, <i>p1</i> ## <i>0</i> <i>p2</i> ## <i>0</i>, <i>p1</i> ## <i>1</i> <i>p2</i> ## <i>1</i>, ... <i>p1</i> ## <i>count</i> - <i>1</i> <i>p2</i> ## <i>count</i> - <i>1</i>
+			</div>
+		</div>
+	<h4>See Also</h4>
+		<ul>
+			<li><a href="enum_trailing_binary_params.html">BOOST_PP_ENUM_TRAILING_BINARY_PARAMS</a></li>
+			<li><a href="limit_repeat.html">BOOST_PP_LIMIT_REPEAT</a></li>
+		</ul>
+	<h4>Requirements</h4>
+		<div>
+			<b>Header:</b> &nbsp;<a href="../headers/repetition/enum_trailing_binary_params.hpp.html">&lt;boost/preprocessor/repetition/enum_trailing_binary_params.hpp&gt;</a>
+		</div>
+</body>
+</html>

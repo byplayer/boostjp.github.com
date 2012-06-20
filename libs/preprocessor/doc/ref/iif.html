@@ -1,0 +1,55 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=EUC-JP"><!--*- encoding: euc-jp -*-->
+	<title>BOOST_PP_IIF</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">
+</head>
+<body>
+	<div style="margin-left:  0px;">
+		<b>BOOST_PP_IIF</b> マクロはビット状態に基づいて、 2つの値からひとつを選択する。
+	</div>
+	<h4>Usage</h4>
+		<div class="code">
+			<b>BOOST_PP_IIF</b>(<i>bit</i>, <i>t</i>, <i>f</i>)
+		</div>
+	<h4>Arguments</h4>
+		<dl>
+			<dt>bit</dt>
+			<dd>
+			結果が <i>t</i> か <i>f</i> かを決定する条件。
+			この値は <i>0</i> か <i>1</i> に展開されなければならない。
+			</dd>
+			<dt>t</dt>
+			<dd>
+			<i>bit</i> が <i>1</i> の時に展開される結果。
+			</dd>
+			<dt>f</dt>
+			<dd>
+			<i>bit</i> が <i>2</i> の時に展開される結果。
+			</dd>
+		</dl>
+	<h4>Remarks</h4>
+		<div>
+		このマクロは第1引数に対してブール値への変換を <i>行わない。</i>
+		もし変換が必要なら、代わりに <b>BOOST_PP_IF</b> を使うこと。
+		</div>
+	<h4>See Also</h4>
+		<ul>
+			<li><a href="if.html">BOOST_PP_IF</a></li>
+			<li><a href="limit_mag.html">BOOST_PP_LIMIT_MAG</a></li>
+		</ul>
+	<h4>Requirements</h4>
+		<div>
+			<b>Header:</b> &nbsp;<a href="../headers/control/iif.hpp.html">&lt;boost/preprocessor/control/iif.hpp&gt;</a>
+		</div>
+	<h4>Sample Code</h4>
+<div><pre>
+#include &lt;<a href="../headers/control/iif.hpp.html">boost/preprocessor/control/iif.hpp</a>&gt;
+
+#define OR_IF(p, q, t, f) <a href="iif.html">BOOST_PP_IIF</a>(<a href="or.html">BOOST_PP_OR</a>(p, q), t, f)
+
+OR_IF(1, 0, abc, xyz) // expands to abc
+OF_IF(0, 0, abc, xyz) // expands to xyz
+</pre></div>
+</body>
+</html>

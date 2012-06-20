@@ -1,0 +1,41 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+	<title>BOOST_PP_ARRAY_ELEM</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">
+</head>
+<body>
+	<div style="margin-left:  0px;">
+		<b>BOOST_PP_ARRAY_ELEM</b> マクロは<i>配列</i>からその要素を抽出する。
+	</div>
+	<h4>Usage</h4>
+		<div class="code">
+			<b>BOOST_PP_ARRAY_ELEM</b>(<i>i</i>, <i>array</i>)
+		</div>
+	<h4>Arguments</h4>
+		<dl>
+			<dt>i</dt>
+			<dd>
+				<i>array</i> における、抽出される要素の 0 から始まるインデックス。
+			</dd>
+			<dt>array</dt>
+			<dd>
+				抽出される要素のもととなる<i>配列</i>。
+				この<i>配列</i>は少なくとも <i>i</i> + <i>1</i> 個の要素を持っていなければならない。
+			</dd>
+		</dl>
+	<h4>Requirements</h4>
+		<div>
+			<b>Header:</b> &nbsp;<a href="../headers/array/elem.hpp.html">&lt;boost/preprocessor/array/elem.hpp&gt;</a>
+		</div>
+	<h4>Sample Code</h4>
+<div><pre>
+#include &lt;<a href="../headers/array/elem.hpp.html">boost/preprocessor/array/elem.hpp</a>&gt;
+
+#define ARRAY (4, (a, b, c, d))
+
+<a href="array_elem.html">BOOST_PP_ARRAY_ELEM</a>(0, ARRAY) // a に展開される
+<a href="array_elem.html">BOOST_PP_ARRAY_ELEM</a>(3, ARRAY) // d に展開される
+</pre></div>
+</body>
+</html>

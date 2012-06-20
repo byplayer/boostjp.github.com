@@ -1,0 +1,1298 @@
+<html>
+<head>
+<meta http-equiv="Content-Type"
+content="text/html; charset=utf-8">
+<meta name="Template"
+content="C:\PROGRAM FILES\MICROSOFT OFFICE\OFFICE\html.dot">
+<meta name="GENERATOR" content="Microsoft FrontPage Express 2.0">
+<title>Type Traits（型特性）</title>
+</head>
+
+<body bgcolor="#FFFFFF" link="#0000FF" vlink="#800080">
+
+<h1><img src="../../c++boost.gif" width="276" height="86">Header
+&lt;<a href="../../boost/type_traits.hpp">boost/type_traits.hpp</a>&gt;</h1>
+
+<p>&lt;boost/type_traits.hpp&gt;の内容はboost名前空間内で宣言される。</p>
+
+<p>ファイル&lt;<a href="../../boost/type_traits.hpp">boost/type_traits.hpp</a>&gt;は、型の基本的な特徴を説明する様々なテンプレートクラスを含んでいる。
+各クラスは単一の型の特徴または単一の型の変形を意味する。本ライブラリに不慣れであれば、付随する<A href="c++_type_traits.htm">記事</A>を最初に読むこと。</P>
+
+<p>このドキュメントは以下のセクションに分割される。</p>
+
+<pre><a href="#primary">Primary Type Categorisation</a>
+<a href="#secondary">Secondary Type Categorisation</a>
+<a href="#properties">Type Properties</a>
+<a href="#relationships">Relationships Between Types</a>
+<a href="#transformations">Transformations Between Types</a>
+<a href="#synthesized">Synthesizing Types</a>
+<a href="#function_traits">Function Traits</a>
+<a href="#compiler">Compiler Support Information</a>
+<a href="#headers">Type traits headers</a>
+<a href="#example">Example Code</a></pre>
+
+<p>本ライブラリにおける汎整数式はすべて<a href="../../more/int_const_guidelines.htm"><em>汎整数定数式</em></a>である。それらの使用は時折コンパイラの問題に遭遇する原因となるため, 本ライブラリを用いて移植性のあるコードを書くための手引きとして<a href="../../more/int_const_guidelines.htm">コーディングガイドライン</a>に関連した事項がある。</p>
+
+<h2><a name="primary"></a>Primary Type Categorisation</h2>
+
+<p>以下の型特性（type traits）テンプレートは型がどの型分類に属しているかを識別する。どんな型を与えた場合でも、以下の式のうちのひとつは確実に真に評価される。
+
+<code>is_integral&lt;T&gt;::value</code>と<code>is_float&lt;T&gt;::value</code>は組み込み型についてのみ当てはまることに注意。あたかも汎整数型や浮動小数点型のように振舞うユーザ定義型を調べるのであれば、代わりにstd::numeric_limitsテンプレートを使うこと。</p>
+
+<table border="0" cellpadding="7" cellspacing="1" width="100%">
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="23%" bgcolor="#008080"><p
+        align="center">Expression</p>
+        </td>
+        <td valign="top" width="26%" bgcolor="#008080"><p
+        align="center">Description</p>
+        </td>
+        <td valign="top" width="16%" bgcolor="#008080"><p
+        align="center">Reference</p>
+        </td>
+        <td valign="top" width="25%" bgcolor="#008080"><p
+        align="center">Compiler requirements</p>
+        </td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="23%" bgcolor="#C0C0C0"><code>::boost::is_void&lt;T&gt;::value</code></td>
+        <td valign="top" width="26%" bgcolor="#C0C0C0">Tがconst/volatile修飾されたvoid型であれば真に評価する。</td>
+        <td valign="top" width="16%" bgcolor="#C0C0C0"><p
+        align="center">3.9.1p9</p>
+        </td>
+        <td valign="top" width="25%" bgcolor="#C0C0C0">&nbsp;</td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="23%" bgcolor="#C0C0C0"><code>::boost::is_integral&lt;T&gt;::value</code></td>
+        <td valign="top" width="26%" bgcolor="#C0C0C0">Tがconst/volatile修飾された汎整数型であれば真に評価する。</td>
+        <td valign="top" width="16%" bgcolor="#C0C0C0"><p
+        align="center">3.9.1p7</p>
+        </td>
+        <td valign="top" width="25%" bgcolor="#C0C0C0">&nbsp;</td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="23%" bgcolor="#C0C0C0"><code>::boost::is_float&lt;T&gt;::value</code></td>
+        <td valign="top" width="26%" bgcolor="#C0C0C0">Tがconst/volatile修飾された浮動小数点型であれば真に評価する。</td>
+        <td valign="top" width="16%" bgcolor="#C0C0C0"><p
+        align="center">3.9.1p8</p>
+        </td>
+        <td valign="top" width="25%" bgcolor="#C0C0C0">&nbsp;</td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="23%" bgcolor="#C0C0C0"><code>::boost::is_pointer&lt;T&gt;::value</code></td>
+        <td valign="top" width="26%" bgcolor="#C0C0C0">Tがconst/volatile修飾されたポインタ型であれば真に評価する（関数ポインタは含まれるが、メンバへのポインタは含まない）。</td>
+        <td valign="top" width="16%" bgcolor="#C0C0C0"><p
+        align="center">3.9.2p2</p>
+        <p align="center">8.3.1</p>
+        </td>
+        <td valign="top" width="25%" bgcolor="#C0C0C0">&nbsp;</td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="23%" bgcolor="#C0C0C0"><code>::boost::is_reference&lt;T&gt;::value</code></td>
+        <td valign="top" width="26%" bgcolor="#C0C0C0">Tが参照型であれば真に評価する。</td>
+        <td valign="top" width="16%" bgcolor="#C0C0C0"><p
+        align="center">3.9.2</p>
+        <p align="center">8.3.2</p>
+        </td>
+        <td valign="top" width="25%" bgcolor="#C0C0C0">&nbsp;</td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="23%" bgcolor="#C0C0C0"><code>::boost::is_member_pointer&lt;T&gt;::value</code></td>
+        <td valign="top" width="26%" bgcolor="#C0C0C0">Tがconst/volatile修飾されたデータメンバまたはメンバ関数へのポインタであれば真に評価する。</td>
+        <td valign="top" width="16%" bgcolor="#C0C0C0"><p
+        align="center">3.9.2</p>
+        <p align="center">8.3.3</p>
+        </td>
+        <td valign="top" width="25%" bgcolor="#C0C0C0">&nbsp;</td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="23%" bgcolor="#C0C0C0"><code>::boost::is_array&lt;T&gt;::value</code></td>
+        <td valign="top" width="26%" bgcolor="#C0C0C0">Tが配列型であれば真に評価する。</td>
+        <td valign="top" width="16%" bgcolor="#C0C0C0"><p
+        align="center">3.9.2</p>
+        <p align="center">8.3.4</p>
+        </td>
+        <td valign="top" width="25%" bgcolor="#C0C0C0">コンパイラがクラステンプレートの部分特殊化版をサポートしていない場合、型によっては間違って配列と認識されることがある（主に関数型）。</td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="23%" bgcolor="#C0C0C0"><code>::boost::is_union&lt;T&gt;::value</code></td>
+        <td valign="top" width="26%" bgcolor="#C0C0C0">Tが共用体型であれば真に評価する。現時点ではある種のコンパイラのサポートを必要とし、それ以外では共用体はクラスとして識別される。</td>
+        <td valign="top" width="16%" bgcolor="#C0C0C0"><p
+        align="center">3.9.2</p>
+        <p align="center">9.5</p>
+        </td>
+        <td valign="top" width="25%" bgcolor="#C0C0C0">C</td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="23%" bgcolor="#C0C0C0"><code>::boost::is_class&lt;T&gt;::value</code></td>
+        <td valign="top" width="26%" bgcolor="#C0C0C0">Tがクラス/構造体型であれば真に評価する。</td>
+        <td valign="top" width="16%" bgcolor="#C0C0C0"><p
+        align="center">3.9.2</p>
+        <p align="center">9.2</p>
+        </td>
+        <td valign="top" width="25%" bgcolor="#C0C0C0">C</td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="23%" bgcolor="#C0C0C0"><code>::boost::is_enum&lt;T&gt;::value</code></td>
+        <td valign="top" width="26%" bgcolor="#C0C0C0">Tが列挙型であれば真に評価する。</td>
+        <td valign="top" width="16%" bgcolor="#C0C0C0"><p
+        align="center">3.9.2</p>
+        <p align="center">7.2</p>
+        </td>
+        <td valign="top" width="25%" bgcolor="#C0C0C0">is_convertibleテンプレートが正しく機能することが必要（現時点ではis_enumがBorland C++では使えないという意味）。</td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td valign="top" bgcolor="#C0C0C0"><code>::boost::is_function&lt;T&gt;::value</code></td>
+        <td valign="top" bgcolor="#C0C0C0">Tが関数型であれば真に評価する（関数への参照やポインタではない）。</td>
+        <td valign="top" bgcolor="#C0C0C0"><p align="center">3.9.2p1</p>
+        <p align="center">8.3.5</p>
+        </td>
+        <td valign="top" bgcolor="#C0C0C0">部分特殊化版がサポートされない場合、このテンプレートは参照型についてはコンパイルできない。</td>
+        <td>&nbsp;</td>
+    </tr>
+</table>
+
+<p>&nbsp;</p>
+
+<h2><a name="secondary"></a>Secondary Type Categorisation</h2>
+
+<p>以下の型分類は１つ以上のprimary type categorisationsを組み合わせて作られている。ある型は、primary type categorisationsの分類に加えて、これらの分類のうちの１つ以上に属している可能性がある。</p>
+
+<table border="0" cellpadding="7" cellspacing="1" width="100%">
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="24%" bgcolor="#008080"><p
+        align="center">Expression</p>
+        </td>
+        <td valign="top" width="26%" bgcolor="#008080"><p
+        align="center">Description</p>
+        </td>
+        <td valign="top" width="15%" bgcolor="#008080"><p
+        align="center">Reference</p>
+        </td>
+        <td valign="top" width="25%" bgcolor="#008080"><p
+        align="center">Compiler requirements</p>
+        </td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="24%" bgcolor="#C0C0C0"><code>::boost::is_arithmetic&lt;T&gt;::value</code></td>
+        <td valign="top" width="26%" bgcolor="#C0C0C0">Tがconst/volatile修飾された算術型であれば真に評価する。汎整数型か浮動小数点型のいずれかがこれにあたる。</td>
+        <td valign="top" width="15%" bgcolor="#C0C0C0"><p
+        align="center">3.9.1p8</p>
+        </td>
+        <td valign="top" width="25%" bgcolor="#C0C0C0">&nbsp;</td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="24%" bgcolor="#C0C0C0"><code>::boost::is_fundamental&lt;T&gt;::value</code></td>
+        <td valign="top" width="26%" bgcolor="#C0C0C0">Tがconst/volatile修飾された基本型であれば真に評価する。汎整数型、浮動小数点型、void型のいずれかがこれにあたる。</td>
+        <td valign="top" width="15%" bgcolor="#C0C0C0"><p
+        align="center">3.9.1</p>
+        </td>
+        <td valign="top" width="25%" bgcolor="#C0C0C0">&nbsp;</td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="24%" bgcolor="#C0C0C0"><code>::boost::is_object&lt;T&gt;::value</code></td>
+        <td valign="top" width="26%" bgcolor="#C0C0C0">Tがconst/volatile修飾されたオブジェクト型であれば真に評価する。関数型、参照型、void型以外がこれにあたる。</td>
+        <td valign="top" width="15%" bgcolor="#C0C0C0"><p
+        align="center">3.9p9</p>
+        </td>
+        <td valign="top" width="25%" bgcolor="#C0C0C0">&nbsp;</td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="24%" bgcolor="#C0C0C0"><code>::boost::is_scalar&lt;T&gt;::value</code></td>
+        <td valign="top" width="26%" bgcolor="#C0C0C0">Tがconst/volatile修飾されたスカラ型であれば真に評価する。算術型、ポインタ型、メンバへのポインタ型がこれにあたる。</td>
+        <td valign="top" width="15%" bgcolor="#C0C0C0"><p
+        align="center">3.9p10</p>
+        </td>
+        <td valign="top" width="25%" bgcolor="#C0C0C0">&nbsp;</td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="24%" bgcolor="#C0C0C0"><code>::boost::is_compound&lt;T&gt;::value</code></td>
+        <td valign="top" width="26%" bgcolor="#C0C0C0">Tが複合型であれば真に評価する。関数型、ポインタ型、参照型、列挙型、共用体型、クラス型、メンバ関数型がこれにあたる。</td>
+        <td valign="top" width="15%" bgcolor="#C0C0C0"><p
+        align="center">3.9.2</p>
+        </td>
+        <td valign="top" width="25%" bgcolor="#C0C0C0">&nbsp;</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td bgcolor="#C0C0C0"><code>::boost::is_member_function_pointer&lt;T&gt;::value</code></td>
+        <td bgcolor="#C0C0C0">Tがメンバ関数へのポインタ型（メンバオブジェクトへのポインタではない）であれば真に評価する。このテンプレートはis_member_pointerを２つの副分類に分割する。</td>
+        <td bgcolor="#C0C0C0"><p align="center">3.9.2</p>
+        <p align="center">8.3.3</p>
+        </td>
+        <td bgcolor="#C0C0C0">&nbsp;</td>
+        <td>&nbsp;</td>
+    </tr>
+</table>
+
+<p>&nbsp;</p>
+
+<h2><a name="properties"></a>Type Properties</h2>
+
+<p>以下のテンプレートは型が持っている特徴を識別する。</p>
+
+<table border="0" cellpadding="7" cellspacing="1" width="100%">
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="23%" bgcolor="#008080"><p
+        align="center">Expression</p>
+        </td>
+        <td valign="top" width="28%" bgcolor="#008080"><p
+        align="center">Description</p>
+        </td>
+        <td valign="top" width="13%" bgcolor="#008080"><p
+        align="center">Reference</p>
+        </td>
+        <td valign="top" width="25%" bgcolor="#008080"><p
+        align="center">Compiler requirements</p>
+        </td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="23%" bgcolor="#C0C0C0"><code>::boost::alignment_of&lt;T&gt;::value</code></td>
+        <td valign="top" width="28%" bgcolor="#C0C0C0">Tが必要とするアラインメントを識別する。実際に返される値は、Tが必要とする実際のアラインメントの倍数となることが保証される。</td>
+        <td valign="top" width="13%" bgcolor="#C0C0C0">&nbsp;</td>
+        <td valign="top" width="25%" bgcolor="#C0C0C0">&nbsp;</td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="23%" bgcolor="#C0C0C0"><code>::boost::is_empty&lt;T&gt;::value</code></td>
+        <td valign="top" width="28%" bgcolor="#C0C0C0">Tが空の構造体やクラスである場合に真。コンパイラが&quot;空の基底クラスのサイズを0にする&quot;最適化を実装しているのであれば、is_emptyはTが空であることを正しく推察する。
+is_classがTがクラス型であることを判別できることが前提。</td>
+        <td valign="top" width="13%" bgcolor="#C0C0C0"><p
+        align="center">10p5</p>
+        </td>
+        <td valign="top" width="25%" bgcolor="#C0C0C0"><p
+        align="center">PCD</p>
+        </td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="23%" bgcolor="#C0C0C0"><code>::boost::is_const&lt;T&gt;::value</code></td>
+        <td valign="top" width="28%" bgcolor="#C0C0C0">Tがトップレベルでconst修飾されている場合に真に評価する。</td>
+        <td valign="top" width="13%" bgcolor="#C0C0C0"><p
+        align="center">3.9.3</p>
+        </td>
+        <td valign="top" width="25%" bgcolor="#C0C0C0">&nbsp;</td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="23%" bgcolor="#C0C0C0"><code>::boost::is_volatile&lt;T&gt;::value</code></td>
+        <td valign="top" width="28%" bgcolor="#C0C0C0">Tがvolatile修飾されていれば真に評価する。</td>
+        <td valign="top" width="13%" bgcolor="#C0C0C0"><p
+        align="center">3.9.3</p>
+        </td>
+        <td valign="top" width="25%" bgcolor="#C0C0C0">&nbsp;</td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="23%" bgcolor="#C0C0C0"><code>::boost::is_POD&lt;T&gt;::value</code></td>
+        <td valign="top" width="28%" bgcolor="#C0C0C0">Tがconst/volatile修飾されたPOD型（訳註:Plane Old Data。非静的データメンバ、仮想関数、基本クラス、ユーザー定義コンストラクタ、コピーコンストラクタ、コピー代入演算子、およびデストラクタが含まれる）であれば真に評価する。</td>
+        <td valign="top" width="13%" bgcolor="#C0C0C0"><p
+        align="center">3.9p10</p>
+        <p align="center">9p4</p>
+        </td>
+        <td valign="top" width="25%" bgcolor="#C0C0C0">&nbsp;</td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="23%" bgcolor="#C0C0C0"><code>::boost::has_trivial_constructor&lt;T&gt;::value</code></td>
+        <td valign="top" width="28%" bgcolor="#C0C0C0">Tが自明なデフォルトコンストラクタを持っている、すなわちT()がmemsetと同等であれば真。</td>
+        <td valign="top" width="13%" bgcolor="#C0C0C0">&nbsp;</td>
+        <td valign="top" width="25%" bgcolor="#C0C0C0"><p
+        align="center">PC</p>
+        </td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="23%" bgcolor="#C0C0C0"><code>::boost::has_trivial_copy&lt;T&gt;::value</code></td>
+        <td valign="top" width="28%" bgcolor="#C0C0C0">Tが自明なコピーコンストラクタを持っている、すなわちT(const T&amp;)がmemcpyと同等であれば真。</td>
+        <td valign="top" width="13%" bgcolor="#C0C0C0">&nbsp;</td>
+        <td valign="top" width="25%" bgcolor="#C0C0C0"><p
+        align="center">PC</p>
+        </td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="23%" bgcolor="#C0C0C0"><code>::boost::has_trivial_assign&lt;T&gt;::value</code></td>
+        <td valign="top" width="28%" bgcolor="#C0C0C0">Tが自明な代入演算子を持っている、すなわちT::operator=(const T&amp;)がmemcpyと同等であれば真。</td>
+        <td valign="top" width="13%" bgcolor="#C0C0C0">&nbsp;</td>
+        <td valign="top" width="25%" bgcolor="#C0C0C0"><p
+        align="center">PC</p>
+        </td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="23%" bgcolor="#C0C0C0"><code>::boost::has_trivial_destructor&lt;T&gt;::value</code></td>
+        <td valign="top" width="28%" bgcolor="#C0C0C0">Tが自明なデストラクタを持っている、すなわちT::~T()が効果なしであれば真。</td>
+        <td valign="top" width="13%" bgcolor="#C0C0C0">&nbsp;</td>
+        <td valign="top" width="25%" bgcolor="#C0C0C0"><p
+        align="center">PC</p>
+        </td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="23%" bgcolor="#C0C0C0"><code>::boost::is_stateless&lt;T&gt;::value</code></td>
+        <td valign="top" width="28%" bgcolor="#C0C0C0">Tが実体を持たない、要するにTが記憶領域を持たず、コンストラクタとデストラクタがトリビアルであれば真。</td>
+        <td valign="top" width="13%" bgcolor="#C0C0C0">&nbsp;</td>
+        <td valign="top" width="25%" bgcolor="#C0C0C0"><p
+        align="center">PC</p>
+        </td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td valign="top" bgcolor="#C0C0C0"><code>::boost::has_nothrow_constructor&lt;T&gt;::value</code></td>
+        <td bgcolor="#C0C0C0">Tが例外を発生させないデフォルトコンストラクタを持っていれば真。</td>
+        <td bgcolor="#C0C0C0">&nbsp;</td>
+        <td align="center" bgcolor="#C0C0C0">PC</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td valign="top" bgcolor="#C0C0C0"><code>::boost::has_nothrow_copy&lt;T&gt;::value</code></td>
+        <td bgcolor="#C0C0C0">Tが例外を発生させないコピーコンストラクタを持っていれば真。</td>
+        <td bgcolor="#C0C0C0">&nbsp;</td>
+        <td align="center" bgcolor="#C0C0C0">PC</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td valign="top" bgcolor="#C0C0C0"><code>::boost::has_nothrow_assign&lt;T&gt;::value</code></td>
+        <td bgcolor="#C0C0C0">Tが例外を発生させない代入演算子を持っていれば真。</td>
+        <td bgcolor="#C0C0C0">&nbsp;</td>
+        <td align="center" bgcolor="#C0C0C0">PC</td>
+        <td>&nbsp;</td>
+    </tr>
+</table>
+
+<p>&nbsp;</p>
+
+<h2><a name="relationships"></a>Relationships Between Types</h2>
+
+<p>以下のテンプレートは２つの型の間に関連性があるかどうかを調べる。</p>
+
+<table border="0" cellpadding="7" cellspacing="1" width="100%">
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="23%" bgcolor="#008080"><p
+        align="center">Expression</p>
+        </td>
+        <td valign="top" width="27%" bgcolor="#008080"><p
+        align="center">Description</p>
+        </td>
+        <td valign="top" width="15%" bgcolor="#008080"><p
+        align="center">Reference</p>
+        </td>
+        <td valign="top" width="25%" bgcolor="#008080"><p
+        align="center">Compiler requirements</p>
+        </td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="23%" bgcolor="#C0C0C0"><div
+        align="center"><center><pre><code>::boost::is_same&lt;T,U&gt;::value</code></pre>
+        </center></div></td>
+        <td valign="top" width="27%" bgcolor="#C0C0C0"><p
+        align="center">TとUが同じ型であれば真に評価する。</p>
+        </td>
+        <td valign="top" width="15%" bgcolor="#C0C0C0">&nbsp;</td>
+        <td valign="top" width="25%" bgcolor="#C0C0C0">&nbsp;</td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="23%" bgcolor="#C0C0C0"><code>::boost::is_convertible&lt;T,U&gt;::value</code></td>
+        <td valign="top" width="27%" bgcolor="#C0C0C0">型Tが型Uに変換できるのであれば真に評価する。</td>
+        <td valign="top" width="15%" bgcolor="#C0C0C0"><p
+        align="center">4</p>
+        <p align="center">8.5</p>
+        </td>
+        <td valign="top" width="25%" bgcolor="#C0C0C0">このテンプレートは、Borlandのコンパイラではコンストラクタベースの変換について、Metrowerksのコンパイラではすべての場合について、現時点では使用できないことに注意。</td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td valign="top" bgcolor="#C0C0C0"><code>::boost::is_base_and_derived&lt;T,U&gt;::value</code></td>
+        <td bgcolor="#C0C0C0">型Tが型Uの基底クラスであれば真に評価する。</td>
+        <td align="center" bgcolor="#C0C0C0">10</td>
+        <td align="center" bgcolor="#C0C0C0">P</td>
+        <td>&nbsp;</td>
+    </tr>
+</table>
+
+<p><code>is_convertible</code>および<code>is_base_and_derived</code>では、変換があいまいな場合にはコンパイラがエラーを出すので注意すること。</p>
+
+<pre>struct A {};
+struct B : A {};
+struct C : A {};
+struct D : B, C {};
+bool const x = boost::is_base_and_derived&lt;A,D&gt;::value;  // エラー
+bool const y = boost::is_convertible&lt;D*,A*&gt;::value;     // エラー
+</pre>
+
+<h2><a name="transformations"></a>Transformations Between Types</h2>
+
+<p>以下のテンプレートは、ある型を別の型に、いくつかの明確な規則に基づいて変形する。各テンプレートにはテンプレート引数Tを変形した結果である<i>type</i>という名のメンバがひとつだけ含まれている。</p>
+
+<table border="0" cellpadding="7" cellspacing="1" width="100%">
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="23%" bgcolor="#008080"><p
+        align="center">Expression</p>
+        </td>
+        <td valign="top" width="28%" bgcolor="#008080"><p
+        align="center">Description</p>
+        </td>
+        <td valign="top" width="13%" bgcolor="#008080"><p
+        align="center">Reference</p>
+        </td>
+        <td valign="top" width="25%" bgcolor="#008080"><p
+        align="center">Compiler requirements</p>
+        </td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="23%" bgcolor="#C0C0C0"><code>::boost::remove_const&lt;T&gt;::type</code></td>
+        <td valign="top" width="28%" bgcolor="#C0C0C0">Tと同じ型であるが、トップレベルのconst修飾子を取り除いた型を作る。例えば、&quot;const int&quot;は&quot;int&quot;になるが、&quot;const int*&quot;は変化しないままとなる。</td>
+        <td valign="top" width="13%" bgcolor="#C0C0C0">3.9.3</td>
+        <td width="25%" bgcolor="#C0C0C0"><p align="center">P</p>
+        </td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="23%" bgcolor="#C0C0C0"><code>::boost::remove_volatile&lt;T&gt;::type</code></td>
+        <td valign="top" width="28%" bgcolor="#C0C0C0">Tと同じ型であるが、トップレベルのvolatile修飾子を取り除いた型を作る。例えば、&quot;volatile int&quot;は&quot;int&quot;になる。</td>
+        <td valign="top" width="13%" bgcolor="#C0C0C0"><p
+        align="left">3.9.3</p>
+        </td>
+        <td width="25%" bgcolor="#C0C0C0"><p align="center">P</p>
+        </td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td bgcolor="#C0C0C0"><code>::boost::remove_cv&lt;T&gt;::type</code></td>
+        <td bgcolor="#C0C0C0">Tと同じ型であるが、トップレベルのconst/volatile修飾子を取り除いた型を作る。例えば、&quot;const volatile int&quot;は&quot;int&quot;になるが、&quot;const int*&quot;は変化せずそのままとなる。</td>
+        <td bgcolor="#C0C0C0">3.9.3</td>
+        <td bgcolor="#C0C0C0"><p align="center">P</p>
+        </td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="23%" bgcolor="#C0C0C0"><code>::boost::remove_reference&lt;T&gt;::type</code></td>
+        <td valign="top" width="28%" bgcolor="#C0C0C0">Tが参照型であれば参照を取り除き、そうでなければTは変化せずそのままとなる。例えば、&quot;int&amp;&quot;は&quot;int&quot;になるが、&quot;int*&quot;は変化しないままである。</td>
+        <td valign="top" width="13%" bgcolor="#C0C0C0">8.3.2</td>
+        <td width="25%" bgcolor="#C0C0C0"><p align="center">P</p>
+        </td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="23%" bgcolor="#C0C0C0"><code>::boost::remove_bounds&lt;T&gt;::type</code></td>
+        <td valign="top" width="28%" bgcolor="#C0C0C0">Tが配列型であればTからトップレベルの配列修飾子を取り除き、そうでなければTは変化せずそのままとなる。例えば、&quot;int[2][3]&quot;は&quot;int[3]&quot;になる。</td>
+        <td valign="top" width="13%" bgcolor="#C0C0C0">8.3.4</td>
+        <td width="25%" bgcolor="#C0C0C0"><p align="center">P</p>
+        </td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="23%" bgcolor="#C0C0C0"><code>::boost::remove_pointer&lt;T&gt;::type</code></td>
+        <td valign="top" width="28%" bgcolor="#C0C0C0">Tがポインタ型であればTから間接修飾を取り除き、そうでなければTは変化せずそのままとなる。例えば、&quot;int*&quot;は&quot;int&quot;になるが、&quot;int&amp;&quot;は変化しないままである。</td>
+        <td valign="top" width="13%" bgcolor="#C0C0C0">8.3.1</td>
+        <td width="25%" bgcolor="#C0C0C0"><p align="center">P</p>
+        </td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="23%" bgcolor="#C0C0C0"><code>::boost::add_reference&lt;T&gt;::type</code></td>
+        <td valign="top" width="28%" bgcolor="#C0C0C0">Tが参照型であればTは変化せずそのままとなり、そうでなければTへの参照型に変換する。例えば、&quot;int&amp;&quot;は変化せずにそのままであるが、&quot;double&quot;は&quot;double&amp;&quot;になる。</td>
+        <td valign="top" width="13%" bgcolor="#C0C0C0">8.3.2</td>
+        <td width="25%" bgcolor="#C0C0C0"><p align="center">P</p>
+        </td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="23%" bgcolor="#C0C0C0"><code>::boost::add_pointer&lt;T&gt;::type</code></td>
+        <td valign="top" width="28%" bgcolor="#C0C0C0">
+&quot;t&quot;がTのインスタンスであるとき、add_pointer&lt;T&gt;::typeは&quot;&amp;t&quotが返す型である。例えば、&quot;int&quot;と&quot;int&amp;&quot;はともに&quot;int*&quot;になる。</td>
+        <td valign="top" width="13%" bgcolor="#C0C0C0">8.3.1</td>
+        <td width="25%" bgcolor="#C0C0C0"><p align="center">P</p>
+        </td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td valign="top" bgcolor="#C0C0C0"><code>::boost::add_const&lt;T&gt;::type</code></td>
+        <td valign="top" bgcolor="#C0C0C0">あらゆるTに対して&quot;T
+        const&quot;と同じ。
+        <td valign="top" bgcolor="#C0C0C0">3.9.3</td>
+        <td valign="top" bgcolor="#C0C0C0">&nbsp;</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td valign="top" bgcolor="#C0C0C0"><code>::boost::add_volatile&lt;T&gt;::type</code></td>
+        <td valign="top" bgcolor="#C0C0C0">あらゆるTに対して&quot;T
+        volatile&quot;と同じ。</td>
+        <td valign="top" bgcolor="#C0C0C0">3.9.3</td>
+        <td valign="top" bgcolor="#C0C0C0">&nbsp;</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td valign="top" bgcolor="#C0C0C0"><code>::boost::add_cv&lt;T&gt;::type</code></td>
+        <td valign="top" bgcolor="#C0C0C0">あらゆるTに対して&quot;T
+        const volatile&quot;と同じ。</td>
+        <td valign="top" bgcolor="#C0C0C0">3.9.3</td>
+        <td bgcolor="#C0C0C0">&nbsp;</td>
+        <td>&nbsp;</td>
+    </tr>
+</table>
+
+<p>上記の表が示すように、型変形テンプレートを正しく実装するには部分特殊化版のサポートが必要である。一方で、経験上この分類に属するテンプレートの多くは非常に有益であり、ジェネリックライブラリの実装においてしばしば必須となる。
+これらのテンプレートが不足していると、それらのライブラリを部分特殊化版の言語仕様をまだサポートしていないコンパイラに移植する上で大きな制約要因となる。
+そうしたコンパイラの中にはしばらく部分特殊化版をサポートしないものがあり、少なくともそのうちの１つは非常に広く普及しているため、ライブラリでは移植を実現させるための回避手段を提供することにした。
+回避手段を裏付ける基本的なアイデアは以下の通り。</p>
+
+<ol>
+    <li>全ての基本型と、それらから導かれる１段階および２段階のconst/volatile修飾された（または修飾されていない）全てポインタ型についての全型変形テンプレートの完全な特殊化版を手作業で定義する。そして、</li>
+    <li>いかなるユーザ定義型 T に対してそうした明示的な特殊化版を定義できるようようにユーザレベルマクロを提供する。</li>
+</ol>
+
+<p>最初の内容はこのようなものであり、コンパイルに成功することが保証されている。</p>
+
+<pre>BOOST_STATIC_ASSERT((is_same&lt;char, remove_reference&lt;char&amp;&gt;::type&gt;::value));</pre>
+
+<pre>BOOST_STATIC_ASSERT((is_same&lt;char const, remove_reference&lt;char const&amp;&gt;::type&gt;::value));</pre>
+
+<pre>BOOST_STATIC_ASSERT((is_same&lt;char volatile, remove_reference&lt;char volatile&amp;&gt;::type&gt;::value));</pre>
+
+<pre>BOOST_STATIC_ASSERT((is_same&lt;char const volatile, remove_reference&lt;char const volatile&amp;&gt;::type&gt;::value));</pre>
+
+<pre>BOOST_STATIC_ASSERT((is_same&lt;char*, remove_reference&lt;char*&amp;&gt;::type&gt;::value));</pre>
+
+<pre>BOOST_STATIC_ASSERT((is_same&lt;char const*, remove_reference&lt;char const*&amp;&gt;::type&gt;::value));</pre>
+
+<pre>...</pre>
+
+<pre>BOOST_STATIC_ASSERT((is_same&lt;char const volatile* const volatile* const volatile, remove_reference&lt;char const volatile* const volatile* const volatile&amp;&gt;::type&gt;::value));</pre>
+
+<p>そして次の内容は'char'、'int'や他の組み込み型だけでなく、独自に定義された型に対しても上記のコードを働かせるための仕組みをライブラリのユーザに提供する。</p>
+
+<pre>struct my {};</pre>
+
+<pre>BOOST_BROKEN_COMPILER_TYPE_TRAITS_SPECIALIZATION(my)</pre>
+
+<pre>BOOST_STATIC_ASSERT((is_same&lt;my, remove_reference&lt;my&amp;&gt;::type&gt;::value));</pre>
+
+<pre>BOOST_STATIC_ASSERT((is_same&lt;my, remove_const&lt;my const&gt;::type&gt;::value));</pre>
+
+<pre>// etc.</pre>
+
+<p>部分特殊化版がサポートされないコンパイラでは、BOOST_BROKEN_COMPILER_TYPE_TRAITS_SPECIALIZATIONは中身のないマクロとして評価されることに注意。</p>
+
+<h2><a name="synthesized"></a>Synthesizing Types</h2>
+
+<p>以下のテンプレートは要求した特徴を持った型を作り出す。</p>
+
+<table border="0" cellpadding="7" cellspacing="1" width="100%">
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="23%" bgcolor="#008080"><p
+        align="center">Expression</p>
+        </td>
+        <td valign="top" width="28%" bgcolor="#008080"><p
+        align="center">Description</p>
+        </td>
+        <td valign="top" width="13%" bgcolor="#008080"><p
+        align="center">Reference</p>
+        </td>
+        <td valign="top" width="25%" bgcolor="#008080"><p
+        align="center">Compiler requirements</p>
+        </td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="23%" bgcolor="#C0C0C0"><code>::boost::type_with_alignment&lt;Align&gt;::type</code></td>
+        <td valign="top" width="28%" bgcolor="#C0C0C0">Alignの倍数に整列された組み込み型またはPOD型を見つける。</td>
+        <td valign="top" width="13%" bgcolor="#C0C0C0">&nbsp;</td>
+        <td width="25%" bgcolor="#C0C0C0">&nbsp;</td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+</table>
+
+<h2><a name="function_traits"></a>Function Traits</h2>
+
+<p><code>::boost::function_traits</code>クラステンプレートは関数型から情報を取り出す。
+
+<table border="0" cellpadding="7" cellspacing="1" width="100%">
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="23%" bgcolor="#008080"><p
+        align="center">Expression</p>
+        </td>
+        <td valign="top" width="28%" bgcolor="#008080"><p
+        align="center">Description</p>
+        </td>
+        <td valign="top" width="13%" bgcolor="#008080"><p
+        align="center">Reference</p>
+        </td>
+        <td valign="top" width="25%" bgcolor="#008080"><p
+        align="center">Compiler requirements</p>
+        </td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="23%" bgcolor="#C0C0C0"><code>::boost::function_traits&lt;F&gt;::arity</code></td>
+        <td valign="top" width="28%" bgcolor="#C0C0C0">関数型Fの引数の数を調べる。</td>
+        <td valign="top" width="13%" bgcolor="#C0C0C0">&nbsp;</td>
+        <td width="25%" bgcolor="#C0C0C0">部分特殊化版がサポートされない場合、このテンプレートは参照型についてはコンパイルできない。</td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="23%" bgcolor="#C0C0C0"><code>::boost::function_traits&lt;F&gt;::result_type</code></td>
+        <td valign="top" width="28%" bgcolor="#C0C0C0">関数型Fが返す型。</td>
+        <td valign="top" width="13%" bgcolor="#C0C0C0">&nbsp;</td>
+        <td width="25%" bgcolor="#C0C0C0">P</td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="5%">&nbsp;</td>
+        <td valign="top" width="23%" bgcolor="#C0C0C0"><code>::boost::function_traits&lt;F&gt;::arg<em>N</em>_type</code></td>
+        <td valign="top" width="28%" bgcolor="#C0C0C0">関数型Fの第<em>N</em>（1≦N≦Fの引数の数）引数の型。</td>
+        <td valign="top" width="13%" bgcolor="#C0C0C0">&nbsp;</td>
+        <td width="25%" bgcolor="#C0C0C0">P</td>
+        <td valign="top" width="5%">&nbsp;</td>
+    </tr>
+</table>
+
+<h2><a name="compiler"></a>Compiler Support Information</h2>
+
+<p>上の表中にある記号の意味は以下の通り。</p>
+
+<table border="0" cellpadding="7" cellspacing="0" width="480">
+    <tr>
+        <td valign="top" width="50%"><p align="center">P</p>
+        </td>
+        <td valign="top" width="90%">クラスが正しく働くためにはクラステンプレートの部分特殊化版のサポートを必要としていることを示す。</td>
+    </tr>
+    <tr>
+        <td valign="top" width="50%"><p align="center">C</p>
+        </td>
+        <td valign="top" width="90%">その特性クラスのためにコンパイラの直接的なサポートが必要であることを示す。</td>
+    </tr>
+    <tr>
+        <td valign="top" width="50%"><p align="center">D</p>
+        </td>
+        <td valign="top" width="90%">特性クラスがコンパイラの直接的なサポートを必要とするクラスに依存していることを示す。</td>
+    </tr>
+</table>
+
+<p>&nbsp;</p>
+
+<p>DやCの印が付いたクラスに対して、コンパイラのサポートが受けられなければ、この型特性は実際には&quot;真&quot;が正しい場合に&quot;偽&quot;を返すことがある。この規則の唯一の例外は&quot;is_class&quot;で、Tが本当にクラスかどうかの推量を試みるにあたって、実際には&quot;偽&quot;が正しい場合に&quot;真&quot;を返すことがある。
+こうしたことが起こるのは、Tが共用体あるいはコンパイラ独自のスカラ型（それらの型特性が特化されていない）の場合である。</p>
+
+<p><i>コンパイラがサポートしていない場合</i>、これらの特性が<i>常に</i>正しい値を返すことを保証するには、ユーザ定義のそれぞれの共用体型に対して'is_union'を、ユーザ定義のそれぞれの空の複合型に対して'is_empty'を、そしてユーザ定義のそれぞれのPOD型に対して'is_POD'を特化しなければならない。ユーザ定義型が'has_*'特性を持っておりPOD<i>ではない</i>場合には、'has_*'特性もまた特化すべきである。</p>
+
+<p>以下の規則が自動的に当てはまる。</p>
+
+<p>is_enumはis_PODでもある。</p>
+
+<p>is_PODはhas_*でもある。</p>
+
+<p>これが意味するのは、例えば、空のPOD構造体がある場合には、is_emptyとis_PODを特化し、すべてのhas_*が真を返すようにするということである。</p>
+
+<h2><a name="headers"></a>Type Traits Headers</h2>
+
+<p>型特性ライブラリは通常下記をインクルードする。</p>
+
+<p>#include &lt;boost/type_traits.hpp&gt;</p>
+
+<p>とはいえ、ライブラリは実際にはいくつかのより小さいヘッダに分かれており、ときには実際に必要な型特性クラスを得るためにその中のひとつを直接インクルードする方が便利なことがある。しかし型特性クラスは相互依存性が高いことに注意すること。したがって、この方法は意外に節減にはならないかもしれない。以下の表では型特性クラスをアルファベット順に、各テンプレートが収められたヘッダとともに並べる。</p>
+
+<table border="0" cellpadding="7" cellspacing="1" width="100%">
+    <tr>
+        <td valign="top" width="7%">&nbsp;</td>
+        <td valign="top" width="43%" bgcolor="#008080">Template
+        class</td>
+        <td valign="top" width="41%" bgcolor="#008080">Header</td>
+        <td valign="top" width="9%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td valign="top" bgcolor="#C0C0C0"><code>add_const</code></td>
+        <td valign="top" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/transform_traits.hpp&gt;</code></td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td bgcolor="#C0C0C0"><code>add_const</code></td>
+        <td bgcolor="#C0C0C0"><code>&lt;boost/type_traits/transform_traits.hpp&gt;</code></td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="7%">&nbsp;</td>
+        <td valign="top" width="43%" bgcolor="#C0C0C0"><code>add_pointer</code></td>
+        <td valign="top" width="41%" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/transform_traits.hpp&gt;</code></td>
+        <td valign="top" width="9%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="7%">&nbsp;</td>
+        <td valign="top" width="43%" bgcolor="#C0C0C0"><code>add_reference</code></td>
+        <td valign="top" width="41%" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/transform_traits.hpp&gt;</code></td>
+        <td valign="top" width="9%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td valign="top" bgcolor="#C0C0C0"><code>add_volatile</code></td>
+        <td valign="top" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/transform_traits.hpp&gt;</code></td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="7%">&nbsp;</td>
+        <td valign="top" width="43%" bgcolor="#C0C0C0"><code>alignment_of</code></td>
+        <td valign="top" width="41%" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/alignment_traits.hpp&gt;</code></td>
+        <td valign="top" width="9%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="7%">&nbsp;</td>
+        <td valign="top" width="43%" bgcolor="#C0C0C0"><code>has_trivial_assign</code></td>
+        <td valign="top" width="41%" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/object_traits.hpp&gt;</code></td>
+        <td valign="top" width="9%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td valign="top" bgcolor="#C0C0C0"><code>function_traits</code></td>
+        <td valign="top" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/function_traits.hpp&gt;</code></td>
+        <td>&nbsp;</td>
+    </tr>
+
+    <tr>
+        <td valign="top" width="7%">&nbsp;</td>
+        <td valign="top" width="43%" bgcolor="#C0C0C0"><code>has_trivial_constructor</code></td>
+        <td valign="top" width="41%" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/object_traits.hpp&gt;</code></td>
+        <td valign="top" width="9%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="7%">&nbsp;</td>
+        <td valign="top" width="43%" bgcolor="#C0C0C0"><code>has_trivial_copy</code></td>
+        <td valign="top" width="41%" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/object_traits.hpp&gt;</code></td>
+        <td valign="top" width="9%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="7%">&nbsp;</td>
+        <td valign="top" width="43%" bgcolor="#C0C0C0"><code>has_trivial_destructor</code></td>
+        <td valign="top" width="41%" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/object_traits.hpp&gt;</code></td>
+        <td valign="top" width="9%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="7%">&nbsp;</td>
+        <td valign="top" width="43%" bgcolor="#C0C0C0"><code>is_arithmetic</code></td>
+        <td valign="top" width="41%" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/arithmetic_traits.hpp&gt;</code></td>
+        <td valign="top" width="9%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="7%">&nbsp;</td>
+        <td valign="top" width="43%" bgcolor="#C0C0C0"><code>is_array
+        </code></td>
+        <td valign="top" width="41%" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/composite_traits.hpp&gt;</code></td>
+        <td valign="top" width="9%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td bgcolor="#C0C0C0"><code>is_base_and_derived</code></td>
+        <td bgcolor="#C0C0C0"><code>&lt;boost/type_traits/object_traits.hpp&gt;</code></td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="7%">&nbsp;</td>
+        <td valign="top" width="43%" bgcolor="#C0C0C0"><code>is_class</code></td>
+        <td valign="top" width="41%" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/object_traits.hpp&gt;</code></td>
+        <td valign="top" width="9%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="7%">&nbsp;</td>
+        <td valign="top" width="43%" bgcolor="#C0C0C0"><code>is_compound</code></td>
+        <td valign="top" width="41%" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/object_traits.hpp&gt;</code></td>
+        <td valign="top" width="9%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="7%">&nbsp;</td>
+        <td valign="top" width="43%" bgcolor="#C0C0C0"><code>is_const</code></td>
+        <td valign="top" width="41%" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/cv_traits.hpp&gt;</code></td>
+        <td valign="top" width="9%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="7%">&nbsp;</td>
+        <td valign="top" width="43%" bgcolor="#C0C0C0"><code>is_convertible</code></td>
+        <td valign="top" width="41%" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/conversion_traits.hpp&gt;</code></td>
+        <td valign="top" width="9%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="7%">&nbsp;</td>
+        <td valign="top" width="43%" bgcolor="#C0C0C0"><code>is_empty</code></td>
+        <td valign="top" width="41%" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/object_traits.hpp&gt;</code></td>
+        <td valign="top" width="9%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="7%">&nbsp;</td>
+        <td valign="top" width="43%" bgcolor="#C0C0C0"><code>is_enum</code></td>
+        <td valign="top" width="41%" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/composite_traits.hpp&gt;</code></td>
+        <td valign="top" width="9%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="7%">&nbsp;</td>
+        <td valign="top" width="43%" bgcolor="#C0C0C0"><code>is_float</code></td>
+        <td valign="top" width="41%" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/arithmetic_traits.hpp&gt;</code></td>
+        <td valign="top" width="9%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td valign="top" bgcolor="#C0C0C0"><code>is_function</code></td>
+        <td valign="top" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/function_traits.hpp&gt;</code></td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="7%">&nbsp;</td>
+        <td valign="top" width="43%" bgcolor="#C0C0C0"><code>is_fundamental</code></td>
+        <td valign="top" width="41%" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/arithmetic_traits.hpp&gt;</code></td>
+        <td valign="top" width="9%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="7%">&nbsp;</td>
+        <td valign="top" width="43%" bgcolor="#C0C0C0"><code>is_integral</code></td>
+        <td valign="top" width="41%" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/arithmetic_traits.hpp&gt;</code></td>
+        <td valign="top" width="9%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="7%">&nbsp;</td>
+        <td valign="top" width="43%" bgcolor="#C0C0C0"><code>is_member_pointer</code></td>
+        <td valign="top" width="41%" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/composite_traits.hpp&gt;</code></td>
+        <td valign="top" width="9%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td valign="top" bgcolor="#C0C0C0"><code>is_member_function_pointer</code></td>
+        <td valign="top" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/composite_traits.hpp&gt;</code></td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="7%">&nbsp;</td>
+        <td valign="top" width="43%" bgcolor="#C0C0C0"><code>is_object
+        </code></td>
+        <td valign="top" width="41%" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/object_traits.hpp&gt;</code></td>
+        <td valign="top" width="9%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="7%">&nbsp;</td>
+        <td valign="top" width="43%" bgcolor="#C0C0C0"><code>is_POD</code></td>
+        <td valign="top" width="41%" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/object_traits.hpp&gt;</code></td>
+        <td valign="top" width="9%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="7%">&nbsp;</td>
+        <td valign="top" width="43%" bgcolor="#C0C0C0"><code>is_pointer</code></td>
+        <td valign="top" width="41%" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/composite_traits.hpp&gt;</code></td>
+        <td valign="top" width="9%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="7%">&nbsp;</td>
+        <td valign="top" width="43%" bgcolor="#C0C0C0"><code>is_reference</code></td>
+        <td valign="top" width="41%" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/composite_traits.hpp&gt;</code></td>
+        <td valign="top" width="9%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="7%">&nbsp;</td>
+        <td valign="top" width="43%" bgcolor="#C0C0C0"><code>is_same</code></td>
+        <td valign="top" width="41%" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/same_traits.hpp&gt;</code></td>
+        <td valign="top" width="9%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="7%">&nbsp;</td>
+        <td valign="top" width="43%" bgcolor="#C0C0C0"><code>is_scalar</code></td>
+        <td valign="top" width="41%" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/object_traits.hpp&gt;</code></td>
+        <td valign="top" width="9%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="7%">&nbsp;</td>
+        <td valign="top" width="43%" bgcolor="#C0C0C0"><code>is_union</code></td>
+        <td valign="top" width="41%" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/composite_traits.hpp&gt;</code></td>
+        <td valign="top" width="9%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="7%">&nbsp;</td>
+        <td valign="top" width="43%" bgcolor="#C0C0C0"><code>is_void</code></td>
+        <td valign="top" width="41%" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/arithmetic_traits.hpp&gt;</code></td>
+        <td valign="top" width="9%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="7%">&nbsp;</td>
+        <td valign="top" width="43%" bgcolor="#C0C0C0"><code>is_volatile</code></td>
+        <td valign="top" width="41%" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/cv_traits.hpp&gt;</code></td>
+        <td valign="top" width="9%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="7%">&nbsp;</td>
+        <td valign="top" width="43%" bgcolor="#C0C0C0"><code>remove_bounds</code></td>
+        <td valign="top" width="41%" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/transform_traits.hpp&gt;</code></td>
+        <td valign="top" width="9%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="7%">&nbsp;</td>
+        <td valign="top" width="43%" bgcolor="#C0C0C0"><code>remove_const</code></td>
+        <td valign="top" width="41%" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/cv_traits.hpp&gt;</code></td>
+        <td valign="top" width="9%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="7%">&nbsp;</td>
+        <td valign="top" width="43%" bgcolor="#C0C0C0"><code>remove_cv</code></td>
+        <td valign="top" width="41%" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/cv_traits.hpp&gt;</code></td>
+        <td valign="top" width="9%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="7%">&nbsp;</td>
+        <td valign="top" width="43%" bgcolor="#C0C0C0"><code>remove_pointer</code></td>
+        <td valign="top" width="41%" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/transform_traits.hpp&gt;</code></td>
+        <td valign="top" width="9%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="7%">&nbsp;</td>
+        <td valign="top" width="43%" bgcolor="#C0C0C0"><code>remove_reference
+        </code></td>
+        <td valign="top" width="41%" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/transform_traits.hpp&gt;</code></td>
+        <td valign="top" width="9%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="7%">&nbsp;</td>
+        <td valign="top" width="43%" bgcolor="#C0C0C0"><code>remove_volatile</code></td>
+        <td valign="top" width="41%" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/cv_traits.hpp&gt;</code></td>
+        <td valign="top" width="9%">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top" width="7%">&nbsp;</td>
+        <td valign="top" width="43%" bgcolor="#C0C0C0"><code>type_with_alignment</code></td>
+        <td valign="top" width="41%" bgcolor="#C0C0C0"><code>&lt;boost/type_traits/alignment_traits.hpp&gt;</code></td>
+        <td valign="top" width="9%">&nbsp;</td>
+    </tr>
+</table>
+
+<p>&nbsp;</p>
+
+<h2><a name="example"></a>Example code</h2>
+
+<p>型特性テンプレートを使用できるいくつかの方法を説明したプログラム例が４つある。</p>
+
+<h4>Copy_example.cpp</h4>
+
+<p>std::copyのコピー操作を最適化するために適宜memcpyを使用するバージョンを示す。</p>
+
+<pre>//
+// opt::copy
+// std::copyと同じセマンティクス
+// 適宜memcpyを呼び出す。
+//
+
+namespace detail{
+
+template&lt;typename I1, typename I2&gt;
+I2 copy_imp(I1 first, I1 last, I2 out)
+{
+   while(first != last)
+   {
+      *out = *first;
+      ++out;
+      ++first;
+   }
+   return out;
+}
+
+template &lt;bool b&gt;
+struct copier
+{
+   template&lt;typename I1, typename I2&gt;
+   static I2 do_copy(I1 first, I1 last, I2 out)
+   { return copy_imp(first, last, out); }
+};
+
+template &lt;&gt;
+struct copier&lt;true&gt;
+{
+   template&lt;typename I1, typename I2&gt;
+   static I2* do_copy(I1* first, I1* last, I2* out)
+   {
+      memcpy(out, first, (last-first)*sizeof(I2));
+      return out+(last-first);
+   }
+};
+
+
+}
+
+template&lt;typename I1, typename I2&gt;
+inline I2 copy(I1 first, I1 last, I2 out)
+{
+   typedef typename boost::remove_cv&lt;typename std::iterator_traits&lt;I1&gt;::value_type&gt;::type v1_t;
+   typedef typename boost::remove_cv&lt;typename std::iterator_traits&lt;I2&gt;::value_type&gt;::type v2_t;
+   return detail::copier&lt;
+      ::boost::type_traits::ice_and&lt;
+         ::boost::is_same&lt;v1_t, v2_t&gt;::value,
+         ::boost::is_pointer&lt;I1&gt;::value,
+         ::boost::is_pointer&lt;I2&gt;::value,
+         ::boost::has_trivial_assign&lt;v1_t&gt;::value
+      &gt;::value&gt;::do_copy(first, last, out);
+}</pre>
+
+<h4>fill_example.cpp</h4>
+
+<p>std::fillの充填操作を最適化するために適宜memsetを使用するバージョンを示す。
+また、エイリアシング問題を避けるため、引数の受け渡しを最適化するためにcall_traitsを使用する。</p>
+
+<pre>namespace opt{
+//
+// fill
+// std::fillと同じ。引数の受け渡しの&quot;最適化&quot;のために
+// call_traitsとともに適宜memsetを使用する。
+//
+//
+namespace detail{
+
+template &lt;typename I, typename T&gt;
+void do_fill_(I first, I last, typename boost::call_traits&lt;T&gt;::param_type val)
+{
+   while(first != last)
+   {
+      *first = val;
+      ++first;
+   }
+}
+
+template &lt;bool opt&gt;
+struct filler
+{
+   template &lt;typename I, typename T&gt;
+   struct rebind
+   {
+      static void do_fill(I first, I last, typename boost::call_traits&lt;T&gt;::param_type val)
+      { do_fill_&lt;I,T&gt;(first, last, val); }
+   };
+};
+
+template &lt;&gt;
+struct filler&lt;true&gt;
+{
+   template &lt;typename I, typename T&gt;
+   struct rebind
+   {
+      static void do_fill(I first, I last, T val)
+      {
+         std::memset(first, val, last-first);
+      }
+   };
+};
+
+}
+
+template &lt;class I, class T&gt;
+inline void fill(I first, I last, const T&amp; val)
+{
+   typedef detail::filler&lt;
+      ::boost::type_traits::ice_and&lt;
+         ::boost::is_pointer&lt;I&gt;::value,
+         ::boost::is_arithmetic&lt;T&gt;::value,
+         (sizeof(T) == 1)
+      &gt;::value&gt; filler_t;
+   typedef typename filler_t:: template rebind&lt;I,T&gt; binder;
+   binder::do_fill(first, last, val);
+}
+
+};   // namespace opt</pre>
+
+<h4>iter_swap_example.cpp</h4>
+
+<p>std::iter_swapの正規のものと同様の代替イテレータとともに動作するバージョンを示す。それは、正規のイテレータに対してstd::swapを呼び出すか、あるいは&quot;遅いけれども安全&quot;なswapを呼び出す。</p>
+
+<pre>namespace opt{
+//
+// iter_swap:
+// イテレータが代替イテレータかどうかを調べ、
+// それに応じて最適な形式を使う。
+//
+namespace detail{
+
+template &lt;bool b&gt;
+struct swapper
+{
+   template &lt;typename I&gt;
+   static void do_swap(I one, I two)
+   {
+      typedef typename std::iterator_traits&lt;I&gt;::value_type v_t;
+      v_t v = *one;
+      *one = *two;
+      *two = v;
+   }
+};
+
+template &lt;&gt;
+struct swapper&lt;true&gt;
+{
+   template &lt;typename I&gt;
+   static void do_swap(I one, I two)
+   {
+      using std::swap;
+      swap(*one, *two);
+   }
+};
+
+}
+
+template &lt;typename I1, typename I2&gt;
+inline void iter_swap(I1 one, I2 two)
+{
+   typedef typename std::iterator_traits&lt;I1&gt;::reference r1_t;
+   typedef typename std::iterator_traits&lt;I2&gt;::reference r2_t;
+   detail::swapper&lt;
+      ::boost::type_traits::ice_and&lt;
+         ::boost::is_reference&lt;r1_t&gt;::value, 
+         ::boost::is_reference&lt;r2_t&gt;::value,
+         ::boost::is_same&lt;r1_t, r2_t&gt;::value
+      &gt;::value&gt;::do_swap(one, two);
+}
+
+};   // namespace opt</pre>
+
+<h4>Trivial_destructor_example.cpp</h4>
+
+<p>このアルゴリズムはstd::uninitialized_copyの逆である。初期化済みのメモリブロックを受け取り、その中のすべてのオブジェクトに対してデストラクタを呼び出す。これは一般には自分自身でメモリ管理を行うコンテナクラスの内部で使われる。</p>
+
+<pre>namespace opt{
+//
+// アルゴリズムdestroy_array:
+// std::unitialized_copyの逆で、初期化済みのメモリブロックを受け取り、
+// その中の全オブジェクトに対してデストラクタを呼び出す。
+//
+
+namespace detail{
+
+template &lt;bool&gt;
+struct array_destroyer
+{
+   template &lt;class T&gt;
+   static void destroy_array(T* i, T* j){ do_destroy_array(i, j); }
+};
+
+template &lt;&gt;
+struct array_destroyer&lt;true&gt;
+{
+   template &lt;class T&gt;
+   static void destroy_array(T*, T*){}
+};
+
+template &lt;class T&gt;
+void do_destroy_array(T* first, T* last)
+{
+   while(first != last)
+   {
+      first-&gt;~T();
+      ++first;
+   }
+}
+
+}; // namespace detail
+
+template &lt;class T&gt;
+inline void destroy_array(T* p1, T* p2)
+{
+   detail::array_destroyer&lt;boost::has_trivial_destructor&lt;T&gt;::value&gt;::destroy_array(p1, p2);
+}
+} // namespace opt</pre>
+
+<hr>
+
+<p>Revised 22 April 2001</p>
+
+<p>Documentation &copy Copyright John Maddock 2001. Permission to
+copy, use, modify, sell and distribute this document is granted
+provided this copyright notice appears in all copies. This
+document is provided &quot;as is&quot; without express or implied
+warranty, and with no claim as to its suitability for any purpose.</p>
+
+<p>The type traits library is based on contributions by Steve
+Cleary, Beman Dawes, Aleksey Gurtovoy, Howard Hinnant, Jesse
+Jones, Mat Marcus, John Maddock and Jeremy Siek.</p>
+
+<p>Mat Marcus and Jesse Jones have worked on, and published a <a
+href="http://opensource.adobe.com/project4/project.shtml">paper</a>
+describing the partial specialisation workarounds used in this
+library.</p>
+
+<p>The is_convertible template is based on code originally
+devised by Andrei Alexandrescu, see &quot;<a
+href="http://www.cuj.com/experts/1810/alexandr.htm?topic=experts">Generic&lt;Programming&gt;:
+Mappings between Types and Values</a>&quot;.</p>
+
+<p>Maintained by <a href="../../people/john_maddock.htm">John
+Maddock</a>, the latest version of this file can be found at <a
+href="http://www.boost.org/">www.boost.org</a>, and the boost
+discussion list at <a
+href="http://www.yahoogroups.com/list/boost">www.yahoogroups.com/list/boost</a>.</p>
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:yusei-t@mx15.freecom.ne.jp">Takagi,Yusei</a><br>
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+</body>
+</html>

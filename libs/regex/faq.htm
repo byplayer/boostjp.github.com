@@ -1,0 +1,340 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type"
+content="text/html; charset=utf-8">
+<meta name="Template"
+content="C:\PROGRAM FILES\MICROSOFT OFFICE\OFFICE\html.dot">
+<meta name="GENERATOR" content="Microsoft FrontPage Express 2.0">
+<title>Regex++ - FAQ</title>
+</head>
+
+<body bgcolor="#FFFFFF" link="#0000FF" vlink="#800080">
+
+<p>&nbsp; </p>
+
+<table border="0" cellpadding="7" cellspacing="0" width="100%">
+    <tr>
+        <td valign="top"><h3><img src="../../c++boost.gif"
+        alt="C++ Boost" width="276" height="86"></h3>
+        </td>
+        <td valign="top"><h3 align="center">Regex++, FAQ.</h3>
+        <p align="left"><i>Copyright (c) 1998-2001 </i></p>
+        <p align="left"><i>Dr John Maddock</i></p>
+        <p align="left"><i>Permission to use, copy, modify,
+        distribute and sell this software and its documentation
+        for any purpose is hereby granted without fee, provided
+        that the above copyright notice appear in all copies and
+        that both that copyright notice and this permission
+        notice appear in supporting documentation. Dr John
+        Maddock makes no representations about the suitability of
+        this software for any purpose. It is provided &quot;as is&quot;
+        without express or implied warranty.</i></p>
+        </td>
+    </tr>
+</table>
+
+<!--<p><font color="#FF0000">Q. Why does using parenthesis in a
+regular expression change the result of a match?</font></p>-->
+<p><font color="#FF0000">Q. 正規表現の中で丸括弧を使うと、なぜ一致の結果が変わるのですか?
+</font></p>
+
+<!--<p>Parentheses don't only mark; they determine what the best
+match is as well. regex++ tries to follow the POSIX standard
+leftmost longest rule for determining what matched. So if there
+is more than one possible match after considering the whole
+expression, it looks next at the first sub-expression and then
+the second sub-expression and so on. So...</p>-->
+<p>丸括弧は印付けをするだけではない。同様に、何が最も一致するかを決定する。
+regex++ の特性は、何が一致するかを決定するのに 最左・最長という POSIX 標準に従っている。
+だからもし全ての表現を検討した上で、ひとつ以上の可能な一致があれば、
+最初の子表現、第2の子表現、第3の・・・と優先されて一致する。
+つまり、</p>
+
+<!--<pre>&quot;(0*)([0-9]*)&quot; against &quot;00123&quot; would produce
+$1 = &quot;00&quot;
+$2 = &quot;123&quot;</pre>-->
+<pre>&quot;(0*)([0-9]*)&quot; against &quot;00123&quot; は次のものを作る:
+$1 = &quot;00&quot;
+$2 = &quot;123&quot;</pre>
+
+<!--<p>where as</p>-->
+<p>一方、</p>
+
+<!--<pre>&quot;0*([0-9)*&quot; against &quot;00123&quot; would produce
+$1 = &quot;00123&quot;</pre>-->
+<pre>&quot;0*([0-9)*&quot; against &quot;00123&quot; は次のものを作る:
+$1 = &quot;00123&quot;</pre>
+
+<!--<p>If you think about it, had $1 only matched the &quot;123&quot;,
+this would be &quot;less good&quot; than the match &quot;00123&quot;
+which is both further to the left and longer. If you want $1 to
+match only the &quot;123&quot; part, then you need to use
+something like:</p>-->
+<p>$1が &quot;123&quot; とだけ一致するとしたら、それは最左最長の一致である &quot;00123&quot;
+との一致よりも望ましくない。もし $1 を &quot;123&quot; とのみ一致させたければ、
+次のようなものを使う必要がある。つまり:</p>
+
+<pre>&quot;0*([1-9][0-9]*)&quot;</pre>
+
+<!--<p>as the expression.</p>-->
+<p>という表現である。</p>
+
+<!--<p><font color="#FF0000">Q. Configure says that my compiler is
+unable to merge template instances, what does this mean?</font> </p>-->
+<p><font color="#FF0000">Q. コンフィギュアは、私のコンパイラが
+テンプレートの実体を結合出来ないと言ってきます。
+これはどういう意味ですか?</font> </p>
+
+<!--<p>A. When you compile template code, you can end up with the
+same template instances in multiple translation units - this will
+lead to link time errors unless your compiler/linker is smart
+enough to merge these template instances into a single record in
+the executable file. If you see this warning after running
+configure, then you can still link to libregex++.a if: </p>-->
+<p>A. あなたがテンプレートコードをコンパイルするとき、
+最終的には複数の翻訳単位で同じテンプレートの実体が出来る。
+このため、もしあなたのコンパイラ/リンカが、これらのテンプレートの実体を
+実行ファイルの中のひとつのレコードに結合するのに十分賢くなければ、
+リンク時のエラーが起きる。
+コンフィギュアを実行した後にこの警告が出ても、次のような場合には 
+libregex++.a とリンクすることが可能である。</p>
+
+<ol>
+<!--    <li>You use only the low-level template classes (reg_expression&lt;&gt;
+        match_results&lt;&gt; etc), from a single translation
+        unit, and use no other part of regex++.</li>
+    <li>You use only the POSIX API functions (regcomp regexec etc),
+        and no other part of regex++.</li>
+    <li>You use only the high level class RegEx, and no other
+        part of regex++. </li>-->
+    <li>低水準テンプレートクラス(reg_expression&lt;&gt;, match_results&lt;&gt;, etc.)
+    のみを単一の翻訳単位から使っていて、regex++ の他の部分は使っていない場合。</li>
+    <li>POSIX API 関数(regcomp, regexec, etc.)だけを使っていて、
+    regex++ の他の部分を使っていない場合。</li>
+    <li>高水準のクラス RegEx だけを使っていて、 regex++ の他の部分を使っていない場合。</li>
+</ol>
+
+<!--<p>Another option is to create a master include file, which
+#include's all the regex++ source files, and all the source files
+in which you use regex++. You then compile and link this master
+file as a single translation unit. </p>-->
+<p>もうひとつの選択肢は、最上位インクルードファイルを作成することである。
+これには regex++ のソースファイル全て、あなたが regex++ を利用しているソースファイル全てを
+インクルードする。そしてこの最上位インクルードファイルを単一の翻訳単位として、
+コンパイルしリンクする。</p>
+
+<!--<p><font color="#FF0000">Q. Configure says that my compiler is
+unable to merge template instances from archive files, what does
+this mean?</font> </p>-->
+<p><font color="#FF0000">Q. コンフィギュアは私のコンパイラがアーカイブファイルから
+テンプレートの実体を結合できないと言ってきます。
+これはどういう意味ですか?</font> </p>
+
+<!--<p>A. When you compile template code, you can end up with the
+same template instances in multiple translation units - this will
+lead to link time errors unless your compiler/linker is smart
+enough to merge these template instances into a single record in
+the executable file. Some compilers are able to do this for
+normal .cpp or .o files, but fail if the object file has been
+placed in a library archive. If you see this warning after
+running configure, then you can still link to libregex++.a if: </p>-->
+<p>A. あなたがテンプレートコードをコンパイルするとき、
+最終的に複数の翻訳単位に同じテンプレートの実体が出来る。
+これにより、もしあなたのコンパイラ/リンカが、
+これらのテンプレートの実体を実行ファイルの中のひとつのレコードに
+結合するのに十分賢くなければ、リンク時にエラーが起きる。
+通常の .cpp ファイルと .o ファイルに対してはこれが可能だが、
+オブジェクトファイルがライブラリアーカイブに置かれていると、
+これに失敗するコンパイラもある。
+コンフィギュアを実行した後にこの警告が出ても、次のような場合は
+libregex++.a とリンクすることが可能である。</p>
+
+<ol>
+<!--    <li>You use only the low-level template classes (reg_expression&lt;&gt;
+        match_results&lt;&gt; etc), and use no other part of
+        regex++.</li>
+    <li>You use only the POSIX API functions (regcomp regexec etc),
+        and no other part of regex++.</li>
+    <li>You use only the high level class RegEx, and no other
+        part of regex++. </li>-->
+    <li>低水準テンプレートクラス(reg_expression&lt;&gt;, match_results&lt;&gt;, etc.)
+    のみを単一の翻訳単位から使っていて、regex++ の他の部分は使っていない場合。</li>
+    <li>POSIX API 関数(regcomp, regexec, etc.)だけを使っていて、
+    regex++ の他の部分を使っていない場合。</li>
+    <li>高水準のクラス RegEx だけを使っていて、 regex++ の他の部分を使っていない場合。</li>
+</ol>
+
+<!--<p>Another option is to add the regex++ source files directly to
+your project instead of linking to libregex++.a, generally you
+should do this only if you are getting link time errors with
+libregex++.a. </p>-->
+<p>もう一つの選択肢は、 libregex++.a をリンクする代わりに、
+regex++ のソースファイルを直接あなたのプロジェクトに追加することである。
+これは通常、 libregex++.a でリンク時エラーが起きる場合のみ、行うべきである。</p>
+
+<!--<p><font color="#FF0000">Q. Configure says that my compiler can't
+merge templates containing switch statements, what does this
+mean?</font> </p>-->
+<p><font color="#FF0000">Q. コンフィギュアは、私のコンパイラが
+switch 文を含むテンプレートを結合出来ないと言ってきます。
+これはどういう意味ですか?</font> </p>
+
+<!--<p>A. Some compilers can't merge templates that contain static
+data - this includes switch statements which implicitly generate
+static data as well as code. Principally this affects the egcs
+compiler - but note gcc 2.81 also suffers from this problem - the
+compiler will compile and link the code - but the code will not
+run because the code and the static data it uses have become
+separated. The default behaviour of regex++ is to try and fix
+this problem by declaring &quot;problem&quot; templates inside
+unnamed namespaces, so that the templates have internal linkage.
+Note that this can result in a great deal of code bloat. If the
+compiler doesn't support namespaces, or if code bloat becomes a
+problem, then follow the guidelines above for placing all the
+templates used in a single translation unit, and edit boost/regex/config.hpp
+so that BOOST_REGEX_NO_TEMPLATE_SWITCH_MERGE is no longer defined.
+</p>-->
+<p>A. 静的なデータを含むテンプレートを結合できないコンパイラもある。
+これには、コードと同様に、しかし暗黙的に静的データを生成する switch 文も含む。
+主にこれは、 egcs コンパイラに影響する
+(しかし gcc 2.81 も同じ問題を持っていることに注意せよ)。
+コンパイラはコードをコンパイルし、リンクすることが出来る。
+しかしコードと、コードが使う静的データは分離してしまうので、
+そのコードは実行できない。
+regex++ のデフォルトの振る舞いは、 無名名前空間の中で
+&quot;problem&quot; テンプレートを宣言することにより、
+この問題を修復しようとするので、テンプレートは内部リンケージをもつ。
+これが、大量のコード膨張を引き起こすことに注意せよ。
+もしコンパイラが名前空間をサポートしていないか、
+コード膨張が問題になったら、単一翻訳単位の中に全てのテンプレートを置くための
+上のガイドラインに従うこと。そして、 boost/regex/config.hpp を編集し、
+BOOST_REGEX_NO_TEMPLATE_SWITCH_MERGE を定義しないようにすること。</p>
+
+<!--<p><font color="#FF0000">Q. I can't get regex++ to work with
+escape characters, what's going on?</font> </p>-->
+<p><font color="#FF0000">Q. 私は regex++ でエスケープ文字を使うことが出来ません。
+何が起こっているのですか？</font> </p>
+
+<!--<p>A. If you embed regular expressions in C++ code, then remember
+that escape characters are processed twice: once by the C++
+compiler, and once by the regex++ expression compiler, so to pass
+the regular expression \d+ to regex++, you need to embed &quot;\\d+&quot;
+in your code. Likewise to match a literal backslash you will need
+to embed &quot;\\\\&quot; in your code. </p>-->
+<p>A. もし C++ コードの中に正規表現を埋め込んでいるなら、
+エスケープ文字が2度処理されることを忘れないこと:
+一度は C++ コンパイラによって、もう一度は regex++ 正規表現コンパイラによってである。
+正規表現 \d+ を regex++ に渡すには、 &quot;\\d+&quot;
+をコードに埋め込む必要がある。
+同様にリテラルとしてバックスラッシュに一致するには、
+コードに &quot;\\\\&quot; を埋め込む必要があるだろう。</p>
+
+<!--<p><font color="#FF0000">Q. Why don't character ranges work
+properly?</font> <br>-->
+<p><font color="#FF0000">Q. なぜ文字範囲が適切に動作しないのですか?</font> </p>
+
+<!--<p>A. The POSIX standard specifies that character range expressions
+are locale sensitive - so for example the expression [A-Z] will
+match any collating element that collates between 'A' and 'Z'.
+That means that for most locales other than &quot;C&quot; or
+&quot;POSIX&quot;, [A-Z] would match the single character 't' for
+example, which is not what most people expect - or at least not
+what most people have come to expect from regular expression
+engines. For this reason, the default behaviour of regex++ is to
+turn locale sensitive collation off by setting the regbase::nocollate
+compile time flag (this is set by regbase::normal). However if
+you set a non-default compile time flag - for example regbase::extended
+or regbase::basic, then locale dependent collation will be
+enabled, this also applies to the POSIX API functions which use
+either regbase::extended or regbase::basic internally, in the
+latter case use REG_NOCOLLATE in combination with either
+REG_BASIC or REG_EXTENDED when invoking regcomp if you don't want
+locale sensitive collation. <i>[Note - when regbase::nocollate in
+effect, the library behaves &quot;as if&quot; the LC_COLLATE
+locale category were always &quot;C&quot;, regardless of what its
+actually set to - end note</i>]. </p>-->
+<p>A. POSIX 標準は、文字範囲表現がロケールに敏感であること明示している。
+例えば正規表現 [A-Z] は 'A' と 'Z' の間に並ぶあらゆる照合要素に一致する。
+これは、 &quot;C&quot; や &quot;POSIX&quot; 以外のほとんどのロケールで、
+例えば[A-Z] は単一文字 't' にマッチする。これはあまり期待されていない動作である。
+また、少なくとも正規表現エンジンによってこうなることは、多くの場合期待されていないだろう。
+この理由で、 regex++ のデフォルトの振る舞いは、
+コンパイル時フラグ regbase::nocollate を設定することでロケールに敏感な照合を行わない
+(このフラグは regbase::normal により設定されている)。
+しかしもし、デフォルトでないコンパイル時フラグを設定すれば
+(例えば regbase::extended や regbase::basic) ロケールに依存する照合が可能になる。
+これはまた、内部的に regbase::extended や regbase::basic を使っている
+POSIX API 関数にも適用される。
+後者の場合、もしロケールに敏感な照合を行いたくなければ、
+ REG_NOCOLLATE を REG_BASIC か REG_EXTENDED を組み合わせて使えばよい。
+<i>[注意: regbase::nocollate が作用しているとき、ライブラリは、
+実際にの設定値に関わらず、
+_COLLATE ロケートカテゴリーが常に &quot;C&quot; である &quot;かのように&quot;
+振る舞う。]</i></p>
+
+<!--<p><font color="#FF0000">&nbsp;Q. Why can't I use the &quot;convenience&quot;
+versions of query_match/reg_search/reg_grep/reg_format/reg_merge?</font>
+</p>-->
+<p><font color="#FF0000">&nbsp;Q. なぜ私は、「簡易版の」
+query_match/reg_search/reg_grep/reg_format/reg_merge
+を使うことが出来ないのですか?</font></p>
+
+<!--<p>A. These versions may or may not be available depending upon
+the capabilities of your compiler, the rules determining the
+format of these functions are quite complex - and only the
+versions visible to a standard compliant compiler are given in
+the help. To find out what your compiler supports, run &lt;boost/regex.hpp&gt;
+through your C++ pre-processor, and search the output file for
+the function that you are interested in. </p>-->
+<p>A. これらの簡易版はあなたのコンパイラの能力によって使えたり使えなかったりする。
+これらの関数の形式を決定する規則は極めて複雑である。
+そして標準に準拠しているコンパイラで利用可能な版は、ヘルプの中に記載されている。
+あなたのコンパイラが何をサポートしているかを見るには、
+あなたの C++ プリプロセッサで、 &lt;boost/regex.hpp&gt; を実行し、
+あなたが感心のある関数をその出力ファイルで探せばよい。</p>
+
+<!--<p><font color="#FF0000">Q. Why are there no throw specifications
+on any of the functions? What exceptions can the library throw?</font>
+</p>-->
+<p><font color="#FF0000">Q. なぜどの関数にも、例外仕様がないのですか?
+ライブラリはどんな例外を投げるのですか?</font></p>
+
+<!--<p>A. Not all compilers support (or honor) throw specifications,
+others support them but with reduced efficiency. Throw
+specifications may be added at a later date as compilers begin to
+handle this better. The library should throw only three types of
+exception: boost::bad_expression can be thrown by reg_expression
+when compiling a regular expression, std::runtime_error can be
+thrown when a call to reg_expression::imbue tries to open a
+message catalogue that doesn't exist or when a call to RegEx::GrepFiles
+or RegEx::FindFiles tries to open a file that cannot be opened,
+finally std::bad_alloc can be thrown by just about any of the
+functions in this library. </p>-->
+<p>A. 全てのコンパイラが、例外仕様をサポートしたり、支持しているわけではない。
+それをサポートしていても、あまり効果を持たせていないものもある。
+例外仕様はコンパイラがこれをもう少しちゃんと扱い始めたら、
+その時に付け加えられるだろう。
+ライブラリは 3 つの型の例外のみを投げる。
+boost::bad_expression は 正規表現のコンパイル時に reg_expression によって投げられる。
+std::runtime_error は reg_expression::imbue の呼び出しが、
+存在しないメッセージカタログを開こうとしたときか、
+RegEx::GrepFiles や RegEx::FindFiles
+が開くことの出来ないファイルを開こうとしたときに投げられる。
+最後に、 std::bad_alloc はこのライブラリのおおよそどの関数でも投げられる。</p>
+
+<hr>
+
+<p><i>Copyright </i><a href="mailto:John_Maddock@compuserve.com"><i>Dr
+John Maddock</i></a><i> 1998-2000 all rights reserved.</i> </p>
+<hr align="left">
+<p><i>Japanese Translation Copyright (C) 2003 <a href="mailto:k_takahashi@cppll.jp">Kohske Takahashi</a></i></p>
+<p>
+オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の
+複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」
+に提供されており、いかなる明示的、暗黙的保証も行わない。また、
+いかなる目的に対しても、その利用が適していることを関知しない。
+</p>
+
+</body>
+</html>

@@ -1,0 +1,118 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=euc-jp"></meta>
+	<title>problems.html</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">
+</head>
+<body>
+<h4>プリプロセッサに関する既知の問題</h4>
+<div>
+	プリプロセッサによるメタプログラミングは忌避される話題である。
+	これは例えば、インライン関数をマクロで定義するなどの、
+	危険な技を伴う良くない経験が一因である。
+	もしプリプロセッサを使わずにすむ良い方法があるのであれば、そのようにするべきだ。
+</div>
+<div>
+	ではプリプロセッサのよく知られた問題のいくつかを、問題/解決法形式で見てみよう。
+</div>
+<h4>問題 #1</h4>
+<div>
+	プリプロセッサはスコープが無い。したがってマクロは予期しないコードの置換をおこしてしまうことがある。
+</div>
+<div>
+	<b>解決法 A</b>
+	<div>
+		全て大文字からなる識別子をマクロに使い、それらをマクロ以外では使わない。
+		実際この方法は予期せずコードが置換されてしまう可能性を除去する。
+	</div>
+</div>
+<div>
+	<b>解決法 B</b>
+	<div>
+		ローカルマクロ慣用法を使う:
+	</div>
+<div class="code"><pre>
+#define MACRO ...
+// use MACRO
+#undef MACRO
+</pre></div>
+	<div>
+		これは特定の部分以外のコードをそのマクロによって予期せず置換されてしまうことを防ぐ。
+	</div>
+	<div>
+		この解決法の欠点は、#undefは自動的に付けられるわけではないため、忘れることがある、というものだ。
+		経験を積んだプログラマは、そのマクロを定義した(時間的に)直前または直後に#undefを書く。
+	</div>
+</div>
+<div>
+	<b>解決法 C</b>
+	<div>
+		特定の接頭語をマクロに付ける。
+	</div>
+<div class="code"><pre>
+#define UMP_MACRO
+// use UMP_MACRO
+</pre></div>
+	<div>
+		これは予期せぬ置換と衝突をめったに起こらなくする。
+		この解決法の欠点は次のようなものである:
+	</div>
+	<ul>
+		<li>名前の衝突は大きなプロジェクトでは起きる可能性がある。</li>
+		<li>マクロは大域的な名前空間を汚染している。</li>
+	</ul>
+	<i>全ての解決法を可能な限り組み合わせて、スコープの問題は大抵は除去できる。</i>
+</div>
+<h4>問題 #2</h4>
+<div>
+	プリプロセッサコードは読みにくい。
+	プリプロセッサがどのようにして再帰的にマクロを展開するかを理解する必要があるし、マクロの定義を見つけたり、マクロのパラメータを頭の中で置換する必要もある。
+</div>
+<div>
+	<b>解決法</b>
+	<div>
+		いかなる種類のプログラミングもそのコードがどのように実行されるか理解しなければならない。
+		関数やテンプレートを含むいかなるパラメータ化の技術においても、定義を見つけ、頭の中でパラメータを置換する必要がある。
+	</div>
+	<div>
+		しかしながら、いくつかの技を知っておくことは有益である:
+	</div>
+	<ul>
+		<li>無理のない範囲でできるだけローカルマクロを使えば、マクロの定義を探す手間が軽減する。</li>
+		<li>コードブラウザと検索ツールはマクロ定義の発見を手助けする。</li>
+		<li>コンパイラにプリプロセス後のソースコードを生成させてバグを探すことができる。</li>
+		<li>
+			プリプロセッサによるメタプログラミングを使う前に、プリプロセッサを使わない小さなバージョンを実装してみる。
+			その後、それをプリプロセッサを使うものに置き換える。
+			これによってコードを少しずつテストすることができる。
+			経験を積んだプログラマはしばしば多くの段階を飛ばすが、もし直接書くには複雑すぎるとわかったなら、少しずつテストする方法に切替えることは常に可能である。
+		</li>
+		<li>
+			もし改行となるべき場所のプリプロセッサコードに特別なシンボルを埋め込んでおけば(If you insert a special symbol into the preprocessor code in places where there should be a line break)、
+			プリプロセス後のコードを検索と置換するツールを使って読みやすくできる。
+		</li>
+	</ul>
+	<i>特に覚えておくべき重要なことは、プリプロセッサの使用を、構造化され、理解しやすく、安全な手段に制限することである。
+	構造化は複雑なシステムを理解しやすくする<a href="../bibliography.html#mcconnell">[McConnell]</a>。</i>
+</div>
+<h4>問題 #3</h4>
+<div>
+	「私はcppを廃止してしまいたい。」 - <i>Bjarne Stroustrup</i> in <a href="../bibliography.html#stroustrup">[Stroustrup]</a>。
+</div>
+<div>
+	<b>解決法</b>
+	<div>
+		C/C++ プリプロセッサは末永く存続する。
+	</div>
+	<i>実際問題としては、プリプロセッサによるメタプログラミングは決してテンプレートメタプログラミングほど単純でもポータブルでも無い <a href="../bibliography.html#czarnecki">[Czarnecki]</a>。</i>
+</div>
+<hr size="1">
+<div style="margin-left: 0px;">
+	<i>&copy; Copyright <a href="http://www.housemarque.com" target="_top">Housemarque Oy</a> 2002</i>
+</div>
+<div style="margin-left: 0px;">
+Permission to copy, use, modify, sell and distribute this document is granted provided this copyright notice appears in all copies.&nbsp;
+This document is provided "as is" without express or implied warranty and with no claim as to its suitability for any purpose.
+</div>
+</body>
+</html>

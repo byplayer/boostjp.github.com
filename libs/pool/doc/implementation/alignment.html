@@ -1,0 +1,421 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> 
+<HTML>
+<HEAD>
+<TITLE>Guaranteeing Alignment</TITLE>
+<LINK HREF="../pool.css" REL="stylesheet" TYPE="text/css">
+</HEAD>
+<BODY>
+
+<IMG SRC="../../../../c++boost.gif" WIDTH=276 HEIGHT=86 ALT="C++ Boost">
+
+<H1 ALIGN=CENTER>アラインメント保証</H1>
+
+<P>
+<H2>用語</H2>
+
+<P>
+<A HREF="../concepts.html">concepts document</A> についてまだ十分理解していないのなら、再読するのがよい。
+復習すると、<EM>ブロック</EM>は連続したメモリー塊のひとつであり、固定サイズの<EM>チャンク</EM>に<EM>仕切られ</EM>、あるいは<EM>分離され</EM>ている。
+ユーザーが確保、解放するのは、これらの<EM>チャンク</EM>である。
+
+<P>
+<H2>大要</H2>
+
+<P>
+個々の <SPAN CLASS="code">Pool</SPAN> は、複数のメモリーブロックにまで広がるフリーリストをひとつ持っている。
+さらに、<SPAN CLASS="code">Pool</SPAN> は確保したメモリーブロックのリンクリストも持っている。
+個々のメモリーブロックは、特に指定しなければ、<SPAN CLASS="code">new[]</SPAN> を使って確保され、破棄時に解放される。
+アラインメントを保証してくれる <SPAN CLASS="code">new[]</SPAN> の、まさに使いどころである。
+
+<P>
+<H2>概要の証明: アラインメント保証</H2>
+
+<P>
+個々のメモリーブロックは <SPAN CLASS="code">operator new[]</SPAN> 経由で POD な型として(はっきり言えば、characterの配列である)確保される。
+<EM>POD_size</EM> を確保した character の数としよう。
+<P>
+<H3>述語1:配列はパディングを持ってはならない</H3>
+
+<P>
+これは以下の引用から言える。
+
+<P>
+[5.3.3/2] (Expressions::Unary expressions::Sizeof)
+&quot;... 配列に適用すると、結果は、配列の全バイト数になる。
+これは <EM>n</EM> 個の要素からなる配列のサイズは、要素のサイズの <EM>n</EM> 倍であることを意味する。&quot;
+
+<P>
+従って、配列内の要素がパディングを含むことはあっても、配列がパディングを含むことはない。
+
+<P>
+<H3>
+述語 2:
+任意の <SPAN CLASS="code">operator new[]</SPAN> によって character の配列として確保されたメモリーブロック(以後、<EM>the block</EM> と呼ぶ)は、任意の同じか小さいサイズのオブジェクトと適切に境界調整されている。
+</H3>
+
+<P>
+これは以下による。
+
+<UL>
+<LI>[3.7.3.1/2] (Basic concepts::Storage duration::Dynamic storage duration::Allocation functions)
+&quot;... 返されたポインタは、どのような完全オブジェクト型へのポインタにでも変換して、割り当てられた記憶域内のオブジェクトまたは配列にアクセスするために使用できるよう、適切に境界に整列させられている...&quot;
+</LI>
+<LI>[5.3.4/10] (Expressions::Unary expressions::New)
+&quot;<SPAN CLASS="code">char</SPAN> と <SPAN CLASS="code">unsigned char</SPAN> の配列に関して、<EM>new 式(new-expression)</EM> の結果と割り当て関数によって返されたアドレスの差は、生成されようとしている配列のサイズを超えない任意のオブジェクトの最も厳しいアラインメント(3.9)要求の整数倍である。[<EM>Note:</EM> 割り当て関数は、任意の型のオブジェクトに対して適切に境界に整列しているポインタを返すものされているため、この配列割り当てに関するオーバーヘッドの強制は、文字型の配列を確保しておき、別の型のオブジェクトを後からそこに配置するという、よく知られた慣用を許容する。]
+&quot;</LI>
+</UL>
+
+<P>
+<H3>考察:
+サイズがある実際のオブジェクトの整数倍であるような想像上のオブジェクト型<EM>Element</EM>
+(ただし、sizeof(Element) &gt; POD_size とする)
+</H3>
+
+<P>
+そのようなオブジェクトは存在することが<EM>できる</EM>。
+そのサイズのひとつのオブジェクトは、&quot;実際の&quot;オブジェクトの配列である。
+<P>
+ブロックは Element に適切に整列している。
+これは述語2から直接導かれる。
+<P>
+<H3>系1:ブロックは要素の配列に適切に整列している</H3>
+<P>
+これは述語1、2 および以下の引用から導かれる。
+<P>
+[3.9/9] (Basic concepts::Types)
+&quot;
+<EM>object type</EM> は(cv-修飾であってもよい)は関数型、参照型、void 型ではない型である。(仕様上、配列型はobject type である)
+&quot;
+<P>
+<H3>
+系2:ポインタ p と整数 i がある。p が、それが指す型に適切に整列しているならば、p + i (well-definedのとき)は、その型に適切に整列している。
+言い換えると、配列が適切に整列しているならば、その要素も適切に整列している。
+</H3>
+
+<P>
+この主張を直接支持する標準からの引用はない。
+しかしそれは&quot;アラインメント&quot;の意味の共通概念に合致する。
+
+<P>
+p + i が well-defined である条件は[5.7/5]で概略が示されている。
+ここで引用はせず、p と p + i の両者が同じ配列の中を指している、または同じ配列の末尾をひとつ過ぎたところであるとき well-defined であることを記述するに留める。
+
+<P>
+<H3>
+sizeof(Element) をいくつかの実際のオブジェクト(T<SUB>1</SUB>, T<SUB>2</SUB>, T<SUB>3</SUB>, ...)のサイズの最小公倍数であると置く</H3>
+
+<P>
+<H3>
+<EM>block</EM> をメモリーブロックへのポインタとする。pe は (Element *)block、
+<EM>p<SUbB>n</SUB></EM> は (T<SUB>n</SUB> *)block であるとする</H3>
+
+<P>
+<H3>
+系3: pe + i が well-defined であるようなすべての整数 <EM>i</EM> について、
+すべての <EM>n</EM> に対して、p<SUB>n</SUB> + j<SUB>n</SUB> が well-defined であり、
+pe + i と同じメモリーアドレスを参照するような整数 <EM>j<SUB>n</SUB></EM> が存在する。
+<P>
+メモリーブロックは Element の配列であり、すべての n について、sizeof(Element) % sizeof(T<SUB>n</SUB>) == 0であるので、Elementsの配列内の個々の要素の境界は T<SUB>n</SUB>の配列の個々の要素の境界でもあることが自然に導かれる。
+<P>
+定理: pe + i が well-defined であるような、すべての整数 <EM>i</EM> について、アドレス(pe + i) はすべての型 T<SUB>n</SUB> に適切に整列している</H3>
+<P>
+pe + i は well-defined であるので、系3より、p<SUB>n</SUB> + j<SUB>n</SUB> は well-defined である。
+述語2および系1,2より、それは適切に整列している。
+<P>
+
+<H2>定理の使用</H2>
+<P>
+上記の証明はブロックからチャンクを切り出すさいのアラインメントに関する要求について当てはまる。
+実装では下記の実際のオブジェクトのサイズを使用している。
+<UL>
+<LI>
+要求されたオブジェクトのサイズ(requested_size)。これはユーザーが要求したチャンクのサイズである。
+</LI>
+<LI>
+void *(void へのポインタ)。これはチャンク群のを通してフリーリストをインターリーブしているがゆえに。
+</LI>
+<LI>
+size_type。個々のメモリーブロックの中に次のブロックのサイズを格納しているがゆえに。
+</LI>
+</UL>
+
+<P>
+それぞれのブロックは次のブロックへのポインタも含んでいる。
+しかしこれは、上記の3つの型へのアラインメント要求を単純にするため、
+void へのポインタとして保存され必要に応じてキャストされる。
+<P>
+従って、<SPAN CLASS="code">alloc_size</SPAN> は上記の3つの型のサイズの最小公倍数として定義される。
+<P>
+<H2>メモリーブロックの概覧</H2>
+
+<P>
+それぞれのメモリーブロックは3つの主要セクションからなる。
+最初のセクションは、そこからチャンクが切り出される場所であり、インターリーブされたフリーリストを含んでいる。
+第二のセクションは、次のブロックへのポインタであり、第三のセクションは次のブロックのサイズである。
+<P>
+これらのセクションは次のセクションのアラインメントを保証するのに必要なパディングを含むことがある。
+最初のセクションのサイズは、number_of_chunks * lcm(requested_size, sizeof(void *), sizeof(size_type)) である。
+第二のセクションのサイズは lcm(sizeof(void *), sizeof(size_type) である。
+第三のセクションのサイズは sizeof(size_type) である。
+
+<P>
+メモリーブロックの一例を示す。ここでは requested_size == sizeof(void *) == sizeof(size_type) == 4 である。
+
+<TABLE CELLSPACING="0" CELLPADDING="0" BORDER="3" STYLE="clear: both;" ALIGN=CENTER>
+<CAPTION><EM>
+メモリーブロックは4個のチャンクを含む。配列構造を重ねて表示する。FLP=フリーリストのインターリーブされたポインタ
+</EM></CAPTION>
+
+<TR><TH>セクション<TH>size_type 境界<TH>void * 境界<TH>requested_size 境界
+
+<TR><TD STYLE="background-color: red; text-align: center;" COLSPAN="4">Memory not belonging to process
+プロセス外メモリー
+
+<TR><TD STYLE="background-color: gray; text-align: center;" ROWSPAN="4">Chunks section (16 bytes)
+ <TD STYLE="background-color: gray; text-align: center;">(4 bytes)
+ <TD STYLE="background-color: gray; text-align: center;">FLP for Chunk 1 (4 bytes)
+ <TD STYLE="background-color: gray; text-align: center;">Chunk 1 (4 bytes)
+<TR><TD STYLE="background-color: silver; text-align: center;">(4 bytes)
+ <TD STYLE="background-color: silver; text-align: center;">FLP for Chunk 2 (4 bytes)
+ <TD STYLE="background-color: silver; text-align: center;">Chunk 2 (4 bytes)
+<TR><TD STYLE="background-color: gray; text-align: center;">(4 bytes)
+ <TD STYLE="background-color: gray; text-align: center;">FLP for Chunk 3 (4 bytes)
+ <TD STYLE="background-color: gray; text-align: center;">Chunk 3 (4 bytes)
+<TR><TD STYLE="background-color: silver; text-align: center;">(4 bytes)
+ <TD STYLE="background-color: silver; text-align: center;">FLP for Chunk 4 (4 bytes)
+ <TD STYLE="background-color: silver; text-align: center;">Chunk 4 (4 bytes)
+
+<TR><TD STYLE="background-color: silver; text-align: center;">Pointer to next Block (4 bytes)
+ <TD STYLE="background-color: gray; text-align: center;">(4 bytes)
+ <TD STYLE="background-color: gray; text-align: center;">Pointer to next Block (4 bytes)
+
+<TR><TD STYLE="background-color: gray; text-align: center;">Size of next Block (4 bytes)
+ <TD STYLE="background-color: silver; text-align: center;">Size of next Block (4 bytes)
+
+<TR><TD STYLE="background-color: red; text-align: center;" COLSPAN="4">Memory not belonging to process
+</TABLE>
+
+<P>
+パディングがある例を図示する。この例ではrequested_size == 8 and sizeof(void *) == sizeof(size_type) == 4
+<TABLE CELLSPACING="0" CELLPADDING="0" BORDER="3" STYLE="clear: both;" ALIGN=CENTER>
+<CAPTION><EM>
+メモリーブロックは4個のチャンクを含む。配列構造を重ねて示す。FLP=フリーリストのインターリーブされたポインタ</EM></CAPTION>
+<TR><TH>Sections<TH>size_type alignment<TH>void * alignment<TH>requested_size alignment
+
+<TR><TD STYLE="background-color: red; text-align: center;" COLSPAN="4">Memory not belonging to process
+
+<TR><TD STYLE="background-color: gray; text-align: center;" ROWSPAN="8">Chunks section (32 bytes)
+ <TD STYLE="background-color: gray; text-align: center;">(4 bytes)
+ <TD STYLE="background-color: gray; text-align: center;">FLP for Chunk 1 (4 bytes)
+ <TD STYLE="background-color: gray; text-align: center;" ROWSPAN="2">Chunk 1 (8 bytes)
+<TR><TD STYLE="background-color: silver; text-align: center;">(4 bytes)
+ <TD STYLE="background-color: silver; text-align: center;">(4 bytes)
+<TR><TD STYLE="background-color: gray; text-align: center;">(4 bytes)
+ <TD STYLE="background-color: gray; text-align: center;">FLP for Chunk 2 (4 bytes)
+ <TD STYLE="background-color: silver; text-align: center;" ROWSPAN="2">Chunk 2 (8 bytes)
+<TR><TD STYLE="background-color: silver; text-align: center;">(4 bytes)
+ <TD STYLE="background-color: silver; text-align: center;">(4 bytes)
+<TR><TD STYLE="background-color: gray; text-align: center;">(4 bytes)
+ <TD STYLE="background-color: gray; text-align: center;">FLP for Chunk 3 (4 bytes)
+ <TD STYLE="background-color: gray; text-align: center;" ROWSPAN="2">Chunk 3 (8 bytes)
+<TR><TD STYLE="background-color: silver; text-align: center;">(4 bytes)
+ <TD STYLE="background-color: silver; text-align: center;">(4 bytes)
+<TR><TD STYLE="background-color: gray; text-align: center;">(4 bytes)
+ <TD STYLE="background-color: gray; text-align: center;">FLP for Chunk 4 (4 bytes)
+ <TD STYLE="background-color: silver; text-align: center;" ROWSPAN="2">Chunk 4 (8 bytes)
+<TR><TD STYLE="background-color: silver; text-align: center;">(4 bytes)
+ <TD STYLE="background-color: silver; text-align: center;">(4 bytes)
+
+<TR><TD STYLE="background-color: silver; text-align: center;">Pointer to next Block (4 bytes)
+ <TD STYLE="background-color: gray; text-align: center;">(4 bytes)
+ <TD STYLE="background-color: gray; text-align: center;">Pointer to next Block (4 bytes)
+
+<TR><TD STYLE="background-color: gray; text-align: center;">Size of next Block (4 bytes)
+ <TD STYLE="background-color: silver; text-align: center;">Size of next Block (4 bytes)
+
+<TR><TD STYLE="background-color: red; text-align: center;" COLSPAN="4">Memory not belonging to process
+</TABLE>
+
+<P>
+最後に、requested_size は 7, sizeof(void *) は 3, and sizeof(size_type) は 5という入り組んだ例をあげ、奇数ばかりの環境であっても最小公倍数がアラインメントを保証するようすを示す。
+<TABLE CELLSPACING="0" CELLPADDING="0" BORDER="3" STYLE="clear: both;" ALIGN=CENTER>
+<CAPTION><EM>Memory block containing 2 chunks, showing overlying array structures</EM></CAPTION>
+
+<TR><TH>Sections<TH>size_type alignment<TH>void * alignment<TH>requested_size alignment
+
+<TR><TD STYLE="background-color: red; text-align: center;" COLSPAN="4">プロセス外メモリー
+
+<!-- First Section -->
+
+<TR><TD STYLE="background-color: gray; text-align: center;" ROWSPAN="42">Chunks section (210 bytes)
+ <TD STYLE="background-color: gray; text-align: center;">(5 bytes)
+ <TD STYLE="background-color: gray; text-align: center;" ROWSPAN="3">Interleaved free list pointer for Chunk 1 (15 bytes; 3 used)
+ <TD STYLE="background-color: gray; text-align: center;" ROWSPAN="21">Chunk 1 (105 bytes; 7 used)
+<TR><TD STYLE="background-color: silver; text-align: center;">(5 bytes)
+<TR><TD STYLE="background-color: gray; text-align: center;">(5 bytes)
+<TR><TD STYLE="background-color: silver; text-align: center;">(5 bytes)
+ <TD STYLE="background-color: silver; text-align: center;" ROWSPAN="3">(15 bytes)
+<TR><TD STYLE="background-color: gray; text-align: center;">(5 bytes)
+<TR><TD STYLE="background-color: silver; text-align: center;">(5 bytes)
+<TR><TD STYLE="background-color: gray; text-align: center;">(5 bytes)
+ <TD STYLE="background-color: gray; text-align: center;" ROWSPAN="3">(15 bytes)
+<TR><TD STYLE="background-color: silver; text-align: center;">(5 bytes)
+<TR><TD STYLE="background-color: gray; text-align: center;">(5 bytes)
+<TR><TD STYLE="background-color: silver; text-align: center;">(5 bytes)
+ <TD STYLE="background-color: silver; text-align: center;" ROWSPAN="3">(15 bytes)
+<TR><TD STYLE="background-color: gray; text-align: center;">(5 bytes)
+<TR><TD STYLE="background-color: silver; text-align: center;">(5 bytes)
+<TR><TD STYLE="background-color: gray; text-align: center;">(5 bytes)
+ <TD STYLE="background-color: gray; text-align: center;" ROWSPAN="3">(15 bytes)
+<TR><TD STYLE="background-color: silver; text-align: center;">(5 bytes)
+<TR><TD STYLE="background-color: gray; text-align: center;">(5 bytes)
+<TR><TD STYLE="background-color: silver; text-align: center;">(5 bytes)
+ <TD STYLE="background-color: silver; text-align: center;" ROWSPAN="3">(15 bytes)
+<TR><TD STYLE="background-color: gray; text-align: center;">(5 bytes)
+<TR><TD STYLE="background-color: silver; text-align: center;">(5 bytes)
+<TR><TD STYLE="background-color: gray; text-align: center;">(5 bytes)
+ <TD STYLE="background-color: gray; text-align: center;" ROWSPAN="3">(15 bytes)
+<TR><TD STYLE="background-color: silver; text-align: center;">(5 bytes)
+<TR><TD STYLE="background-color: gray; text-align: center;">(5 bytes)
+<TR><TD STYLE="background-color: silver; text-align: center;">(5 bytes)
+ <TD STYLE="background-color: silver; text-align: center;" ROWSPAN="3">Interleaved free list pointer for Chunk 2 (15 bytes; 3 used)
+ <TD STYLE="background-color: silver; text-align: center;" ROWSPAN="21">Chunk 2 (105 bytes; 7 used)
+<TR><TD STYLE="background-color: gray; text-align: center;">(5 bytes)
+<TR><TD STYLE="background-color: silver; text-align: center;">(5 bytes)
+<TR><TD STYLE="background-color: gray; text-align: center;">(5 bytes)
+ <TD STYLE="background-color: gray; text-align: center;" ROWSPAN="3">(15 bytes)
+<TR><TD STYLE="background-color: silver; text-align: center;">(5 bytes)
+<TR><TD STYLE="background-color: gray; text-align: center;">(5 bytes)
+<TR><TD STYLE="background-color: silver; text-align: center;">(5 bytes)
+ <TD STYLE="background-color: silver; text-align: center;" ROWSPAN="3">(15 bytes)
+<TR><TD STYLE="background-color: gray; text-align: center;">(5 bytes)
+<TR><TD STYLE="background-color: silver; text-align: center;">(5 bytes)
+<TR><TD STYLE="background-color: gray; text-align: center;">(5 bytes)
+ <TD STYLE="background-color: gray; text-align: center;" ROWSPAN="3">(15 bytes)
+<TR><TD STYLE="background-color: silver; text-align: center;">(5 bytes)
+<TR><TD STYLE="background-color: gray; text-align: center;">(5 bytes)
+<TR><TD STYLE="background-color: silver; text-align: center;">(5 bytes)
+ <TD STYLE="background-color: silver; text-align: center;" ROWSPAN="3">(15 bytes)
+<TR><TD STYLE="background-color: gray; text-align: center;">(5 bytes)
+<TR><TD STYLE="background-color: silver; text-align: center;">(5 bytes)
+<TR><TD STYLE="background-color: gray; text-align: center;">(5 bytes)
+ <TD STYLE="background-color: gray; text-align: center;" ROWSPAN="3">(15 bytes)
+<TR><TD STYLE="background-color: silver; text-align: center;">(5 bytes)
+<TR><TD STYLE="background-color: gray; text-align: center;">(5 bytes)
+<TR><TD STYLE="background-color: silver; text-align: center;">(5 bytes)
+ <TD STYLE="background-color: silver; text-align: center;" ROWSPAN="3">(15 bytes)
+<TR><TD STYLE="background-color: gray; text-align: center;">(5 bytes)
+<TR><TD STYLE="background-color: silver; text-align: center;">(5 bytes)
+
+<!-- Second Section -->
+
+<TR><TD STYLE="background-color: silver; text-align: center;" ROWSPAN="3">次ブロックへのポインタ (15 bytes; 3 used)
+ <TD STYLE="background-color: gray; text-align: center;">(5 bytes)
+ <TD STYLE="background-color: gray; text-align: center;" ROWSPAN="3">次ブロックへのポインタ (15 bytes; 3 used)
+<TR><TD STYLE="background-color: silver; text-align: center;">(5 bytes)
+<TR><TD STYLE="background-color: gray; text-align: center;">(5 bytes)
+
+<!-- Third Section -->
+
+<TR><TD STYLE="background-color: gray; text-align: center;">次ブロックのサイズ (5 bytes; 5 used)
+ <TD STYLE="background-color: silver; text-align: center;">次ブロックのサイズ (5 bytes; 5 used)
+
+<TR><TD STYLE="background-color: red; text-align: center;" COLSPAN="4">Memory not belonging to process
+</TABLE>
+
+<P>
+<H2>どのように連続したチャンクを扱うか</H2>
+
+<P>
+上記の定理は、チャンクの割り当てにも、インターリーブされているフリーリストのような実装の詳細にも、すべてのアラインメント要求を保証している。
+しかしながら、それは必要に応じてパディングを追加しているので、連続したチャンクの割り当ては別の方法で扱わなくてはならない。
+
+<P>
+上記に似ている配列引数を使用することで、連続した <EM>n</EM>個の requested_size のオブジェクトへの要求を、<EM>m</EM> 個の連続したチャンクへの要求に翻訳できる。
+<EM>m</EM>は単純に ceil(n * requested_size / alloc_size)であり、alloc_size はチャンクの実際のサイズである。
+図示する。
+<P>
+これは requested_size == 1でsizeof(void *) == sizeof(size_type) == 4の場合のメモリーブロックの例である。
+
+<TABLE CELLSPACING="0" CELLPADDING="0" BORDER="3" STYLE="clear: both;" ALIGN=CENTER>
+<CAPTION><EM>メモリーブロックは 4個のチャンクを含んでいる。requested_size は 1</EM></CAPTION>
+<TR><TH>Sections<TH>size_type alignment<TH>void * alignment<TH>requested_size alignment
+
+<TR><TD STYLE="background-color: red; text-align: center;" COLSPAN="4">Memory not belonging to process
+
+<TR><TD STYLE="background-color: gray; text-align: center;" ROWSPAN="4">Chunks section (16 bytes)
+ <TD STYLE="background-color: gray; text-align: center;">(4 bytes)
+ <TD STYLE="background-color: gray; text-align: center;">FLP to Chunk 2 (4 bytes)
+ <TD STYLE="background-color: gray; text-align: center;">Chunk 1 (4 bytes)
+<TR><TD STYLE="background-color: silver; text-align: center;">(4 bytes)
+ <TD STYLE="background-color: silver; text-align: center;">FLP to Chunk 3 (4 bytes)
+ <TD STYLE="background-color: silver; text-align: center;">Chunk 2 (4 bytes)
+<TR><TD STYLE="background-color: gray; text-align: center;">(4 bytes)
+ <TD STYLE="background-color: gray; text-align: center;">FLP to Chunk 4 (4 bytes)
+ <TD STYLE="background-color: gray; text-align: center;">Chunk 3 (4 bytes)
+<TR><TD STYLE="background-color: silver; text-align: center;">(4 bytes)
+ <TD STYLE="background-color: silver; text-align: center;">FLP to end-of-list (4 bytes)
+ <TD STYLE="background-color: silver; text-align: center;">Chunk 4 (4 bytes)
+
+<TR><TD STYLE="background-color: silver; text-align: center;">Pointer to next Block (4 bytes)
+ <TD STYLE="background-color: gray; text-align: center;">(4 bytes)
+ <TD STYLE="background-color: gray; text-align: center;">Ptr to end-of-list (4 bytes)
+
+<TR><TD STYLE="background-color: gray; text-align: center;">Size of next Block (4 bytes)
+ <TD STYLE="background-color: silver; text-align: center;">0 (4 bytes)
+
+<TR><TD STYLE="background-color: red; text-align: center;" COLSPAN="4">Memory not belonging to process
+</TABLE>
+
+<TABLE CELLSPACING="0" CELLPADDING="0" BORDER="3" STYLE="clear: both;" ALIGN=CENTER>
+<CAPTION><EM>ユーザーが 7個の連続した requested_size の要素を要求した後</EM></CAPTION>
+
+<TR><TH>Sections<TH>size_type alignment<TH>void * alignment<TH>requested_size alignment
+
+<TR><TD STYLE="background-color: red; text-align: center;" COLSPAN="4">Memory not belonging to process
+
+<TR><TD STYLE="background-color: gray; text-align: center;" ROWSPAN="4">Chunks section (16 bytes)
+ <TD STYLE="background-color: gray; text-align: center;">(4 bytes)
+ <TD STYLE="background-color: gray; text-align: center;">(4 bytes)
+ <TD STYLE="background-color: gray; text-align: center;">4 bytes in use by program
+<TR><TD STYLE="background-color: silver; text-align: center;">(4 bytes)
+ <TD STYLE="background-color: silver; text-align: center;">(4 bytes)
+ <TD STYLE="background-color: silver; text-align: center;">3 bytes in use by program (1 byte unused)
+<TR><TD STYLE="background-color: gray; text-align: center;">(4 bytes)
+ <TD STYLE="background-color: gray; text-align: center;">FLP to Chunk 4 (4 bytes)
+ <TD STYLE="background-color: gray; text-align: center;">Chunk 3 (4 bytes)
+<TR><TD STYLE="background-color: silver; text-align: center;">(4 bytes)
+ <TD STYLE="background-color: silver; text-align: center;">FLP to end-of-list (4 bytes)
+ <TD STYLE="background-color: silver; text-align: center;">Chunk 4 (4 bytes)
+
+<TR><TD STYLE="background-color: silver; text-align: center;">Pointer to next Block (4 bytes)
+ <TD STYLE="background-color: gray; text-align: center;">(4 bytes)
+ <TD STYLE="background-color: gray; text-align: center;">Ptr to end-of-list (4 bytes)
+
+<TR><TD STYLE="background-color: gray; text-align: center;">Size of next Block (4 bytes)
+ <TD STYLE="background-color: silver; text-align: center;">0 (4 bytes)
+
+<TR><TD STYLE="background-color: red; text-align: center;" COLSPAN="4">Memory not belonging to process
+</TABLE>
+
+<P>
+ユーザーが連続したメモリーを解放したときは、再びチャンクに分けることができる。
+<P>
+連続したチャンクを割り当てるための実装は、二次ではなく線形のアルゴリズムを使っている。
+これはフリーリストが順序付けされていなければ連続したチャンクを<STRONG>発見できないことがある</STRONG>ことを意味している。
+従って連続したチャンクを割り当てることがあるときは、いつも順序付けられたフリーリストを使うことを勧める。
+(上記の例でなら、チャンクが順序付けされておらず、チャンク1 がチャンク3 を指し、チャンク3 はチャンク2 を、チャンク2 は、チャンク4 を指しているならば、連続領域割り当てアルゴリズムは、いずれの連続したチャンクをも発見できない)
+<P>
+<HR>
+
+<P>
+Copyright &copy; 2000, 2001 Stephen Cleary (<A HREF="mailto:shammah@voyager.net">shammah@voyager.net</A>)
+
+<P>
+This file can be redistributed and/or modified under the terms found in <A HREF="../copyright.html">copyright.html</A>
+
+<P>
+This software and its documentation is provided &quot;as is&quot; without express or implied warranty, and with no claim as to its suitability for any purpose.
+
+</BODY>
+</HTML>

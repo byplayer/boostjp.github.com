@@ -1,0 +1,81 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="ja">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Boost.Signals: クラス trackable</title>
+  </head>
+
+  <body bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080">
+
+  <h1><IMG SRC="../../../../c++boost.gif" WIDTH="276" HEIGHT="86" ALT="Boost">Boost.Signals: クラス <code>trackable</code></h1>
+
+<h2>ヘッダ</h2>
+<pre>
+#include &lt;<a href="../../../../boost/signals/trackable.hpp">boost/signals/trackable.hpp</a>&gt;
+</pre>
+
+<h2>概要</h2>
+<p> <code>trackable</code> クラスは、
+スロットの一部として結合されたオブジェクトが破棄されたときに、
+シグナルとスロットを自動的に切断するよう管理する責任を負う。
+<code>trackable</code> クラスは他のクラスの基底クラスとしてのみ用いることが可能である; 
+そのとき、派生クラスはスロットの一部として用いられる関数オブジェクトに結合される。
+<code>trackable</code> オブジェクトがシグナル・スロット接続を追跡する方法は、実装定義である。
+
+<pre>
+<b>namespace</b> boost {
+  <b>namespace</b> signals {
+    <b>class</b> trackable {
+    <b>protected</b>:
+      <a href="#default_constructor">trackable()</a>;
+      <a href="#copy_constructor">trackable(<b>const</b> trackable&amp;)</a>;
+      <a href="#destructor">~trackable()</a>;
+
+      <a href="#copy_assignment">trackable&amp; <b>operator=</b>(<b>const</b> trackable&amp;)</a>;
+    };
+  }
+}
+</pre>
+
+<h2>メンバ</h2>
+
+<hr><h3>コンストラクタ</h3>
+<p><a name="default_constructor"><code>trackable();</code></a>
+<ul>
+  <li><b>作用</b>: 接続済みスロットのリストを空にする。</li>
+  <li><b>例外</b>: なし。</li>
+</ul>
+
+<p><a name="copy_constructor"><code>trackable(<b>const</b> trackable&amp;);</code></a>
+<ul>
+  <li><b>作用</b>: 接続済みスロットのリストを空にする。</li>
+  <li><b>例外</b>: なし。</li>
+  <li><b>論拠</b>: シグナル・スロット接続は明示的な connect メソッド呼び出しを介してのみ作成される。
+したがって trackable オブジェクトがコピーされるここでは、作成できない。
+</li>
+</ul>
+
+<hr><h3>デストラクタ</h3>
+
+<p><a name="destructor">~<code>trackable();</code></a>
+<ul>
+  <li><b>作用</b>: すべての接続済みスロットを切断する。</li>
+</ul>
+
+<hr><h3>代入</h3>
+<p><a name="copy_assignment"><code>trackable&amp; <b>operator=</b>(<b>const</b> trackable&amp; other);</code></a>
+<ul>
+  <li><b>作用</b>: すべての接続済みスロットを切断する。</li>
+  <li><b>戻り値</b>: <code>*<b>this</b></code></li>
+  <li><b>論拠</b>: シグナル・スロット接続は明示的な connect メソッド呼び出しを介してのみ作成される。
+したがって trackable オブジェクトがコピーされるここでは、作成できない。
+</ul>
+
+    <hr>
+    <address><a href="http://www.cs.rpi.edu/~gregod">Doug Gregor</a></address>
+<!-- Created: Fri Jul 13 10:57:20 EDT 2001 -->
+<!-- hhmts start -->
+Last modified: Fri Oct 11 05:43:22 EDT 2002
+<!-- hhmts end -->
+  </body>
+</html>

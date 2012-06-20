@@ -1,0 +1,200 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> 
+<HTML>
+<HEAD>
+<TITLE>Pool</TITLE>
+<LINK HREF="../pool.css" REL="stylesheet" TYPE="text/css">
+</HEAD>
+<BODY>
+
+<IMG SRC="../../../../c++boost.gif" WIDTH=276 HEIGHT=86 ALT="C++ Boost">
+
+<H1 ALIGN=CENTER>Pool</H1>
+
+<P>
+<H2>はじめに</H2>
+
+<P>
+<SPAN CLASS="code">pool</SPAN>は高速なメモリーアロケータであり、すべての割り当てたチャンクの適正なアラインメントを保証する。
+
+<P>
+pool.hpp は2つの <A HREF="user_allocator.html">UserAllocator</A> クラスと <SPAN CLASS="code">pool</SPAN> テンプレートクラスを提供する。
+これは <A HREF="simple_segregated_storage.html">simple segregated storage</A> 解が提供するフレームワークを拡張し一般化する。
+他のプールベースのインタフェースについての情報は<A HREF="../interfaces.html">他のプールインタフェース</A>を見よ。
+<P>
+<H2>意味</H2>
+
+<PRE CLASS="code">struct default_user_allocator_new_delete; // <A HREF="user_allocator.html">User Allocators</A>を見よ
+struct default_user_allocator_malloc_free; // <A HREF="user_allocator.html">User Allocators</A>を見よ
+
+template &lt;typename UserAllocator = default_user_allocator_new_delete&gt;
+class pool
+{
+  private:
+    pool(const pool &amp;);
+    void operator=(const pool &amp;);
+
+  public:
+    typedef UserAllocator user_allocator;
+    typedef typename UserAllocator::size_type size_type;
+    typedef typename UserAllocator::difference_type difference_type;
+
+    explicit pool(size_type requested_size);
+    ~pool();
+
+    bool release_memory();
+    bool purge_memory();
+
+    bool is_from(void * chunk) const;
+    size_type get_requested_size() const;
+
+    void * malloc();
+    void * ordered_malloc();
+    void * ordered_malloc(size_type n);
+
+    void free(void * chunk);
+    void ordered_free(void * chunk);
+    void free(void * chunks, size_type n);
+    void ordered_free(void * chunks, size_type n);
+};</PRE>
+
+<P>
+<H2>テンプレートパラメータ</H2>
+
+<P>
+<H3>UserAllocator</H3>
+
+<P>
+Poolがシステムからメモリーを割り当てるときに使用するメソッドを定義する。
+詳細は <A HREF="user_allocator.html">User Allocators</A> を見よ。
+<P>
+<H2>意味</H2>
+
+<P>
+<TABLE BORDER ALIGN=CENTER>
+<CAPTION><EM>Symbol Table</EM></CAPTION>
+<TR><TH>Symbol<TH>Meaning
+<TR><TD CLASS="code">Pool<TD CLASS="code">pool&lt;UserAllocator&gt;
+<TR><TD CLASS="code">t<TD>value of type <SPAN CLASS="code">Pool</SPAN>
+<TR><TD CLASS="code">u<TD>value of type <SPAN CLASS="code">const Pool</SPAN>
+<TR><TD CLASS="code">chunk<TD>value of type <SPAN CLASS="code">void *</SPAN>
+<TR><TD CLASS="code">n<TD>value of type <SPAN CLASS="code">size_type</SPAN>
+<TR><TD CLASS="code">RequestedSize<TD>value of type <SPAN CLASS="code">Pool::size_type</SPAN>; must be greater than 0
+</TABLE>
+
+<P>
+<TABLE BORDER ALIGN=CENTER>
+<CAPTION><EM>Typedefs</EM></CAPTION>
+<TR><TH>Expression<TH>Type
+<TR><TD CLASS="code">Pool::user_allocator<TD CLASS="code">UserAllocator
+<TR><TD CLASS="code">Pool::size_type<TD CLASS="code">UserAllocator::size_type
+<TR><TD CLASS="code">Pool::difference_type<TD CLASS="code">UserAllocator::difference_type
+</TABLE>
+
+<P>
+<TABLE BORDER ALIGN=CENTER>
+<CAPTION><EM>Constructors, Destructors, and Testing</EM></CAPTION>
+<TR><TH>Expression<TH>Return Type<TH>Notes
+<TR><TD CLASS="code">Pool(RequestedSize)<TD>not used<TD>Constructs a new empty <SPAN CLASS="code">Pool</SPAN> that can be used to allocate chunks of size <SPAN CLASS="code">RequestedSize</SPAN>
+<SPAN CLASS="code">RequestedSize</SPAN>サイズのチャンクを割り当てるために使用される、新しい空の<SPAN CLASS="code">Pool</SPAN>を構築する。
+<TR><TD CLASS="code">(&amp;t)->~Pool()<TD>not used<TD>Destructs the <SPAN CLASS="code">Pool</SPAN>, freeing its list of memory blocks
+<SPAN CLASS="code">Pool</SPAN>を破棄し、メモリーブロックのリストを解放する。
+
+<TR><TD CLASS="code">u.is_from(chunk)<TD CLASS="code">bool<TD>
+<SPAN CLASS="code">chunk</SPAN>が<SPAN CLASS="code">u</SPAN>から割り当てられたものである、もしくは<SPAN CLASS="code">u</SPAN>から先々割り当てられることがあり得るものの場合に<SPAN CLASS="code">true</SPAN>を返す。
+<SPAN CLASS="code">chunk</SPAN>が<SPAN CLASS="code">u</SPAN>以外のpoolから割り当てられたものである、もしくは他のpoolから先々割り当てられることがあり得るものの場合に<SPAN CLASS="code">false</SPAN>を返す。
+さもなくば、戻り値は無意味である。
+
+<TR><TD CLASS="code">u.get_requested_size()<TD CLASS="code">size_type<TD>
+この関数はどのようなポインタ値を与えても信頼できるテストを行っているわけでは<STRONG>ない</STRONG>ことに注意せよ。
+コンストラクタに渡された値を返す。
+<SPAN CLASS="code">Pool</SPAN> オブジェクトの生存期間中、変わらない。
+</TABLE>
+
+<P>
+<TABLE BORDER ALIGN=CENTER>
+<CAPTION><EM>Allocation and Deallocation</EM></CAPTION>
+<TR><TH>Expression<TH>Return Type<TH>Pre-Condition<TH>Notes
+<TR><TD CLASS="code">t.malloc()<TD CLASS="code">void *<TD><TD>
+
+メモリーのチャンクを割り当てる。
+未使用のチャンクを持つブロックを、メモリーブロックリストから探し、見つかればその未使用チャンクを返す。
+さもなくば、新しいメモリーブロックを生成し、それのフリーリストを <SPAN CLASS="code">t</SPAN> のフリーリストに追加し、そのブロックから未使用チャンクを返す。
+新しいメモリーブロックを確保することができなければ、<SPAN CLASS="code">0</SPAN> を返す。
+償却 O(1)。
+
+<TR><TD CLASS="code">t.ordered_malloc()<TD CLASS="code">void *<TD><TD>
+上記と同じ、但し、順序を維持してフリーリストをマージすることだけが異なる。
+償却 O(1)。
+
+<TR><TD CLASS="code">t.ordered_malloc(n)<TD CLASS="code">void *<TD><TD>
+上記と同じ、但し、少なくとも <SPAN CLASS="code">n * requested_size</SPAN> バイト以上の大きさはある連続したチャンクを割り当てる。
+償却 O(1)。
+
+<TR><TD CLASS="code">t.free(chunk)<TD CLASS="code">void<TD>
+<SPAN CLASS="code">chunk</SPAN> は <SPAN CLASS="code">t.malloc()</SPAN> もしくは <SPAN CLASS="code">t.ordered_malloc()</SPAN> によって返されたものでなくてはならない。
+<TD>
+メモリーのチャンクを解放する。
+<SPAN CLASS="code">chunk</SPAN> は <SPAN CLASS="code">0</SPAN> であってはならないことに注意せよ。
+O(1)。
+
+<TR><TD CLASS="code">t.ordered_free(chunk)<TD CLASS="code">void<TD>
+上記と同じ。
+<TD>
+上記と同じ、但し、順序を維持する。
+<SPAN CLASS="code">chunk</SPAN> は <SPAN CLASS="code">0</SPAN> であってはならないことに注意せよ。
+フリーリストのサイズによって O(N)。
+
+<TR><TD CLASS="code">t.free(chunk, n)<TD CLASS="code">void<TD>
+<SPAN CLASS="code">chunk</SPAN> は <SPAN CLASS="code">t.ordered_malloc(n)</SPAN> によって返されたものでなくてはならない。
+<TD>
+<SPAN CLASS="code">chunk</SPAN> は実際に <SPAN CLASS="code">n * partition_sz</SPAN> バイトに広がったチャンクのブロックを参照していることを前提とし、ブロックの個々のチャンクを開放する。
+<SPAN CLASS="code">chunk</SPAN> は <SPAN CLASS="code">0</SPAN> であってはならないことに注意せよ。
+O(n)。
+
+<TR><TD CLASS="code">t.ordered_free(chunk, n)<TD CLASS="code">void<TD>
+<SPAN CLASS="code">chunk</SPAN> は <SPAN CLASS="code">t.ordered_malloc(n)</SPAN> によって返されたものでなくてはならない。
+<TD>
+<SPAN CLASS="code">chunk</SPAN> は実際に <SPAN CLASS="code">n * partition_sz</SPAN> バイトに広がったチャンクのブロックを参照していることを前提とし、ブロックの個々のチャンクを開放する。
+<SPAN CLASS="code">chunk</SPAN> は <SPAN CLASS="code">0</SPAN> であってはならないことに注意せよ。
+順序を維持する。
+O(N + n)、N はフリーリストのサイズ。
+
+<TR><TD CLASS="code">t.release_memory()<TD CLASS="code">bool
+<TD><SPAN CLASS="code">t</SPAN> 順序付けされていること。
+<TD>割り当て中のチャンクを持たないメモリーブロックを解放する。
+少なくともひとつのメモリーブロックを解放した場合、<SPAN CLASS="code">true</SPAN> を返す。
+
+<TR><TD CLASS="code">t.purge_memory()<TD CLASS="code">bool<TD><TD>
+すべてのメモリーブロックを解放する。
+この関数は <SPAN CLASS="code">t</SPAN> の割り当て関数から返されたポインタを無効にする。
+少なくともひとつのメモリーブロックを解放した場合、<SPAN CLASS="code">true</SPAN> を返す。
+
+</TABLE>
+
+<P>
+<H2>Symbols</H2>
+
+<P>
+<UL>
+<LI>boost::default_user_allocator_new_delete</LI>
+<LI>boost::default_user_allocator_malloc_new</LI>
+<LI>boost::pool</LI>
+</UL>
+
+<P>
+<H2><A HREF="../implementation/pool.html">実装の詳細</A></H2>
+
+<P>
+<HR>
+
+<P>
+Copyright &copy; 2000, 2001 Stephen Cleary (<A HREF="mailto:shammah@voyager.net">shammah@voyager.net</A>)
+
+<P>
+This file can be redistributed and/or modified under the terms found in <A HREF="../copyright.html">copyright.html</A>
+
+<P>
+This software and its documentation is provided &quot;as is&quot; without express or implied warranty, and with no claim as to its suitability for any purpose.
+
+</BODY>
+</HTML>

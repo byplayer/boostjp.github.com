@@ -1,0 +1,102 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=EUC-JP"><!--*- encoding: euc-jp -*-->
+	<title>BOOST_PP_LINE</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">	
+</head>
+<body>
+	<div style="margin-left:  0px;">
+		<b>BOOST_PP_LINE</b> マクロは前処理出力でライン指令として符号化された注意を配置する。
+	</div>
+	<h4>Usage</h4>
+		<div class="code">
+			#line <b>BOOST_PP_LINE</b>(<i>line</i>, <i>file</i>)
+		</div>
+	<h4>Arguments</h4>
+		<dl>
+			<dt>line</dt>
+			<dd>
+				追跡している行の新しい行番号。&nbsp;
+				あらかじめ定義されているマクロ <i>__LINE__</i> は 広く使用されている。
+			</dd>
+			<dt>file</dt>
+			<dd>
+				通常は現在のファイル名。&nbsp;
+				しかし、どんな有益なテキストでも機能するだろう。&nbsp;
+				このテキストは内部で文字列化されるので、引用符は不必要である。
+			</dd>
+		</dl>
+	<h4>Remarks</h4>
+		<div>
+			もし、マクロ <b>BOOST_PP_CONFIG_EXTENDED_LINE_INFO</b> が <i>1</i> と定義され、かつ <i>file-iteration</i>
+			が進行中であるならば、このマクロは <i>file-iteration</i> の状態に関するデバッギング情報を自動的に挿入するだろう。&nbsp;
+			この情報は最後に内部の最多の反復を備えたすべての現在の反復値を示すだろう。
+		</div>
+		<div>
+			エラーが同じソーステキストにおいて複数の反復に及んでいるかもしれないとき、この情報は役に立つ。&nbsp;
+			エラーが少しもないのを探すことはときどき決して簡単でない。&nbsp;
+			このマクロの使用はより簡単にこれを作成するための情報を提供できる。&nbsp;
+			たとえば、このようないくつかのエラーを得る代わりに：
+			<div><i>
+				"file.hpp", line 2: error: expected a ";"<br>
+				"file.hpp", line 4: error: improperly terminated macro invocation<br>
+			</i></div>
+			このようなものを得るかもしれない･･･。
+			<i><div>
+				"file.hpp [1]", line 2: error: expected a ";"<br>
+				"file.hpp [5]", line 4: error: improperly terminated macro invocation<br>
+			</i></div>
+			このエラーが同じソーステキスト複数の反復に及んでいるということは、すぐに明らかになる。&nbsp;
+			もしそうでなければ、同じエラーが各反復に生じるだろう。
+		</div>
+		<div>
+			しかしながら、いくつかのコンパイルは実際にファイルでないファイル名を受け付けないので、注意されるに違いない。&nbsp;
+			それらのコンパイラは概して悪いフィル名に関する警告を出す。&nbsp;
+			これは、デバッグするとき <i>だけ</i> 単に <b>BOOST_PP_CONFIG_EXTENDED_LINE_INFO</b> を <i>1</i> と定義することをよい考えとする。
+		</div>
+	<h4>See Also</h4>
+		<ul>
+			<li><a href="config_extended_line_info.html">BOOST_PP_CONFIG_EXTENDED_LINE_INFO</a></li>
+		</ul>
+	<h4>Requirements</h4>
+		<div>
+			<b>Header:</b> &nbsp;<a href="../headers/debug/line.hpp.html">&lt;boost/preprocessor/debug/line.hpp&gt;</a>
+		</div>
+	<h4>Sample Code</h4>
+<div><pre>
+// sample.cpp
+#if !defined(<a href="is_iterating.html">BOOST_PP_IS_ITERATING</a>)
+
+   #define <a href="config_extended_line_info.html">BOOST_PP_CONFIG_EXTENDED_LINE_INFO</a> 1
+
+   #include &lt;<a href="../headers/arithmetic/dec.hpp.html">boost/preprocessor/arithmetic/dec.hpp</a>&gt;
+   #include &lt;<a href="../headers/cat.hpp.html">boost/preprocessor/cat.hpp</a>&gt;
+   #include &lt;<a href="../headers/debug/line.hpp.html">boost/preprocessor/debug/line.hpp</a>&gt;
+   #include &lt;<a href="../headers/iteration/iterate.hpp.html">boost/preprocessor/iteration/iterate.hpp</a>&gt;
+
+   namespace sample {
+
+   #define <a href="iteration_params_x.html">BOOST_PP_ITERATION_PARAMS_1</a> (3, (1, 5, "sample.cpp"))
+   #include <a href="iterate.html">BOOST_PP_ITERATE</a>()
+
+   } // sample
+
+   int main(void) {
+      return 0;
+   }
+
+#else
+
+   #line <a href="line.html">BOOST_PP_LINE</a>(1, sample.cpp)
+
+   int <a href="cat.html">BOOST_PP_CAT</a>(x, <a href="iteration.html">BOOST_PP_ITERATION</a>())); // 余分な丸括弧
+   
+   struct <a href="cat.html">BOOST_PP_CAT</a>(s, <a href="dec.html">BOOST_PP_DEC</a>(<a href="iteration.html">BOOST_PP_ITERATION</a>()) {
+      // 丸括弧が不足している
+      // ...
+   };
+
+#endif
+</pre></div>
+</body>
+</html>

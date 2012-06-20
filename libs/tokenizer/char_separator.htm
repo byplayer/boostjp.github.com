@@ -1,0 +1,247 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type"
+content="text/html; charset=utf-8">
+<meta name="GENERATOR" content="Microsoft FrontPage Express 2.0">
+<title>Boost Char Separator</title>
+<!--
+  -- Copyright (c) Jeremy Siek and John Bandela 2001-2002
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  Jeremy Siek makes no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+</head>
+
+<body bgcolor="#FFFFFF" text="#000000" link="#0000EE"
+vlink="#551A8B" alink="#FF0000">
+
+<p><img src="../../c++boost.gif" alt="C++ Boost" width="277"
+height="86"> <br>
+</p>
+
+<h1>
+char_separator&lt;Char, Traits&gt;
+</h1>
+
+<p>
+<tt>char_separator</tt> クラスは <tt>strtok()</tt> と同じように、
+文字列を区切り文字に基づいてトークンに分解する。
+(but without all the evils of non-reentrancy
+and destruction of the input sequence).
+</p>
+
+<p>
+<tt>char_separator</tt> クラスは <a href="token_iterator.htm"><tt>token_iterator</tt></a> クラスや
+<a href="tokenizer.htm"><tt>tokenizer</tt></a> クラスと一緒に使用される。</p>
+
+<h2>Definitions</h2>
+
+<p>
+<tt>strtok()</tt> 関数は出力トークンに区切り文字自体を含まない。
+しかし、場合によっては出力トークンに区切り文字自体を含んだ方が便利なこともある。
+<tt>char_separator</tt> はその機能をオプションで提供しており、トークンとして出力したい区切り文字は
+<b><i>kept delimiters</i></b> に、出力したくない区切り文字は <b><i>dropped delimiters</i></b> に指定すれば良い。
+</p>
+
+<p>
+入力文字列中に2つの区切り文字が連続して現れたときは、
+<b><i>空のトークン</i></b> を出力するか、飛ばして進んでいくかという疑問が発生する。
+<tt>strtok()</tt> は飛ばして進んでいくが、
+<tt>char_separator</tt> クラスはどちらかを選択することができる。
+</p>
+
+
+<h2>Examples</h2>
+
+<p>
+この最初の例は <tt>strtok()</tt> 関数の代替としての <tt>char_separator</tt> の使い方を示している。
+区切り文字として3つの文字を指定し、それらの区切り文字は出力トークンの中には含まれない。
+また、kept delimiters は指定せず、デフォルトでは空のトークンは無視される。
+</p>
+
+<blockquote>
+<pre>// char_sep_example_1.cpp
+#include &lt;iostream&gt;
+#include &lt;boost/tokenizer.hpp&gt;
+#include &lt;string&gt;
+
+int main()
+{
+  std::string str = &quot;;;Hello|world||-foo--bar;yow;baz|&quot;;
+  typedef boost::tokenizer&lt;boost::char_separator&lt;char&gt; &gt; 
+    tokenizer;
+  boost::char_separator&lt;char&gt; sep(&quot;-;|&quot;);
+  tokenizer tokens(str, sep);
+  for (tokenizer::iterator tok_iter = tokens.begin();
+       tok_iter != tokens.end(); ++tok_iter)
+    std::cout &lt;&lt; &quot;&lt;&quot; &lt;&lt; *tok_iter &lt;&lt; &quot;&gt; &quot;;
+  std::cout &lt;&lt; &quot;\n&quot;;
+  return EXIT_SUCCESS;
+}
+</pre>
+</blockquote>
+出力:
+<blockquote>
+<pre>
+&lt;Hello&gt; &lt;world&gt; &lt;foo&gt; &lt;bar&gt; &lt;yow&gt; &lt;baz&gt; 
+</pre>
+</blockquote>
+
+
+<p>
+次の例は dropped delimiters に '-' と ';' の2つを指定し、
+kept delimiters に'|'を指定している。さらに、2つの区切り文字が連続したときに
+空のトークンを出力するように指定している。
+</p>
+
+<blockquote>
+<pre>// char_sep_example_2.cpp
+#include &lt;iostream&gt;
+#include &lt;boost/tokenizer.hpp&gt;
+#include &lt;string&gt;
+
+int main()
+{
+    std::string str = &quot;;;Hello|world||-foo--bar;yow;baz|&quot;;
+    typedef boost::tokenizer&lt;boost::char_separator&lt;char&gt; &gt; 
+        tokenizer;
+    boost::char_separator&lt;char&gt; sep(&quot;-;&quot;, &quot;|&quot;, boost::keep_empty_tokens);
+    tokenizer tokens(str, sep);
+    for (tokenizer::iterator tok_iter = tokens.begin();
+         tok_iter != tokens.end(); ++tok_iter)
+      std::cout &lt;&lt; &quot;&lt;&quot; &lt;&lt; *tok_iter &lt;&lt; &quot;&gt; &quot;;
+    std::cout &lt;&lt; &quot;\n&quot;;
+    return EXIT_SUCCESS;
+}
+</pre>
+</blockquote>
+出力:
+<blockquote>
+<pre>
+&lt;&gt; &lt;&gt; &lt;Hello&gt; &lt;|&gt; &lt;world&gt; &lt;|&gt; &lt;&gt; &lt;|&gt; &lt;&gt; &lt;foo&gt; &lt;&gt; &lt;bar&gt; &lt;yow&gt; &lt;baz&gt; &lt;|&gt; &lt;&gt;
+</pre>
+</blockquote>
+
+<p>
+最後の例は <tt>char_separator</tt> のデフォルトコンストラクタを使用して、
+句読点とスペースを区切り文字としてトークンに分解する。</p>
+
+<blockquote>
+<pre>// char_sep_example_3.cpp
+#include &lt;iostream&gt;
+#include &lt;boost/tokenizer.hpp&gt;
+#include &lt;string&gt;
+
+int main()
+{
+   std::string str = "This is,  a test";
+   typedef boost::tokenizer&lt;boost::char_separator&lt;char&gt; &gt; Tok;
+   boost::char_separator&lt;char&gt; sep; // default constructed
+   Tok tok(str, sep);
+   for(Tok::iterator tok_iter = tok.begin(); tok_iter != tok.end(); ++tok_iter)
+     std::cout &lt;&lt; "&lt;" &lt;&lt; *tok_iter &lt;&lt; "&gt; ";
+   std::cout &lt;&lt; "\n";
+   return EXIT_SUCCESS;
+}
+</pre>
+</blockquote>
+出力:
+<blockquote>
+<pre>
+&lt;This&gt; &lt;is&gt; &lt;,&gt; &lt;a&gt; &lt;test&gt; 
+</pre>
+</blockquote>
+
+<h2>Template parameters</h2>
+
+<P>
+<table border>
+<TR>
+<th>パラメータ</th><th>説明</th><th>デフォルト</th>
+</tr>
+
+<TR><TD><TT>Char</TT></TD>
+<TD>トークンの要素の型。通常は <tt>char</tt> である。</TD>
+<TD>&nbsp;</TD>
+</TR>
+
+<TR><TD><TT>Traits</TT></TD>
+<TD>文字の型の <tt>char_traits</tt> 。</TD>
+<TD><tt>char_traits&lt;char&gt;</tt></TD>
+</TR>
+
+</table>
+
+<h2>Model of</h2>
+
+<a href="tokenizerfunction.htm">Tokenizer Function</a>
+
+
+<h2>Members</h2>
+
+<hr>
+<pre>
+explicit char_separator(const Char* dropped_delims,
+                        const Char* kept_delims = &quot;&quot;,
+                        empty_token_policy empty_tokens = drop_empty_tokens)
+</pre>
+
+<p>
+トークンに分離するための <a href="token_iterator.htm"><tt>token_iterator</tt></a>
+や <a href="tokenizer.htm"><tt>tokenizer</tt></a> を生成する際に使用する
+ <tt>char_separator</tt> を生成する。
+<tt>dropped_delims</tt> と <tt>kept_delims</tt> はそれぞれ、
+トークンに分離する際の区切り文字として使用される文字の文字列である。
+入力文字列に区切り文字が見つかると常にトークンはそこで終端となり、次からは新しいトークンとなる。
+
+<tt>dropped_delims</tt> に含まれる区切り文字は出力中にトークンとして現れないのに対し、
+<tt>kept_delims</tt> に含まれる区切り文字はトークンとして現れる。
+<tt>empty_tokens</tt> が <tt>drop_empty_tokens</tt> である場合は、空のトークンは出力に含まれない。
+<tt>empty_tokens</tt> が <tt>keep_empty_tokens</tt> である場合は、空のトークンも出力に含まれる。
+</p>
+
+<hr>
+
+<pre>
+explicit char_separator()
+</pre>
+<p>
+dropped delimiters の識別には <tt>std::isspace()</tt> 関数が使用され、
+kept delimiters の識別には <tt>std::ispunct()</tt> 関数が使用される。
+また、空のトークンは出力に含まれない。
+</p>
+
+<hr>
+
+<pre>
+template &lt;typename InputIterator, typename Token&gt;
+bool operator()(InputIterator&amp; next, InputIterator end, Token&amp; tok)
+</pre>
+
+<p>
+この関数はトークンに分離するために <a href="token_iterator.htm"><tt>token_iterator</tt></a>
+から呼び出される。通常は、使用者がこの関数を直接呼び出すことはない。
+</p>
+
+
+<hr>
+
+<p>&copy; Copyright Jeremy Siek and John R. Bandela 2001-2002. Permission
+to copy, use, modify, sell and distribute this document is granted
+provided this copyright notice appears in all copies. This document is
+provided &quot;as is&quot; without express or implied warranty, and
+with no claim as to its suitability for any purpose.</p>
+
+<hr>
+
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:yamasaki@mail.ne.jp">Akihiro Yamasaki</a><br>
+<small>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</small></p>
+
+</body>
+</html>

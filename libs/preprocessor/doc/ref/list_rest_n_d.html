@@ -1,0 +1,62 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=EUC-JP"><!--*- encoding: euc-jp -*-->
+	<title>BOOST_PP_LIST_REST_N_D</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">
+</head>
+<body>
+	<div style="margin-left:  0px;">
+		<b>BOOST_PP_LIST_REST_N_D</b> マクロは <i>リスト</i> の先頭の <i>count</i> 個の要素以外の <i>リスト</i> に展開される。&nbsp;
+		これは <b>BOOST_PP_WHILE</b> 内で呼ばれる際には最も効率よく機能する。
+	</div>
+	<h4>Usage</h4>
+		<div class="code">
+			<b>BOOST_PP_LIST_REST_N_D</b>(<i>d</i>, <i>count</i>, <i>list</i>)
+		</div>
+	<h4>Arguments</h4>
+		<dl>
+			<dt>d</dt>
+			<dd>
+				次の有効な <b>BOOST_PP_WHILE</b> 反復。
+			</dd>
+			<dt>count</dt>
+			<dd>
+			<dd>
+				<i>リスト</i> の先頭から削除する要素数。
+			</dd>
+			<dt>list</dt>
+			<dd>
+				要素が抽出される <i>リスト</i> 。
+			</dd>
+		</dl>
+	<h4>Remarks</h4>
+		<div>
+			このマクロは <i>count</i> 個の要素を <i>リスト</i> の先頭から削除し、残りの要素を <i>リスト</i> として返す。
+		</div>
+	<h4>See Also</h4>
+		<ul>
+			<li><a href="list_rest_n.html">BOOST_PP_LIST_REST_N</a></li>
+		</ul>
+	<h4>Requirements</h4>
+		<div>
+			<b>Header:</b> &nbsp;<a href="../headers/list/rest_n.hpp.html">&lt;boost/preprocessor/list/rest_n.hpp&gt;</a>
+		</div>
+	<h4>Sample Code</h4>
+<div><pre>
+#include &lt;<a href="../headers/list/fold_right.hpp.html">boost/preprocessor/list/fold_right.hpp</a>&gt;
+#include &lt;<a href="../headers/list/rest_n.hpp.html">boost/preprocessor/list/rest_n.hpp</a>&gt;
+
+#define L1 (a, (b, (c, (d, <a href="nil.html">BOOST_PP_NIL</a>))))
+#define L2 (L1, (L1, (L1, <a href="nil.html">BOOST_PP_NIL</a>)))
+
+#define OP(d, state, x) (<a href="list_rest_n_d.html">BOOST_PP_LIST_REST_N_D</a>(d, 2, x), state)
+
+<a href="list_fold_right.html">BOOST_PP_LIST_FOLD_RIGHT</a>(OP, <a href="nil.html">BOOST_PP_NIL</a>, L2)
+/*
+   ((c, (d, <a href="nil.html">BOOST_PP_NIL</a>)), ((c, (d, <a href="nil.html">BOOST_PP_NIL</a>)),
+   ((c, (d, <a href="nil.html">BOOST_PP_NIL</a>)), <a href="nil.html">BOOST_PP_NIL</a>)))
+   に展開される
+*/
+</pre></div>
+</body>
+</html>

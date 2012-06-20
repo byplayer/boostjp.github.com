@@ -1,0 +1,33 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=EUC-JP"><!--*- encoding: euc-jp -*-->
+	<title>BOOST_PP_FRAME_FLAGS</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">
+</head>
+<body>
+	<div style="margin-left:  0px;">
+		<b>BOOST_PP_FRAME_FLAGS</b> マクロは <i>ファイル繰り返し</i> 
+		の絶対的な深さに関連するフラグに展開される。
+	</div>
+	<h4>Usage</h4>
+		<div class="code">
+			<b>BOOST_PP_FRAME_FLAGS</b>(<i>i</i>)
+		</div>
+	<h4>Arguments</h4>
+		<dl>
+			<dt>i</dt>
+			<dd>
+			フラグが検索されるフレームの絶対的深さ。
+			有効な値の範囲は <i>1</i> から <b>BOOST_PP_ITERATION_DEPTH</b>() までである。
+			</dd>
+		</dl>
+	<h4>Remarks</h4>
+		<div>
+		このマクロは <i>ファイル繰り返し</i> が進行中の時のみ有効である。
+		</div>
+	<h4>Requirements</h4>
+		<div>
+			<b>Header:</b> &nbsp;<a href="../headers/iteration/iterate.hpp.html">&lt;boost/preprocessor/iteration/iterate.hpp&gt;</a>
+		</div>
+</body>
+</html>

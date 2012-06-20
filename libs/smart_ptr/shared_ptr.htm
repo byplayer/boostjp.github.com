@@ -1,0 +1,1429 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+	<head>
+		<title>shared_ptr</title>
+		<!--meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"-->
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	</head>
+	<body text="#000000" bgColor="#ffffff">
+		<h1><IMG height="86" alt="c++boost.gif (8819 bytes)" src="../../c++boost.gif" width="277" align="middle">shared_ptr 
+			class template</h1>
+		<p><A href="#Introduction">Introduction</A><br>
+			<a href="#BestPractices">Best Practices</a><br>
+			<A href="#Synopsis">Synopsis</A><br>
+			<A href="#Members">Members</A><br>
+			<A href="#functions">Free Functions</A><br>
+			<A href="#example">Example</A><br>
+			<A href="#Handle/Body">Handle/Body Idiom</A><br>
+			<a href="#ThreadSafety">Thread Safety</a><br>
+			<A href="#FAQ">Frequently Asked Questions</A><br>
+			<A href="smarttests.htm">Smart Pointer Timings</A></p>
+		<h2><a name="Introduction">Introduction</a></h2>
+
+		<!--p>The <b>shared_ptr</b> class template stores a pointer to a dynamically allocated 
+			object, typically with a C++ <EM>new-expression</EM> . The object pointed to is 
+			guaranteed to be deleted when the last <b>shared_ptr</b> pointing to it is 
+			destroyed or reset. See the <A href="#example">example</A>.
+		</p-->
+		<p>
+			<b>shared_ptr</b> クラステンプレートは、C++ の <EM>new</EM> などによって動的に割り当てられたオブジェクトへのポインタを保持する。
+			<!--次の文、原文に対してかなり冗長; 日本語ならこれくらい明確に書いた方が分かりやすいのでは。-->
+			<b>shared_ptr</b> <!--のポインタ-->に指されたオブジェクトは、そのオブジェクトを指す最後の <b>shared_ptr</b> が
+			破棄もしくは<!--reset-->リセットされるときに削除されることが保証されている。
+			<A href="#example">example</A> を参照のこと。
+		</p>
+
+		<!--p>Every <b>shared_ptr</b> meets the <b>CopyConstructible</b> and <b>Assignable</b> 
+			requirements of the C++ Standard Library, and so can be used in standard 
+			library containers. Comparison operators are supplied so that <b>shared_ptr</b> 
+			works with the standard library's associative containers.
+		</p-->
+		<p>
+		<b>shared_ptr</b> はC++標準ライブラリの
+		<b>CopyConstructible</b> (コピーコンストラクト可能)と
+		<b>Assignable</b> (代入可能)の条件を満たすので、標準ライブラリのコンテナで使うことができる。
+		<!>また、<!>標準ライブラリの連想コンテナで使うことができるように、比較演算子が提供されている。
+		</p>
+
+		<!--p>Normally, a <b>shared_ptr</b> cannot correctly hold a pointer to a dynamically 
+			allocated array. See <A href="shared_array.htm"><b>shared_array</b></A> for 
+			that usage.
+		</p-->
+		<p>
+			通常、<b>shared_ptr</b> は動的に割り当てられた配列を正しく扱うことはできない。
+			動的に割り当てられた配列<!-- へのポインタ -->の扱い方については、
+			<A href="shared_array.htm"><b>shared_array</b></A> を参照のこと。
+		</p>
+
+		<!--p>Because the implementation uses reference counting, cycles of <b>shared_ptr</b> instances 
+			will not be reclaimed. For example, if <b>main()</b> holds a <b>shared_ptr</b> to
+			<b>A</b>, which directly or indirectly holds a <b>shared_ptr</b> back to <b>A</b>,
+			<b>A</b>'s use count will be 2. Destruction of the original <b>shared_ptr</b> will 
+			leave <b>A</b> dangling with a use count of 1. Use <A href="weak_ptr.htm">weak_ptr</A>
+			to "break cycles."
+		</p-->
+		<p>
+		<!--実装には参照カウントが用いられているため、循環する<b>shared_ptr</b>のインスタンスは再確保されない。-->
+			<b>shared_ptr</b> の実装には参照カウントが用いられているため、
+			循環参照された <b>shared_ptr</b> のインスタンスは正常に解放されない。
+			例えば、<b>main()</b> が <b>A</b> を指す <b>shared_ptr</b> を保持しているときに、
+			その <b>A</b> が直接的または間接的に <b>A</b> 自身を指す <b>shared_ptr</b> を持っていると、
+			<b>A</b> に対する<A href="#use_count">参照カウント</A>は 2 となる。
+			最初の <b>shared_ptr</b> が破棄される際に、
+			<!--A href="#use_count">use count</A-->
+			<b>A</b> の<A href="#use_count">参照カウント</A>は 1 となり、そのインスタンスは破棄されずに残ってしまう。
+			循環参照を回避するには、<A href="weak_ptr.htm">weak_ptr</A> を使う。
+		</p>
+
+		<!--p>The class template is parameterized on <b>T</b>, the type of the object pointed 
+			to. <b>shared_ptr</b> and most of its member functions place no 
+			requirements on <b>T</b>; it is allowed to be an incomplete type, or <b>
+				void</b>. Member functions that do place additional requirements (<A href="#constructors">constructors</A>,
+			<A href="#reset">reset</A>) are explicitly documented below.
+		</p-->
+		<p>
+			このクラステンプレートには、指し示すオブジェクトの型を表すパラメータ <b>T</b> を与える。
+			<b>shared_ptr</b> とそのメンバ関数の多くは、 <b>T</b> に特別な条件を必要としない。
+			不完全<!--な-->型や <b>void</b> も許されている。
+			<b>T</b> に特別な条件を必要とするメンバ関数
+			(<A href="#constructors">constructors</A>, <A href="#reset">reset</A>)
+			についてはこのドキュメント中で明示されている。
+		</p>
+
+		<!--p><b>shared_ptr&lt;T&gt;</b> can be implicitly converted to <b>shared_ptr&lt;U&gt;</b>
+			whenever <b>T*</b> can be implicitly converted to <b>U*</b>. 
+			In particular, <b>shared_ptr&lt;T&gt;</b> is implicitly convertible 
+			to <b>shared_ptr&lt;T const&gt;</b>, to <b>shared_ptr&lt;U&gt;</b>
+			where <b>U</b> is an accessible base of <b>T</b>, and to <b>
+				shared_ptr&lt;void&gt;</b>.
+		</p-->
+		<p>
+			<!--原文では T* のような書き方と T * のような書き方が混在しているので、T * (スペースで区切る)の形に統一する -->
+			<b>T *</b> が暗黙の型変換により <b>U *</b> に変換可能であれば、
+			<b>shared_ptr&lt;T&gt;</b> は暗黙に <b>shared_ptr&lt;U&gt;</b> に変換できる。
+			特に、<b>shared_ptr&lt;T&gt;</b> は暗黙の型変換により、 <b>shared_ptr&lt;T const&gt;</b> 、
+			<b>shared_ptr&lt;U&gt;</b> 、
+			<b>shared_ptr&lt;void&gt;</b> に変換できる。
+			(<b>U</b>はアクセス可能な<b>T</b>の基底型)
+		</p>
+
+		<h2><a name="BestPractices">Best Practices</a></h2>
+		<!--p>A simple guideline that nearly eliminates the possibility of memory leaks 
+			is: always use a named smart pointer variable to hold the result of <b>new. </b>
+			Every occurence of the <b>new</b> keyword in the code should have the 
+			form:
+		</p-->
+		<p>
+			メモリリークの可能性をほとんど排除<!--撲滅、回避-->する為のシンプルな指針 : <!--br-->
+			<b>new</b> の結果を常に名前のあるスマートポインタに格納すること。
+			コードに含まれる全ての <b>new</b> キーワードは、次の形にされるべきである :
+		</p>
+		<PRE>shared_ptr&lt;T&gt; p(new Y);</PRE>
+		<!--p>It is, of course, acceptable to use another smart pointer in place of <b>shared_ptr</b>
+			above; having <b>T</b> and <b>Y</b> be the same type, or 
+			passing arguments to <b>Y</b>'s constructor is also OK.
+		</p-->
+		<p>
+			もちろん、上での <b>shared_ptr</b> の代わりに他のスマートポインタを利用しても良い。
+			また、<b>T</b> と <b>Y</b> が同じ型であったり、<b>Y</b> のコンストラクタに引数が与えられても良い。
+		</p>
+
+		<!--p>If you observe this guideline, it naturally follows that you will have no 
+			explicit <b>delete</b>s; <b>try/catch</b> constructs will 
+			be rare.
+		</p-->
+		<p>
+			この指針に従えば、自然と明示的な <b>delete</b> が無くなり、
+			<b>try/catch</b> <!--このconstructsは恐らくnoun(名詞)-->構文<!>も極めて少なくなるだろう。
+		</p>
+
+		<!--p>Avoid using unnamed <b>shared_ptr</b> temporaries to save typing; to 
+			see why this is dangerous, consider this example:
+		</p-->
+		<p>
+			<!-- to save typing は皮肉なのだろうか？ 皮肉だとしたら、訳文ももっと皮肉っぽく書くべきか -->
+			タイプ数(コード量)を減らすために、名前のない一時的な <b>shared_ptr</b> を使ってはならない。
+			このことがなぜ危険かを理解するには、以下の例を考えると良い :
+		</p>
+
+		<PRE>
+void f(shared_ptr&lt;int&gt;, int);
+int g();
+
+void ok()
+{
+    shared_ptr&lt;int&gt; p(new int(2));
+    f(p, g());
+}
+
+void bad()
+{
+    f(shared_ptr&lt;int&gt;(new int(2)), g());
+}
+</PRE>
+
+		<!--p>The function <b>ok</b> follows the guideline to the letter, whereas <b>
+				bad</b> constructs the temporary <b>shared_ptr</b> in place, 
+			admitting the possibility of a memory leak. Since function arguments are 
+			evaluated in unspecified order, it is possible for <b>new int(2)</b> to 
+			be evaluated first, <b>g()</b> second, and we may never get to the <b>
+				shared_ptr </b>constructor if <b>g</b> throws an exception. 
+			See <A href="http://www.gotw.ca/gotw/056.htm">Herb Sutter's treatment</A> of 
+			the issue for more information.
+		</p-->
+		<p>
+			<!-- to the letter : 文字[定義]通りに、正確に、間違えずに -->
+			<b>ok</b> 関数はこの指針に的確に従っているのに対し、
+			<b>bad</b> 関数は一時的な <b>shared_ptr</b> を<!--construct-->使用しており、
+			メモリリークが起きる可能性がある。
+			関数の引数が評価される順序が不定であるため、
+			<b>new int(2)</b>が最初に評価され、次に<b>g()</b>が評価されるかもしれない。
+			その結果、もし <b>g</b> が例外を送出すると、<b>shared_ptr</b> のコンストラクタは呼び出されない。
+			<!-- つまり new int(2) がリーク -->
+			この問題についてのより詳しい情報は
+			<A href="http://www.gotw.ca/gotw/056.htm">Herb Sutter's treatment (英文)</a>
+			を参照のこと。
+		</p>
+
+		<h2><a name="Synopsis">Synopsis</a></h2>
+		<pre>namespace boost {
+
+  class use_count_is_zero: public std::exception;
+
+  template&lt;typename T&gt; class <A href="weak_ptr.htm" >weak_ptr</A>;
+
+  template&lt;typename T&gt; class shared_ptr {
+
+    public:
+
+      typedef T <A href="#element_type" >element_type</A>;
+
+      <A href="#constructors">shared_ptr</A>();
+      template&lt;typename Y&gt; explicit <A href="#constructors" >shared_ptr</A>(Y * p);
+      template&lt;typename Y, typename D&gt; <A href="#constructors" >shared_ptr</A>(Y * p, D d);
+      <A href="#destructor">~shared_ptr</A>(); // never throws
+
+      <A href="#constructors">shared_ptr</A>(shared_ptr const &amp; r); // never throws
+      template&lt;typename Y&gt; <A href="#constructors">shared_ptr</A>(shared_ptr&lt;Y&gt; const &amp; r); // never throws
+      template&lt;typename Y&gt; explicit <A href="#constructors">shared_ptr</A>(<A href="weak_ptr.htm" >weak_ptr</A>&lt;Y&gt; const &amp; r);
+      template&lt;typename Y&gt; explicit <A href="#constructors" >shared_ptr</A>(std::auto_ptr&lt;Y&gt; &amp; r);
+
+      shared_ptr &amp; <A href="#assignment" >operator=</A>(shared_ptr const &amp; r); // never throws  
+      template&lt;typename Y&gt; shared_ptr &amp; <A href="#assignment" >operator=</A>(shared_ptr&lt;Y&gt; const &amp; r); // never throws
+      template&lt;typename Y&gt; shared_ptr &amp; <A href="#assignment" >operator=</A>(std::auto_ptr&lt;Y&gt; &amp; r);
+
+      void <A href="#reset" >reset</A>();
+      template&lt;typename Y&gt; void <A href="#reset" >reset</A>(Y * p);
+      template&lt;typename Y, typename D&gt; void <A href="#reset" >reset</A>(Y * p, D d);
+
+      T &amp; <A href="#indirection" >operator*</A>() const; // never throws
+      T * <A href="#indirection" >operator-&gt;</A>() const; // never throws
+      T * <A href="#get" >get</A>() const; // never throws
+
+      bool <A href="#unique" >unique</A>() const; // never throws
+      long <A href="#use_count" >use_count</A>() const; // never throws
+
+      operator <a href="#conversions"><i>unspecified-bool-type</i></a>() const; // never throws
+
+      void <A href="#swap" >swap</A>(shared_ptr &amp; b); // never throws
+  };
+
+  template&lt;typename T, typename U&gt;
+    bool <A href="#comparison" >operator==</A>(shared_ptr&lt;T&gt; const &amp; a, shared_ptr&lt;U&gt; const &amp; b); // never throws
+  template&lt;typename T, typename U&gt;
+    bool <A href="#comparison" >operator!=</A>(shared_ptr&lt;T&gt; const &amp; a, shared_ptr&lt;U&gt; const &amp; b); // never throws
+  template&lt;typename T&gt;
+    bool <A href="#comparison" >operator&lt;</A>(shared_ptr&lt;T&gt; const &amp; a, shared_ptr&lt;T&gt; const &amp; b); // never throws
+
+  template&lt;typename T&gt; void <A href="#free-swap" >swap</A>(shared_ptr&lt;T&gt; &amp; a, shared_ptr&lt;T&gt; &amp; b); // never throws
+
+  template&lt;typename T&gt; T * <A href="#get_pointer" >get_pointer</A>(shared_ptr&lt;T&gt; const &amp; p); // never throws
+
+  template&lt;typename T, typename U&gt;
+    shared_ptr&lt;T&gt; <A href="#shared_static_cast" >shared_static_cast</A>(shared_ptr&lt;U&gt; const &amp; r); // never throws
+  template&lt;typename T, typename U&gt;
+    shared_ptr&lt;T&gt; <A href="#shared_dynamic_cast" >shared_dynamic_cast</A>(shared_ptr&lt;U&gt; const &amp; r);
+  template&lt;typename T, typename U&gt;
+    shared_ptr&lt;T&gt; <A href="#shared_polymorphic_cast" >shared_polymorphic_cast</A>(shared_ptr&lt;U&gt; const &amp; r);
+  template&lt;typename T, typename U&gt;
+    shared_ptr&lt;T&gt; <A href="#shared_polymorphic_downcast" >shared_polymorphic_downcast</A>(shared_ptr&lt;U&gt; const &amp; r); // never throws
+
+}</pre>
+
+		<!--
+		<p><EM>[It might be convenient to relax the requirements on <b>shared_ptr</b>'s 
+				signature, allowing an additional, defaulted, template parameter; the parameter 
+				can encode the threading model, for example. This would help in detecting 
+				possible ODR violations.</EM>
+		</p>
+		-->
+		<p><EM>
+			[<b>shared_ptr</b> のシグネチャに必要な条件を緩和し、
+			<!--意訳-->補足的なデフォルトのテンプレートパラメータ
+			(例えば、<!-- the parameter can encode the threading model --> スレッドモデルを変換可能なパラメータ<!>など<!>)
+			を使えるようにすることは、利便性<!--使いやすさ-->の向上に繋がるかも知れない。
+			これは、ODR違反の可能性を発見する一助になるだろう。
+			(訳注:ODR(One-Definition Rule) C++ のプログラム中のあらゆる要素の本体は、その要素が使われる全ての翻訳単位で同じ内容で定義されなくてはならないという規則
+			[<a href="../python/doc/v2/definitions.html">参考(boost::pythonのドキュメント)</a>]
+			) </EM>
+		</p>
+
+		<!--p><EM> On the other hand, using <b>shared_ptr</b> as an argument to a 
+				template template parameter requires an exact signature match. </EM><EM>Metaprogramming 
+				experts tend to deemphasize template template parameters as they are too 
+				inflexible, but the alternative is typically an std::allocator::rebind-type 
+				"hack".]</EM>
+		</p-->
+		<p><EM>
+			一方、<b>shared_ptr</b> を template テンプレートパラメータとして使うには、
+			シグネチャの正確な合致が必要となる。
+			</EM><EM>
+			メタプログラミングに精通している人は、template テンプレートパラメータを重要視しない。
+			柔軟性が低すぎるからである。
+			その代わり典型的に、 std::allocator::rebind-type を"<!--hack-->書き換える"。]</EM>
+		</p>
+
+		<h2><a name="Members">Members</a></h2>
+		<h3><a name="element_type">element_type</a></h3>
+		<pre>typedef T element_type;</pre>
+		<blockquote>
+			<!--p>Provides the type of the template parameter T. </p-->
+			<p>テンプレートパラメータ T の型を<!--高橋さんの訳では[与える]-->規定する</p>
+		</blockquote>
+		<h3><a name="constructors">コンストラクタ ( constructors )</a></h3>
+		<pre>shared_ptr();</pre>
+		<blockquote>
+			<!--p><b>Effects:</b> Constructs a <b>shared_ptr</b>. </p-->
+			<p><b>Effects:</b> <b>shared_ptr</b> を構築する。 </p>
+			<!--p><b>Postconditions:</b> <A href="#use_count">use count</A> is 1; the stored pointer is 0.  </p-->
+			<p><b>Postconditions:</b> <A href="#use_count">use count</A> は 1 ; 保持されるポインタは 0 。 </p>
+			<p><b>Throws:</b> <b>std::bad_alloc</b>.  </p>
+			<!--p><b>Exception safety:</b> If an exception is thrown, the constructor has no effect.  </p-->
+			<p><b>Exception safety:</b> 例外が発生すると、コンストラクタは何もしない。 </p>
+		</blockquote>
+		<!--
+		<p><EM>[The poscondition of use_count() == 1 is too strong. Having the nothrow 
+				guarantee is important, since <b>reset()</b> is specified in terms of 
+				the default constructor, but the current specification requires that a count be 
+				allocated. Therefore, this postcondition will be dropped in a future release. 
+				The use count of a default-constructed <b>shared_ptr</b>, including 
+				all copies created from it, will probably be left unspecified.</EM>
+		</p>
+		-->
+		<p><EM>
+				[use_count() == 1 という事後条件は<!--本当に 1 に成り得るか保証できない-->強すぎる。
+				<!--意訳-->
+				<b>reset()</b> の中でデフォルトコンストラクタが使われるため、例外を送出しない保証が重要である。
+				しかし、現在の仕様では<!--count-->参照カウンタ<!>の割り当てが必要となっているため、
+				例外を送出しないことが保証されなくなっている。
+				そのため、この事後条件は将来のリリースで<!--will be dropped : 撤廃-->撤廃されるだろう<!>。
+				デフォルトコンストラクタにより構築された <b>shared_ptr</b> (とそこから作られた全てのコピー)の参照カウンタは、
+				おそらく未定義になるだろう。
+				</EM>
+		</p>
+
+		<!--
+		<p><EM>There are two possible nothrow implementations, one stores 0 as a pointer to the 
+				reference count, the other uses a single statically allocated count for all 
+				default-constructed <b>shared_ptr</b>s. The second option is 
+				difficult to achieve in the current header-only reference implementation due to 
+				thread safety issues and initialization order, but it should not be precluded 
+				by the specification.</EM>
+		</p>
+		-->
+		<p><EM>
+				例外を送出しないことを保証するには、二つの実装が考えられる。
+				一つは、参照カウンタへのポインタとして0を保持する方法、
+				もう一つは、デフォルトコンストラクタによって構築される全ての <b>shared_ptr</b>
+				に対して、静的に割り当てられた唯一<!--Singleton-->の参照カウンタを利用する方法である。
+				後者の方法は、スレッドセーフの問題と初期化の順序の問題のために、現在のヘッダのみの参照実装では実現が困難であるが
+				 <!-- but it should not be precluded by the specification.-->
+				仕様の為に実装方法が制限されるべきではない。</EM>
+		</p>
+
+		<!--
+		<p><EM>A future release may enable <b>shared_ptr</b> construction from a 
+				literal zero, for consistency with built-in pointers. It is not clear yet 
+				whether this constructor should be left implicit, enabling <b>0</b> to 
+				be used as a shorthand for <b>shared_ptr&lt;T&gt;().</b>]</EM>
+		</p>
+		-->
+		<p><EM>
+			将来のリリースでは、<!--built-in-->組み込みポインタとの一貫性<!--親和性、整合性-->を高めるため、
+				<!--literal 0 : 完全な0(クラスサイズ0)のことかと思ったが、次の文を読むと
+				「ソースコード中の数字の0」の事を指しているようだ-->
+				<b>shared_ptr</b> を数字の 0 から構築できるようになるかもしれない。
+				今後、<b>0</b> を <b>shared_ptr&lt;T&gt;()</b> の略記として使うことを可能にする、このコンストラクタが、<!--implicit-->潜在化されたままにされるかどうかは明かではない。</EM>
+		</p>
+
+		<pre>template&lt;typename Y&gt; explicit shared_ptr(Y * p);</pre>
+		<blockquote>
+			<!--
+			<p><b>Requirements:</b> <b>p</b> must be convertible to <b>T *</b>. <b>Y</b>
+				must be a complete type. The expression <code>delete p</code> must be 
+				well-formed, must not invoke undefined behavior, and must not throw exceptions.
+			</p>
+			-->
+			<p><b>Requirements:</b>
+			<b>p</b> は <b>T *</b> に変換可能でなくてはならない。
+				<b>Y</b> は完全な型でなくてはならない。
+				<code>delete p</code> の式が文法的に正しくなければならない; 未定義の振る舞いをしてはならない; 
+				例外を送出してはならない。
+			</p>
+
+			<!--p><b>Effects:</b> Constructs a <b>shared_ptr</b>, storing a copy of <b>p</b>.  </p-->
+			<p><b>Effects:</b> <b>shared_ptr</b> を構築し、<b>p</b> のコピーを保持する。  </p>
+			<!--p><b>Postconditions:</b> <A href="#use_count">use count</A> is 1.  </p-->
+			<p><b>Postconditions:</b> <A href="#use_count">use count</A> は 1 。  </p>
+			<p><b>Throws:</b> <b>std::bad_alloc</b>.  </p>
+			<!--p><b>Exception safety:</b> If an exception is thrown, <code>delete p</code> is called.  </p-->
+			<p><b>Exception safety:</b> 例外が発生すると、<code>delete p</code> を<!--実行する、処理する-->呼び出す。  </p>
+			<!--
+			<p><b>Notes:</b> <B>p</B> must be a pointer to an object that was 
+				allocated via a C++ <B>new</B> expression or be 0. The postcondition that <A href="#use_count">
+					use count</A> is 1 holds even if <b>p</b> is 0; invoking <b>delete</b>
+				on a pointer that has a value of 0 is harmless.
+			</p>
+			-->
+			<p><b>Notes:</b> <B>p</B> はC++の <b>new</b> によって割り当てられたオブジェクトへのポインタか、
+				0でなくてはならない。
+				事後条件の <A href="#use_count">use count</A> が 1 というのは、
+				<b>p</b> が0の時でも同様である( 値が0のポインタに対する <b>delete</b> 呼び出しが安全であるため )。
+			</p>
+
+		</blockquote>
+		<!--
+		<p><EM>[This constructor has been changed to a template in order to remember the actual 
+				pointer type passed. The destructor will call <b>delete</b> with the 
+				same pointer, complete with its original type, even when <b>T</b> does 
+				not have a virtual destructor, or is <b>void</b>.</EM>
+		</p>
+		-->
+		<p><EM>[
+			このコンストラクタは、実際に渡されたポインタの型を記憶するためにテンプレートに変更された。
+			デストラクタは同じポインタについて、<!--original 「本来の」としたが、意味が強すぎるだろうか; 実際には、明示的に型キャストされたポインタを受け取った場合など、本来の型で delete されない状況も少なからず存在する -->本来の<!>型で <b>delete</b> を呼び出す。
+			よって、<b>T</b> が仮想デストラクタを持っていなくても、あるいは void であっても、本来の型で delete される。
+				</EM>
+		</p>
+
+		<!--
+		<p><EM>In the current implementation, if <b>p</b> is convertible to <b>counted_base 
+					*</b>, <b>shared_ptr</b> will use the embedded reference 
+				count supplied by <b>counted_base</b>. This is an (experimental) 
+				attempt to provide a way for <b>shared_ptr</b> to be constructed from 
+				a raw pointer such as <b>this</b>. A free function <b>shared_from_this(q)</b>
+				performs the conversion when <b>q</b> is convertible to <b>counted_base 
+					const *</b>.</EM>
+		</p>
+		-->
+		<p><EM>
+			現在の実装では、<b>p</b> が <b>counted_base *</b> 
+			に変換可能なとき、 <b>shared_ptr</b> は <b>counted_base</b> に埋め込まれた参照カウントを使う。
+			これは、<b>shared_ptr</b> を <b>this</b> のような生のポインタから構築する方法を提供する(実験的な)試みである。
+			<!-- free function -->非メンバ関数 <b>shared_from_this(q)</b> は、
+			<b>q</b> が <b>counted_base const *</b> へ変換可能なとき、その変換を行う。</EM>
+		</p>
+
+		<!--
+		<p><EM>The optional intrusive counting employed by the current implementation allows <b>
+					shared_ptr</b> to interoperate with <b>intrusive_ptr</b>, an 
+				experimental generic intrusive-counted smart pointer.</EM>
+		</p>
+		-->
+		<p><EM>
+			現在の実装で用意されている<!--optional : 上手く当てはまる日本語が見付からない-->随意選択可能な<!>割り込みカウントは、
+			<b>shared_ptr</b> を <b>intrusive_ptr</b> (割り込みカウント方式の実験的な汎用スマートポインタ)と一緒に利用できるようにしている。</EM>
+		</p>
+
+		<!--
+		<p><EM> Another possible implementation is to use a global pointer-to-count map instead 
+				of intrusive counting. <b>shared_from_this</b> would no longer be 
+				O(1), which is a concern for some users, although I do not expect any 
+				performance problems, since the operation is rare. Maintaining a global 
+				map is difficult; it needs to be initialized before any <b>shared_ptr</b>
+				instances are constructed, and the initialization needs to be thread safe. 
+				In addition, under the Windows dynamic library model, it is possible for 
+				several maps to exist.</EM>
+		</p>
+		-->
+		<p><EM>
+			別のの実装の可能性としては、
+			割り込みカウントではなくグローバルのポインタカウントマップを使う方法が考えられる。
+			その場合、<b>shared_from_this</b> の処理時間は O(1)  ではなくなる。
+			これは一部のユーザに影響を与えるが、この処理が行われることは希なため、パフォーマンスの問題は予想していない。
+			グローバルのポインタカウントマップを管理するのは困難である; ポインタカウントマップは <b>shared_ptr</b> のインスタンスが構築される前に初期化されている必要があり、初期化はスレッドセーフに行われなければならない。
+			Windows の動的ライブラリの形態に従えば、幾つかのカウントマップを存在させることができる。 </EM>
+		</p>
+
+		<!--
+		<p><EM> It is not yet clear which implementation should be used, or whether the 
+				specification should allow both; nevertheless, the ability to make a <b>shared_ptr</b>
+				from <b>this</b> is considered essential by experienced smart 
+				pointer users.</EM><EM>]</EM>
+		</p>
+		-->
+		<p><EM>
+			どの実装が使われるべきか、または仕様でその両方を許容するかどうかは、まだ明かではない。
+			とは言え、スマートポインタを幅広く利用するプログラマにとって、 <b>shared_ptr</b> を <b>this</b> から構築できることは必要不可欠である。<!--consideredの意は省略-->
+				]</EM>
+		</p>
+
+		<pre>template&lt;typename Y, typename D&gt; shared_ptr(Y * p, D d);</pre>
+		<blockquote>
+			<!--
+			<p><b>Requirements:</b> <B>p</B> must be convertible to <B>T *</B>. <b>D</b>
+				must be <b>CopyConstructible</b>. The copy constructor and destructor 
+				of <b>D</b> must not throw. The expression <code>d(p)</code> must be 
+				well-formed, must not invoke undefined behavior, and must not throw exceptions.
+			</p>
+			-->
+			<p><b>Requirements:</b> <B>p</B> は <B>T *</B> に変換可能でなくてはならない。
+			<b>D</b> は <b>CopyConstructible</b> (コピーコンストラクト可能)でなくてはならない。
+			<b>D</b> のコピーコンストラクタとデストラクタは例外を送出してはならない。
+			<code>d(p)</code> の式が文法的に正しくなければならない; 未定義の振る舞いをしてはならない; 例外を送出してはならない。
+			</p>
+
+			<!--
+			<p><b>Effects:</b> Constructs a <b>shared_ptr</b>, storing a copy of <b>p</b> and <b>d</b>. </p>
+			-->
+			<p><b>Effects:</b> <b>shared_ptr</b> を構築し、<b>p</b> と <b>d</b> のコピーを保持する。(訳注: <b>d</b> は <b>p</b> の deallocator (削除子)になる) </p>
+			<!--p><b>Postconditions:</b> <A href="#use_count">use count</A> is 1. </p-->
+			<p><b>Postconditions:</b> <A href="#use_count">use count</A> は 1 。 </p>
+			<!--p><b>Throws:</b> <b>std::bad_alloc</b>. </p-->
+			<p><b>Throws:</b> <b>std::bad_alloc</b> </p>
+			<!--p><b>Exception safety:</b> If an exception is thrown, <code>d(p)</code> is called. </p-->
+			<p><b>Exception safety:</b> 例外が発生すると、<code>d(p)</code> を呼び出す。 </p>
+			<!--
+			<p><b>Notes:</b> When the the time comes to delete the object pointed to by <b>p</b>, 
+				the stored copy of <b>d</b> is invoked with the stored copy of <b>p</b>
+				as an argument.
+			</p>
+			-->
+			<p><b>Notes:</b>
+			<b>p</b> に指されているオブジェクトを削除する時になると、 
+			保持されている <b>p</b> のコピーを1引数として、保持されている <b>d</b> (のコピー)が実行される。
+			</p>
+		</blockquote>
+
+		<!--
+		<p><EM>[Custom deallocators allow a factory function returning a <b>shared_ptr</b>
+				to insulate the user from its memory allocation strategy. Since the deallocator 
+				is not part of the type, changing the allocation strategy does not break source 
+				or binary compatibility, and does not require a client recompilation. For 
+				example, a "no-op" deallocator is useful when returning a <b>shared_ptr</b>
+				to a statically allocated object.</EM>
+		</p>
+		-->
+		<p><EM>[
+			<!--Custom deallocators-->カスタム削除子は、<b>shared_ptr</b> を返すファクトリ関数を利用可能にし、
+			メモリ割り当ての<!--strategyr : 単純に「戦略」とした方がわかりやすいだろうか-->方策をユーザから切り離す。
+			削除子は<!--part of the type-->型の属性<!>ではないので、
+			バイナリの互換性やソースを破壊せずに変更することができ、使用する側の再コンパイルを必要としない。
+			例えば、静的に割り当てられたオブジェクトを指す<b>shared_ptr</b>を返すには、"何もしない(no-op)" 削除子が有効である。</EM>
+		</p>
+
+		<!--
+		<p><EM>The support for custom deallocators does not impose significant overhead. Other <b>
+					shared_ptr</b> features still require a deallocator to be kept.</EM>
+		</p>
+		-->
+		<p><EM>
+			カスタム削除子のサポートは大きなオーバーヘッドを生じない。
+			<b>shared_ptr</b> の他の特徴も削除子が保持されることを必要としている。
+			</EM>
+		</p>
+
+		<!--
+		<p><EM>The requirement that the copy constructor of <b>D</b> does not throw comes from 
+				the pass by value. If the copy constructor throws, the pointer is leaked. 
+				Removing the requirement requires a pass by (const) reference. The problems are 
+				that (1) pass by value conveniently changes functions (function references) to 
+				function pointers (this has to be performed manually otherwise and some 
+				compilers may not be able to do it) and (2) const references don't currently 
+				(per the standard) bind to functions. This can be solved (I think) but it 
+				requires an overload set that breaks on many compilers due to 14.5.5.2 problems 
+				(and of course it will break on compilers that don't do partial ordering at 
+				all.)</EM>
+		</p>
+		-->
+		<p><EM>
+			<!-- <b>d</b> が値渡しされるため、<b>D</b> のコピーコンストラクタが
+			例外を送出しないという必要条件がある。-->
+			<b>D</b> のコピーコンストラクタが例外を送出しないと言う条件は、
+			値渡しのために設定されている。
+			もし、このコピーコンストラクタが例外を送出すると、ポインタ <b>p</b> が指すメモリがリークする。
+			この条件を取り除くためには、<b>d</b> を(コンストの)参照渡しにする必要がある。
+			参照渡しには幾つかの<!--problem-->短所がある;
+			<!--
+				(1) pass by value conveniently changes functions (function references) to 
+				function pointers (this has to be performed manually otherwise and some 
+				compilers may not be able to do it) 
+			-->
+			(1) 値渡しならば、関数(関数への参照)を関数ポインタ(幾つかのコンパイラではできないかもしれないが、手動で実行できる必要がある)に変更するのが容易である。
+			<!--
+				(2) const references don't currently (per the standard) bind to functions.
+			-->
+			(2) 現在のところ、(標準に従えば)コンスト参照を関数に結びつけることはできない。
+			オーバーロード関数群を備えることでこれらの制限を克服できるのだが、幾つかのコンパイラに存在する14.5.5.2 問題
+			のために実現できない。
+			14.5.5.2 問題とは、部分整列をサポートしていないコンパイラで、特殊化されたテンプレート関数がコンパイルできないというものである。
+			(訳注: &quot;部分整列&quot; : テンプレート関数の特殊化の度合いによる利用優先順位付け)
+			</EM>
+		</p>
+
+		<!--p><EM>The requrement will be removed when the aforementioned issues are 
+				resolved.]</EM>
+		</p-->
+		<p><EM>前述された問題が解決されれば、これらの条件も取り除かれるだろう。] </EM>
+		</p>
+
+		<pre>shared_ptr(shared_ptr const &amp; r); // never throws
+template&lt;typename Y&gt; shared_ptr(shared_ptr&lt;Y&gt; const &amp; r); // never throws</pre>
+		<blockquote>
+			<!--p><b>Effects:</b> Constructs a <b>shared_ptr</b>, as if by storing a copy of the 
+				pointer stored in <b>r</b>. </p-->
+				<p><b>Effects:</b> <b>shared_ptr</b> を構築し、<b>r</b> が保持するポインタのコピーを保持したかのように作用する。 </p>
+
+			<!--p><b>Postconditions:</b> <A href="#use_count">use count</A> for all copies is 
+				increased by one.  </p-->
+			<p><b>Postconditions:</b> 全てのコピーの <A href="#use_count">use count</A> は 1 増加する。 </p>
+
+			<!--p><b>Throws:</b> nothing. </p-->
+			<p><b>Throws:</b> 無し。 </p>
+		</blockquote>
+
+		<!--p><!EM>[The postcondition will be relaxed when a default-constructed <b>shared_ptr</b>
+				is being copied.]</EM> </p-->
+			<p><EM>[デフォルトコンストラクタにより構築された <b>shared_ptr</b> は、コピーされると事後条件が緩和される。
+				]</EM> </p>
+
+
+		<pre>template&lt;typename Y&gt; explicit shared_ptr(<A href="weak_ptr.htm">weak_ptr</A>&lt;Y&gt; const &amp; r);</pre>
+		<blockquote>
+			<!--p><b>Effects:</b> Constructs a <b>shared_ptr</b>, as if by storing a copy of the 
+				pointer stored in <b>r</b>. </p-->
+				<p><b>Effects:</b> <b>shared_ptr</b> を構築し、<b>r</b> が管理するポインタのコピーを保持したかのように作用する。 </p>
+
+			<!--p><b>Postconditions:</b> <A href="#use_count">use count</A> for all copies is increased by one.  </p-->
+			<p><b>Postconditions:</b> 全てのコピーの <A href="#use_count">use count</A> は 1 増加する。
+			<!--p><b>Throws:</b> <b>use_count_is_zero</b> when <code>r.use_count() == 0</code>. </p-->
+			<p><b>Throws:</b> <code>r.use_count() == 0</code> の時、<b>use_count_is_zero</b> を送出する。 </p>
+			<!--p><b>Exception safety:</b> If an exception is thrown, the constructor has no </p-->
+			<p><b>Exception safety:</b> 例外が発生すると、コンストラクタは何もしない。 </p>
+		</blockquote>
+
+		<!--p><EM>[This constructor is an optional part of the specification; it depends on the 
+				existence of <b>weak_ptr</b>. It is true that <b>weak_ptr</b>
+				support imposes overhead on every <b>shared_ptr</b> user, regardless 
+				of whether weak pointers are used.</EM>
+		</p-->
+		<p><EM>
+			[このコンストラクタは仕様の選択的な部分に位置する; <b>weak_ptr</b> の存在に依存する。
+			<!--<b>weak_ptr</b> のサポートが <b>shared_ptr</b> にオーバーヘッドを生じさせ、<b>weak_ptr</b> が使用されているかどうかを監視していないことは事実である。-->
+			<b>weak_ptr</b> が使用されているかどうかに無頓着なユーザにとって、
+			<b>weak_ptr</b> のサポートが <b>shared_ptr</b> にオーバーヘッドを生じさせているのは事実である。
+		</EM>
+		</p>
+
+		<!--
+		<p><EM> On the other hand, cyclic references are a serious problem with all reference 
+				counted designs. Not providing a solution within the library is unacceptable; 
+				if users are forced to reinvent the weak pointer wheel, there is substantial 
+				probability that they will get it wrong, as designing a safe <b>weak_ptr</b>
+				interface is non-trivial.</EM>
+		</p>
+		-->
+		<p><EM>
+				一方、全ての参照カウントにとって、循環参照は深刻な問題である。
+				ライブラリ内で解決方法が提供されないのは許容できない;
+				もしユーザがウィークポインタ機構の再開発をせざるを得なくなった場合、
+				安全な <b>weak_ptr</b> の設計は簡単なことではなく、悪い結果をもたらす確率は相当大きい。
+				</EM>
+		</p>
+
+
+		<!--p><EM>My opinion is that the added functionality is worth the cost. <b>weak_ptr</b>
+				is provided in the reference implementation as a proof of concept.]</EM>
+		</p-->
+		<p><EM>
+				機能の追加には努力を払う価値があるというのが私の意見である。
+				その証拠として、この参照の実装にて <b>weak_ptr</b> が提供されている。]
+			</EM>
+		</p>
+
+
+
+		<pre>template&lt;typename Y&gt; shared_ptr(std::auto_ptr&lt;Y&gt; &amp; r);</pre>
+		<BLOCKQUOTE>
+			<!--p><B>Effects:</B> Constructs a <B>shared_ptr</B>, as if by storing a copy of <b>r.release()</b>. </p-->
+				<p><b>Effects:</b> <b>shared_ptr</b> を構築し、<b>r.release()</b> のコピーを保持したかのように作用する。 </p>
+			<!--p><B>Postconditions:</B> <A href="#use_count">use count</A> is 1. </p-->
+			<p><B>Postconditions:</B> <A href="#use_count">use count</A> は 1 。 </p>
+			<p><B>Throws:</B> <B>std::bad_alloc</B> </p>
+			<!--p><B>Exception safety:</B> If an exception is thrown, the constructor has no effect. </p-->
+			<p><b>Exception safety:</b> 例外が発生すると、コンストラクタは何もしない。 </p>
+
+		</BLOCKQUOTE>
+		<!--p><EM>[This constructor takes a the source <b>auto_ptr</b> by reference and 
+				not by value, and cannot accept <b>auto_ptr</b> temporaries. This is 
+				by design, as the constructor offers the strong guarantee.]</EM>
+		</p-->
+		<p><EM>[
+				このコンストラクタは <b>auto_ptr</b> を値渡しでなく参照で受け取り、
+				<!--temporary-->一時的な <b>auto_ptr</b> を受け取らない。
+				これは、このコンストラクタが強力な保証を提供する設計にするためである。
+				]</EM>
+		</p>
+
+		<h3><a name="destructor">デストラクタ ( destructor )</a></h3>
+		<pre>~shared_ptr(); // never throws</pre>
+		<BLOCKQUOTE>
+			<!--p><B>Effects:</B> If <b>*this</b> is the sole owner (<code>use_count() == 1</code>), 
+				destroys the object pointed to by the stored pointer. </p-->
+				<p><B>Effects:</B> もし <b>*this</b> が唯一の所有者であるとき
+				(<code>use_count() == 1</code>)、保持しているポインタが指すオブジェクトを破棄する。 </p>
+
+			<!--p><B>Postconditions:</B> <A href="#use_count">use count</A> for all remaining 
+				copies is decreased by one.  </p-->
+			<p><b>Postconditions:</b> 残存する全てのコピーの <A href="#use_count">use count</A> が 1 減少する。 </p>
+			<p><B>Throws:</B> なし。
+		</p>
+		</BLOCKQUOTE>
+
+		<H3><a name="assignment">代入 ( assignment )</a></H3>
+		<pre>shared_ptr &amp; operator=(shared_ptr const &amp; r); // never throws
+template&lt;typename Y&gt; shared_ptr &amp; operator=(shared_ptr&lt;Y&gt; const &amp; r); // never throws
+template&lt;typename Y&gt; shared_ptr &amp; operator=(std::auto_ptr&lt;Y&gt; &amp; r);</pre>
+
+		<BLOCKQUOTE>
+			<!--p><B>Effects:</B> Equivalent to <code>shared_ptr(r).swap(*this)</code>. </p-->
+			<p><B>Effects:</B> <code>shared_ptr(r).swap(*this)</code> と等価。 </p>
+
+			<!--p><B>Notes:</B> The use count updates caused by the temporary object construction 
+				and destruction are not considered observable side effects, and the 
+				implementation is free to meet the effects (and the implied guarantees) via 
+				different means, without creating a temporary. In particular, in the example:
+			</p-->
+			<p><B>Notes:</B>
+				一時的な<!--object-->スマートポインタ<!>の構築と破棄による参照カウントの更新は未知の副作用を生じる可能性がある。
+				この実装は、一時的なオブジェクトを<!--creating-->構築<!>しない方法を採ることによって、
+				保証された<!--effects: おそらくEffects:の項の効果を指す-->作用<!>を得られる。
+				特に、この様な例では:
+			</p>
+
+			<pre>
+shared_ptr&lt;int&gt; p(new int);
+shared_ptr&lt;void&gt; q(p);
+p = p;
+q = p;
+</pre>
+			<!--p>both assignments may be no-ops. </p-->
+			<p>いずれの代入文も、何も作用しない(no-op)だろう。</p>
+		</BLOCKQUOTE>
+
+		<!--
+		<p><EM>[Some experts consider the note to be redundant, as it appears to essentially 
+				mirror the "as if" rile. However, experience suggests that when C++ code is 
+				used to describe effects, it is often misinterpreted as required 
+				implementation. In addition, it is not entirely clear whether the "as if" rule 
+				actually applies here, so it's better to be explicit about the possible 
+				optimizations.]</EM>
+		</p>
+		-->
+		<p><!EM>[
+				<!--Some experts consider the note to be redundant, as it appears to essentially mirror the "as if" rile.-->
+				<!-- この rile は rule の誤植だろう -->
+				<!-- "as if" rule : http://ou800doc.caldera.com/SDK_cprog/_The_As_If_Rule.html -->
+				<!-- http://docs-pdf.sun.com/816-4918/816-4918.pdf の PDF の 178 ページに上サイトの日本語訳がある -->
+				一部の<!--expert-->上級者は、この &quot;as if&quot; 規則(訳注: 演算子の再配置規則)をそのまま
+				表現したような注意書きをくどいと感じるだろう。
+				しかし、作用の説明に C++ のコードを用いられるとき、
+				しばしばそれが必要な実装であるかのように誤って解釈されてしまうことがあると、
+				経験的に示唆されている。
+				さらに付け加えると、この部分で &quot;as if&quot; 規則が適用されるかどうかは全くわからないが、
+				可能な最適化について明示しておくことは好ましいと思われる。
+				]</EM>
+		</p>
+
+		<h3><a name="reset">リセット ( reset )</a></h3>
+		<pre>void reset();</pre>
+		<BLOCKQUOTE>
+			<!--p><B>Effects:</B> Equivalent to <code>shared_ptr().swap(*this)</code>. </p-->
+			<p><B>Effects:</B> <code>shared_ptr().swap(*this)</code> と等価。 </p>
+		</BLOCKQUOTE>
+		<!--p><EM>[<b>reset()</b> will offer the nothrow guarantee in a future 
+				implementation.]</EM></p-->
+		<p><EM>[<b>reset()</b> は将来の実装で、例外を送出しない(nothrow)保証を提供するだろう。]</EM></p>
+
+		<pre>template&lt;typename Y&gt; void reset(Y * p);</pre>
+		<BLOCKQUOTE>
+			<!--p><B>Effects:</B> Equivalent to <code>shared_ptr(p).swap(*this)</code>. </p-->
+			<p><B>Effects:</B> <code>shared_ptr(p).swap(*this)</code> と等価。 </p>
+		</BLOCKQUOTE>
+		<pre>template&lt;typename Y, typename D&gt; void reset(Y * p, D d);</pre>
+		<BLOCKQUOTE>
+			<!--p><B>Effects:</B> Equivalent to <code>shared_ptr(p, d).swap(*this)</code>. </p-->
+			<p><B>Effects:</B> <code>shared_ptr(p, d).swap(*this)</code> と等価。 </p>
+		</BLOCKQUOTE>
+
+		<h3><a name="indirection">ポインタ偽装 ( indirection )</a></h3>
+		<pre>T &amp; operator*() const; // never throws</pre>
+		<blockquote>
+			<!--p><b>Requirements:</b> The stored pointer must not be 0. </p-->
+			<p><b>Requirements:</b> 保持されているポインタが 0 でないこと。 </p>
+			<!--p><b>Returns:</b> a reference to the object pointed to by the stored pointer. </p-->
+			<p><b>Returns:</b> 保持されているポインタが指すオブジェクトの参照。 </p>
+			<!--p><b>Throws:</b> nothing. </p-->
+			<p><b>Throws:</b> 無し。</p>
+		</blockquote>
+
+		<pre>T * operator-&gt;() const; // never throws</pre>
+		<blockquote>
+			<!--p><b>Requirements:</b> The stored pointer must not be 0. </p-->
+			<p><b>Requirements:</b> 保持されているポインタが 0 でないこと。 </p>
+			<!--p><b>Returns:</b> the stored pointer. </p-->
+			<p><b>Returns:</b> 保持されているポインタ。 </p>
+			<!--p><b>Throws:</b> nothing. </p-->
+			<p><b>Throws:</b> 無し。 </p>
+		</blockquote>
+
+		<h3><a name="get">ポインタの取得 ( get )</a></h3>
+		<pre>T * get() const; // never throws</pre>
+		<blockquote>
+			<!--p><b>Returns:</b> the stored pointer. </p-->
+			<p><b>Returns:</b> 保持されているポインタ。 </p>
+			<!--p><b>Throws:</b> nothing. </p-->
+			<p><b>Throws:</b> 無し。 </p>
+		</blockquote>
+
+		<h3><a name="unique">一意性 ( unique )</a></h3>
+		<pre>bool unique() const; // never throws</pre>
+		<blockquote>
+			<!--p><b>Returns:</b> <code>use_count() == 1</code>. </p-->
+			<p><b>Returns:</b> <code>use_count() == 1</code>. </p>
+			<!--p><b>Throws:</b> nothing. </p-->
+			<p><b>Throws:</b> 無し。 </p>
+			<!--
+			<p><B>Notes:</B> <code>unique()</code> may be faster than <code>use_count()</code>. 
+				If you are using <code>unique()</code> to implement copy on write, do not rely 
+				on a specific value when the stored pointer is zero.
+			</p>
+			-->
+			<p><B>Notes:</B>
+				<code>unique()</code> は恐らく <code>use_count()</code> よりも速い。 
+				だが、もし <code>unique()</code> を使って書き込み時コピー(copy on write)を実装しようとしているなら、
+				保持されているポインタが 0 の時は <b>unique()</b> の値を当てにしてはならない。
+			</p>
+
+		</blockquote>
+		<!--p><EM>[In a future release, <b>unique()</b> will return an unspecified value 
+				for a default-constructed <b>shared_ptr.</b>]</EM></p-->
+			<p><EM>[将来のリリースでは、デフォルトコンストラクタで構築された <b>shared_ptr</b> に対し、<b>unique()</b>
+				は不定の値を返すようになるだろう。]</EM></p>
+			<h3><a name="use_count">参照カウント ( use_count )</a></h3>
+		<pre>long use_count() const; // never throws</pre>
+		<blockquote>
+			<!--p><b>Returns:</b> the number of <b>shared_ptr</b> objects sharing ownership of the stored pointer. </p-->
+			<p><b>Returns:</b> 保持しているポインタを共有している <b>shared_ptr</b> オブジェクトの数。 </p>
+			<!--p><b>Throws:</b> nothing. </p-->
+			<p><b>Throws:</b> 無し。 </p>
+			<!--p><B>Notes:</B> <code>use_count()</code> is not necessarily efficient. Use only 
+				for debugging and testing purposes, not for production code. </p-->
+			<p><B>Notes:</B> <code>use_count()</code> は必ずしも必要なものではない。
+				デバッグや試験の為にだけ使用するべきで、製品のコードに使用するべきでない。</p>
+		</blockquote>
+		<h3><a name="conversions">変換 ( conversions )</a></h3>
+		<pre>operator <i>unspecified-bool-type</i> () const; // never throws</pre>
+		<blockquote>
+			<!--p><b>Returns:</b> an unspecified value that, when used in boolean contexts, 
+				is equivalent to <code>get() != 0</code>. </p-->
+				<p><b>Returns:</b> <b>shared_ptr</b> が<!--boolean context-->ブール式<!>として使用されたときに、
+				<code>get() != 0</code> と等価な明示的ではない値を返す。 </p>
+			<!--p><b>Throws:</b> nothing. </p-->
+			<p><b>Throws:</b> 無し。 </p>
+			<!--
+			<p><B>Notes:</B> This conversion operator allows <b>shared_ptr</b> objects to be 
+				used in boolean contexts, like <code>if (p &amp;&amp; p-&gt;valid()) {}</code>. 
+				The actual target type is typically a pointer to a member function, avoiding 
+				many of the implicit conversion pitfalls.
+			</p>
+			-->
+			<p><B>Notes:</B>
+				この変換演算子は <b>shared_ptr</b> オブジェクトを、
+				<code>if (p &amp;&amp; p-&gt;valid()) {}</code> のようなブール式の中で使えるようにするためのものである。
+				実際に対象となる型はメンバ関数へのポインタなどであり、
+				暗黙の型変換の落とし穴を回避するために用いる。
+			</p>
+		</blockquote>
+
+		<!--p><EM>[The conversion to bool is not merely syntactic sugar. It allows <b>shared_ptr</b>s 
+				to be declared in conditions when using <b>shared_dynamic_cast </b>or <b>
+					make_shared</b>.]</EM></p-->
+			<p><EM>[
+				このブールへの変換は単にコードをスマートにする物(syntactic sugar : 構文糖)というわけではない。
+				この変換により <b>shared_dynamic_cast</b> や <b>make_shared</b> を使用するときに、
+				<b>shared_ptr</b> を条件式として<!--declare-->利用<!>することができる。]</EM>
+			</p>
+
+		<h3><a name="swap">交換 ( swap )</a></h3>
+		<pre>void swap(shared_ptr &amp; b); // never throws</pre>
+		<blockquote>
+			<!--p><b>Effects:</b> Exchanges the contents of the two smart pointers. </p-->
+			<p><b>Effects:</b> 二つのスマートポインタの中身を交換する。 </p>
+			<!--p><b>Throws:</b> nothing. </p-->
+			<p><b>Throws:</b> 無し。 </p>
+		</blockquote>
+		<h2><a name="functions">Free Functions</a></h2>
+		<h3><a name="comparison">比較 ( comparison )</a></h3>
+		<pre>template&lt;typename T, typename U&gt;
+  bool operator==(shared_ptr&lt;T&gt; const &amp; a, shared_ptr&lt;U&gt; const &amp; b); // never throws</pre>
+		<blockquote>
+			<p><b>Returns:</b> <code>a.get() == b.get()</code> </p>
+			<!--p><b>Throws:</b> nothing. </p-->
+			<p><b>Throws:</b> 無し。 </p>
+		</blockquote>
+		<pre>template&lt;typename T, typename U&gt;
+  bool operator!=(shared_ptr&lt;T&gt; const &amp; a, shared_ptr&lt;U&gt; const &amp; b); // never throws</pre>
+		<blockquote>
+			<p><b>Returns:</b> <code>a.get() != b.get()</code> </p>
+			<!--p><b>Throws:</b> nothing. </p-->
+			<p><b>Throws:</b> 無し。 </p>
+		</blockquote>
+		<pre>template&lt;typename T&gt;
+  bool operator&lt;(shared_ptr&lt;T&gt; const &amp; a, shared_ptr&lt;T&gt; const &amp; b); // never throws</pre>
+		<blockquote>
+			<!--p><b>Returns:</b> an unspecified value such that <b>operator&lt;</b> is a 
+				strict weak ordering as described in section 25.3 <code>[lib.alg.sorting]</code>
+				of the C++ standard.
+			</p-->
+			<p><b>Returns:</b> <b>operator&lt;</b> は、C++ 標準の <code>[lib.alg.sorting]</code> の 25.3 章で説明されている、
+				完全な弱い順序づけのための明示的ではない値を返す。
+			</p>
+			<!--p><b>Throws:</b> nothing. </p-->
+			<p><b>Throws:</b> 無し。 </p>
+			<!--p><B>Notes:</B> Allows <b>shared_ptr</b> objects to be used as keys in associative containers.  </p-->
+			<p><B>Notes:</B> <b>shared_ptr</b> オブジェクトを連想コンテナのキーとして使えるようにするための演算子。</p>
+		</blockquote>
+		<!--
+		<p><EM>[<b>Operator&lt;</b> has been preferred over a <b>std::less </b>
+				specialization for consistency and legality reasons, as <b>std::less</b>
+				is required to return the results of <b>operator&lt;</b>, and many 
+				standard algorithms use <b>operator&lt;</b> instead of <b>std::less</b>
+				for comparisons when a predicate is not supplied. Composite objects, like <b>std::pair</b>, 
+				also implement their <b>operator&lt;</b> in terms of their contained 
+				subobjects' <b>operator&lt;</b>.</EM>
+		</p>
+		-->
+		<p><EM>[
+				一貫性と適合性の理由から、 <b>std::less</b> の特殊化版よりも、
+				<b>operator&lt;</b> の方が好まれて使われている。
+				<b>std::less</b> は <b>operator&lt;</b> の結果を返すことを必要とされ、
+				他の幾つかの標準アルゴリズムも、属性が提供されないとき、比較のために
+				<b>std::less</b> ではなく <b>operator&lt;</b> を使う。
+				<b>std::pair</b> のような複合オブジェクトの <b>operator&lt;</b> もまた、
+				収容している子オブジェクトの <b>operator&lt;</b> に基づいて実装されている。 </EM>
+		</p>
+
+		<!--p><EM>The rest of the comparison operators are omitted by design.]</EM></p-->
+		<p><EM>比較演算子の<!--rest ???-->安全の確保は、設計によって省略された。]</EM></p>
+
+		<h3><a name="free-swap">交換 ( swap )</a></h3>
+		<pre>template&lt;typename T&gt;
+  void swap(shared_ptr&lt;T&gt; &amp; a, shared_ptr&lt;T&gt; &amp; b); // never throws</pre>
+		<BLOCKQUOTE>
+			<!--p><B>Effects:</B> Equivalent to <code>a.swap(b)</code>. </p-->
+			<p><B>Effects:</B> <code>a.swap(b)</code> と等価。 </p>
+			<!--p><b>Throws:</b> nothing. </p-->
+			<p><b>Throws:</b> 無し。 </p>
+			<!--p><B>Notes:</B> Matches the interface of <B>std::swap</B>. Provided as an aid to generic programming. </p-->
+			<p><B>Notes:</B> <B>std::swap</B> のインターフェースとの一貫性を図り、
+				ジェネリックプログラミングを支援する。</p>
+		</BLOCKQUOTE>
+		<!--p><EM>[<b>swap</b> is defined in the same namespace as <b>shared_ptr</b>
+				as this is currently the only legal way to supply a <b>swap</b> function 
+				that has a chance to be used by the standard library.]</EM>
+		</p-->
+		<p><EM>[
+				<b>swap</b> は <b>shared_ptr</b> と同じ名前空間で定義される。
+				これは現在のところ、標準ライブラリから使用可能な <b>swap</b> 関数を提供するための唯一の正当な方法である。
+				]</EM>
+		</p>
+		<h3><a name="get_pointer">ポインタを取得 ( get_pointer )</a></h3>
+		<pre>template&lt;typename T&gt;
+  T * get_pointer(shared_ptr&lt;T&gt; const &amp; p); // never throws</pre>
+		<BLOCKQUOTE>
+			<!--p><B>Returns:</B> <code>p.get()</code>. </p-->
+			<p><B>Returns:</B> <code>p.get()</code> </p>
+			<!--p><b>Throws:</b> nothing. </p-->
+			<p><b>Throws:</b> 無し。 </p>
+			<!--p><B>Notes:</B> Provided as an aid to generic programming. Used by <A href="../bind/mem_fn.html">mem_fn</A>. </p-->
+			<p><B>Notes:</B> 汎用プログラミングを補助する機能を提供する。 <A href="../bind/mem_fn.html">mem_fn</A> で使用する。</p>
+		</BLOCKQUOTE>
+
+		<h3><a name="shared_static_cast">静的キャスト ( shared_static_cast )</a></h3>
+		<pre>template&lt;typename T, typename U&gt;
+  shared_ptr&lt;T&gt; shared_static_cast(shared_ptr&lt;U&gt; const &amp; r); // never throws</pre>
+		<BLOCKQUOTE>
+			<!--p><b>Requires:</b> The expression <code>static_cast&lt;T*&gt;(r.get())</code>
+				must be well-formed. </p-->
+			<p><b>Requires:</b> <code>static_cast&lt;T*&gt;(r.get())</code> は正しい形でなくてはならない。</p>
+			<!--p><B>Returns:</B> A <b>shared_ptr&lt;T&gt;</b> object that stores a copy 
+				of <code>static_cast&lt;T*&gt;(r.get())</code> and shares ownership with <b>r</b>. </p-->
+			<p><B>Returns:</B> <code>static_cast&lt;T*&gt;(r.get())</code> のコピーを保持し、
+				<b>r</b> と所有権を共有する <b>shared_ptr&lt;T&gt;</b> オブジェクト。</p>
+			<!--p><b>Throws:</b> nothing. </p-->
+			<p><b>Throws:</b> 無し。 </p>
+			<!--p><B>Notes:</B> the seemingly equivalent expression</p-->
+			<p><B>Notes:</B> 表面的には次の式と等価。</p>
+			<p><code>shared_ptr&lt;T&gt;(static_cast&lt;T*&gt;(r.get()))</code></p>
+			<!--p>will eventually result in undefined behavior, attempting to delete the same 
+				object twice. </p-->
+				<p>これは、同じオブジェクトを2度削除しようとする事になるため、結局は未定義のふるまいとなる。 </p>
+		</BLOCKQUOTE>
+
+		<h3><a name="shared_dynamic_cast">動的キャスト ( shared_dynamic_cast )</a></h3>
+		<pre>template&lt;typename T, typename U&gt;
+  shared_ptr&lt;T&gt; shared_dynamic_cast(shared_ptr&lt;U&gt; const &amp; r);</pre>
+		<BLOCKQUOTE>
+			<!--p><b>Requires:</b> The expression <CODE>dynamic_cast&lt;T*&gt;(r.get())</CODE>
+				must be well-formed and its behavior defined. </p-->
+			<p><b>Requires:</b> <CODE>dynamic_cast&lt;T*&gt;(r.get())</CODE> の式が正しい形であり、
+				そのふるまいが定義されていなくてはならない。</p>
+			<p><B>Returns:</B></p>
+			<UL>
+				<LI>
+					<!--
+					When <CODE>dynamic_cast&lt;T*&gt;(r.get())</CODE> returns a nonzero value, a <b>
+						shared_ptr&lt;T&gt;</b> object that stores a copy of it and shares 
+					ownership with <b>r</b>;
+					-->
+					<CODE>dynamic_cast&lt;T*&gt;(r.get())</CODE> が非ゼロの値を返すとき、
+					<b>r</b> のコピーを保持し、その所有権を共有する <b>shared_ptr&lt;T&gt;</b> オブジェクトを返す。
+				<LI>
+					<!--
+					Otherwise, a default-constructed <b>shared_ptr&lt;T&gt;</b> object.</LI></UL>
+					-->
+					それ以外の時は、デフォルトコンストラクタにより構築された <b>shared_ptr&lt;T&gt;</b> オブジェクトを返す。</LI></UL>
+			<p><B>Throws:</B> <b>std::bad_alloc</b> </p>
+			<!--p><B>Exception safety:</B> If an exception is thrown, the function has no effect. </p-->
+			<p><B>Exception safety:</B> 例外が発生すると、この関数は何もしない。 </p>
+			<!--p><B>Notes:</B> the seemingly equivalent expression</p-->
+			<p><B>Notes:</B> 表面的には次の式と等価。</p>
+			<p><CODE>shared_ptr&lt;T&gt;(dynamic_cast&lt;T*&gt;(r.get()))</CODE></p>
+			<!--p>will eventually result in undefined behavior, attempting to delete the same object twice. </p-->
+			<p>これは、同じオブジェクトを2度削除しようとする事になるため、結局は未定義のふるまいとなる。 </p>
+		</BLOCKQUOTE>
+
+		<h3><a name="shared_polymorphic_cast">ポリモーフィックキャスト ( shared_polymorphic_cast )</a></h3>
+		<pre>template&lt;typename T, typename U&gt;
+  shared_ptr&lt;T&gt; shared_polymorphic_cast(shared_ptr&lt;U&gt; const &amp; r);</pre>
+		<BLOCKQUOTE>
+			<!--p><b>Requires:</b> The expression <CODE><A href="../conversion/cast.htm#Polymorphic_cast">polymorphic_cast</A>&lt;T*&gt;(r.get())</CODE> must be well-formed and 
+				its behavior defined.
+			</p-->
+			<p><b>Requires:</b> <CODE><A href="../conversion/cast.htm#Polymorphic_cast">polymorphic_cast</A>&lt;T*&gt;(r.get())</CODE> の式が正しい形であり、そのふるまいが定義されていなくてはならない。
+			</p>
+
+			<!--p><B>Returns:</B> A <b>shared_ptr&lt;T&gt;</b> object that stores a copy 
+				of <CODE><A href="../conversion/cast.htm#Polymorphic_cast">polymorphic_cast</A>&lt;T*&gt;(r.get())</CODE>
+				and shares ownership with <B>r</B>.
+			</p-->
+			<p><B>Returns:</B>
+				<CODE><A href="../conversion/cast.htm#Polymorphic_cast">polymorphic_cast</A>&lt;T*&gt;(r.get())</CODE>
+				のコピーを保持し、
+				<b>r</b> と所有権を共有する <b>shared_ptr&lt;T&gt;</b> オブジェクト。</p>
+
+			<!--p><B>Throws:</B> <b>std::bad_cast</b> when the pointer cannot be converted. </p-->
+			<p><B>Throws:</B> 保持しているポインタが変換できないとき、<b>std::bad_cast</b> を送出する。 </p>
+			<!--p><B>Exception safety:</B> If an exception is thrown, the function has no effect. </p-->
+			<p><B>Exception safety:</B> 例外が発生すると、この関数は何もしない。 </p>
+		</BLOCKQUOTE>
+
+		<h3><a name="shared_polymorphic_downcast">ポリモーフィックダウンキャスト ( shared_polymorphic_downcast )</a></h3>
+		<pre>template&lt;typename T, typename U&gt;
+  shared_ptr&lt;T&gt; shared_polymorphic_downcast(shared_ptr&lt;U&gt; const &amp; r); // never throws</pre>
+		<BLOCKQUOTE>
+			<!--p><b>Requires:</b> The expression <CODE><A href="../conversion/cast.htm#Polymorphic_cast">
+						polymorphic_downcast</A>&lt;T*&gt;(r.get())</CODE> must be well-formed 
+				and its behavior defined.
+			</p-->
+			<p><b>Requires:</b> <CODE><A href="../conversion/cast.htm#Polymorphic_cast">polymorphic_downcast</A>&lt;T*&gt;(r.get())</CODE> の式が正しい形であり、そのふるまいが定義されていなければならない。
+			</p>
+
+			<!--p><B>Returns:</B> A <b>shared_ptr&lt;T&gt;</b> object that stores a copy 
+				of <CODE><A href="../conversion/cast.htm#Polymorphic_cast">polymorphic_downcast</A>&lt;T*&gt;(r.get())</CODE>
+				and shares ownership with <B>r</B>.
+			</p-->
+			<p><B>Returns:</B> 
+				<CODE><A href="../conversion/cast.htm#Polymorphic_cast">polymorphic_downcast</A>&lt;T*&gt;(r.get())</CODE>
+				のコピーを保持し、
+				<b>r</b> と所有権を共有する <b>shared_ptr&lt;T&gt;</b> オブジェクト。</p>
+			</p>
+
+			<p><B>Throws:</B> 無し。 </p>
+		</BLOCKQUOTE>
+
+		<h2><a name="example">Example</a></h2>
+		<!--
+		<p>See <A href="shared_ptr_example.cpp">shared_ptr_example.cpp</A> for a complete 
+			example program. The program builds a <b>std::vector</b> and <b>std::set</b> of <b>shared_ptr</b>
+			objects.
+		</p>
+		-->
+		<p>サンプルプログラムの本体は <A href="shared_ptr_example.cpp">shared_ptr_example.cpp</A> を参照のこと。
+			このプログラムは、<b>shared_ptr</b> オブジェクト<!--を格納する-->からなる <b>std::set</b> と <b>std::vector</b> を<!--build up-->作成する。
+		</p>
+
+		<!--
+		<p>Note that after the containers have been populated, some of the <b>shared_ptr</b>
+			objects will have a use count of 1 rather than a use count of 2, since the set 
+			is a <b>std::set</b> rather than a <b>std::multiset</b>, and thus does not 
+			contain duplicate entries. Furthermore, the use count may be even higher at 
+			various times while <b>push_back</b> and <b>insert</b> container operations are 
+			performed. More complicated yet, the container operations may throw exceptions 
+			under a variety of circumstances. Getting the memory management and exception 
+			handling in this example right without a smart pointer would be a nightmare.
+		</p>
+		-->
+		<p>これらのコンテナに <b>shared_ptr</b> オブジェクトを格納した後、
+			幾つかの <b>shared_ptr</b> オブジェクトの参照カウントが 2 ではなく
+			1 になることに注意せよ。
+			これは、コンテナとして <b>std::multiset</b> ではなく <b>std::set</b> が使われているためである
+			(<b>std::set</b> は重複するキーを持つ要素を受け入れない)。
+			更に言うと、これらのオブジェクトの参照カウントは
+			<b>push_back</b> 及び <b>insert</b> のコンテナ操作をしている間は
+			同じ数のままであるだろう。
+			更に複雑になると、コンテナ操作の際に様々な要因によって例外が発生する可能性もある。
+			スマートポインタを利用せずにこの様なメモリ管理や例外管理を行うことは、正に悪夢である。
+		</p>
+
+		<h2><a name="Handle/Body">Handle/Body</a> Idiom</h2>
+		<!--
+		<p>One common usage of <b>shared_ptr</b> is to implement a handle/body (also called 
+			pimpl) idiom which avoids exposing the body (implementation) in the header 
+			file.
+		</p>
+		-->
+		<p>
+			<b>shared_ptr</b> の一般的な用法の一つに、handle/body 表現 (pimpl とも呼ばれる)
+			の実装がある。
+			handle/body 表現とは、オブジェクト本体の実装を隠蔽する(ヘッダファイル中にさらけ出すことを回避する)ためのものである。
+			<!--
+			(訳注: より詳しい実例は <a href="http://www.s34.co.jp/cpptechdoc/article/handlebody/index.html">S34 : Handle-Bodyイディオム : 参照カウントによる実装</a> を参照のこと ;-)
+
+				epi さんの説明している Handle/Body と、ここで説明されている Handle/Body は
+				セマンティクス面のニュアンスが違いますね(^-^;;
+			-->
+		</p>
+
+		<!--
+		<p>The <A href="shared_ptr_example2_test.cpp">shared_ptr_example2_test.cpp</A> sample 
+			program includes a header file, <A href="shared_ptr_example2.hpp">shared_ptr_example2.hpp</A>, 
+			which uses a <b>shared_ptr&lt;&gt;</b> to an incomplete type to hide the 
+			implementation. The instantiation of member functions which require a complete 
+			type occurs in the <A href="shared_ptr_example2.cpp">shared_ptr_example2.cpp</A>
+			implementation file. Note that there is no need for an explicit destructor. 
+			Unlike ~scoped_ptr, ~shared_ptr does not require that <b>T</b> be a complete 
+			type.
+		</p>
+		-->
+		<p>サンプルプログラム
+			<A href="shared_ptr_example2_test.cpp">shared_ptr_example2_test.cpp</A>
+			は、ヘッダファイル
+			<A href="shared_ptr_example2.hpp">shared_ptr_example2.hpp</A>
+			をインクルードしている。
+			このヘッダファイルでは、不完全型のポインタを取る <b>shared_ptr&lt;&gt;</b> を利用して実装を隠蔽している。
+			完全型が必要となるメンバ関数のインスタンス化は、実装ファイル
+			<A href="shared_ptr_example2.cpp">shared_ptr_example2.cpp</A>
+			内に記述されている。
+			ここでは明示的なデストラクタが必要とされていないことに注意せよ。
+			~scoped_ptr と違い、~shared_ptr は <b>T</b> は完全型である必要はない。
+		</p>
+
+		<h2><a name="ThreadSafety">Thread Safety</a></h2>
+		<!--
+		<p><b>shared_ptr</b> objects offer the same level of thread safety as 
+			built-in types. A <b>shared_ptr</b> instance can be "read" 
+			(accessed using only const operations) simultaneously by multiple threads. 
+			Different <b>shared_ptr</b> instances can be "written to" (accessed 
+			using mutable operations such as <b>operator= </b>or <b>reset</b>) 
+			simultaneosly by multiple threads (even when these instances are copies, and 
+			share the same reference count underneath.)
+		</p>
+		-->
+		<p>
+			<b>shared_ptr</b> オブジェクトはプリミティブ型と同等のスレッドセーフティを提供する。
+			<b>shared_ptr</b> のインスタンスは、複数のスレッドから(const 処理のためのアクセスに限り)同時に &quot;読む&quot; 事ができる。
+			また、異なる <b>shared_ptr</b> を、複数のスレッドから(<b>operator=</b> や <b>reset</b> のようなスレッド動作を想定した操作のためのアクセスに限り)同時に &quot;<!--written to-->変更する&quot; こともできる
+			( それらの <b>shared_ptr</b> インスタンスが、コピーされた(同じ参照カウントを共有する)ものでも問題ない )。
+		</p>
+
+		<!--p>Any other simultaneous accesses result in undefined behavior. </p-->
+		<p>上記以外の同時アクセスは未定義のふるまいを引き起こす。</p>
+
+		<!--p>Examples:</p-->
+		<p>例 Examples:</p>
+		<pre>
+shared_ptr&lt;int&gt; p(new int(42));
+
+//--- Example 1 ---
+
+// thread A
+shared_ptr&lt;int&gt; p2(p); // reads p
+
+// thread B
+shared_ptr&lt;int&gt; p3(p); // OK, multiple reads are safe
+
+//--- Example 2 ---
+
+// thread A
+
+p.reset(new int(1912)); // writes p
+
+// thread B
+p2.reset(); // OK, writes p2
+
+//--- Example 3 ---
+
+// thread A
+p = p3; // reads p3, writes p
+
+// thread B
+p3.reset(); // writes p3; undefined, simultaneous read/write
+
+//--- Example 4 ---
+
+// thread A
+p3 = p2; // reads p2, writes p3
+
+// thread B
+// p2 goes out of scope: undefined, the destructor is considered a "write access"
+
+//--- Example 5 ---
+
+// thread A
+p3.reset(new int(1));
+
+// thread B
+p3.reset(new int(2)); // undefined, multiple writes
+</pre>
+		<!--
+		<p><b>shared_ptr</b> uses <A href="../config/config.htm">Boost.Config</A> 
+			to detect whether the implementation supports threads. If your program is 
+			single-threaded, but your platform is autodetected by <b>Boost.Config</b>
+			as supporting multiple threads, <b>#define BOOST_DISABLE_THREADS</b> to 
+			eliminate the thread safety overhead.
+		</p>
+		-->
+		<p><b>shared_ptr</b> は、実装がスレッドをサポートしているかどうかを検出するために
+			<A href="../config/config.htm">Boost.Config</A> を使用している。
+			もしあなたのプログラムがシングルスレッドだとしても、マルチスレッドをサポートしているかどうかは
+			<b>Boost.Config</b> が自動的に検出する。
+			シングルスレッドのプロジェクトにおいて、スレッドセーフティの為のオーバーヘッドを取り除くためには、
+			<b>#define BOOST_DISABLE_THREADS</b> 
+			を定義する。
+		</p>
+
+		<h2><a name="FAQ">FAQ ( Frequently Asked Questions )</a></h2>
+		<!--
+		<p><B>Q.</B> There are several variations of shared pointers, with different 
+			tradeoffs; why does the smart pointer library supply only a single 
+			implementation? It would be useful to be able to experiment with each type so 
+			as to find the most suitable for the job at hand?<BR>
+			<b>A.</b> An important goal of <b>shared_ptr</b> is to provide a 
+			standard shared-ownership pointer. Having a single pointer type is important 
+			for stable library interfaces, since different shared pointers typically cannot 
+			interoperate, i.e. a reference counted pointer (used by library A) cannot share 
+			ownership with a linked pointer (used by library B.)
+		</p>
+		-->
+		<p><B>Q.</B>
+		共有ポインタにはそれぞれ異なる特長を持った幾つかの<!--種類-->実装のバリエーション<!>があるが、
+			なぜこのスマートポインタライブラリは単一の実装しか提供しないのか?
+			手元の仕事に最も適した実装を見つけるために、
+			それぞれの型を試してみられることは有益なのではないだろうか？
+			<BR>
+			<b>A.</b>
+			標準的な所有権共有ポインタを提供することが、<b>shared_ptr</b> の重要な目標の一つである。
+			通常、異なる共有ポインタは併用できないので、
+			安定したライブラリインターフェースを提供するためには共有ポインタ型を一つにすることが大切である。
+			例えば、(ライブラリ A で使われている)参照カウントポインタは、
+			(ライブラリ B で使われている)連結ポインタと所有権を共有できない。
+		</p>
+
+		<!--
+		<p><B>Q.</B> Why doesn't <B>shared_ptr</B> have template parameters supplying 
+			traits or policies to allow extensive user customization?<BR>
+			<B>A.</B> Parameterization discourages users. The <B>shared_ptr</B> template is 
+			carefully crafted to meet common needs without extensive parameterization. Some 
+			day a highly configurable smart pointer may be invented that is also very easy 
+			to use and very hard to misuse. Until then, <B>shared_ptr</B> is the smart 
+			pointer of choice for a wide range of applications. (Those interested in policy 
+			based smart pointers should read <A href="http://cseng.aw.com/book/0,,0201704315,00.html">
+				Modern C++ Design</A> by Andrei Alexandrescu.)
+		</p>
+		-->
+		<p><B>Q.</B>
+			なぜ <b>shared_ptr</b> は、拡張のためのポリシーや<!--traits-->特性<!>を与えるための
+			テンプレートパラメータを持たないのか。<BR>
+			<B>A.</B>
+			パラメータ化することは、ユーザにとって使いにくくなることに繋がる。
+			この <b>shared_ptr</b> テンプレートは、
+			拡張可能なパラメータを必要とせずに一般的なニーズを満たすように注意深く設計されている。
+			いつかは、高い拡張性を持ち、非常に使い易く、且つ誤用されにくいスマートポインタが開発されるかも知れない。
+			しかしそれまでは、<b>shared_ptr</b> が幅広い用途に使用されるだろう。
+			(そのような興味深いポリシー思考のスマートポインタについて知りたければ、Andrei Alexandrescu の
+			<A href="http://cseng.aw.com/book/0,,0201704315,00.html">Modern C++ Design</A>
+			を読むべきである。)
+		</p>
+
+		<!--
+		<p><B>Q.</B> I am not convinced. Default parameters can be used where appropriate 
+			to hide the complexity. Again, why not policies?<BR>
+			<B>A.</B> Template parameters affect the type. See the answer to the first 
+			question above.
+		</p>
+		-->
+		<p><B>Q.</B>
+			私は納得できない。
+			複雑性を隠すためにデフォルトのパラメータを使うことができるはずだ。
+			もう一度尋ねるが、なぜポリシーを導入しないのか？
+			<BR>
+			<B>A.</B>
+			テンプレートパラメータは型に影響を及ぼす。
+			この FAQ の最初の解答を参照せよ。
+		</p>
+
+		<!--
+		<p><b>Q.</b> Why doesn't <b>shared_ptr</b> use a linked list implementation?<br>
+			<b>A.</b> A linked list implementation does not offer enough advantages to 
+			offset the added cost of an extra pointer. See <A href="smarttests.htm">timings</A>
+			page. In addition, it is expensive to make a linked list implementation thread 
+			safe.
+		</p>
+		-->
+		<p><b>Q.</b>
+			なぜ <b>shared_ptr</b> の実装は連結リスト方式を使っていないのか？<br>
+			<b>A.</b>
+			連結リスト方式の実装は、余分なポインタのためのコストに見合うだけの利点が無いからである。
+			<A href="smarttests.htm">timings</A> のページを参照せよ。
+			補足すると、連結リスト方式の実装でスレッドセーフティを実現するには、大きな犠牲を伴う。
+		</p>
+
+		<!--
+		<p><b>Q.</b> Why doesn't <b>shared_ptr</b> (or any of the other Boost smart 
+			pointers) supply an automatic conversion to <b>T*</b>?<br>
+			<b>A.</b> Automatic conversion is believed to be too error prone.
+		</p>
+		-->
+		<p><b>Q.</b>
+			なぜ <b>shared_ptr</b> やその他の Boost スマートポインタは、
+			<b>T *</b> への自動的な型変換を提供しないのか？<br>
+			<b>A.</b> 自動的な型変換は、エラーに繋がる傾向が非常に高いと信じられている。
+		</p>
+
+		<!--
+		<p><b>Q.</b> Why does <b>shared_ptr</b> supply use_count()?<br>
+			<b>A.</b> As an aid to writing test cases and debugging displays. One of the 
+			progenitors had use_count(), and it was useful in tracking down bugs in a 
+			complex project that turned out to have cyclic-dependencies.
+		</p>
+		-->
+		<p><b>Q.</b>
+			なぜ <b>shared_ptr</b> は use_count() を提供しているのか？<br>
+			<b>A.</b>
+			テストケースを書くための支援や、デバッグ出力の支援をするためである。
+			循環依存することが分かっているような複雑な<!--project: プロジェクトと訳すと勘違いされそう-->プログラム<!>において、
+			<!--One of the progenitors had use_count()-->
+			<!--自信なし-->
+			原本となる <b>shared_ptr</b> の use_count() が、バグを追跡するために有効である。
+		</p>
+
+		<!--
+		<p><b>Q.</b>
+		Why doesn't <b>shared_ptr</b> specify complexity requirements?<br>
+			<b>A.</b> Because complexity requirements limit implementors and complicate the 
+			specification without apparent benefit to <b>shared_ptr</b> users. For example, 
+			error-checking implementations might become non-conforming if they had to meet 
+			stringent complexity requirements.
+		</p>
+		-->
+		<p><b>Q.</b>
+		なぜ <b>shared_ptr</b> は<!--complexity requirements -->計算量の指定を明示しないのか？<br>
+			<b>A.</b>
+			なぜなら、計算量の指定は、実装者に制限を付与し、
+			<b>shared_ptr</b> の利用者に対する見かけ上の利益もなしに仕様を複雑化する。
+			例えば、もしエラー検証機構の実装に厳密な計算量の指定が必要とされた場合、
+			その実装には整合性が無くなってしまうだろう。
+		</p>
+
+		<!--
+		<p><b>Q.</b> Why doesn't <b>shared_ptr</b> provide a release() function?<br>
+			<b>A.</b> <b>shared_ptr</b> cannot give away ownership unless it's unique() 
+			because the other copy will still destroy the object.
+		</p>
+		-->
+		<p><b>Q.</b>
+			なぜ <b>shared_ptr</b> は release() 関数を提供しないのか？<br>
+			<b>A.</b>
+			<b>shared_ptr</b> は unique() な時をのぞいて、所有権を譲渡できない。
+			なぜなら、いずれは所有権を共有している他の <b>shared_ptr</b>
+			が、そのオブジェクトを削除するはずだからである。
+		</p>
+
+		<!--p>Consider:</p-->
+		<p>考えてみよ:</p>
+
+<!--
+		<blockquote><pre>shared_ptr&lt;int&gt; a(new int);
+shared_ptr&lt;int&gt; b(a); // a.use_count() == b.use_count() == 2
+
+int * p = a.release();
+
+// Who owns p now? b will still call delete on it in its destructor.</pre>
+-->
+		<blockquote><pre>shared_ptr&lt;int&gt; a(new int);
+shared_ptr&lt;int&gt; b(a); // a.use_count() == b.use_count() == 2
+
+int * p = a.release();
+
+// このとき、p の所有権はどこにあるのだろう？ a が release() してもなお、b はデストラクタの中で delete を呼ぶだろう。</pre>
+		</blockquote>
+		<!--
+		<p><b>Q.</b> Why doesn't <b>shared_ptr</b> provide (your pet feature here)?<br>
+			<b>A.</b> Because (your pet feature here) would mandate a reference counted 
+			implementation or a linked list implementation, or some other specific 
+			implementation. This is not the intent.
+		</p>
+		-->
+		<p><b>Q.</b>
+			なぜ <b>shared_ptr</b> は(あなたが大好きな機能をここに当てはめよ)を提供しないのか？<br>
+			<b>A.</b>
+			<!--この辺(特にmandate)の訳がよく分からない・・・-->
+			なぜなら、(あなたが愛する機能)は、参照カウント方式の実装でも、
+			連結リスト方式の実装でも、あるいは他の特定の実装でも構わないという話だったからである。
+			故意に提供していないわけではない。
+		</p>
+
+		<hr>
+		<p>Revised $Date: 2003/03/15 06:38:54 $
+	</p>
+		<p>Copyright 1999 Greg Colvin and Beman Dawes. Copyright 2002 Darin Adler. 
+			Copyright 2002 Peter Dimov. Permission to copy, use, modify, sell and 
+			distribute this document is granted provided this copyright notice appears in 
+			all copies. This document is provided "as is" without express or implied 
+			warranty, and with no claim as to its suitability for any purpose.
+		</p>
+		<p>
+		Japanese Translation Copyright (C) 2003
+		<a href="mailto:lenoir@zeroscape.org">Ryo Kobayashi</a>,
+		<a href="mailto:kohske@msc.biglobe.ne.jp">Kohske Takahashi</a>.
+
+			オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の
+			複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」
+			に提供されており、いかなる明示的、暗黙的保証も行わない。また、
+			いかなる目的に対しても、その利用が適していることを関知しない。
+		</p>
+
+	</body>
+</html>

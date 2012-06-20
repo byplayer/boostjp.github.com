@@ -1,0 +1,51 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+	<title>BOOST_PP_ASSIGN_SLOT</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">
+</head>
+<body>
+	<div style="margin-left:  0px;">
+		<b>BOOST_PP_ASSIGN_SLOT</b> マクロは、数値マクロかまたは数値式を完全に評価する。
+	</div>
+	<h4>Usage</h4>
+		<div class="code">
+			#include <b>BOOST_PP_ASSIGN_SLOT</b>(<i>i</i>)
+		</div>
+	<h4>Arguments</h4>
+		<dl>
+			<dt>i</dt>
+			<dd>
+				代入されている<i>スロット</i>番号。
+				この値は <i>1</i> から <b>BOOST_PP_LIMIT_SLOT_COUNT</b> までの範囲内でなければならない。
+			</dd>
+		</dl>
+	<h4>Remarks</h4>
+		<div>
+			これを使う前に、<i>名前付き外部引数</i> <b>BOOST_PP_VALUE</b> が定義されていなければならない。
+			それもまた、<i>0</i> から <i>2</i>^<i>32</i> - <i>1</i> までの範囲内の数値に展開されなければならない。
+		</div>
+	<h4>See Also</h4>
+		<ul>
+			<li><a href="limit_slot_count.html">BOOST_PP_LIMIT_SLOT_COUNT</a></li>
+			<li><a href="value.html">BOOST_PP_VALUE</a></li>
+		</ul>
+	<h4>Requirements</h4>
+		<div>
+			<b>Header:</b> &nbsp;<a href="../headers/slot/slot.hpp.html">&lt;boost/preprocessor/slot/slot.hpp&gt;</a>
+		</div>
+	<h4>Sample Code</h4>
+<div><pre>
+#include &lt;<a href="../headers/slot/slot.hpp.html">boost/preprocessor/slot/slot.hpp</a>&gt;
+
+#define X() 4
+
+#define <a href="value.html">BOOST_PP_VALUE</a> 1 + 2 + 3 + X()
+#include <a href="assign_slot.html">BOOST_PP_ASSIGN_SLOT</a>(1)
+
+#undef X
+
+<a href="slot.html">BOOST_PP_SLOT</a>(1) // 10 に展開される
+</pre></div>
+</body>
+</html>

@@ -1,0 +1,242 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Boost Random Number Library</title>
+</head>
+
+<body bgcolor="#FFFFFF" text="#000000">
+
+<table border="1" bgcolor="#007F7F" cellpadding="2">
+  <tr>
+    <td bgcolor="#FFFFFF"><img src="../../c++boost.gif" alt="c++boost.gif (8819 bytes)" width="277" height="86"></td>
+    <td><a href="../../index.htm"><font face="Arial,Helvetica" color="#FFFFFF"><big>Home</big></font></a></td>
+    <td><a href="../libraries.htm"><font face="Arial,Helvetica" color="#FFFFFF"><big>Libraries</big></font></a></td>
+    <td><a href="../../people/people.htm"><font face="Arial,Helvetica" color="#FFFFFF"><big>People</big></font></a></td>
+    <td><a href="../../more/faq.htm"><font face="Arial,Helvetica" color="#FFFFFF"><big>FAQ</big></font></a></td>
+    <td><a href="../../more/index.htm"><font face="Arial,Helvetica" color="#FFFFFF"><big>More</big></font></a></td>
+  </tr>
+</table>
+
+<p>
+<a href="http://www.boost.org/libs/random/index.html">原文</a>
+</p>
+<h1>Boost Random Number Library</h1>
+
+<p>
+<!--
+Random numbers are useful in a variety of applications.  The Boost
+Random Number Library (Boost.Random for short) provides a vast variety
+of generators and distributions to produce random numbers having
+useful properties, such as uniform distribution.  
+-->
+乱数は、様々な種類のアプリケーションで役立つ。
+Boost Random Number Library (略してBoost.Random)は、例えば一様分布といったような、有用な特徴をもつ乱数を生成するための膨大で多様な生成子と分布を供給する。
+</p>
+
+<p>
+<!--
+You should read the
+<a href="random-concepts.html">concepts documentation</a>
+for an introduction and the definition of the basic concepts.  For a
+quick start, it may be sufficient to have a look at <a
+href="random_demo.cpp">random_demo.cpp</a>.
+-->
+導入と基本的な概念の定義の理解のため、
+<a href="random-concepts.html">concepts documentation[概要]</a>
+を読むべきである。
+早く始めたいのなら、<a href="random_demo.cpp">random_demo.cpp</a>を一読すれば十分であろう。
+</p>
+
+<h2>Library Organization</h2>
+
+<p>
+<!--The library is separated into several header files, all within the
+<code>boost/random/</code> directory.  Additionally, a convenience
+header file which includes all other headers in
+<code>boost/random/</code> is available as
+<code><a href="../../boost/random.hpp">boost/random.hpp</a></code>.
+-->
+ライブラリは全て <code>boost/random/</code> ディレクトリ中に、複数のヘッダー・ファイルに分かれて存在している。
+さらに、<code>boost/random/</code> 中に存在する他の全てのヘッダー・ファイルをインクルードしている便利なヘッダー・ファイルが、 <code><a href="../../boost/random.hpp">boost/random.hpp</a></code> として利用可能である。
+</p>
+
+<p>
+<!--
+Several random number generators are available in the following
+header files; please read the
+<a href="random-generators.html">documentation</a> about these.
+-->
+各乱数生成子は、以下のヘッダー・ファイルで利用可能である。
+生成子については <a href="random-generators.html">documentation</a> を読まれたい。
+</p>
+
+<ul>
+<li><code><a href="../../boost/random/linear_congruential.hpp">boost/random/linear_congruential.hpp</a></code>
+<li><code><a href="../../boost/random/additive_combine.hpp">boost/random/additive_combine.hpp</a></code>
+<li><code><a href="../../boost/random/inversive_congruential.hpp">boost/random/inversive_congruential.hpp</a></code>
+<li><code><a href="../../boost/random/shuffle_output.hpp">boost/random/shuffle_output.hpp</a></code>
+<li><code><a href="../../boost/random/mersenne_twister.hpp">boost/random/mersenne_twister.hpp</a></code>
+<li><code><a href="../../boost/random/lagged_fibonacci.hpp">boost/random/lagged_fibonacci.hpp</a></code>
+</ul>
+
+<p>
+<!--
+Similarly, several random number distributions are available in the
+following header files; please read the
+<a href="random-distributions.html">documentation</a> about these.
+-->
+同様に、各乱数分布は、以下のヘッダー・ファイルで利用可能である。
+分布については <a href="random-distributions.html">documentation</a> を読まれたい。
+</p>
+
+<ul>
+<li><code><a href="../../boost/random/uniform_smallint.hpp">boost/random/uniform_smallint.hpp</a></code>
+<li><code><a href="../../boost/random/uniform_int.hpp">boost/random/uniform_int.hpp</a></code>
+<li><code><a href="../../boost/random/uniform_01.hpp">boost/random/uniform_01.hpp</a></code>
+<li><code><a href="../../boost/random/uniform_real.hpp">boost/random/uniform_real.hpp</a></code>
+<li><code><a href="../../boost/random/triangle_distribution.hpp">boost/random/triangle_distribution.hpp</a></code>
+<li><code><a href="../../boost/random/bernoulli_distribution.hpp">boost/random/bernoulli_distribution.hpp</a></code>
+<li><code><a href="../../boost/random/cauchy_distribution.hpp">boost/random/cauchy_distribution.hpp</a></code>
+<li><code><a href="../../boost/random/exponential_distribution.hpp">boost/random/exponential_distribution.hpp</a></code>
+<li><code><a href="../../boost/random/geometric_distribution.hpp">boost/random/geometric_distribution.hpp</a></code>
+<li><code><a href="../../boost/random/normal_distribution.hpp">boost/random/normal_distribution.hpp</a></code>
+<li><code><a href="../../boost/random/lognormal_distribution.hpp">boost/random/lognormal_distribution.hpp</a></code>
+<li><code><a href="../../boost/random/uniform_on_sphere.hpp">boost/random/uniform_on_sphere.hpp</a></code>
+</ul>
+
+<p>
+<!--
+Additionally, non-deterministic random number generators are available
+in the header 
+<code><a href="../../boost/nondet_random.hpp">&lt;boost/nondet_random.hpp&gt;</a></code>.
+<a href="nondet_random.html">Documentation</a> is also available.
+-->
+加えて、非決定論的乱数生成子が <code><a href="../../boost/nondet_random.hpp">&lt;boost/nondet_random.hpp&gt;</a></code> ヘッダで利用可能である。(<a href="nondet_random.html">Documentation</a> も同様)
+</p>
+
+<p>
+<!--
+In order to map the interface of the generators and distribution functions
+to other concepts, some <a href="random-misc.html">decorators</a> are available.
+-->
+生成子と分布関数のインターフェースを他のコンセプトに配置するために、<a href="random-misc.html">decorators[装飾子?]</a> が利用可能である。
+</p>
+
+<h2>Tests</h2>
+
+<p>
+<!--
+An extensive test suite for the pseudo-random number generators and
+distributions is available as
+<a href="random_test.cpp">random_test.cpp</a>.
+-->
+広範囲にわたる擬似乱数生成子と分布のためのテストスーツが <a href="random_test.cpp">random_test.cpp</a> で利用可能である。
+</p>
+
+<p>
+<!--
+Some <a href="random-performance.html">performance results</a> obtained
+using <a href="random_speed.cpp">random_speed.cpp</a> are also available.
+-->
+<a href="random_speed.cpp">random_speed.cpp</a> を使用して得られた <a href="random-performance.html">performance results[実行結果]</a> も見ることができる。
+</p>
+
+<h2>Rationale</h2>
+
+<p>
+<!--
+The methods for generating and evaluating deterministic and
+non-deterministic random numbers differ radically.  Furthermore, due
+to the inherent deterministic design of present-day computers, it is
+often difficult to implement non-deterministic random number
+generation facilities.  Thus, the random number library is split into
+separate header files, mirroring the two different application
+domains.
+-->
+決定論的乱数と非決定論的乱数の生成及び算出手法は根本的に異なるものである。
+おまけに、現代のコンピュータで本来的に使用されている決定論的[乱数生成]デザインのために、非決定論的乱数の生成手段を実装することは困難である。
+そこで、この乱数ライブラリは、2つの異なる適用領域を反映して、複数のヘッダー・ファイルに分割されている。
+</p>
+
+<h2>History and Acknowledgements</h2>
+<p>
+<!--
+In November 1999, Jeet Sukumaran proposed a framework based on virtual
+functions, and later sketched a template-based approach.  Ed Brey
+pointed out that Microsoft Visual C++ does not support in-class member
+initializations and suggested the <code>enum</code> workaround.  Dave
+Abrahams highlighted quantization issues.
+-->
+1999年11月、Jeet Sakumaran は仮想関数に基づくフレームワークを提案、後にテンプレートに基づく方法の大筋を記した。
+Ed Brey が、Microsoft Visual C++ がクラス内のメンバ初期化をサポートしていないことを指摘し、<code>enum</code> による回避手段を提案。
+Dave Abrahams が量子化の問題を強調した。
+</p>
+<p>
+<!--
+The first public release of this random number library materialized in
+March 2000 after extensive discussions on the boost mailing list.
+Many thanks to Beman Dawes for his original <code>min_rand</code>
+class, portability fixes, documentation suggestions, and general
+guidance.  Harry Erwin sent a header file which provided additional
+insight into the requirements.  Ed Brey and Beman Dawes wanted an
+iterator-like interface.
+-->
+この乱数ライブラリの最初の公のリリースは、2000年3月、boost メーリングリストでの広範囲にわたる議論の末に実現した。
+Beman Dawes のオリジナルの <code>min_rand</code> クラス、移植性の修正、文書の提案、そして全般的な指導に多大なる感謝を送る。
+Harry Erwin は要求に対するさらなる識見をもたらすヘッダー・ファイルを送ってくれた。
+Ed Brey と Beman Dawes はイテレータのようなインターフェースを欲していた。
+</p>
+
+<p>
+<!--
+Beman Dawes managed the formal review, during which Matthias Troyer,
+Csaba Szepesvari, and Thomas Holenstein gave detailed comments.  The
+reviewed version became an official part of boost on 17 June 2000.
+-->
+Beman Dawes は、Matthias Trayer と Csaba Szepesvari、そして Thomas Holenstein が詳細なコメントを記述している間に、正式な再検討を成し遂げた。この再検討された版は、2000年6月17日に公式に boost の一部となった。
+</p>
+
+<p>
+<!--
+Gary Powell contributed suggestions for code cleanliness.  Dave
+Abrahams and Howard Hinnant suggested to move the basic generator
+templates from namespace <code>boost::detail</code> to
+<code>boost::random</code>.
+-->
+Gary Powell は、コードのきれいさについての提案を貢献した。
+Dave Abraham と Howard Hinnant は基本的な生成子テンプレートを <code>boost::detail</code> 名前空間から <code>boost::random</code> に移すよう提案した。
+</p>
+
+<p>
+<!--
+Ed Brey asked to remove superfluous warnings and helped with
+<code>uint64_t</code> handling.  Andreas Scherer tested with MSVC.
+Matthias Troyer contributed a lagged Fibonacci generator.  Michael
+Stevens found a bug in the copy semantics of normal_distribution and
+suggested documentation improvements.
+-->
+Ed Brey は過度の警告を取り除くよう頼み、<code>uint64_t</code> の取り扱い方について手助けをした。
+Andreas Scherer は MSVC でのテストを行った。
+Matthias Troyer は遅れのあるフィボナッチ(lagged_fibonacci)生成子を提供した。
+Michael Stevens は normal_distribution のコピーセマンティックに潜んでいたバグを発見し、文書の改良を提案した。
+</p>
+
+<hr>
+<p id="original_copyright">
+<a href="../../people/jens_maurer.htm">Jens Maurer</a>,
+2001-08-31
+</p>
+
+<p id="japanese_transration_copyright">
+Japanese Translation Copyright (C) 2003 KATOU Akira &lt;turugina@blue.sakura.ne.jp&gt;.
+<br>
+オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の
+複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」
+に提供されており、いかなる明示的、暗黙的保証も行わない。また、
+いかなる目的に対しても、その利用が適していることを関知しない。
+</p>
+
+</body>
+</html>

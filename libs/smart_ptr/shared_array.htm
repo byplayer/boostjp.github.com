@@ -1,0 +1,370 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+	<head>
+		<title>shared_array</title>
+		<!--meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"-->
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	</head>
+	<body bgcolor="#ffffff" text="#000000">
+		<h1><img src="../../c++boost.gif" alt="c++boost.gif (8819 bytes)" align="middle" width="277" height="86">shared_array 
+			class template</h1>
+		<!--
+		<p>The <b>shared_array</b> class template stores a pointer to a dynamically 
+			allocated array. (Dynamically allocated array are allocated with the C++ <b>new[]</b>
+			expression.) The object pointed to is guaranteed to be deleted when the last <b>shared_array</b>
+			pointing to it is destroyed or reset.</p>
+		-->
+		<p><b>shared_array</b> クラステンプレートは動的に割り当てられた配列へのポインタを保持する。
+			(動的に割り当てられた配列とは、C++ の <b>new[]</b> によって割り当てられたものである。)
+			<!-- 訳注 : 原文誤字(というより誤語) : 次の文の "object" は、scoped_array のドキュメントでは "array" となっており、恐らく "array" の方が適切 -->
+		  <b>shared_array</b> に指されたオブジェクトは、そのオブジェクトを指す最後の <b>shared_array</b>
+			が破棄もしくはリセットされるときに削除されることが保証される。
+		<!--
+		<p>Every <b>shared_array</b> meets the <b>CopyConstructible</b> and <b>Assignable</b>
+			requirements of the C++ Standard Library, and so can be used in standard 
+			library containers. Comparison operators are supplied so that <b>shared_array</b>
+			works with the standard library's associative containers.</p>
+	  -->
+		<p>
+		全ての <b>shared_array</b> はC++標準ライブラリの
+		<b>CopyConstructible</b> (コピーコンストラクト可能)と
+		<b>Assignable</b> (代入可能)の条件を満たすので、標準ライブラリのコンテナで使うことができる。
+		また、標準ライブラリの連想コンテナで使うことができるように、比較演算子が提供されている。
+		<!--
+		<p>Normally, a <b>shared_array</b> cannot correctly hold a pointer to an object 
+			that has been allocated with the non-array form of <STRONG>new</STRONG>. See <a href="shared_ptr.htm">
+				<b>shared_ptr</b></a> for that usage.</p>
+		-->
+		<p>
+			通常、<b>shared_array</b> は <b>new</b> により割り当てられたオブジェクトへのポインタを正しく扱うことはできない。
+			<b>new</b> によって割り当てられたオブジェクトの扱い方については、
+			<a href="shared_ptr.htm"><b>shared_ptr</b></a> を参照のこと。</p>
+		<!--
+		<p>Because the implementation uses reference counting, cycles of <b>shared_array</b>
+			instances will not be reclaimed. For example, if <b>main()</b> holds a <b>shared_array</b>
+			to <b>A</b>, which directly or indirectly holds a <b>shared_array</b> back to <b>A</b>,
+			<b>A</b>'s use count will be 2. Destruction of the original <b>shared_array</b> 
+			will leave <b>A</b> dangling with a use count of 1.</p>
+		-->
+
+		<p>
+		  <b>shared_array</b> の実装には参照カウントが用いられているため、
+			循環参照された <b>shared_array</b> のインスタンスは正常に解放されない。
+			例えば、<b>main()</b> が <b>A</b> を指す <b>shared_array</b> を保持しているときに、
+			その <b>A</b> が直接的または間接的に <b>A</b> 自身を指す
+			<b>shared_array</b> を持っていると、 <b>A</b>
+			に対する参照カウントは 2 となる。 最初の <b>shared_array</b>
+			が破棄される際に、<b>A</b> の参照カウントは 1 となり、そのインスタンスは破棄されずに残ってしまう。</p>
+		<!--
+		<p>A <b>shared_ptr</b> to a <b>std::vector</b> is an alternative to a <b>shared_array</b>
+			that is a bit heavier duty but far more flexible.</p>
+		-->
+		<p> <b>shared_array</b> に代わるものとして、
+			<b>std::vector</b> を指す <b>shared_ptr</b> がある。
+			これは <b>shared_array</b> に比べ若干重いが、より柔軟である。
+		</p>
+
+		<!--
+		<p>The class template is parameterized on <b>T</b>, the type of the object pointed 
+			to. <b>T</b> must meet the smart pointer <a href="smart_ptr.htm#Common requirements">
+				common requirements</a>.</p>
+		-->
+		<p>
+		このクラステンプレートには、指し示す配列の要素の型を表すパラメータ <b>T</b> を与える。
+		<b>T</b> はスマートポインタの
+		<a href="smart_ptr.htm#Common requirements">共通の要求事項</a>
+		を満たさなければならない。</p>
+
+		<h2>Synopsis</h2>
+		<pre>namespace boost {
+
+  template&lt;typename T&gt; class shared_array {
+
+    public:
+      typedef T <a href="#element_type">element_type</a>;
+
+      explicit <a href="#constructors">shared_array</a>(T * p = 0);
+      template&lt;typename D&gt; <a href="#constructors">shared_array</a>(T * p, D d);
+      <a href="#destructor">~shared_array</a>(); // never throws
+
+      <a href="#constructors">shared_array</a>(shared_array const &amp; r); // never throws
+
+      shared_array &amp; <a href="#assignment">operator=</a>(shared_array const &amp; r); // never throws
+
+      void <a href="#reset">reset</a>(T * p = 0);
+      template&lt;typename D&gt; void <a href="#reset">reset</a>(T * p, D d);
+
+      T &amp; <a href="#indexing">operator[]</a>(std::ptrdiff_t i) const() const; // never throws
+      T * <a href="#get">get</a>() const; // never throws
+
+      bool <a href="#unique">unique</a>() const; // never throws
+      long <a href="#use_count">use_count</a>() const; // never throws
+
+      void <a href="#swap">swap</a>(shared_array&lt;T&gt; &amp; b); // never throws
+  };
+
+  template&lt;typename T&gt;
+    bool <a href="#comparison">operator==</a>(shared_array&lt;T&gt; const &amp; a, shared_array&lt;T&gt; const &amp; b); // never throws
+  template&lt;typename T&gt;
+    bool <a href="#comparison">operator!=</a>(shared_array&lt;T&gt; const &amp; a, shared_array&lt;T&gt; const &amp; b); // never throws
+  template&lt;typename T&gt;
+    bool <a href="#comparison">operator&lt;</a>(shared_array&lt;T&gt; const &amp; a, shared_array&lt;T&gt; const &amp; b); // never throws
+
+  template&lt;typename T&gt; void <a href="#free-swap">swap</a>(shared_array&lt;T&gt; &amp; a, shared_array&lt;T&gt; &amp; b); // never throws
+
+}</pre>
+		<h2>Members</h2>
+		<h3><a name="element_type">element_type</a></h3>
+		<pre>typedef T element_type;</pre>
+		<!--p>Provides the type of the stored pointer.</p-->
+		<p>テンプレートパラメータ T の型を規定する。</p>
+		<h3><a name="constructors">constructors</a></h3>
+		<pre>explicit shared_array(T * p = 0);</pre>
+
+		<!--
+		<p>Constructs a <b>shared_array</b>, storing a copy of <b>p</b>, which must be a 
+			pointer to an array that was allocated via a C++ <b>new[]</b> expression or be 
+			0. Afterwards, the <a href="#use_count">use count</a> is 1 (even if p == 0; see <a href="#destructor">
+				~shared_array</a>). The only exception which may be thrown by this 
+			constructor is <b>std::bad_alloc</b>. If an exception is thrown, <b>delete[] p</b>
+			is called.</p>
+		-->
+		<p><b>shared_array</b> を構築し、<b>p</b> のコピーを保持する。
+			<b>p</b> は C++ の <b>new[]</b> によって割り当てられた配列へのポインタか、0でなくてはならない。
+			その後、<a href="#use_count">use count</a> は 1 になる。
+			(p == 0 の場合でも同様である。
+			<a href="#destructor">~shared_array</a> を参照のこと)
+			このコンストラクタが送出する可能性のある例外は <b>std::bad_alloc</b> だけである。
+			もし例外が発生すると、<b>delete[] p</b> が呼び出される。</p>
+
+		<pre>template&lt;typename D&gt; shared_array(T * p, D d);</pre>
+		<!--
+		<p>Constructs a <b>shared_array</b>, storing a copy of <b>p</b> and of <b>d</b>. 
+			Afterwards, the <a href="#use_count">use count</a> is 1. <b>D</b>'s copy 
+			constructor and destructor must not throw. When the the time comes to delete 
+			the array pointed to by <b>p</b>, the object <b>d</b> is used in the statement <b>d(p)</b>. 
+			Invoking the object <b>d</b> with parameter <b>p</b> in this way must not 
+			throw. The only exception which may be thrown by this constructor is <b>std::bad_alloc</b>. 
+			If an exception is thrown, <b>d(p)</b> is called.</p>
+		-->
+		<p><b>shared_array</b> を構築し、<b>p</b> のコピーと <b>d</b> のコピーを保持する。 
+			その後、<a href="#use_count">use count</a> は 1 になる。
+			<b>D</b> のコピーコンストラクタとデストラクタは例外を送出してはならない。
+			<b>p</b> に指されている配列が削除される時になると、
+			<b>d</b> オブジェクトが <b>d(p)</b> の形で実行される。
+			<b>p</b> を引数に取る <b>d</b> の実行において、例外を送出してはならない。
+			このコンストラクタが送出する可能性のある例外は <b>std::bad_alloc</b> だけである。
+			もし例外が発生すると、<b>d(p)</b> が呼び出される。</p>
+
+		<pre>shared_array(shared_array const &amp; r); // never throws</pre>
+		<!--
+		<p>Constructs a <b>shared_array</b>, as if by storing a copy of the pointer stored 
+			in <b>r</b>. Afterwards, the <a href="#use_count">use count</a> for all copies 
+			is 1 more than the initial use count.</p>
+		-->
+		<p> <b>shared_array</b> を構築し、<b>r</b> が保持するポインタのコピーを保持したかのように作用する。
+		その後、全てのコピーの <a href="#use_count">use count</a> は 1 増加する。</p>
+
+		<h3><a name="destructor">destructor</a></h3>
+		<pre>~shared_array(); // never throws</pre>
+		<!--
+		<p>Decrements the <a href="#use_count">use count</a>. Then, if the use count is 0, 
+			deletes the array pointed to by the stored pointer. Note that <b>delete[]</b> on 
+			a pointer with a value of 0 is harmless. <b>T</b> need not be a complete type. 
+			The guarantee that this does not throw exceptions depends on the requirement 
+			that the deleted object's destructor does not throw exceptions. See the smart 
+			pointer <a href="smart_ptr.htm#Common requirements">common requirements</a>.</p>
+		-->
+		<p> <a href="#use_count">use count</a> を 1 減少させる。
+			そしてもし use count が 0 だった時、保持しているポインタが指す配列を削除する。
+			値が 0 のポインタに対する <b>delete[]</b> が安全であることに注意。 
+			<b>T</b> は完全型である必要はない。
+			削除される配列の要素のデストラクタが例外を送出しないという条件が満たされている場合、
+			このデストラクタが例外を送出しないことが保証される。
+			スマートポインタの
+			<a href="smart_ptr.htm#Common requirements">共通の要求事項</a> を参照のこと。</p>
+
+		<h3><a name="operator=">assignment</a></h3>
+		<pre>shared_array &amp; <a href="#assignment">operator=</a>(shared_array const &amp; r); // never throws</pre>
+		<!--
+		<p>Constructs a new <b>shared_array</b> as described <a href="#constructors">above</a>, 
+			then replaces this <b>shared_array</b> with the new one, destroying the 
+			replaced object.</p>
+		-->
+		<p><a href="#constructors">上</a> で説明されているように新しい <b>shared_array</b> が構築され、
+			現在の <b>shared_array</b> と新しい <b>shared_array</b> が交換される。
+			交換された元のオブジェクトは破棄される。</p>
+
+		<h3><a name="reset">reset</a></h3>
+		<pre>void reset(T * p = 0);</pre>
+		<!--
+		<p>Constructs a new <b>shared_array</b> as described <a href="#constructors">above</a>, 
+			then replaces this <b>shared_array</b> with the new one, destroying the 
+			replaced object. The only exception which may be thrown is <b>std::bad_alloc</b>. 
+			If an exception is thrown, <b>delete[] p</b> is called.</p>
+		-->
+		<p><a href="#constructors">上</a> で説明されているように新しい <b>shared_array</b> が構築され、
+			現在の <b>shared_array</b> と新しい <b>shared_array</b> が交換される。
+			交換された元のオブジェクトは破棄される。
+			送出する可能性のある例外は <b>std::bad_alloc</b> だけである。
+			もし例外が発生すると、<b>delete[] p</b> が呼び出される。</p>
+
+		<pre>template&lt;typename D&gt; void reset(T * p, D d);</pre>
+		<!--
+		<p>Constructs a new <b>shared_array</b> as described <a href="#constructors">above</a>, 
+			then replaces this <b>shared_array</b> with the new one, destroying the 
+			replaced object. <b>D</b>'s copy constructor must not throw. The only exception 
+			which may be thrown is <b>std::bad_alloc</b>. If an exception is thrown, <b>d(p)</b>
+			is called.</p>
+		-->
+		<p><a href="#constructors">上</a> で説明されているように新しい <b>shared_array</b> が構築され、
+			現在の <b>shared_array</b> と新しい <b>shared_array</b> が交換される。
+			交換された元のオブジェクトは破棄される。
+			<b>D</b> のコピーは例外を送出してはならない。
+			送出する可能性のある例外は <b>std::bad_alloc</b> だけである。
+			もし例外が発生すると、<b>d(p)</b> が呼び出される。</p>
+
+		<h3><a name="indirection">indexing</a></h3>
+		<pre>T &amp; operator[](std::ptrdiff_t i) const; // never throws</pre>
+		<!--
+		<p>Returns a reference to element <b>i</b> of the array pointed to by the stored 
+			pointer. Behavior is undefined and almost certainly undesirable if the stored 
+			pointer is 0, or if <b>i</b> is less than 0 or is greater than or equal to the 
+			number of elements in the array.</p>
+		-->
+		<p>
+			保持しているポインタが指す配列の <b>i</b> 番目の要素への参照を返す。
+			保持しているポインタが 0 のとき、及び
+			<b>i</b> が 0 未満または配列の要素数以上の数であるとき、
+			この演算子のふるまいは未定であり、ほぼ確実に有害である。</p>
+
+		<h3><a name="get">get</a></h3>
+		<pre>T * get() const; // never throws</pre>
+		<!--
+		<p>Returns the stored pointer. <b>T</b> need not be a complete type. See the smart 
+			pointer <a href="smart_ptr.htm#Common requirements">common requirements</a>.</p>
+		-->
+		<p>保持しているポインタを返す。
+			<b>T</b> は完全型である必要はない。
+			スマートポインタの <a href="smart_ptr.htm#Common requirements">共通の要求事項</a>
+			を参照のこと。</p>
+		<h3><a name="unique">unique</a></h3>
+		<pre>bool unique() const; // never throws</pre>
+		<!--
+		<p>Returns true if no other <b>shared_array</b> is sharing ownership of the stored 
+			pointer, false otherwise. <b>T</b> need not be a complete type. See the smart 
+			pointer <a href="smart_ptr.htm#Common requirements">common requirements</a>.</p>
+		-->
+		<p>
+			保持しているポインタが他の <b>shared_array</b> に共有されていないとき true を返す。
+			そうでなければ false を返す。
+			<b>T</b> は完全型である必要はない。
+			スマートポインタの <a href="smart_ptr.htm#Common requirements">共通の要求事項</a>
+			を参照のこと。</p>
+
+		<h3><a name="use_count">use_count</a></h3>
+		<pre>long use_count() const; // never throws</pre>
+		<!--
+		<p>Returns the number of <b>shared_array</b> objects sharing ownership of the 
+			stored pointer. <b>T</b> need not be a complete type. See the smart pointer <a href="smart_ptr.htm#Common requirements">
+				common requirements</a>.</p>
+		-->
+		<p>
+			保持しているポインタを共有する <b>shared_array</b> オブジェクトの数を返す。
+			<b>T</b> は完全型である必要はない。
+			スマートポインタの <a href="smart_ptr.htm#Common requirements">共通の要求事項</a>
+			を参照のこと。</p>
+		<!--
+		<p>Because <b>use_count</b> is not necessarily efficient to implement for 
+			implementations of <b>shared_array</b> that do not use an explicit reference 
+			count, it might be removed from some future version. Thus it should be used for 
+			debugging purposes only, and not production code.</p>
+		-->
+		<p>
+			<b>use_count</b> は、明示的に参照カウントを使わないようにするための <b>shared_array</b>
+			の実装に必要とされて用意されているものではないため、
+			将来のバージョンでは削除される可能性がある。
+			従って、<b>use_count</b> はデバッグや試験の為にだけ使用するべきで、製品のコードに使用するべきでない。 </p>
+
+		<h3><a name="swap">swap</a></h3>
+		<pre>void swap(shared_ptr &amp; b); // never throws</pre>
+		<!--
+		<p>Exchanges the contents of the two smart pointers. <b>T</b> need not be a 
+			complete type. See the smart pointer <a href="smart_ptr.htm#Common requirements">common 
+				requirements</a>.</p>
+		-->
+		<p>
+			二つのスマートポインタの中身を交換する。
+			<b>T</b> は完全型である必要はない。
+			スマートポインタの <a href="smart_ptr.htm#Common requirements">共通の要求事項</a>
+			を参照のこと。</p>
+
+		<h2><a name="functions">Free Functions</a></h2>
+		<h3><a name="comparison">comparison</a></h3>
+		<pre>template&lt;typename T&gt;
+  bool operator==(shared_array&lt;T&gt; const &amp; a, shared_array&lt;T&gt; const &amp; b); // never throws
+template&lt;typename T&gt;
+  bool operator!=(shared_array&lt;T&gt; const &amp; a, shared_array&lt;T&gt; const &amp; b); // never throws
+template&lt;typename T&gt;
+  bool operator&lt;(shared_array&lt;T&gt; const &amp; a, shared_array&lt;T&gt; const &amp; b); // never throws</pre>
+		<!--
+		<p>Compares the stored pointers of the two smart pointers. <b>T</b> need not be a 
+			complete type. See the smart pointer <a href="smart_ptr.htm#Common requirements">common 
+				requirements</a>.</p>
+		-->
+		<p>
+			二つのスマートポインタが保持するポインタを比較する。
+			<b>T</b> は完全型である必要はない。
+			スマートポインタの <a href="smart_ptr.htm#Common requirements">共通の要求事項</a>
+			を参照のこと。</p>
+		<!--
+		<p>The <b>operator&lt;</b> overload is provided to define an ordering so that <b>shared_array</b>
+			objects can be used in associative containers such as <b>std::map</b>. The 
+			implementation uses <b>std::less&lt;T *&gt;</b> to perform the comparison. This 
+			ensures that the comparison is handled correctly, since the standard mandates 
+			that relational operations on pointers are unspecified (5.9 [expr.rel] 
+			paragraph 2) but <b>std::less&lt;&gt;</b> on pointers is well-defined (20.3.3 
+			[lib.comparisons] paragraph 8).</p>
+		-->
+		<p>
+		<b>
+			<!--この辺の訳は曖昧-->
+			operator&lt;</b> オーバーロードは、<b>shared_ptr</b> オブジェクトの順序付けを定義し、
+			<b>std::map</b> などの連想コンテナで使えるようにするために提供される。
+			<!-- "The" implementaiton : std::map のことだろうか？--><b>std::map</b> の実装では、
+			比較を行うために <b>std::less&lt;T*&gt;</b> を用いる。
+			これにより、比較が正しく扱われることを確実にする。
+			<!--standard mandates : 恐らく C++ Standard ISO/IEC 14882 の事であろう-->
+			C++ 標準によると、ポインタに対する関係演算の結果は不定であるが
+			(5.9 [expr.rel] paragraph 2)、
+			ポインタに対する <b>std::less&lt;&gt;</b> の結果は明確に定義されている。 (20.3.3 
+			[lib.comparisons] paragraph 8).</p>
+		<h3><a name="free-swap">swap</a></h3>
+		<pre>template&lt;typename T&gt;
+  void swap(shared_array&lt;T&gt; &amp; a, shared_array&lt;T&gt; &amp; b) // never throws</pre>
+		<!--
+		<p>Equivalent to <b>a.swap(b)</b>. Matches the interface of <b>std::swap</b>. 
+			Provided as an aid to generic programming.</p>
+		-->
+		<p><b>a.swap(b)</b> と等価。
+			<b>std::swap</b> のインターフェースとの一貫性を図り、
+			ジェネリックプログラミングを補助するために用意されている。</p>
+		<hr>
+		<p>Revised <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%d %B %Y" startspan -->
+			8 February 2002<!--webbot bot="Timestamp" i-checksum="38439" endspan --></p>
+		<p>Copyright 1999 Greg Colvin and Beman Dawes. Copyright 2002 Darin Adler. 
+			Permission to copy, use, modify, sell and distribute this document is granted 
+			provided this copyright notice appears in all copies. This document is provided 
+			"as is" without express or implied warranty, and with no claim as to its 
+			suitability for any purpose.</p>
+
+		<p>Japanese Translation Copyright (C) 2003
+		<a href="mailto:lenoir@zeroscape.org">Ryo Kobayashi</a>,
+			オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の
+			複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」
+			に提供されており、いかなる明示的、暗黙的保証も行わない。また、
+			いかなる目的に対しても、その利用が適していることを関知しない。
+		</p>
+
+	</body>
+</html>

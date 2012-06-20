@@ -1,0 +1,106 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=EUC-JP"><!--*- encoding: euc-jp -*-->
+	<title>BOOST_PP_FOR</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">
+</head>
+<body>
+	<div style="margin-left:  0px;">
+		<b>BOOST_PP_FOR</b> マクロは汎用の横断的繰り返しの構築を表す。
+	</div>
+	<h4>Usage</h4>
+		<div class="code">
+			<b>BOOST_PP_FOR</b>(<i>state</i>, <i>pred</i>, <i>op</i>, <i>macro</i>)
+		</div>
+	<h4>Arguments</h4>
+		<dl>
+			<dt>state</dt>
+			<dd>
+			初期状態。
+			</dd>
+			<dt>pred</dt>
+			<dd>
+			<i>pred</i>(<i>r</i>, <i>state</i>) という形の2項述語。
+			このマクロは <i>0</i> から <b>BOOST_PP_LIMIT_MAG</b> 
+			までの範囲の整数値に展開されなければならない。
+			<b>BOOST_PP_FOR</b> はこの述語が非0を返す間、 <i>macro</i> を繰り返し展開する。
+			このマクロは利用可能な次の <b>BOOST_PP_FOR</b> の繰り返しと、
+			現在の <i>state</i> と共に呼び出される。
+			</dd>
+			<dt>op</dt>
+			<dd>
+			<i>op</i>(<i>r</i>, <i>state</i>) という形の2項演算。
+			この演算は <b>BOOST_PP_FOR</b> によって、
+			利用可能な次の <b>BOOST_PP_FOR</b> の繰り返しと、現在の <i>state</i> と共に展開される。
+			このマクロは <i>pred</i> が <i>0</i> を返すまで、
+			新しい <i>state</i> を作りながら、 <i>state</i> に繰り返し適用される。
+			</dd>
+			<dt>macro</dt>
+			<dd>
+			<i>macro</i>(<i>r</i>, <i>state</i>) という形の2項演算。
+			このマクロは <b>BOOST_PP_FOR</b> によって、
+			利用可能な次の <b>BOOST_PP_FOR</b> の繰り返しと、現在の <i>state</i> と共に展開される。
+			このマクロは <b>BOOST_PP_FOR</b> によって、
+			<i>pred</i> が <i>0</i> を返すまで繰り返される。
+			</dd>
+		</dl>
+	<h4>Remarks</h4>
+		<div>
+		このマクロは次のシーケンスに展開される:
+			<div>
+				<i>macro</i>(<i>r</i>, <i>state</i>) <i>macro</i>(<i>r</i>, <i>op</i>(<i>r</i>, <i>state</i>)) ... <i>macro</i>(<i>r</i>, <i>op</i>(<i>r</i>, ... <i>op</i>(<i>r</i>, <i>state</i>) ... ))
+			</div>
+		</div>
+		<div>
+		<i>pred</i>, <i>op</i>, <i>macro</i> に渡される <i>r</i> の値は、
+		利用可能な次の <b>BOOST_PP_FOR</b> の繰り返しを表す。
+		<b>_R</b> 接尾辞を持つ他のマクロの仲間は内部で <b>BOOST_PP_FOR</b> を使っている。
+		例えば、 <b>BOOST_PP_LIST_FOR_EACH</b> や <b>BOOST_PP_LIST_FOR_EACH_R</b> である。
+		これらの <b>_R</b> バージョンを使うことは厳密には必要ではないが、
+		(<i>pred</i>, <i>op</i>, <i>macro</i> に渡される) <i>r</i> の値をこれらのマクロに渡すことで、
+		最も効率的に <b>BOOST_PP_FOR</b> に再入することが出来る。
+		</div>
+		<div>
+		<i>r</i> の値を単純に他のマクロに渡すのではなく直接使うには、 <b>BOOST_PP_FOR_<i>r</i></b> を見よ。
+		</div>
+		<div>
+		以前、このマクロは <b>BOOST_PP_FOR</b> の中で再帰的に使うことが出来なかった。
+		この制限は今は存在しない。
+		ライブラリは自動的に、利用可能な次の <b>BOOST_PP_FOR</b> の繰り返しを発見することが出来る。
+		</div>
+	<h4>See Also</h4>
+		<ul>
+			<li><a href="for_r.html">BOOST_PP_FOR_<i>r</i></a></li>
+			<li><a href="limit_mag.html">BOOST_PP_LIMIT_MAG</a></li>
+		</ul>
+	<h4>Requirements</h4>
+		<div>
+			<b>Header:</b> &nbsp;<a href="../headers/repetition/for.hpp.html">&lt;boost/preprocessor/repetition/for.hpp&gt;</a>
+		</div>
+	<h4>Sample Code</h4>
+<div><pre>
+#include &lt;<a href="../headers/arithmetic/inc.hpp.html">boost/preprocessor/arithmetic/inc.hpp</a>&gt;
+#include &lt;<a href="../headers/comparison/not_equal.hpp.html">boost/preprocessor/comparison/not_equal.hpp</a>&gt;
+#include &lt;<a href="../headers/repetition/for.hpp.html">boost/preprocessor/repetition/for.hpp</a>&gt;
+#include &lt;<a href="../headers/tuple/elem.hpp.html">boost/preprocessor/tuple/elem.hpp</a>&gt;
+
+#define PRED(r, state) \
+   <a href="not_equal.html">BOOST_PP_NOT_EQUAL</a>( \
+      <a href="tuple_elem.html">BOOST_PP_TUPLE_ELEM</a>(2, 0, state), \
+      <a href="inc.html">BOOST_PP_INC</a>(<a href="tuple_elem.html">BOOST_PP_TUPLE_ELEM</a>(2, 1, state)) \
+   ) \
+   /**/
+
+#define OP(r, state) \
+   ( \
+      <a href="inc.html">BOOST_PP_INC</a>(<a href="tuple_elem.html">BOOST_PP_TUPLE_ELEM</a>(2, 0, state)), \
+      <a href="tuple_elem.html">BOOST_PP_TUPLE_ELEM</a>(2, 1, state) \
+   ) \
+   /**/
+
+#define MACRO(r, state) <a href="tuple_elem.html">BOOST_PP_TUPLE_ELEM</a>(2, 0, state)
+
+<a href="for.html">BOOST_PP_FOR</a>((5, 10), PRED, OP, MACRO) // expands to 5 6 7 8 9 10
+</pre></div>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=EUC-JP"><!--*- encoding: euc-jp -*-->
+	<title>BOOST_PP_TUPLE_TO_LIST</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">
+</head>
+<body>
+	<div style="margin-left:  0px;">
+		<b>BOOST_PP_TUPLE_TO_LIST</b> マクロは <i>タプル</i> を <i>リスト</i> に変換する。
+	</div>
+	<h4>Usage</h4>
+		<div class="code">
+			<b>BOOST_PP_TUPLE_TO_LIST</b>(<i>size</i>, <i>tuple</i>)
+		</div>
+	<h4>Arguments</h4>
+		<dl>
+			<dt>size</dt>
+			<dd>
+			変換される <i>タプル</i> の大きさ。
+			有効な <i>タプル</i> の大きさの範囲は <i>0</i> から <b>BOOST_PP_LIMIT_TUPLE</b> までである。
+			</dd>
+			<dt>tuple</dt>
+			<dd>
+			変換される <i>タプル</i> 。
+			</dd>
+		</dl>
+	<h4>Remarks</h4>
+		<div>
+		<i>size</i> 引数は <i>タプル</i> の実際の大きさでなければならない。
+		</div>
+	<h4>See Also</h4>
+		<ul>
+			<li><a href="limit_tuple.html">BOOST_PP_LIMIT_TUPLE</a></li>
+		</ul>
+	<h4>Requirements</h4>
+		<div>
+			<b>Header:</b> &nbsp;<a href="../headers/tuple/to_list.hpp.html">&lt;boost/preprocessor/tuple/to_list.hpp&gt;</a>
+		</div>
+	<h4>Sample Code</h4>
+<div><pre>
+#include &lt;<a href="../headers/tuple/to_list.hpp.html">boost/preprocessor/tuple/to_list.hpp</a>&gt;
+
+<a href="tuple_to_list.html">BOOST_PP_TUPLE_TO_LIST</a>(3, (x, y, z))
+   // expands to (x, (y, (z, <a href="nil.html">BOOST_PP_NIL</a>)))
+</pre></div>
+</body>
+</html>

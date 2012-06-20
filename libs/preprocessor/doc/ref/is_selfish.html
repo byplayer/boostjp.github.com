@@ -1,0 +1,28 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=EUC-JP"><!--*- encoding: euc-jp -*-->
+	<title>BOOST_PP_IS_SELFISH</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">
+	
+</head>
+<body>
+	<div style="margin-left:  0px;">
+		<b>BOOST_PP_IS_SELFISH</b> マクロは <i>自己インクルード</i> が進行中の時に定義される。
+	</div>
+	<h4>Usage</h4>
+		<div class="code">
+			#if !defined(<b>BOOST_PP_IS_SELFISH</b>) // ...
+		</div>
+	<h4>Remarks</h4>
+		<div>
+		<i>自己インクルード</i> が進行中の時、このマクロは <i>1</i> に定義される。
+		これは、次のものも動作することを意味する:
+			<div>
+				#if !<b>BOOST_PP_IS_SELFISH</b> // ...
+			</div>
+		</div>
+		<div>
+		このマクロはファイルの無限インクルードを防ぐために定義される。
+		</div>
+</body>
+</html>

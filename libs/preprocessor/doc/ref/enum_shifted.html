@@ -1,0 +1,76 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+	<title>BOOST_PP_ENUM_SHIFTED</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">
+</head>
+<body>
+	<div style="margin-left:  0px;">
+		<b>BOOST_PP_ENUM_SHIFTED</b> マクロはコンマで区切られた、ずらされたリストを生成する。
+	</div>
+	<h4>Usage</h4>
+		<div class="code">
+			<b>BOOST_PP_ENUM_SHIFTED</b>(<i>count</i>, <i>macro</i>, <i>data</i>)
+		</div>
+	<h4>Arguments</h4>
+		<dl>
+			<dt>count</dt>
+			<dd>
+				<i>macro</i> を繰り返し呼び出す回数。
+				有効な値の範囲は <i>0</i> から <b>BOOST_PP_LIMIT_REPEAT</b> まで。
+			</dd>
+			<dt>macro</dt>
+			<dd>
+				<i>macro</i>(<i>z</i>, <i>n</i>, <i>data</i>) の形の三項演算。
+				このマクロは、
+				利用可能な次の反復の深さ、
+				現在の繰り返し番号、
+				付属の <i>data</i> の三引数でもって <b>BOOST_PP_ENUM_SHIFTED</b> により展開される。
+			</dd>
+			<dt>data</dt>
+			<dd>
+				<i>macro</i> に渡される付属データ。
+			</dd>
+		</dl>
+	<h4>Remarks</h4>
+		<div>
+			このマクロはコンマ区切りのシーケンスに展開される:
+			<div>
+				<i>macro</i>(<i>z</i>, <i>1</i>, <i>data</i>), ... <i>macro</i>(<i>z</i>, <i>count</i> - <i>1</i>, <i>data</i>)
+			</div>
+		</div>
+		<div>
+			<i>macro</i> に渡される <i>z</i> の値は、利用可能な次の反復の次元を表す。 
+			接尾辞 <b>_Z</b> を持つ他のマクロの仲間、例えば <b>BOOST_PP_ENUM_PARAMS</b> に対しての <b>BOOST_PP_ENUM_PARAMS_Z</b>、
+			は内部で <b>BOOST_PP_REPEAT</b> を使っている。
+			これらの <b>_Z</b> バージョンを使う必要は厳密にはないが、<i>z</i> の値（これは <i>macro</i> に渡される）をこれらのマクロに渡すことで、
+			最も効率よく <b>BOOST_PP_REPEAT</b> に再入できる。
+		</div>
+		<div>
+			この <i>z</i> の値を単純に他のマクロに渡すのではなく、直接使うためには、<b>BOOST_PP_ENUM_SHIFTED_<i>z</i></b> を見よ。
+		</div>
+		<div>
+			以前、このマクロは <b>BOOST_PP_REPEAT</b> の中で再帰的に使うことは出来なかった。
+			この制限はもう存在しない。ライブラリは自動的に実行可能な次の反復の深さを発見できるからだ。
+		</div>
+	<h4>See Also</h4>
+		<ul>
+			<li><a href="enum_shifted_z.html">BOOST_PP_ENUM_SHIFTED_<i>z</i></a></li>
+			<li><a href="limit_repeat.html">BOOST_PP_LIMIT_REPEAT</a></li>
+		</ul>
+	<h4>Requirements</h4>
+		<div>
+			<b>Header:</b> &nbsp;<a href="../headers/repetition/enum_shifted.hpp.html">&lt;boost/preprocessor/repetition/enum_shifted.hpp&gt;</a>
+		</div>
+	<h4>Sample Code</h4>
+<div><pre>
+#include &lt;<a href="../headers/repetition/enum.hpp.html">boost/preprocessor/repetition/enum.hpp</a>&gt;
+#include &lt;<a href="../headers/repetition/enum_shifted.hpp.html">boost/preprocessor/repetition/enum_shifted.hpp</a>&gt;
+
+#define TYPE(z, n, type) type
+
+<a href="enum.html">BOOST_PP_ENUM</a>(5, TYPE, int) // int, int, int, int, int に展開される
+<a href="enum_shifted.html">BOOST_PP_ENUM_SHIFTED</a>(5, TYPE, int) // int, int, int, int に展開される
+</pre></div>
+</body>
+</html>

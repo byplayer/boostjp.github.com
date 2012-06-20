@@ -1,0 +1,217 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="ja">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Boost.Signals: クラステンプレート signalN</title>
+  </head>
+
+  <body bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080">
+
+  <h1><IMG SRC="../../../../c++boost.gif" WIDTH="276" HEIGHT="86" ALT="Boost">Boost.Signals: クラステンプレート <code>signal<em>N</em></code></h1>
+
+<h2>ヘッダ</h2>
+<p> <em>N</em> はサポートされているシグナルのパラメタ数である。
+つまり、
+ヘッダ <code>&lt;boost/signals/signal0.hpp&gt;</code> には <code>signal0</code> が含まれており、
+ヘッダ <code>&lt;boost/signals/signal1.hpp&gt;</code> には <code>signal1</code> が含まれている。
+サポートされているシグナルの最大パラメタ数は実装定義だが、
+最低 10 であることが要求される。
+<pre>
+#include &lt;boost/signals/signal<em>N</em>.hpp&gt;
+</pre>
+
+<h2>概要</h2>
+<p> 本ドキュメントは複数の関係するクラス <code>signal<em>0</em></code>,
+<code>signal<em>1</em></code>, <code>signal<em>2</em></code> などを扱う。
+ここで末尾の数値は、シグナルとそれに接続されたスロットがとるパラメタ数を表す。
+すべてのクラスを列挙する代わりに、
+単一の例 <code>signal<em>N</em></code> について記述する。
+なお <em>N</em> は関数のパラメタ数を表す。
+
+<pre>
+<b>namespace</b> boost {
+  <b>template</b>&lt;<b>typename</b> R,
+           <b>typename</b> T1,
+           <b>typename</b> T2,
+           ...
+           <b>typename</b> T<em>N</em>,
+           <b>typename</b> <a href="#combiner">Combiner</a> = <a href="last_value.html">last_value</a>&lt;R&gt;,
+           <b>typename</b> <a href="#slot_group">Group</a> = <b>int</b>,
+           <b>typename</b> <a href="#group_compare">GroupCompare</a> = std::less&lt;Group&gt;,
+           <b>typename</b> <a href="#slot_function_type">SlotFunction</a> = <a href="../../../function/doc/reference.html">boost::function<em>N</em></a>&lt;R, T1, T2, ..., T<em>N</em>&gt; &gt;
+  <b>class</b> signal<em>N</em> :
+    <a href="../../../utility/utility.htm#noncopyable">boost::noncopyable</a>, <em>// 開示用 : クラスは <a href="../../../thread/doc/overview.html#NonCopyable">Noncopyable</a> 要求を満たす</em>
+    <a href="trackable.html">boost::trackable</a>
+  {
+  <b>public</b>:
+    <b>typedef</b> <b>typename</b> Combiner::result_type result_type;
+    <b>typedef</b> Combiner combiner_type;
+    <b>typedef</b> Group group_type;
+    <b>typedef</b> GroupCompare group_compare_type;
+    <b>typedef</b> SlotFunction slot_function_type;
+    <b>typedef</b> <a href="slot.html">slot</a>&lt;slot_function_type&gt; slot_type;
+    <b>typedef</b> <em>implementation-defined</em> <a href="#slot_result_type">slot_result_type</a>; <em>SlotFunction が戻り値型 <b>void</b> を持つ場合は <b>void</b> でない可能性がある; そのほかの場合には SlotFunction の戻り値型</em>
+    <b>typedef</b> <em>implementation-defined</em> <a href="#slot_call_iterator">slot_call_iterator</a>; <em>// <code>value_type</code> が <code>R</code> である <a href="http://www.sgi.com/tech/stl/InputIterator.html">InputIterator</a></em>
+    <b>typedef</b> T1 argument_type; <em>// N == 1 のとき、シグナルは <a href="http://www.sgi.com/tech/stl/AdaptableUnaryFunction.html">AdaptableUnaryFunction</a> のモデルである</em>
+    <b>typedef</b> T1 first_argument_type; <em>// N == 2 のとき、シグナルは <a href="http://www.sgi.com/tech/stl/AdaptableBinaryFunction.html">AdaptableBinaryFunction</a> のモデルである</em>
+    <b>typedef</b> T2 second_argument_type; <em>// N == 2 のとき、シグナルは <a href="http://www.sgi.com/tech/stl/AdaptableBinaryFunction.html">AdaptableBinaryFunction</a> のモデルである</em>
+    
+    <b>typedef</b> T1 arg1_type;
+    <b>typedef</b> T2 arg2_type;
+             .
+             .
+             .
+    <b>typedef</b> T<em>N</em> arg<em>N</em>_type;
+
+    <a href="#constructor"><b>explicit</b> signal<em>N</em>(<b>const</b> combiner_type&amp; = combiner_type(), <b>const</b> group_compare_type&amp; = group_compare_type())</a>;
+    <a href="#destructor">~signal()</a>;
+    <a href="#connect">signals::connection connect(<b>const</b> slot_type&amp;)</a>;
+    <a href="#group_connect">signals::connection connect(<b>const</b> group_type<b>&amp;</b>, <b>const</b> slot_type&amp; slot)</a>;
+    <a href="#group_disconnect"><b>void</b> disconnect(<B>const</b> group_type<b>&amp;</b>)</a>;
+    <a href="#disconnect_all"><b>void</b> disconnect_all_slots()</a>;
+    <a href="#empty"><b>bool</b> empty() <b>const</b></a>;
+    <a href="#function_call_operator">result_type <b>operator()</b>(T1 a1, T2 a2, ..., T<em>N</em> a<em>N</em>);</a>
+    <a href="#function_call_operator_const">result_type <b>operator()</b>(T1 a1, T2 a2, ..., T<em>N</em> a<em>N</em>) <b>const</b>;</a>
+
+  <b>private</b>:
+    combiner_type combiner; <em>// 開示用</em>
+  };
+}
+</pre>
+
+<hr><h2>関連型</h2>
+<h3><a name="combiner">Combiner</a></h3>
+<p> Combiner はイテレータのシーケンス <code>[first, last)</code> を受け取り、
+シーケンス中のいくつかのイテレータを参照外しして値を戻す関数オブジェクトである。
+Combiner に渡されるイテレータの型は <a href="#slot_call_iterator">slot call iterator</a> である。
+
+<h3><a name="slot_group">Group</a></h3>
+<p> Group は、接続をグループ化するために用いる型を定義する。これは <a href="http://www.sgi.com/tech/stl/DefaultConstructible.html"><code>DefaultConstructible</code></a> かつ <a href="http://www.sgi.com/tech/stl/CopyConstructible.html"><code>CopyConstructible</code></a> でなければならない。
+
+<h3><a name="group_compare">GroupCompare</a></h3>
+<p> GroupCompare は、実引数型が <a href="#slot_group">group type</a> と一致する <a href="http://www.sgi.com/tech/stl/BinaryPredicate.html"><code>BinaryPredicate</code></a> である。
+これは接続グループの順序関係を定める。
+
+<h3><a name="slot_function_type">SlotFunction</a></h3>
+<p> SlotFunction は、
+他の互換性がある関数オブジェクトからコンストラクト可能な関数オブジェクトアダプタであることが要求される
+(互換性は SlotFunction それ自身によって定義される)。
+SlotFunction は <code>T1, T2, .. T<em>N</em></code> 型のパラメタを受け取り、
+シグナルのテンプレートパラメタ型 <code>R</code> に変換可能な結果を返す必要がある; 
+ただし <code>R</code> が void である場合には SlotFunction の戻り値型はすべて無視されることに注意。
+
+<p> 他のシグナルへの接続、ならびに関数オブジェクトの参照への接続では、
+SlotFunction は <a href="../../../bind/ref.html"><code>reference_wrapper</code></a> オブジェクトを受理可能である必要がある。
+
+<hr><h2>メンバ</h2>
+<h3><a name="slot_result_type"><code>slot_result_type</code> 型</a></h3>
+<p> <code>SlotFunction</code> が <code><b>void</b></code> を戻す場合、
+スロットの戻り値型は実装定義である; そうでないばあいにはスロットの戻り値型は <code>SlotFunction</code> 関数オブジェクトによって戻される型であることが要求される。
+
+<h3><a name="slot_call_iterator"><code>slot_call_iterator</code> 型</a></h3>
+<p> <code>value_type</code> が <code>R</code> であるような <a href="http://www.sgi.com/tech/stl/InputIterator.html"><code>InputIterator</code></a>。
+<code>slot_call_iterator</code> の参照外し演算子は、
+指定された実引数を与えてスロットを呼び出し、その結果を戻す責任を負う。
+イテレータを複数回参照外ししたときでもスロットが一度だけ呼び出されることを保証するため、
+結果はキャッシュされなければならない。
+
+<hr><h3>コンストラクタ</h3>
+<p><code><b>explicit</b> <a name="constructor">signal<em>N</em>(<b>const</b> combiner_type&amp; = combiner_type(), <b>const</b> group_compare_type&amp; = group_compare_type());</a></code>
+<ul>
+  <li><b>作用</b>: シグナルをスロットを含まない状態に初期化し、
+  与えられた統合子を内部記憶域にコピーし、
+  与えられたグループ比較関数オブジェクトを格納する。
+  <li><b>事後条件</b>: <code><b>this</b>-&gt;empty();</code></li>
+</ul>
+
+<hr><h3>デストラクタ</h3>
+<p><code><a name="destructor">~signal()</a>;</code>
+<ul>
+  <li><b>作用</b>: すべてのスロット接続を切断する。</li>
+</ul>
+
+<hr><h3>接続管理</h3>
+<p><code><a href="connection.html">signals::connection</a> <a name="connect">connect(<b>const</b> slot_type&amp; slot)</a>;</code>
+<ul>
+  <li><b>作用</b>: シグナル <code><b>this</b></code> を <code>slot</code> に接続する。
+        スロットが <em>非アクティブ</em> である場合、
+        たとえばスロット呼び出しに結合された <a href="trackable.html"><code>trackable</code></a> オブジェクトが破棄されている場合、
+        <code>connect</code> 呼び出しは無視される。</li>
+  <li><b>戻り値</b>: 新規に作成されたシグナル・スロット間の接続を参照する <a href="connection.html"><code>signals::connection</code></a> オブジェクト;
+       <code>slot</code> が非アクティブである場合、切断状態の接続が返る。</li>
+  <li><b>例外</b>: 強い例外保証。例外が発生すると常に、スロットはシグナルに接続された状態にならない。</li>
+</li>
+  <li><b>計算量</b>: <em>O(lg n)</em>。ここで <em>n</em> はシグナルが認識しているスロット数。</li>
+  <li><b>注記</b>: シグナル呼び出し中に接続されたスロットが直ちに呼び出されるか否かは、不定である。</li>
+</ul>
+
+<p><code><a href="connection.html">signals::connection</a> <a name="group_connect">connect(<b>const</b> group_type<b>&amp;</b> group, <b>const</b> slot_type&amp; slot);</a></code>
+<ul>
+  <li><b>作用</b>: 与えられたスロットを (<code>connect(slot)</code> と同様に) シグナルに接続し、
+このスロット接続を与えられたグループ <code>group</code> に関連づける。</li>
+  <li><b>戻り値</b>: 新規に作成されたシグナル・スロット間の接続を参照する <a href="connection.html"><code>signals::connection</code></a> オブジェクト。</li>
+  <li><b>例外</b>: 強い例外保証。例外が発生すると常に、スロットはシグナルに接続された状態にならない。</li>
+  <li><b>計算量</b>: <em>O(lg n)</em>。ここで <em>n</em> はシグナルが認識しているスロット数。</li>
+  <li><b>注記</b>: シグナル呼び出し中に接続されたスロットが直ちに呼び出されるか否かは、不定である。</li>
+</ul>
+
+<p><code><a name="group_disconnect"><b>void</b> disconnect(<b>const</b> group_type<b>&amp;</b> group);</a></code>
+<ul>
+  <li><b>作用</b>: 与えられたグループ中の全スロットが切断される。</li>
+  <li><b>例外</b>: ユーザのデストラクタが投げない限りは、例外を投げない。
+ユーザのデストラクタが例外を投げると、グループ中の全スロットが切断されない可能性がある。</li>
+  <li><b>計算量</b>: <em>O(lg n) + k</em>。ここで <em>n</em> はシグナルが認識しているスロット数であり、
+<em>k</em> は <!-- XXX : 原文の不備 --> <code>group</code> に含まれるスロット数である。</li>
+</ul>
+
+<p><code><a name="disconnect_all"><b>void</b> disconnect_all_slots()</a>;</code>
+<ul>
+  <li><b>作用</b>: シグナルに接続された全スロットを切断する。</li>
+  <li><b>事後条件</b>: <code><b>this</b>-&gt;empty()</code>.</li>
+  <li><b>例外</b>: 切断するスロットが例外を投げる場合、すべてのスロットが切断されない可能性がある。</li>
+  <li><b>計算量</b>: シグナルが認識しているスロット数に比例。</li>
+  <li><b>注記</b>: シグナルがスロットを呼び出している最中を含めて、シグナルの生存期間中、いつでも呼び出してよい。
+</li>
+</ul>
+
+<p><code><a name="empty"><b>bool</b> empty() <b>const</b></a>;</code>
+<ul>
+  <li><b>戻り値</b>: そのシグナルに接続されたスロットがない場合 <code><b>true</b></code>、そうでなければ <code><b>false</b></code>。
+  <li><b>例外</b>: なし。</li>
+  <li><b>計算量</b>: シグナルが認識しているスロット数に比例。</li>
+  <li><b>論拠</b>: スロットは、そのスロットの実行中も含めて、任意の時点で切断することが可能である。
+したがって実装は切断されたスロットのリストを検索し、まだスロットが接続されているかを決定しなければならない可能性がある。</li>
+</ul>
+
+<hr><h3>シグナル呼び出し</h3>
+<p>
+<pre>
+<a name="function_call_operator">result_type <b>operator()</b>(T1 a1, T2 a2, ..., T<em>N</em> a<em>N</em>);</a>
+<a name="function_call_operator_const">result_type <b>operator()</b>(T1 a1, T2 a2, ..., T<em>N</em> a<em>N</em>) <b>const</b>;</a>
+</pre>
+<ul>
+  <li><b>作用</b>: <code>slot_call_iterator</code> の範囲 <code>[first, last)</code> を与えて統合子を呼び出す (言い換えると <code>combiner(first, last)</code>)。この範囲は、各スロットに与えられたパラメタの集合 <code>a1, a2, ..., a<em>N</em></code> を渡して呼び出した結果をイテレートする。スロットはグループ比較関数オブジェクトによって与えられる半順序関係にしたがって呼び出されるが、グループに所属しないスロットは最後に呼ばれる。
+</li>
+  <li><b>戻り値</b>: 統合子によって戻された結果。</li>
+  <li><b>例外</b>: スロット呼び出しによって例外が投げられた、
+あるいは統合子が渡されたスロットを参照外ししなかった場合、
+接続されたスロットの内部リストに含まれるその後のスロットは呼び出されない。
+</li>
+  <li><b>注記</b>: <code><b>const</b></code> 版の関数呼び出し演算子は統合子を <code><b>const</b></code> として実行する一方で、非<code><b>const</b></code> 版は統合子を非 <code><b>const</b></code> として実行する。
+  <p>同一グループ中のメンバー、ならびにグループに所属していないスロット間の順序は不定である。
+  <p> 使用される統合子によっては、
+スロットが一つもシグナルに接続されていない状態で関数呼び出し演算子を呼び出すと未定義動作を引き起こす可能性がある。
+既定の統合子は、
+戻り値型が <code><b>void</b></code> の場合にはゼロ個のスロットに対しても正しく定義されているが、
+戻り値型が他の型の場合には未定義である (なぜなら戻り値を合成する方法がないから)。
+</li>
+
+</ul>
+    <hr>
+    <address><a href="http://www.cs.rpi.edu/~gregod">Doug Gregor</a></address>
+<!-- Created: Fri Jul 13 10:57:20 EDT 2001 -->
+<!-- hhmts start -->
+Last modified: Fri Oct 11 05:42:42 EDT 2002
+<!-- hhmts end -->
+  </body>
+</html>

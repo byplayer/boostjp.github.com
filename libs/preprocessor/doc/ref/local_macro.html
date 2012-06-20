@@ -1,0 +1,55 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=EUC-JP"><!--*- encoding: euc-jp -*-->
+	<title>BOOST_PP_LOCAL_MACRO</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">
+</head>
+<body>
+	<div style="margin-left:  0px;">
+		<b>BOOST_PP_LOCAL_MACRO</b> マクロは <b>BOOST_PP_LOCAL_ITERATE</b> によって使用されるユーザ定義 <i>名前付き外部引数</i> である。
+	</div>
+	<h4>Usage</h4>
+		<div class="code">
+			#define <b>BOOST_PP_LOCAL_MACRO</b>(<i>n</i>) ...
+		</div>
+	<h4>Arguments</h4>
+		<dl>
+			<dt>n</dt>
+			<dd>
+				<i>ローカル反復</i> メカニズムから受け取った現在の反復値。
+			</dd>
+		</dl>
+	<h4>Remarks</h4>
+		<div>
+			このマクロは自動的に再利用のために <b>BOOST_PP_LOCAL_ITERATE</b> 呼び出しによって未定義にされる。
+		</div>
+	<h4>See Also</h4>
+		<ul>
+			<li><a href="local_iterate.html">BOOST_PP_LOCAL_ITERATE</a></li>
+		</ul>
+	<h4>Sample Code</h4>
+<div><pre>
+#include &lt;<a href="../headers/iteration/local.hpp.html">boost/preprocessor/iteration/local.hpp</a>&gt;
+
+template&lt;int&gt; struct sample;
+
+#define <a href="local_macro.html">BOOST_PP_LOCAL_MACRO</a>(n) \
+   template&lt;&gt; struct sample&lt;n&gt; { \
+      enum { value = n }; \
+   }; \
+   /**/
+
+#define <a href="local_limits.html">BOOST_PP_LOCAL_LIMITS</a> (1, 5)
+
+#include <a href="local_iterate.html">BOOST_PP_LOCAL_ITERATE</a>()
+/* 
+template&lt;&gt; struct sample&lt;1&gt; { enum { value = 1 }; };
+template&lt;&gt; struct sample&lt;2&gt; { enum { value = 2 }; };
+template&lt;&gt; struct sample&lt;3&gt; { enum { value = 3 }; };
+template&lt;&gt; struct sample&lt;4&gt; { enum { value = 4 }; };
+template&lt;&gt; struct sample&lt;5&gt; { enum { value = 5 }; };
+に展開される
+*/
+</pre></div>
+</body>
+</html>

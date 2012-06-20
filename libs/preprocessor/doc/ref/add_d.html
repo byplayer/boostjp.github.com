@@ -1,0 +1,80 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=EUC-JP">
+	<title>BOOST_PP_ADD_D</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">
+</head>
+<body>
+	<div style="margin-left:  0px;">
+		<b>BOOST_PP_ADD_D</b> マクロは第二引数と第三引数の和に展開される。
+		これは <b>BOOST_PP_WHILE</b> 内で呼ばれる際には最も効率よく機能する。
+	</div>
+	<h4>Usage</h4>
+		<div class="code">
+			<b>BOOST_PP_ADD_D</b>(<i>d</i>, <i>x</i>, <i>y</i>)
+		</div>
+	<h4>Arguments</h4>
+		<dl>
+			<dt>d</dt>
+			<dd>
+				次の有効な <b>BOOST_PP_WHILE</b> 反復。
+			</dd>
+			<dt>x</dt>
+			<dd>
+				演算における一つ目の加数。
+				有効な値の範囲は <i>0</i> から <b>BOOST_PP_LIMIT_MAG</b> まで。
+			</dd>
+			<dt>y</dt>
+			<dd>
+				演算における二つ目の加数。
+				有効な値の範囲は <i>0</i> から <b>BOOST_PP_LIMIT_MAG</b> まで。
+			</dd>
+		</dl>
+	<h4>Remarks</h4>
+		<div>
+		  もし <i>x</i> と <i>y</i> の和が <b>BOOST_PP_LIMIT_MAG</b> よりも大きければ、演算結果は <b>BOOST_PP_LIMIT_MAG</b> に丸められる。
+		</div>
+		<div>
+			<i>x</i> が<i>y</i> より小さいかまたは同じとき、このマクロは最も効率的である。
+			しかしながら、その効率利得にはマクロ発動に先立って実際に二つの引数を比較するほどの価値はない。
+			言い換えれば、<i>x</i> は二つのオペランドのうち大きい方である可能性が<i>たぶん</i><font color="green">高そうな(逆じゃない?)</font>方であるべきだ。
+		</div>
+	<h4>See Also</h4>
+		<ul>
+			<li><a href="add.html">BOOST_PP_ADD</a></li>
+			<li><a href="limit_mag.html">BOOST_PP_LIMIT_MAG</a></li>
+		</ul>
+	<h4>Requirements</h4>
+		<div>
+			<b>Header:</b> &nbsp;<a href="../headers/arithmetic/add.hpp.html">&lt;boost/preprocessor/arithmetic/add.hpp&gt;</a>
+		</div>
+	<h4>Sample Code</h4>
+<div><pre>
+#include &lt;<a href="../headers/arithmetic/add.hpp.html">boost/preprocessor/arithmetic/add.hpp</a>&gt;
+#include &lt;<a href="../headers/arithmetic/dec.hpp.html">boost/preprocessor/arithmetic/dec.hpp</a>&gt;
+#include &lt;<a href="../headers/control/while.hpp.html">boost/preprocessor/control/while.hpp</a>&gt;
+#include &lt;<a href="../headers/tuple/elem.hpp.html">boost/preprocessor/tuple/elem.hpp</a>&gt;
+
+#define PRED(d, data) <a href="tuple_elem.html">BOOST_PP_TUPLE_ELEM</a>(2, 0, data)
+
+#define OP(d, data) \
+   ( \
+      <a href="dec.html">BOOST_PP_DEC</a>( \
+         <a href="tuple_elem.html">BOOST_PP_TUPLE_ELEM</a>(2, 0, data) \
+      ), \
+      <a href="add_d.html">BOOST_PP_ADD_D</a>( \
+         d, \
+         <a href="tuple_elem.html">BOOST_PP_TUPLE_ELEM</a>(2, 1, data), \
+         2 \
+      ) \
+   ) \
+   /**/
+
+// 'x' を 2 'n' 回インクリメントする
+#define STRIDE(x, n) <a href="tuple_elem.html">BOOST_PP_TUPLE_ELEM</a>(2, 1, <a href="while.html">BOOST_PP_WHILE</a>(PRED, OP, (n, x)))
+
+STRIDE(10, 2) // 14 に展開される
+STRIDE(51, 6) // 63 に展開される
+</pre></div>
+</body>
+</html>

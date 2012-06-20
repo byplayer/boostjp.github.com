@@ -1,0 +1,97 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> 
+<HTML>
+<HEAD>
+<TITLE>Pool</TITLE>
+<LINK HREF="../pool.css" REL="stylesheet" TYPE="text/css">
+</HEAD>
+<BODY>
+
+<IMG SRC="../../../../c++boost.gif" WIDTH=276 HEIGHT=86 ALT="C++ Boost">
+
+<H1 ALIGN=CENTER>User Allocators</H1>
+
+<P>
+<H2>はじめに</H2>
+
+<P>
+Pool オブジェクトはシステムにメモリーブロックを要求する必要があり、それを Pool はユーザーに割り当てるチャンクに分割する。
+様々な Pool インターフェースに対し、テンプレートパラメータである <SPAN CLASS="code">UserAllocator</SPAN> を指定することで、ユーザーはそれらのシステムメモリーブロックがどのように割り当てられるかを管理することができる。
+<P>
+<H2>意味</H2>
+
+<P>
+<TABLE BORDER ALIGN=CENTER>
+<CAPTION><EM>Symbol Table</EM></CAPTION>
+<TR><TH>Symbol<TH>意味
+<TR><TD CLASS="code">UserAllocator<TD>ユーザーアロケーター型
+<TR><TD CLASS="code">block<TD><SPAN CLASS="code">char *</SPAN>型の値
+<TR><TD CLASS="code">n<TD><SPAN CLASS="code">UserAllocator::size_type</SPAN>型の値
+</TABLE>
+
+<P>
+<TABLE BORDER ALIGN=CENTER>
+<CAPTION><EM>Typedefs</EM></CAPTION>
+<TR><TH>式<TH>型
+<TR><TD CLASS="code">UserAllocator::size_type<TD>
+アロケートされる最大オブジェクトのサイズを表現しうる符号無し整数型
+<TR><TD CLASS="code">UserAllocator::difference_type<TD>
+任意の2つのポインタの差を表現しうる符号付整数型
+</TABLE>
+
+<P>
+<TABLE BORDER ALIGN=CENTER>
+<CAPTION><EM>Allocation and Deallocation</EM></CAPTION>
+<TR><TH>式<TH>戻り型<TH>事前条件/注意事項
+<TR><TD CLASS="code">UserAllocator::malloc(n)<TD CLASS="code">char *<TD>
+システムから<SPAN CLASS="code">n</SPAN>バイトを割り当てようとする。
+メモリー枯渇時には0を返す。
+<TR><TD CLASS="code">UserAllocator::free(block)<TD CLASS="code">void<TD><SPAN CLASS="code">block</SPAN>
+<SPAN CLASS="code">block</SPAN> は以前に <SPAN CLASS="code">UserAllocator::malloc</SPAN> への呼び出しから返されたものでなくてはならない。
+</TABLE>
+
+<P>
+<H2>提供されている実装</H2>
+
+<P>
+2つの <SPAN CLASS="code">UserAllocator</SPAN> クラスが提供されている。
+両者とも pool.hpp の中にある(<A HREF="pool.html">pool</A> を参照)。
+テンプレートパラメータ <SPAN CLASS="code">UserAllocator</SPAN> のデフォルト値は常に <SPAN CLASS="code">default_user_allocator_new_delete</SPAN> である。
+<P>
+<H3>梗概</H3>
+
+<PRE CLASS="code">struct default_user_allocator_new_delete
+{
+  typedef std::size_t size_type;
+  typedef std::ptrdiff_t difference_type;
+
+  static char * malloc(const size_type bytes)
+  { return new (std::nothrow) char[bytes]; }
+  static void free(char * const block)
+  { delete [] block; }
+};
+
+struct default_user_allocator_malloc_free
+{
+  typedef std::size_t size_type;
+  typedef std::ptrdiff_t difference_type;
+
+  static char * malloc(const size_type bytes)
+  { return reinterpret_cast&lt;char *&gt;(std::malloc(bytes)); }
+  static void free(char * const block)
+  { std::free(block); }
+};</PRE>
+
+<P>
+<HR>
+
+<P>
+Copyright &copy; 2000, 2001 Stephen Cleary (<A HREF="mailto:shammah@voyager.net">shammah@voyager.net</A>)
+
+<P>
+This file can be redistributed and/or modified under the terms found in <A HREF="../copyright.html">copyright.html</A>
+
+<P>
+This software and its documentation is provided &quot;as is&quot; without express or implied warranty, and with no claim as to its suitability for any purpose.
+
+</BODY>
+</HTML>

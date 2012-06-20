@@ -1,0 +1,99 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> 
+<HTML>
+<HEAD>
+<TITLE>ct_gcd_lcm - Compile-Time GCD and LCM</TITLE>
+<LINK HREF="../pool.css" REL="stylesheet" TYPE="text/css">
+</HEAD>
+<BODY>
+
+<IMG SRC="../../../../c++boost.gif" WIDTH=276 HEIGHT=86 ALT="C++ Boost">
+
+<H1 ALIGN=CENTER>ct_gcd_lcm - コンパイル時 GCD および LCM</H1>
+
+<P>
+<H2>はじめに</H2>
+
+<P>
+detail/ct_gcd_lcm.hpp は2つのコンパイル時アルゴリズムを提供する。
+最大公約数と最小公倍数である。
+<P>
+<H2>梗概</H2>
+<PRE CLASS="code">namespace details {
+namespace pool {
+
+template &lt;unsigned A, unsigned B&gt;
+struct ct_gcd
+{
+  static const unsigned value = ...;
+};
+template &lt;unsigned A, unsigned B&gt;
+struct ct_lcm
+{
+  static const unsigned value = ...;
+};
+
+} // namespace pool
+} // namespace details</PRE>
+
+<P>
+<H2>意味</H2>
+
+<TABLE ALIGN=CENTER BORDER>
+<CAPTION><EM>Symbol Table</EM></CAPTION>
+<TR><TH>Symbol<TH>Meaning</TR>
+<TR><TD CLASS="code">A, B<TD>コンパイル時符号なし定整数<A HREF="#5.19/1"><SUP>[5.19/1]</SUP></A></TR>
+</TABLE>
+
+<TABLE ALIGN=CENTER BORDER>
+<CAPTION><EM>Semantics</EM></CAPTION>
+<TR><TH>Expression<TH>Result Type<TH>Value<TH>Precondition
+<TR><TD CLASS="code">ct_gcd&lt;A, B&gt;::value<TD>コンパイル時符号なし定整数<TD><SPAN CLASS="code">A</SPAN> と <SPAN CLASS="code">B</SPAN> の最大公約数
+<TD CLASS="code">A != 0 &amp;&amp; B != 0
+<TR><TD CLASS="code">ct_lcm&lt;A, B&gt;::value<TD>コンパイル時符号なし定整数<TD><SPAN CLASS="code">A</SPAN> と <SPAN CLASS="code">B</SPAN> の最小公倍数
+<TD CLASS="code">A != 0 &amp;&amp; B != 0
+</TABLE>
+
+<P>
+<H2>注意事項</H2>
+
+<P>
+コンパイル時アルゴリズムであるため、事前条件の違反はコンパイル時エラーを招く。
+<P>
+<H2>依存性</H2>
+
+<UL>
+<LI>&lt;boost/static_assert.hpp&gt; (see <A HREF="../../../static_assert/static_assert.htm">Boost.Static_Assert</A>), 事前条件が満たされていることを確認する
+</LI>
+<LI>&lt;boost/type_traits/ice.hpp&gt; (see <A HREF="../../../../more/int_const_guidelines.htm">Coding Guidelines for Integral Constant Expressions</A>), 移植性の一助
+</LI>
+</UL>
+
+<P>
+<H2>標準文書からの抜粋</H2>
+
+<P>
+<A NAME="5.19/1">
+<STRONG>5.19/1: Expressions: Constant Expressions:</STRONG>&quot;. . . <EM>整定数式</EM>は、リテラル(2.13)、列挙子、<SPAN CLASS="code">const</SPAN> 変数または定数式(8.5)で初期化された整数ないし列挙型の静的データメンバー、整数ないし列挙型の非型テンプレートパラメータ、<SPAN CLASS="code">sizeof</SPAN> 式のみを含むことができる。
+浮動小数リテラル(2.13.3)は整数ないし列挙型にキャストされる場合のみ現れることができる。
+整数ないし列挙型への型変換のみが使用できる。
+特に、<SPAN CLASS="code">sizeof</SPAN> 式を除いて、関数、クラスオブジェクト、ポインタ、参照は使用できず、代入、増分、減分、関数呼び出し、カンマ演算子は使用できない。&quot;</A>
+
+<P>
+<H2>将来の方向性</H2>
+
+<P>
+このヘッダーは Boost compile-time algorithms ライブラリに置き換えられるかもしれない。
+<P>
+<HR>
+
+<P>
+Copyright &copy; 2000, 2001 Stephen Cleary (<A HREF="mailto:shammah@voyager.net">shammah@voyager.net</A>)
+
+<P>
+This file can be redistributed and/or modified under the terms found in <A HREF="../copyright.html">copyright.html</A>
+
+<P>
+This software and its documentation is provided &quot;as is&quot; without express or implied warranty, and with no claim as to its suitability for any purpose.
+
+</BODY>
+</HTML>

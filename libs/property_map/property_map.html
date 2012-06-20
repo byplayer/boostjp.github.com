@@ -1,0 +1,392 @@
+<HTML>
+<!--
+  -- Copyright (c) Jeremy Siek 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  Silicon Graphics makes no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<Title>プロパティマップライブラリ(Property Map Library)</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+	ALINK="#ff0000"> 
+<IMG SRC="../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+<H1><A NAME="sec:property-maps"></A>
+Boost Property Map Library
+</H1>
+
+<!--
+The Boost Property Map Library is a small library that addresses the
+need to provide a generic interface for mapping between objects.  Most
+of the library is the interface definition, captured as a <a
+href="#sec:property-map-concepts">set of concepts</a>. In addition
+there are supporting <a href="#sec:property-map-tags">category
+tags</a> and a <a href="#sec:property-map-traits">traits class</a>, as
+well as <a href="#sec:property-map-types">some types</a> that
+implement the property map interface. These classes are not meant to
+fulfill all mapping needs, but more to serve as an example of how to
+implement the interface as well as covering a few common cases.
+-->
+Boost Property Map Libraryは、ジェネリックな、オブジェクト間のマッピングインターフェースを提供するという要請に、取り組んだ、小さなライブラリである。ライブラリのほとんどの部分は、インターフェース定義であり、<a href="#sec:property-map-concepts">コンセプトの集合</a>として捕らえられる。それに加え、サポート用の<a href="#sec:property-map-tags">種別タグ(category tag)</a>、<a href="#sec:property-map-traits">特性クラス(traits class)</a>、さらには、プロパティマップのインターフェースを実装する<a href="#sec:property-map-types">いくつかのタイプ</a>がある。それらのクラスは、すべてのマッピングにおける要請をよく満たしているわけではない。むしろ、多くの、一般的な場合に適用できるインターフェースを、実装する方法を例示している。
+
+<h2><A NAME="sec:property-map-concepts"></A>
+プロパティマップコンセプト(Property Map Concepts)
+</h2>
+
+<!--
+The property map interface consists of a set of concepts (see
+definition of &quot;concept&quot; in <a
+href="../concept_check/concept_check.htm#introduction">[1]</a> and <a
+href="http://www.sgi.com/tech/stl/stl_introduction.html">[2]</a>)
+that define a general purpose mechanism for mapping key objects to
+corresponding value objects, thereby hiding the details of how the
+mapping is implemented from algorithms that use property maps.  The
+property map requirements are purposefully vague on the type of the
+key and value objects to allow for the utmost flexibility.  Since the
+property map operations are global functions, it is possible to
+overload the map functions such that nearly arbitrary property map
+types and key types can be used. The interface for property maps
+consists of three functions: <tt>get()</tt>, <tt>put()</tt>, and
+<tt>operator[]</tt>. The following concrete example from <a
+href="./example1.cpp">example1.cpp</a> shows how the three functions
+could be used to access the addresses associated with various people.
+We use a separate function template here to highlight the parts of the
+program that use the property map concept interface. In the
+<tt>main()</tt> function we use <tt>std::map</tt> and
+<tt>boost::associative_property_map</tt>, but it would have been OK to
+use any type (including a custom type that you create) that fulfills
+the property map requirements.
+-->
+プロパティマップインターフェースは、コンセプトの集合により構成される。(コンセプト"concept"の定義を参照のこと<a
+href="../concept_check/concept_check.htm#introduction">[1]</a><a
+href="http://www.sgi.com/tech/stl/stl_introduction.html">[2]</a>)
+コンセプトは、キーオブジェクトとそれに対応する値オブジェクトをマップする、広汎な目的に用いられるメカニズムであり、それゆえに、プロパティマップを使用するアルゴリズムからプロパティマップの実装詳細を隠している。プロパティマップへの要請として、キーと値オブジェクトの型を意図的にあいまいにし、最大限の柔軟性を許すことがある。プロパティマップへの操作がグローバル関数により行われるため、マップ操作関数をオーバーロードでき、ほとんど任意にプロパティマップのタイプとキーのタイプを使用することができる。プロパティマップのインターフェースは、get(), put(), operator[]の三つの関数により構成される。次に示す具体的な例(<a href="./example1.cpp">example.cpp</a>)は、この三つの関数が、たくさんの人々と、それに関連付けられた住所をアクセスするために、どのように用いられるかを示す。
+私たちは、ここでは、独立した関数テンプレートを用い、プロパティマップのコンセプトが使用されるプログラムの一部分を!!!!明確にしめす。main()関数では、<tt>std::map</tt>と<tt>boost::associative_property_map</tt>を用いたが、他のどんな型(あなたが作成したカスタムな型も含む)でも大丈夫だろうし、それらの型は、プロパティマップへの要請をみたすだろう。
+
+<pre>#include &lt;iostream&gt;
+#include &lt;map&gt;
+#include &lt;string&gt;
+#include &lt;boost/property_map.hpp&gt;
+
+
+template &lt;typename AddressMap&gt;
+void foo(AddressMap address)
+{
+  typedef typename boost::property_traits&lt;AddressMap&gt;::value_type value_type;
+  typedef typename boost::property_traits&lt;AddressMap&gt;::key_type key_type;
+
+  value_type old_address, new_address;
+  key_type fred = &quot;Fred&quot;;
+  old_address = get(address, fred);
+  new_address = &quot;384 Fitzpatrick Street&quot;;
+  put(address, fred, new_address);
+
+  key_type joe = &quot;Joe&quot;;
+  value_type&amp; joes_address = address[joe];
+  joes_address = &quot;325 Cushing Avenue&quot;;
+}
+
+int
+main()
+{
+  std::map&lt;std::string, std::string&gt; name2address;
+  boost::associative_property_map&lt; std::map&lt;std::string, std::string&gt; &gt;
+    address_map(name2address);
+
+  name2address.insert(make_pair(std::string(&quot;Fred&quot;), 
+				std::string(&quot;710 West 13th Street&quot;)));
+  name2address.insert(make_pair(std::string(&quot;Joe&quot;), 
+				std::string(&quot;710 West 13th Street&quot;)));
+
+  foo(address_map);
+  
+  for (std::map&lt;std::string, std::string&gt;::iterator i = name2address.begin();
+       i != name2address.end(); ++i)
+    std::cout &lt;&lt; i-&gt;first &lt;&lt; &quot;: &quot; &lt;&lt; i-&gt;second &lt;&lt; &quot;\n&quot;;
+
+  return EXIT_SUCCESS;
+}</pre>
+
+<p>
+<!-- For each property map object there is a set of <i>valid keys</i>
+for which the mapping to value objects is defined.  Invoking a
+property map function on an <i>invalid</i> key results in
+undefined behavior. The property map concepts do not specify how
+this set of valid keys is created or modified. A function that uses a
+property map must specify the expected set of valid keys in its
+preconditions.
+-->
+それぞれの属性マップオブジェクトに対し、値オブジェクトへの対応付けが可能な<i>妥当なキー</i>の集合がある。属性マップ関数を<i>妥当ではない</i>キーを用いて呼び出した場合には、結果は未定義である。属性マップコンセプトは、妥当なキーが生成や変更の方法を定めない。属性マップを使用する関数は、期待される妥当なキーの集合を、関数呼び出しの事前条件として、指定しなければならない。
+
+<p>
+<!--
+The need for property maps came out of the design of the Boost
+Graph Library, whose algorithms needed an interface for accessing
+properties attached to vertices and edges in a graph. In this context
+the vertex and edge descriptors are the key type of the property
+maps.
+-->
+属性マップの必要性はBoost Graph Libraryのデザインにおいて、明らかになった。Boost Graph Libraryのアルゴリズムは、頂点と稜に対応付けられた属性をアクセスするインターフェースを必要とした。
+
+
+<!-- historical note about Decorators and Data Maps -->
+
+<!--
+
+<P>
+Several categories of property maps provide
+different access capabilities:
+<DL>
+<DT><STRONG>readable</STRONG></DT>
+<DD>The associated property data can only be read. 
+  The data is returned by-value. Many property maps defining the
+  problem input (such as edge weight) can be defined as readable
+  property maps.
+-->
+
+<P>
+プロパティマップの数多くのカテゴリは、異なるアクセス能力を提供している：
+<DL>
+<DT><STRONG>readable(読み取り可能)</STRONG></DT>
+<DD>関連付けられたプロパティのデータは、読み出すことができるのみである。
+  データは、値渡しで返される。問題領域における入力(たとえば、edgeやweight)を定義する多くのプロパティマップは、readableなプロパティマップとして定義することができる。
+
+<!--
+<P>
+</DD>
+<DT><STRONG>writeable</STRONG></DT>
+<DD>The associated property can only be written to.
+  The parent array used to record the paths in a bread-first search tree
+  is an example of a property map that would be defined writeable.
+-->
+
+<P>
+</DD>
+<DT><STRONG>writeable(書き込み可能)</STRONG></DT>
+<DD>関連付けられたプロパティに対する書き込みのみを行うことができる。
+  横優先検索ツリーのパスを記録するために用いられる親配列は、writable(書き込みのみ可能)なプロパティマップの例である。
+
+<!--
+<P>
+</DD>
+<DT><STRONG>read/write</STRONG></DT>
+<DD>The associated property can both be written and read.
+  The distance property use in Dijkstra's shortest paths algorithm
+  would need to provide both read and write capabilities.
+-->
+
+<P>
+</DD>
+<DT><STRONG>read/write(読み取り/書き込み可能)</STRONG></DT>
+<DD>関連付けられたプロパティに大して、読み出しと書き込みを行うことができる。
+  ダイクストラの最短経路探索アルゴリズムに用いられる距離プロパティは、読み出しと書き込みの両方の機能を提供する必要があるだろう。
+
+
+<!--
+<P>
+</DD>
+<DT><STRONG>lvalue(左辺値)</STRONG></DT>
+<DD>The associated property is actually represented in 
+  memory and it is possible to get a reference to it. 
+  The property maps in the lvalue
+  category also support the requirements for read/write property
+  maps.
+-->
+
+<P>
+</DD>
+<DT><STRONG>lvalue</STRONG></DT>
+<DD>関連付けられたプロパティはメモリ内に表現されており、参照を取得することができる。プロパティマップのlvalueカテゴリは、read/writeプロパティマップへの要請を満たす。
+
+<P>
+</DD>
+</DL>
+
+<P>
+4つのプロパティマップカテゴリから分離して定義されるコンセプトがある。
+これらのプロパティマップコンセプトは、以下にリストされる。また、それぞれのドキュメントがリンクされている。
+
+<ul>
+<li><a href="./ReadablePropertyMap.html">ReadablePropertyMap</a></li>
+<li><a href="./WritablePropertyMap.html">WritablePropertyMap</a></li>
+<li><a href="./ReadWritePropertyMap.html">ReadWritePropertyMap</a></li>
+<li><a href="./LvaluePropertyMap.html">LvaluePropertyMap</a></li>
+</ul>
+
+<!--
+<h2><a name="sec:property-map-tags">Property Map Category Tags</a></h2>
+
+<P>
+There is a tag struct for each of the categories of property
+maps, which is defined in the header
+<tt>&lt;boost/property_map.hpp&gt;</tt>.
+-->
+
+<h2><a name="sec:property-map-tags">プロパティマップカテゴリタグ(Property Map Category Tags)</a></h2>
+
+<P>
+タグ構造体が、それぞれのプロパティマップのカテゴリごとに存在し、ヘッダ<tt>&lt;boost/property_map.hpp&gt;</tt>において定義される。
+
+<PRE>namespace boost {
+
+  struct readable_property_map_tag { };
+
+  struct writable_property_map_tag { };
+
+  struct read_write_property_map_tag :
+    public readable_property_map_tag,
+    public writable_property_map_tag { };
+
+  struct lvalue_property_map_tag : 
+    public read_write_property_map_tag { };
+
+}</PRE>
+
+<!--
+<h2><a name="sec:property-map-traits">Property Map Traits</a></h2>
+
+<P>
+Similar to the <TT>std::iterator_traits</TT> class of the STL, there
+is a <TT>boost::property_traits</TT> class that can be used to deduce
+the types associated with a property map type: the key and value
+types, and the property map category. There is a specialization
+of <TT>boost::property_traits</TT> so that pointers can be used as
+property map objects. In addition, the property map
+functions are overloaded for pointers. These traits classes and
+functions are defined in <tt>&lt;boost/property_map.hpp&gt;</tt>.
+-->
+
+<h2><a name="sec:property-map-traits">プロパティマップ特性(Property Map Traits)</a></h2>
+
+<P>
+STLの<TT>std::iterator_traits</TT>クラスと同様に、プロパティマップで定義される型(キー型と値型、プロパティマップカテゴリ)の型推論に用いられる<TT>boost::property_traits</TT> クラス がある。また、<TT>boost::property_traits</TT>は、特殊化され、ポインタもプロパティマップのオブジェクトとして用いることができる。それに加え、プロパティマップ関数は、ポインタ型に対してオーバーロードされる。これらの用途に用いられる特性(traits)クラスと関数が、<tt>&lt;boost/property_map.hpp&gt;</tt>に定義される。
+
+
+<PRE>namespace boost {
+
+  template &lt;typename PropertyMap&gt;
+  struct property_traits {
+     typedef typename PropertyMap::key_type key_type;
+     typedef typename PropertyMap::value_type value_type;
+     typedef typename PropertyMap::category category;
+  };
+
+}</PRE>
+
+<!--
+
+<h2><a name="sec:property-map-types">Property Map Types</a></h2>
+
+<ul>
+  <li>Builtin C++ pointer types.<br>
+
+    The following specialization of the <tt>property_traits</tt> class
+    and the overloads of <tt>put()</tt> and <tt>get()</tt> make it
+    possible to use builtin C++ pointer types as property maps. These
+    are defined in <tt>boost/property_map.hpp</tt>. More specifically,
+    it means that <tt>T*</tt> is a model of <a
+    href="./LvaluePropertyMap.html">LvaluePropertyMap</a>, given a key
+    type that is at least convertible <tt>std::ptrdiff_t</tt>.
+-->
+
+<h2><a name="sec:property-map-types">プロパティマップで定義される型</a></h2>
+
+<ul>
+  <li>C++のポインタ型<br>
+
+    次に示す<tt>property_traits</tt>の特殊化と、<tt>put()</tt>関数と<tt>get()</tt>関数のオーバーロードがC++のポインタ型を用いて、C++のポインタ型をプロパティマップとして用いることを可能とする。これらは、<tt>boost/property_map.hpp</tt>にて、定義される。より明確に説明すると、<tt>T*</tt>は、<a
+    href="./LvaluePropertyMap.html">LvaluePropertyMap</a>のモデルであり、与えられたキー型は、少なくとも、<tt>std::ptrdiff_t</tt>に変換可能でなければならない。
+
+
+<PRE>namespace boost {
+  // specialization for using pointers as property maps
+  template &lt;typename T&gt;
+  struct property_traits&lt;T*&gt; {
+    typedef T value_type;
+    typedef std::ptrdiff_t key_type;
+    typedef random_access_iterator_pa_tag category;
+  };
+
+  // overloads of the property map functions for pointers
+  template&lt;&gt;
+  void put(T* pmap, std::ptrdiff_t k, const T&amp; val) { pmap[k] = val;  }
+
+  template&lt;&gt;
+  const T&amp; get(const T* pmap, std::ptrdiff_t k) { return pmap[k]; }
+
+}</PRE>
+  </li>
+  <li><a href="./identity_property_map.html">identity_property_map</a> </li>
+  <li><a href="./iterator_property_map.html">iterator_property_map</a></li>
+  <li><a href="./associative_property_map.html">associative_property_map</a></li>
+  <li><a href="./const_associative_property_map.html">const_associative_property_map</a></li>
+</ul>
+
+<!--
+
+<h3>History</h3>
+
+The property map interface originated as <i>data accessors</i> in
+Dietmar K&uuml;hl's Masters Thesis on generic graph algorithms.  The
+property map idea also appeared under the guise of <i>decorators</i>
+in early versions of the Generic Graph Component Library (GGCL), which
+is now the Boost Graph Library (BGL).  The main motivation for the
+property map interface was to support the access of data associated
+with vertices and edges in a graph, though the applicability of
+property maps goes beyond this.
+
+-->
+
+<h3>履歴</h3>
+
+プロパティマップのインターフェースは、ジェネリックなグラフアルゴリズムに関するDietmar K&uuml;hl'の修士論文で述べられた<i>data accessors</i>を起源とする。
+プロパティマップの概念は、Generic Graph Component Library (GGCL)の初期バージョン内における、<i>decorators</i>としても現れている。また、Generic Graph Component Library (GGCL)は、現在、Boost Graph Library (BGL)となっている。プロパティマップを構築する主な動機は、グラフ内の頂点や稜に対応付けられたデータへのアクセスをサポートすることであった。しかしながら、プロパティマップの適用範囲は、これを、超えている。
+
+<!--
+<h3>Acknowledgments</h3>
+
+Thanks go to Dietmar K&uuml;hl for coming up with this mechanism, and
+thanks go to the Boost members who helped refine and improve the
+property map interface. Thanks to Dave Abrahams for managing the
+formal review of the BGL which included the property map library.
+-->
+
+<h3>謝辞</h3>
+
+Dietmar K&uuml;hl へ。プロパティマップのメカニズムを持っての登場に感謝いたします。<br>
+Boostのメンバたちへ。プロパティマップインターフェースを発展させ、改善してくれたことに感謝いたします。<br>
+Dave Abrahamsへ。プロパティマップライブラリを含むBGLの査読を監督してくれたことに感謝いたします。<br>
+
+
+<!--
+<h3>Notes to Implementors</h3>
+
+Copying a property map should be inexpensive since they are often
+passed by value.
+-->
+
+<h3>実装者への注釈</h3>
+
+プロパティマップの複製のコストは、高くてはいけない。
+なぜなら、プロパティマップは、しばしば値渡しされるからである。
+
+
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000-2002</TD><TD>
+<a HREF="../../people/jeremy_siek.htm">Jeremy Siek</a>, Indiana University (<A HREF="mailto:jsiek@lsc.nd.edu">jsiek@lsc.nd.edu</A>)
+</TD></TR></TABLE>
+
+</BODY>
+</HTML> 

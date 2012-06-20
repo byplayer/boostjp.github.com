@@ -1,0 +1,681 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!--
+  == Copyright (c) Ronald Garcia, Jeremy Siek 2001
+  ==
+  == Permission to use, copy, modify, distribute and sell this software
+  == and its documentation for any purpose is hereby granted without fee,
+  == provided that the above copyright notice appears in all copies and
+  == that both that copyright notice and this permission notice appear
+  == in supporting documentation.  Jeremy Siek makes no
+  == representations about the suitability of this software for any
+  == purpose.  It is provided "as is" without express or implied warranty.
+  -->
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Boost 多次元配列ライブラリ (Boost.MultiArray)</title>
+</head>
+
+<body>
+
+<h1>
+   <img src="../../../c++boost.gif" alt="boost logo"
+    width="277" align="middle" height="86">
+   <br>Boost 多次元配列ライブラリ
+   <br>(Boost.MultiArray)
+</h1>
+
+<h2>Synopsis - 概要</h2>
+
+<p>
+Boost 多次元配列ライブラリは，多次元コンテナと，
+意味的に等価な連続データの配列へのアダプタを提供する。
+このライブラリのクラス群は，できるだけ STL コンテナと近い振る舞いをし，
+また N 次元配列の慣用句 (formulation) である，
+いわゆる "ベクタのベクタ" より便利でかつ有効な実装を提供する。
+配列はひとたび構築されるとリサイズできないが，
+保持するデータへの代替ビューを提供することによって，
+スライス (sliced) されまた形作られ (shaped) 得る。
+</p>
+
+
+<h2>Table of Contents - 目次</h2>
+
+<ol>
+      <li><a href="#sec_rationale">Rationale</a>
+      <li><a href="#sec_related">Related Work</a>
+      <li><a href="#sec_example">Short Example</a>
+      <li><a href="#sec_components">MultiArray Components</a>
+      <li><a href="#sec_assignment">Construction and Assignment</a>
+      <li><a href="#sec_generators">Array View and Subarray Type Generators</a>
+      <li><a href="#sec_dimensions">Specifying Array Dimensions</a>
+      <li><a href="#sec_access">Accessing Elements</a>
+      <li><a href="#sec_views">Creating Views</a>
+      <li><a href="#sec_storage">Storage Ordering</a>
+      <li><a href="#sec_base">Setting the Array Base</a>
+      <li><a href="#sec_reshape">Changing an Array's Shape</a>
+      <li><a href="#sec_concepts">MultiArray Concept</a>
+      <li><a href="#sec_testcases">Test Cases</a>
+</ol>  
+
+
+<a name="sec_rationale"></a>
+<h2>Rationale - 原論</h2>
+
+<p>C++ 標準ライブラリはいくつかのジェネリックなコンテナを提供するが，
+多次元配列型はない。
+<tt>std::vector</tt> を使うと "ネストしたベクタ" として
+N 次元配列をシミュレートできるが，
+巧みではなく (unwieldy) またメモリのオーバヘッドがかなりのものになり得る。
+ネイティブな C++ 配列 (例えば <tt>int arr[2][2][2];</tt>) を使うこともできるし，
+連続データの配列を動的に確保し，それを多次元配列のように見なして使うこともできる。
+<a href="../../array_traits/index.html">array_traits</a> 
+を使えば静的に定義された C++ 配列からその次元に関係なくイテレータを抽出できる。
+しかし，両者のケースでは，
+それらを受け付けるよう正しく特殊化されていない関数に渡すと，次元の情報は失われる。
+上記の他，<tt>std::vector</tt> も C++ 配列ベースの解も，
+多次元配列の特定のサブセットや "ビュー" に研ぐの都合のよい方法
+(a convenient method of honing in upon a specific subset
+or "view" of a multi-dimentional array) を提供しない。
+</p>
+
+<p>
+Boost.MultiArray は MultiArray コンセプト
+(N 次元コンテナのジェネリックなインタフェース) を定義する。
+このライブラリの主なコンポーネントは MultiArray をモデル化 (model) し，
+同様にユーザデータを MultiArray にモデル化できるよう適合することをサポートする。
+</p>
+
+
+<a name="sec_related"></a>
+<h2>Related Work - 関連するモノ</h2>
+
+<p>
+<a href="../../array/index.htm">boost::array</a> と
+<a href="http://www.sgi.com/tech/stl/Vector.html">std::vector</a>
+はユーザデータの 1 次元コンテナである。
+両者は自分自身のメモリを管理する。
+<tt>std::valarray</tt> は低レベルな C++ 標準ライブラリで，
+数値アプリケーションに移植制のある高いパフォーマンスを提供することになっている。
+<a href="http://www.oonumerics.org/blitz/">Blitz++</a> 
+は Todd Veldhuizen が開発した配列ライブラリである。
+これは配列ベースの数値アプリケーションへ
+FORTRAN に近いパフォーマンスを提供するために高度な C++ テクニックを使っている。
+<a href="../../array_traits/index.html">array_traits</a> 
+は Boost のベータ版のライブラリで，
+ネイティブの C++ 配列からイテレータを作成することになっている。
+
+このライブラリは <a href="../../array/index.html">boost::array</a>
+が C の 1 次元配列に対してするように C スタイルの N 次元配列を増加する。
+(;´Д｀)? .oＯ(This library is analogous to 
+<a href="">boost::array</a> in that it augments C style N-dimensional
+arrays, as <tt>boost::array</tt> does for C one-dimensional arrays.)
+</p>
+
+
+<a name="sec_example"></a>
+<h2>Short Example - 短いサンプル</h2>
+
+<p>以下は <tt>multi_array</tt> を使う簡潔なサンプルである:</p>
+
+<blockquote>
+<pre>
+#include "boost/multi_array.hpp"
+#include &lt;cassert&gt;
+
+int 
+main () {
+  // Create a 3D array that is 3 x 4 x 2
+  typedef boost::multi_array&lt;double, 3&gt; array_type;
+  typedef array_type::index index;
+  array_type A(boost::extents[3][4][2]);
+
+  // Assign values to the elements
+  int values = 0;
+  for(index i = 0; i != 3; ++i) 
+    for(index j = 0; j != 4; ++j)
+      for(index k = 0; k != 2; ++k)
+        A[i][j][k] = values++;
+
+  // Verify values
+  int verify = 0;
+  for(index i = 0; i != 3; ++i) 
+    for(index j = 0; j != 4; ++j)
+      for(index k = 0; k != 2; ++k)
+        assert(A[i][j][k] == verify++);
+
+  return 0;
+}
+</pre>
+</blockquote>
+
+<a name="sec_components"></a>
+<h2>MultiArray Components</h2>
+
+<p>Boost.MultiArray は 3 つのユーザレベルクラステンプレートを提供する:</p>
+
+<ol>
+      <li><a href="./reference.html#multi_array"><tt>multi_array</tt></a> -
+      defined in "boost/multi_array.hpp",
+
+      <li><a href="./reference.html#multi_array_ref"><tt>multi_array_ref</tt></a> -
+      defined in "boost/multi_array_ref.hpp", and
+
+      <li><a href="./reference.html#const_multi_array_ref"><tt>const_multi_array_ref</tt></a>  -
+      defined in "boost/multi_array_ref.hpp"
+</ol>
+
+<p>
+<tt>multi_array</tt> はコンテナテンプレートである。
+インスタンス化されると，
+構築時に指定された寸法（次元？）に相当する要素の個数分スペースを確保する。
+</p>
+
+<p>
+<tt>multi_array_ref</tt> は既存データの配列が <tt>multi_array</tt>
+インタフェースを提供するよう適合させる。
+<tt>multi_array_ref</tt> は渡されたデータを所有しない。
+</p>
+
+<p>
+<tt>const_multi_array_ref</tt> は <tt>multi_array_ref</tt>
+と類似しているが配列の内容が不変であることを保証する。
+従って型 <i>T const*</i> へのポインタをラップできる。
+</p>
+
+<p>
+3 つのコンポーネントはとても類似した振る舞いを示す。
+コンストラクタの引数を別にすると，<tt>multi_array</tt> と
+<tt>multi_array_ref</tt> は同じインタフェースをエクスポーとする。
+<tt>const_multi_array_ref</tt> は <tt>multi_array_ref</tt>
+インタフェースの const 部分だけを提供する。
+</p>
+
+
+<a name="sec_assignment"></a>
+<h2>Construction and Assignment - 構築と代入</h2>
+<p>それぞれの配列型 - 
+<a href="./reference.html#multi_array"><tt>multi_array</tt></a>，
+<a href="./reference.html#multi_array_ref"><tt>multi_array_ref</tt></a>，そして
+<a href="./reference.html#const_multi_array_ref"><tt>const_multi_array_ref</tt></a> - 
+はコンストラクタの特殊化された集合を提供する。
+さらなる情報はリファレンスページを参照して欲しい。
+</p>
+
+<p>
+このライブラリの非 const 配列型は全て代入演算子 <tt>operator=()</tt> を提供する。
+それぞれの配列型 <tt>multi_array</tt>，<tt>multi_array_ref</tt>，
+<tt>subarray</tt>，そして <tt>array_view</tt>
+はその形 (shape) が合致する限り互いに代入できる。
+const バリエーションである <tt>const_multi_array_ref</tt>，
+<tt>const_subarray</tt>，そして <tt>const_array_view</tt>
+は形が合致する配列にコピーする元となれる。
+代入の結果は配列中に格納されたデータの深い (要素から要素へ) コピーを成す。
+</p>
+
+
+<a name="sec_generators"></a>
+<h2>Array View and Subarray Type Generators - 配列ビューとサブ配列生成子</h2>
+
+<p>
+いくつかの場面で，arrat_view やサブ配列型へのネストした生成子を使うことは都合が悪い。
+例えば，配列型でテンプレートパラメータ化した関数の中で余計な
+"template" キーワードが混乱を引き起こす。
+もっと言えば (more likely though)，いくつかのコンパイラは，
+テンプレートパラメータ中のネストしたテンプレートを扱えない。
+この理由により，型生成子 <tt>subarray_gen</tt>，<tt>const_subarray_gen</tt>，
+<tt>array_view_gen</tt>，そして <tt>const_array_view_gen</tt>
+が提供される。
+従って，以下のサンプルにあるふたつの typedef は同じ型を得る。
+</p>
+
+<blockquote>
+<pre>
+template &lt;typename Array&gt;
+void my_function() {
+  typedef typename Array::template array_view&lt;3&gt;::type view1_t;
+  typedef typename boost::array_view_gen&lt;Array,3&gt;::type view2_t;
+  // ...
+}
+</pre>
+</blockquote>
+
+
+<a name="sec_dimensions"></a>
+<h2>Specifying Array Dimensions - 配列次元の指定</h2>
+
+<p>
+Boost.MultiArray コンポーネントを作成するとき，
+次元の数とそれぞれの大きさを指定する必要がある。
+次元の数はいつもテンプレート引数として指定されるとしても，
+それぞれの大きさを指定するのにふたつの独立したメカニズムが提供される。
+</p>
+
+<p>
+最初の方法は大きさの <a href="../../utility/Collection.html">Collection</a>
+(最も一般的には <tt>boost::array</tt>)
+をコンストラクタに渡すことである。
+コンストラクタはそのコンテナから介しイテレータを取得し，
+N 次元の大きさに相当する N 要素を取得する。
+この方法は次元非依存のコードを書くときに役立つ。
+</p>
+
+<h3>Example</h3>
+<blockquote>
+<pre>
+  typedef boost::multi_array&lt;double, 3&gt; array_type;
+  boost::array&lt;array_type::index, 3&gt; shape = {{ 3, 4, 2 }};
+  array_type A(shape);
+</pre>
+</blockquote>
+
+<p>
+二番目の方法はマトリクス次元 (matrix dimentions) を指定した
+<tt>extent_gen</tt> オブジェクトをコンストラクタに渡すことである。
+デフォルトで，ライブラリはグローバルな <tt>extent_gen</tt> オブジェクトを
+<tt>boost::extents</tt> で構築する。
+これらのオブジェクトが使用するメモリを気にするならば，
+ライブラリのヘッダをインクルードする前に
+<tt>BOOST_MULTI_ARRAY_NO_GENERATORS</tt> を定義すればこれらの構築を抑止できる。
+</p>
+
+<h3>Example</h3>
+<blockquote>
+<pre>
+  typedef boost::multi_array&lt;double, 3&gt; array_type;
+  array_type A(boost::extents[3][4][2]);
+</pre>
+</blockquote>
+
+<a name="sec_access"></a>
+<h2>Accessing Elements - 要素のアクセス</h2>
+
+<p>
+Boost.MultiArray コンポーネントは，
+コンテナ中の指定した要素をアクセスするのに 2 通りの方法を提供する。
+最初は <tt>operator[]</tt> によって提供される伝統的な C 配列の記法を使うことである。
+</p>
+
+<h3>Example</h3>
+<blockquote>
+<pre>
+  typedef boost::multi_array&lt;double, 3&gt; array_type;
+  array_type A(boost::extents[3][4][2]);
+  A[0][0][0] = 3.14;
+  assert(A[0][0][0] == 3.14);
+</pre>
+</blockquote>
+
+<p>
+二番目の方法はインデクスの <a href="../../utility/Collection.html">Collection</a>
+を <tt>operator()</tt> に渡すことである。
+N 個のインデクスはコンテナの N 次元ぶん Collection から取得される。
+</p>
+
+<h3>Example</h3>
+<blockquote>
+<pre>
+  typedef boost::multi_array&lt;double, 3&gt; array_type;
+  array_type A(boost::extents[3][4][2]);
+  boost::array&lt;array_type::index,3&gt; idx = {{0,0,0}};
+  A(idx) = 3.14;
+  assert(A(idx) == 3.14);
+</pre>
+</blockquote>
+
+<p>
+個の方法は次元非依存のコードを書くのに役立ち，
+いくつかのコンパイラの下では <tt>operator[]</tt> 
+よりも高いパフォーマンスをもたらす。
+</p>
+
+<a name="sec_views"></a>
+<h2>Creating Views - ビューの作成</h2>
+
+<p>
+Boost.MultiArray は既存の配列コンポーネントのサブビュー (sub-view)
+を作成する方法 (facilities) を提供する。
+オリジナル配列と同じまたはより少ない次元を保持するサブビューを作成することができる。
+</p>
+
+<p>
+サブビューの作成は <tt>index_gen</tt> 型を渡して
+operator[] を呼ぶことで起こる。
+<tt>index_gen</tt> は <tt>index_range</tt> オブジェクトを <tt>operator[]</tt>
+へ渡すことで (populated) 。
+<tt>boost::extents</tt> と類似して，デフォルトで，
+ライブラリは <tt>boost::indices</tt> で構築する。
+ライブラリヘッダをインクルードする前に
+<tt>BOOST_MULTI_ARRAY_NO_GENERATORS</tt> を定義することでこのオブジェクトを抑制できる。
+単純なサブビュー作成のサンプルを以下に示す。
+</p>
+
+<h3>Example</h3>
+<blockquote>
+<pre>
+  // myarray = 2 x 3 x 4
+
+  //
+  // array_view dims: [base,bound) (dimension striding default = 1)
+  // dim 0: [0,2) 
+  // dim 1: [1,3) 
+  // dim 2: [0,4) (strided by 2), 
+  // 
+
+  typedef array_type::index_range range;
+  array_type::array_view&lt;3&gt;::type myview =
+    myarray[ boost::indices[range(0,2)][range(1,3)][range(0,4,2)] ];
+
+  for (array_type::index i = 0; i != 2; ++i)
+    for (array_type::index j = 0; j != 2; ++j)
+      for (array_type::index k = 0; k != 2; ++k) 
+	assert(myview[i][j][k] == myarray[i][j+1][k*2]);
+</pre>
+</blockquote>
+
+<p>
+ひとつの整数値を index_gen へ渡すことで，
+オリジナルの配列コンポーネントより少ない次元でビューを作成できる
+(これはスライシング (slicing) とも呼ばれる)。
+</p>
+
+<h3>Example</h3>
+<blockquote>
+<pre>
+  // myarray = 2 x 3 x 4
+
+  //
+  // array_view dims:
+  // [base,stride,bound)
+  // [0,1,2), 1, [0,2,4) 
+  // 
+
+  typedef array_type::index_range range;
+  array_type::index_gen indices;
+  array_type::array_view&lt;2&gt;::type myview =
+    myarray[ indices[range(0,2)][1][range(0,4,2)] ];
+
+  for (array_type::index i = 0; i != 2; ++i)
+    for (array_type::index j = 0; j != 2; ++j)
+	assert(myview[i][j] == myarray[i][1][j*2]);
+</pre>
+</blockquote>
+
+<h3>More on <tt>index_range</tt> - もっと <tt>index_range</tt></h3>
+
+<p>
+<tt>index_range</tt> 型はサブビュー生成の範囲を指定する様々な方法を提供する。
+ここでは同じ範囲を指定するいくつかの範囲インスタンス化を示す。
+</p>
+
+<h3>Example</h3>
+<blockquote>
+<pre>
+  // [base,stride,bound)
+  // [0,2,4) 
+
+  typedef array_type::index_range range;
+  range a_range;
+  a_range = range(0,4,2);
+  a_range = range().start(0).finish(4).stride(2);
+  a_range = range().start(0).stride(2).finish(4);
+  a_range = 0 &lt;= range().stride(2) &lt; 4;
+  a_range = 0 &lt;= range().stride(2) &lt;= 3;
+</pre>
+</blockquote>
+
+<p>
+スライス操作へ渡された <tt>index_range</tt> オブジェクトは，
+供給されなかった開始(かつ/または)終端値をその配列から継承する。
+これは都合よく，あるケースで配列長の境界を知る必要があることから防ぐ。
+例えば，デフォルトコンストラクトされた range は，
+使用する際に指定された次元の全範囲に適用される。
+</p>
+
+<h3>Example</h3>
+<blockquote>
+<pre>
+  typedef array_type::index_range range;
+  range a_range;
+
+  // All elements in this dimension
+  a_range = range(); 
+
+  // indices i where 3 &lt;= i
+  a_range = range().start(3) 
+  a_range = 3 &lt;= range();
+  a_range = 2 &lt; range();
+
+  // indices i where i &lt; 7
+  a_range = range().finish(7)
+  a_range = range() &lt; 7;
+  a_range = range() &lt;= 6;
+</pre>
+</blockquote>
+
+<p>
+以下のサンプルは上で示したもののいくつかの代替表現を示す。
+</p>
+
+<blockquote>
+<pre>
+    // take all of dimension 1
+    // take i &lt; 5 for dimension 2
+    // take 4 &lt;= j &lt;= 7 for dimension 3 with stride 2
+    myarray[ boost::indices[range()][range() &lt; 5 ][4 &lt;= range().stride(2) &lt;= 7] ];
+</pre>
+</blockquote>
+
+<a name="sec_storage"></a>
+<h2>Storage Ordering - 記憶域の順序</h2>
+
+<p>
+それぞれの配列クラスは，記憶域の順序を示すパラメータを受け付ける。
+これは，FORTRAN のような，
+標準 C と違う順序を要求するレガシーコードとの橋渡しをする際に役立つ。
+可能な値は <tt>c_storage_order</tt>，<tt>fortran_storage_order</tt>，
+そして <tt>general_storage_order</tt> である。
+</p>
+
+<p>
+<tt>c_storage_order</tt> はデフォルトであり，
+要素を C 配列と同じ順序，すなわち最後の次元からから最初の次元の順番で，
+メモリに格納する。
+</p>
+
+<p>
+<tt>fortran_storage_order</tt> は要素を FORTRAN と同じ順序，
+すなわち最初の次元から最後の次元の順番で，メモリに格納する。
+このパラメータの使用で注意すべきは，配列インデクスは相変わらず 0 ベースであることである。
+</p>
+
+<h3>Example</h3>
+<blockquote>
+<pre>
+  typedef boost::multi_array&lt;double,3&gt; array_type;
+  array_type A(boost::extents[3][4][2],boost::fortran_storage_order); 
+  call_fortran_function(A.data());
+</pre>
+</blockquote>
+
+<p>
+<tt>general_storage_order</tt> はどのような順序で次元がメモリに格納されるか，
+また昇順でまたは降順で次元が格納されるかをカスタマイズ可能にする。
+</p>
+
+<h3>Example</h3>
+<blockquote>
+<pre>
+  typedef boost::general_storage_order&lt;3&gt; storage;
+  typedef boost::multi_array&lt;int,3&gt; array_type;
+ 
+  // Store last dimension, then first, then middle
+  array_type::size_type ordering[] = {2,0,1};
+
+  // Store the first dimension(dimension 0) in descending order 
+  bool ascending[] = {false,true,true};
+
+  array_type A(extents[3][4][2],storage(ordering,ascending)); 
+</pre>
+</blockquote>
+
+
+<a name="sec_base"></a>
+<h2>Setting The Array Base - 配列起点の設定</h2>
+
+<p>
+いくつかの状況で，0 ベースの配列は不都合で扱いにくい。
+Boost.MultiArray コンポーネントは，
+配列の起点を変更するふたつの方法を提供する。
+ひとつは，
+起点を設定するために範囲値のペアを extent_gen コンストラクタへ渡すことである。
+
+<h3>Example</h3>
+<blockquote>
+<pre>
+  typedef boost::multi_array&lt;double, 3&gt; array_type;
+  typedef array_type::extent_range range;
+
+  array_type::extent_gen extents;
+ 
+  // dimension 0: 0-based
+  // dimension 1: 1-based
+  // dimension 2: -1 - based
+  array_type A(extents[2][range(1,4)][range(-1,3)]);
+</pre>
+</blockquote>
+
+<p>
+代替の方法は，まず普通に配列を構築してから，起点を再設定することである。
+全ての起点に同じ値を設定するには，
+新しいインデクス値を渡して <tt>reindex</tt> メンバ関数を使う。
+</p>
+
+<h3>Example</h3>
+<blockquote>
+<pre>
+  typedef boost::multi_array&lt;double, 3&gt; array_type;
+  typedef array_type::extent_range range;
+
+  array_type::extent_gen extents;
+ 
+  array_type A(extents[2][3][4]);
+  // change to 1-based
+  A.reindex(1)
+</pre>
+</blockquote>
+
+<p>
+もしくは，インデクス起点の Collection を
+<tt>reindex</tt> メンバ関数に渡すこと各々の起点を別々に設定する。
+</p>
+
+<h3>Example</h3>
+<blockquote>
+<pre>
+  typedef boost::multi_array&lt;double, 3&gt; array_type;
+  typedef array_type::extent_range range;
+
+  array_type::extent_gen extents;
+ 
+  // dimension 0: 0-based
+  // dimension 1: 1-based
+  // dimension 2: (-1)-based
+  array_type A(extents[2][3][4]);
+  boost::array&lt;array_type::index,ndims&gt; bases = {{0, 1, -1}};       
+  A.reindex(bases);
+</pre>
+</blockquote>
+
+
+<a name="sec_reshape"></a>
+<h2>Changing an Array's Shape - 配列形の変更</h2>
+
+<p>
+Boost.MultiArray は配列形を変更する操作を提供する。
+次元の数が同じでなければならない，要素の総数を保持する限り，配列形は変更され得る。
+</p>
+
+<h3>Example</h3>
+<blockquote>
+<pre>
+  typedef boost::multi_array&lt;double, 3&gt; array_type;
+  typedef array_type::extent_range range;
+
+  array_type::extent_gen extents;
+  array_type A(extents[2][3][4]);
+  boost::array&lt;array_type::index,ndims&gt; dims = {{4, 3, 2}};       
+  A.reshape(dims);
+</pre>
+</blockquote>
+
+<p>
+配列の再成形はインデクス付けに影響を与えないことに注意すること。
+</p>
+
+<a name="sec_concepts"></a>
+<h2>MultiArray Concept - MultiArray コンセプト</h2>
+
+<p>
+Boost.MultiArray は <a href="./reference.html#MultiArray">MultiArray</a>
+コンセプトを定義し，使用する。
+これは N 次元コンテナのインタフェースを指定する。
+</p>
+
+<a name="sec_testcases"></a>
+<h2>Test Cases - テストケース</h2>
+
+<p>
+Boost.MultiArray には，
+同ライブラリの機能とセマンティクスを学習できるテストケースが一揃い付属する。
+このテストケースの記述は<a href="./test_cases.html">ここ</a>にある。
+
+<h2>Credits</h2>
+<ul>
+  <li><a href="mailto:garcia@osl.iu.edu">Ronald Garcia</a> は，
+      このライブラリの最初の作者である。
+  
+  <li><a href="../../../people/jeremy_siek.htm">Jeremy Siek</a> は，
+      このライブラリを助け，またアイデア，アドバイス，
+      そして Microsoft Visual C++ に移植する手助けのための
+      (sounding board) を提供した。
+  
+  <li><a href="mailto:gbavestrelli@yahoo.com">Giovanni Bavestrelli</a> は，
+      <a href="http://www.boost.org/">Boost</a> メーリングリストのメンバから，
+      N 次元配列の初期の実装に対するすばらしいフィードバックを提供した。
+      この仕事におけるいくつかのデザインの決定は，
+      この実装や引き出されたコメントに基づく。
+  
+  <li><a href="mailto:tveldhui@acm.org">Todd Veldhuizen</a> は，
+      このデザインのいくつかの側面に影響を与えた
+      <a href="http://oonumerics.org/blitz/">Blitz++</a> を書いた。
+      更に，彼はこのライブラリの実装やデザインにフィードバックをもたらした。
+  
+  <li><a href="mailto:jewillco@osl.iu.edu">Jeremiah Willcock</a> は，
+      このライブラリの実装やデザインにフィードバックをもたらしたし，
+      機能に対するいくつかの提案を行った。
+  
+  <li><a href="mailto:bdawes@acm.org">Beman Dawes</a> は，
+      このライブラリを Microsoft Windows コンパイラに移植するための，
+      計り知れない援助をくれた。
+</ul>
+
+<hr>
+
+<address>
+<a href="mailto:garcia@.cs.indiana.edu">Ronald Garcia</a>
+</address>
+<!-- Created: Fri Jun 29 10:53:07 EST 2001 -->
+<!-- hhmts start -->
+Last modified: Tue Sep 10 11:14:15 EST 2002
+<!-- hhmts end -->
+
+<hr>
+<address>
+翻訳: Tietew with BDT project<br>$Id $
+</address>
+
+</body>
+</html>

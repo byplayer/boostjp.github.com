@@ -1,0 +1,59 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=EUC-JP"><!--*- encoding: euc-jp -*-->
+	<title>BOOST_PP_EQUAL_D</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">
+</head>
+<body>
+	<div style="margin-left:  0px;">
+		The <b>BOOST_PP_EQUAL_D</b> マクロは 2つの値が等しいかどうか比較する。
+	</div>
+	<h4>Usage</h4>
+		<div class="code">
+			<b>BOOST_PP_EQUAL_D</b>(<i>d</i>, <i>x</i>, <i>y</i>)
+		</div>
+	<h4>Arguments</h4>
+		<dl>
+			<dt>d</dt>
+			<dd>
+				この引数は無視される。
+			</dd>
+			<dt>x</dt>
+			<dd>
+				比較における左オペランド。&nbsp;
+				有効な値の範囲は <i>0</i> から <b>BOOST_PP_LIMIT_MAG</b> まで。
+			</dd>
+			<dt>y</dt>
+			<dd>
+				比較における右オペランド。&nbsp;
+				有効な値の範囲は <i>0</i> から <b>BOOST_PP_LIMIT_MAG</b> まで。
+			</dd>
+		</dl>
+	<h4>Remarks</h4>
+		<div>
+			もし <i>x</i> が <i>y</i> と等しいならば、このマクロは <i>1</i> に展開される。&nbsp;
+			そうでなければ <i>0</i> に展開される。
+		</div>
+		<div>
+			このマクロは廃止された。&nbsp;
+			これは下位互換性のためだけに存在する。&nbsp;
+			<b>BOOST_PP_EQUAL</b> を代わりに使うべきだ。
+		</div>
+	<h4>See Also</h4>
+		<ul>
+			<li><a href="equal.html">BOOST_PP_EQUAL</a></li>
+			<li><a href="limit_mag.html">BOOST_PP_LIMIT_MAG</a></li>
+		</ul>
+	<h4>Requirements</h4>
+		<div>
+			<b>Header:</b> &nbsp;<a href="../headers/comparison/equal.hpp.html">&lt;boost/preprocessor/comparison/equal.hpp&gt;</a>
+		</div>
+	<h4>Sample Code</h4>
+<div><pre>
+#include &lt;<a href="../headers/comparison/equal.hpp.html">boost/preprocessor/comparison/equal.hpp</a>&gt;
+
+<a href="equal_d.html">BOOST_PP_EQUAL_D</a>(1, 4, 3) // 0 に展開される
+<a href="equal_d.html">BOOST_PP_EQUAL_D</a>(1, 5, 5) // 1 に展開される
+</pre></div>
+</body>
+</html>

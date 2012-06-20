@@ -1,0 +1,43 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="ja">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Boost.Signals</title>
+  </head>
+
+  <body bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080">
+
+  <h1><IMG SRC="../../../c++boost.gif" WIDTH="276" HEIGHT="86" ALT="Boost">Boost.Signals</h1>
+<p> Boost.Signals ライブラリは、管理されたシグナル・スロット機構の実装である。シグナルは複数のターゲットに対するコールバックを表し、同じ機構のパブリッシャやイベントから発信される。シグナルはスロットの集合に接続され、シグナルが「発信」されるとそれらのスロットが呼び出しを受ける。スロットはコールバックの受信者であり、イベントターゲット、もしくはサブスクライバとも呼ばれる。
+
+<p> シグナルとスロットは管理されており、それらのシグナルとスロット (より正確にはスロットの一部として存在するオブジェクト) はすべての接続を追跡しているため、シグナル・スロットのいずれか一方が破棄されると自動的にシグナル・スロット接続を切断できる。これによりユーザは、関係する全オブジェクトの寿命から影響を受けるシグナル・スロット接続の寿命管理に大変な労力を払うことなくシグナル・スロット接続を利用することが可能になる。
+
+<p> シグナルが複数のスロットに接続されている場合は、スロットの戻り値とシグナルの戻り値の関係について問題がある。Boost.Signals では、ユーザが複数の戻り値を結合させる方法を指定できる。
+
+<h2>目次</h2>
+<ul>
+  <li><a href="tutorial.html">チュートリアル</a></li>
+  <li>リファレンス
+  <ul>
+    <li> クラステンプレート <a href="reference/signal.html"><code>signal</code></a></li>
+    <li> クラステンプレート <a href="reference/signalN.html"><code>signal<em>N</em></code></a></li>
+    <li> クラステンプレート <a href="reference/slot.html"><code>slot</code></a>
+</li>
+    <li> クラス <a href="reference/trackable.html"><code>trackable</code></a></li>
+    <li> ヘッダ <a href="reference/connection.html"><code>boost/connection.hpp</code></a></li>
+    <li> クラステンプレート <a href="reference/last_value.html"><code>last_value</code></a></li>
+    <li> 関数テンプレート <a href="reference/visit_each.html"><code>visit_each</code></a></li>
+  </ul></li>
+  <li><a href="faq.html">FAQ</a></li>
+  <li><a href="design.html">Boost.Signals の設計</a></li>
+  <li><a href="design_rationale.html">設計の論拠とその他のシグナル・スロット実装との比較</a></li>
+  <li><a href="history.html">改訂履歴</a>
+</ul>
+    <hr>
+    <address><a href="http://www.cs.rpi.edu/~gregod">Doug Gregor</a></address>
+<!-- Created: Fri Jul 13 10:57:20 EDT 2001 -->
+<!-- hhmts start -->
+Last modified: Fri Oct 11 05:41:39 EDT 2002
+<!-- hhmts end -->
+  </body>
+</html>

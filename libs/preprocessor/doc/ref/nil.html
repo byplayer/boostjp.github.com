@@ -1,0 +1,32 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=EUC-JP"><!--*- encoding: euc-jp -*-->
+	<title>BOOST_PP_NIL</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">
+</head>
+<body>
+	<div style="margin-left:  0px;">
+		<b>BOOST_PP_NIL</b> 識別子はライブラリによって、
+		非マクロを示すために予約されている。
+	</div>
+	<h4>Usage</h4>
+		<div class="code">
+			<b>BOOST_PP_NIL</b>
+		</div>
+	<h4>Remarks</h4>
+		<div>
+		この識別子は 定義されて <i>いない</i>
+		この目的は <i>マクロではないこと</i> である。
+		<i>リスト</i> を終了するためにも使われる。
+		</div>
+	<h4>Sample Code</h4>
+<div><pre>
+#include &lt;<a href="../headers/list/adt.hpp.html">boost/preprocessor/list/adt.hpp</a>&gt;
+
+#define LIST (x, (y, (z, <a href="nil.html">BOOST_PP_NIL</a>)))
+
+<a href="list_first.html">BOOST_PP_LIST_FIRST</a>(x) // expands to x
+<a href="list_rest.html">BOOST_PP_LIST_REST</a>(x) // expands to (y, (z, <a href="nil.html">BOOST_PP_NIL</a>))
+</pre></div>
+</body>
+</html>

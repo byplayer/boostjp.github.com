@@ -1,0 +1,129 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=euc-jp"></meta>
+	<title>incompatible.html</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">
+</head>
+<body>
+	<h4>非互換性</h4>
+	<div>
+		以前のBoostのリリース(1.28)とはいくつか非互換な部分がある。
+		それらは大雑把に言って三つのカテゴリにわけられる。
+	</div>
+	<ul>
+		<li><b>BOOST_PP_REPEAT</b>に基づく水平反復</li>
+		<li>再入構文</li>
+		<li><i>list</i> の畳み込み</li>
+	</ul>
+	<h4>反復ターゲット</h4>
+	<div>
+		まず、最も広く使われていると思われるのは、<b>BOOST_PP_REPEAT</b>へ渡されるターゲットマクロと、<b>BOOST_PP_REPEAT</b>を使った水平反復の構成である。
+		これはターゲットマクロを必要とするような全ての<b>BOOST_PP_REPEAT_</b>* と全ての<b>BOOST_PP_ENUM_</b>* を含む。
+	</div>
+	<div>
+		非互換性は自明であるが、それはソースの変更を必要とする。
+	</div>
+	<div>
+		これらのターゲットマクロは<i>第3の</i>引数を期待するようになった。
+		追加されたのは各ターゲットマクロの<i>最初の</i>パラメータである。
+		It represents the next repetition dimension and brings <b>BOOST_PP_REPEAT</b> inline with rest of the library.&nbsp;
+	</div>
+	<div>
+		したがって次のようであったものは:
+	</div>
+	<div class="code">
+		#define <i>macro</i>(<i>n</i>, <i>data</i>) ...<br>
+		<b>BOOST_PP_REPEAT</b>(<i>5</i>, <i>macro</i>, <i>data</i>)
+	</div>
+	<div>
+		...次のようになる:
+	</div>
+	<div class="code">
+		#define <i>macro</i>(<i>z</i>, <i>n</i>, <i>data</i>) ...<br>
+		<b>BOOST_PP_REPEAT</b>(<i>5</i>, <i>macro</i>, <i>data</i>)
+	</div>
+	<div>
+		このパラメータは<b>BOOST_PP_REPEAT</b>メカニズムへの非常に効率的な再入に利用できる。
+		しかしながら、ライブラリは自動的に次の反復次元を見つけるため、それを必ずしも使う必要はない。
+	</div>
+	<h4>次元の順序付け</h4>
+	<div>
+		しかしこの自動的な検知により、<b>BOOST_PP_REPEAT_1ST</b>、<b>BOOST_PP_REPEAT_2ND</b>、<b>BOOST_PP_3RD</b>を順序からはずれて使うことは安全でない。
+		これらのマクロは<i>自動再帰</i>メカニズムをバイパスし、また<i>自動再帰</i>メカニズムは適切な順序でマクロが使われることに依存している。
+		これらのバイパスマクロを使うなら、一番外側の反復は<b>BOOST_PP_REPEAT_1ST</b>、次が<b>BOOST_PP_REPEAT_2ND</b>、最後が<b>BOOST_PP_REPEAT_3RD</b>で<i>なければならない</i>。
+		それ以外の使いかたはライブラリによってサポートされない。
+		時々は動作するかもしれないが、動作しないこともあるかもしれない。
+	</div>
+	<h4>再入構文</h4>
+	<div>
+		<i>自動再帰</i>も同様の問題がある。以前は<b>BOOST_PP_WHILE</b>の再帰構文(と同様に<b>BOOST_PP_FOR</b>)は次のようであった:
+	</div>
+	<div class="code">
+		<b>BOOST_PP_WHILE</b> ## <i>d</i>(<i>pred</i>, <i>op</i>, <i>state</i>)
+	</div>
+	<div>
+		...あるいは:
+	</div>
+	<div class="code">
+		<b>BOOST_PP_CAT</b>(<b>BOOST_PP_WHILE</b>, <i>d</i>)(<i>pred</i>, <i>op</i>, <i>state</i>)
+	</div>
+	<div>
+		<i>自動再帰</i>モデルにおいて、<b>BOOST_PP_CAT</b>バージョンは使えない。
+		なぜなら<b>BOOST_PP_CAT</b>は連結の前に引数の展開を許すが、<b>BOOST_PP_WHILE</b>は引数無しで展開するからである。
+		このライブラリでそれは3つのパラメータを取るように見えるが、しかしそれは<i>自動再帰</i>のトリックである。
+		それは次のようなものと同様である:
+	</div>
+	<div class="code">
+		#define A(x, y) ...<br>
+		#define B A<br>
+		// ...<br>
+		B(2, 3)
+	</div>
+	<div>
+		この構文は<i>B</i>マクロが2つの引数をとるように見えるが、実際はそうではない。
+		この<i>B</i>マクロが<i>A</i>に推移することを除いては、<i>自動再帰</i>メカニズムも同様の流儀で動作する。
+	</div>
+	<div>
+		いくつかのプリプロセッサは動作が遅いため、直接的な再入(<i>自動再帰</i>無しの)がいくつかの非自明なケースでいまだに必要とされる。
+		その結果、ライブラリは再入のために新しい構文を使う:
+	</div>
+	<div class="code">
+		<b>BOOST_PP_FOR_</b> ## <i>r</i>(<i>state</i>, <i>pred</i>, <i>op</i>, <i>macro</i>)<br>
+		<b>BOOST_PP_REPEAT_</b> ## <i>z</i>(<i>count</i>, <i>macro</i>, <i>data</i>)<br>
+		<b>BOOST_PP_WHILE_</b> ## <i>d</i>(<i>pred</i>, <i>op</i>, <i>state</i>)
+	</div>
+	<h4>畳み込み</h4>
+	<div>
+		以前は<b>BOOST_PP_LIST_FOLD_RIGHT</b>マクロの引数は<b>BOOST_PP_LIST_FOLD_LEFT</b>の逆順であった。
+		また、<b>BOOST_PP_LIST_FOLD_RIGHT</b>へ渡される集積マクロも逆の引数で呼ばれていた。
+		この食い違いは解消された。
+	</div>
+	<div>
+		例示すると、<b>BOOST_PP_LIST_FOLD_RIGHT</b>は次のようであった:
+	</div>
+	<div class="code">
+		#define <i>macro</i>(<i>d</i>, <u><i>elem</i></u>, <u><i>state</i></u>)<br>
+		<b>BOOST_PP_LIST_FOLD_RIGHT</b>(<i>macro</i>, <u><i>list</i></u>, <u><i>state</i></u>)
+	</div>
+	<div>
+		これは次のように置き換わった...
+	</div>
+	<div class="code">
+		#define <i>macro</i>(<i>d</i>, <u><i>state</i></u>, <u><i>elem</i></u>)<br>
+		<b>BOOST_PP_LIST_FOLD_RIGHT</b>(<i>macro</i>, <u><i>state</i></u>, <u><i>list</i></u>)
+	</div>
+	<h4>概要</h4>
+	<div>
+		このライブラリは1.28リリースには無い新しい機能をたくさん持っていて、このリストはそれら全てを列挙するものではない。
+		これは単に、新しいリリースに互換となるためにコードを変更したければならないもののリストである。
+	</div>
+	<h4>See Also</h4>
+	<ul>
+		<li><a href="../ref/for.html">BOOST_PP_FOR</a></li>
+		<li><a href="../ref/list_fold_right.html">BOOST_PP_LIST_FOLD_RIGHT</a></li>
+		<li><a href="../ref/repeat.html">BOOST_PP_REPEAT</a></li>
+		<li><a href="../ref/while.html">BOOST_PP_WHILE</a></li>
+	</ul>
+	<div class="sig">- Paul Mensonides</div>
+</body>
+</html>

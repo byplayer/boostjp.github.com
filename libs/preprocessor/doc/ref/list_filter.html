@@ -1,0 +1,66 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=EUC-JP"><!--*- encoding: euc-jp -*-->
+	<title>BOOST_PP_LIST_FILTER</title>
+	<link rel="stylesheet" type="text/css" href="../styles.css">
+</head>
+<body>
+	<div style="margin-left:  0px;">
+		<b>BOOST_PP_LIST_FILTER</b> マクロは <i>リスト</i> を与えられた基準に従ってフィルターする。
+	</div>
+	<h4>Usage</h4>
+		<div class="code">
+			<b>BOOST_PP_LIST_FILTER</b>(<i>pred</i>, <i>data</i>, <i>list</i>)
+		</div>
+	<h4>Arguments</h4>
+		<dl>
+			<dt>pred</dt>
+			<dd>
+				<i>pred</i> (<i>d</i>, <i>data</i>, <i>elem</i> ) 形式の 3項述語。&nbsp;
+				この述語は、次の有効な <b>BOOST_PP_WHILE</b> 反復、補助の <i>データ</i> および <i>リスト</i> 中の現在の要素を伴い、
+				<i>リスト</i> 中の各要素のために <b>BOOST_PP_LIST_FILTER</b> によって展開される。&nbsp;
+				このマクロは <i>0</i> から <b>BOOST_PP_LIMIT_MAG</b> までの範囲の整数値を返さなければならない。&nbsp;
+				もしこの述語が特定の要素で 0以外に展開されるならば、その要素は結果の <i>リスト</i> に含まれるだろう。
+			</dd>
+			<dt>data</dt>
+			<dd>
+				<i>pred</i> に渡される補助のデータ。
+			</dd>
+			<dt>list</dt>
+			<dd>
+				フィルターされる <i>リスト</i> 。
+			</dd>
+		</dl>
+	<h4>Remarks</h4>
+		<div>
+			このマクロは <i>リスト</i> 中の各要素のために <i>pred</i> を展開する。&nbsp;
+			これは、<i>pred</i> が 0以外を返す各要素から新しい <i>リスト</i> を作成する。
+		</div>
+		<div>
+			以前、このマクロは <b>BOOST_PP_WHILE</b> の中では使えなかったが、
+			現在ではこのような制限はない。&nbsp;
+			しかし、そのような状況では <b>BOOST_PP_LIST_FILTER_D</b> を使うほうがより能率的である。
+		</div>
+	<h4>See Also</h4>
+		<ul>
+			<li><a href="limit_mag.html">BOOST_PP_LIMIT_MAG</a></li>
+			<li><a href="list_filter_d.html">BOOST_PP_LIST_FILTER_D</a></li>
+		</ul>
+	<h4>Requirements</h4>
+		<div>
+			<b>Header:</b> &nbsp;<a href="../headers/list/filter.hpp.html">&lt;boost/preprocessor/list/filter.hpp&gt;</a>
+		</div>
+	<h4>Sample Code</h4>
+<div><pre>
+#include &lt;<a href="../headers/comparison/less_equal.hpp.html">boost/preprocessor/comparison/less_equal.hpp</a>&gt;
+#include &lt;<a href="../headers/list/filter.hpp.html">boost/preprocessor/list/filter.hpp</a>&gt;
+
+#define LIST (1, (3, (2, (5, <a href="nil.html">BOOST_PP_NIL</a>))))
+
+#define PRED(d, data, elem) <a href="less_equal.html">BOOST_PP_LESS_EQUAL</a>(elem, data)
+
+<a href="list_filter.html">BOOST_PP_LIST_FILTER</a>(PRED, 3, LIST)
+   // (1, (3, (2, <a href="ni.html">BOOST_PP_NIL</a>))) に展開される
+</pre></div>
+</body>
+</html>
