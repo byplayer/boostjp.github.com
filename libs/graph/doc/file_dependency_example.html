@@ -1,0 +1,266 @@
+<!-- saved from url=(0022)http://internet.e-mail --><HTML><HEAD>
+		<Title>File Dependency Example</Title> 
+		<!--
+  -- Copyright (c) Jeremy Siek 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  Silicon Graphics makes no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	</HEAD>
+	<BODY text="#000000" vLink="#551a8b" aLink="#ff0000" link="#0000ee" bgColor="#ffffff">
+		<A href="http://www.boost.org/libs/graph/doc/file_dependency_example.html">原文</A>
+		<br>
+		<IMG height="86" alt="C++ Boost" src="../../../c++boost.gif" width="277">
+		<BR>
+		<H1>ファイル依存関係の例
+		</H1>
+		<P>計算機科学において抽象グラフの最も一般的な用途は、依存関係の追跡である。 私たち（このドキュメントを読んでいるあなたを含めて）の日常における依存関係           
+			追跡の一例を示すと、コーディングしたプログラムソースファイルにおける コンパイル依存性で、これらの依存性は、<TT>make</TT>          
+		や Visucal C++ のような IDE といったビルドシステム内部で、いくらかの変更が行われた           
+		ソースファイルに対して、再コンパイルしなければならないファイル数を 最小限にするために使用される。          
+		<P>&nbsp; <A href="#fig:file-dep">図1</A>に、<TT>killerapp</TT>          
+		というプログラムを 作成するために使用されるソースファイル、オブジェクトファイル、ライブラリファイルそれぞれを頂点として表現したグラフを示した。グラフ中の線は、 どのファイルが他のファイルを作成するのに使用されるか示す。           
+		矢印の方向をどちらにするかという点は任意であるが、慣習的に私たちは、 矢印方向の意味を「使用された」といように使っており、反対方向の意味を「依存する」           
+		というように使っている。
+		<P>
+		<P></P>
+		<DIV align="center"><A name="fig:file-dep"></A>
+			<TABLE>
+				<CAPTION align="bottom">
+					<STRONG>図１:</STRONG> ファイル依存関係のグラフ表示</CAPTION>          
+				<TR>
+					<TD><IMG height="351" src="./figs/file_dep.gif" width="331"></TD>
+				</TR>
+			</TABLE>
+		</DIV>
+		<P></P>
+		<P>
+		<P><TT>make</TT>
+		といったビルドシステムは、次のような質問に答える事ができる：          
+		<P>
+			<OL>
+				<LI>
+				もし、全てのファイルをコンパイル（または再コンパイル）する必要がある場合に、どのような順番でコンパイルすべきだろうか？
+				<LI>
+				どのファイルとどのファイルが並列にコンパイルできるだろうか？
+				<LI>
+				もし、あるファイルに変更が加えられたら、どれだけのファイルを再コンパイルしなければならないだろうか？
+				<LI>
+					依存関係中に循環参照がないだろうか？（これは、ユーザがミスを犯しており、エラーとして通知されるべきものである）
+				</LI>
+			</OL>
+		<P>
+		<P>これから、依存関係グラフにおけるこれらの質問を公式化し、解決できるようなグラフ・アルゴリズムを例で示していく。 <A href="#fig:file-dep">図１</A>          
+			のグラフは、これから示す全ての例で利用される。このサンプルのソースコードは <A href="../example/file_dependencies.cpp"><TT>examples/file_dependencies.cpp</TT></A>          
+		にある。          
+		<P>
+			<H2>グラフの設定</H2>
+		<P>ここにグラフデータの構築方法を示す。 私たちは単純に手作業でグラフを構築してきた。しかし <TT>make</TT> といったビルドシステムは、代わりに <TT>Makefile</TT>          
+			からファイルのリストを得て、依存関係の調査設定を行う。グラフを表すために <TT>adjacency_list</TT> クラスを使う。 <TT>vecS</TT>          
+			という選択子は <TT>std::vector</TT> を意味しており、辺（頂点間）リスト（効率的な経路横断をもたらす）を表すのに使用される。 <TT>directedS</TT>          
+			という選択子は 有向グラフを利用するという意味であり、 <TT>color_property</TT>          
+		はグラフの各頂点に色プロパティを付加する。色プロパティは、次節以降のアルゴリズムで利用していく。          
+		<P><PRE>  enum files_e { dax_h, yow_h, boz_h, zow_h, foo_cpp, 
+                 foo_o, bar_cpp, bar_o, libfoobar_a,
+                 zig_cpp, zig_o, zag_cpp, zag_o, 
+                 libzigzag_a, killerapp, N };
+  const char* name[] = { &quot;dax.h&quot;, &quot;yow.h&quot;, &quot;boz.h&quot;, &quot;zow.h&quot;, &quot;foo.cpp&quot;,
+                         &quot;foo.o&quot;, &quot;bar.cpp&quot;, &quot;bar.o&quot;, &quot;libfoobar.a&quot;,
+                         &quot;zig.cpp&quot;, &quot;zig.o&quot;, &quot;zag.cpp&quot;, &quot;zag.o&quot;,
+                         &quot;libzigzag.a&quot;, &quot;killerapp&quot; };
+
+  typedef std::pair&lt;int, int&gt; Edge;
+  Edge used_by[] = {
+    Edge(dax_h, foo_cpp), Edge(dax_h, bar_cpp), Edge(dax_h, yow_h),
+    Edge(yow_h, bar_cpp), Edge(yow_h, zag_cpp),
+    Edge(boz_h, bar_cpp), Edge(boz_h, zig_cpp), Edge(boz_h, zag_cpp),
+    Edge(zow_h, foo_cpp), 
+    Edge(foo_cpp, foo_o),
+    Edge(foo_o, libfoobar_a),
+    Edge(bar_cpp, bar_o),
+    Edge(bar_o, libfoobar_a),
+    Edge(libfoobar_a, libzigzag_a),
+    Edge(zig_cpp, zig_o),
+    Edge(zig_o, libzigzag_a),
+    Edge(zag_cpp, zag_o),
+    Edge(zag_o, libzigzag_a),
+    Edge(libzigzag_a, killerapp)
+  };
+
+  using namespace boost;
+  typedef adjacency_list&lt;vecS, vecS, directedS, 
+      property&lt;vertex_color_t, default_color_type&gt;,
+      property&lt;edge_weight_t, int&gt;
+    &gt; Graph;
+  Graph g(N, used_by, used_by + sizeof(used_by) / sizeof(Edge));
+  typedef graph_traits&lt;Graph&gt;::vertex_descriptor Vertex;
+</PRE>
+		<P>
+			<H2>コンパイル順序（全ファイル）</H2>
+		<P>１つのプロジェクトで <TT>make</TT> される最初の事項は、全てのファイルをコンパイルする事である。様々なファイル間で与えられた依存関係により、果たして正しい順序でコンパイルとリンクを行えるだろうか？&nbsp;最初に構築されたグラフを公式化する必要がある。コンパイル順序を見つけることは、グラフの頂点を並び替える事と同じである。順序付けの制約条件とは、辺として表現したファイルの依存関係である。言い換えれば、グラフ中の          
+			<I>(u,v)</I> という辺に対して、<I>v</I> は <I>u</I> よりも前に現れないようにする順序付けと説明できる。この種の制約条件による順序付けは          
+			<EM>topological sort </EM>（トポロジカル・ソート）と呼ばれるもので行う。それゆえに、コンパイル順序に対する質問の答えは、BGL           
+			アルゴリズム&nbsp; <A href="./topological_sort.html"><TT>topological_sort()</TT></A> &nbsp;を呼び出すだけでよい。トポロジカル・ソートの伝統的な出力形式は、ソート済み頂点の連結リスト構造である。           
+			BGL&nbsp;アルゴリズムは（伝統的な出力形式を使用せず）任意の <a href="http://www.sgi.com/tech/stl/OutputIterator.html">          
+				OutputIterator （出力イテレータ）</a>へソート済み頂点を出力するので、より柔軟な出力を得る事ができる。ここでは、std::list&lt;Vertex&gt;           
+			の先頭へ頂点を挿入できる出力イテレータとして <TT>std::front_insert_iterator</TT>          
+		を生成し、使用した。他にもファイルへの出力イテレータ、異なる STL コンテナや特別に作成したコンテナに対する挿入イテレータを利用することができる。          
+		<P><PRE>  typedef std::list&lt;Vertex&gt; MakeOrder;
+  MakeOrder make_order;
+  boost::topological_sort(g, std::front_inserter(make_order));
+    
+  std::cout &lt;&lt; &quot;make ordering: &quot;;
+  for (MakeOrder::iterator i = make_order.begin();
+       i != make_order.end(); ++i)
+    std::cout &lt;&lt; name[*i] &lt;&lt; &quot; &quot;;
+  std::cout &lt;&lt; std::endl;
+</PRE>
+		<P>上記出力結果:
+		</P>
+		<PRE>  make ordering: zow.h boz.h zig.cpp zig.o dax.h yow.h zag.cpp \
+  zag.o bar.cpp bar.o foo.cpp foo.o libfoobar.a libzigzag.a killerapp
+</PRE>
+		<P>
+			<H2><A name="sec:parallel-compilation"></A>並列コンパイル
+			</H2>
+        <P>
+		ビルドシステムがおそらく答えなければならない質問は、”どのファイルとどのファイルが並列にコンパイルできるだろうか？”であった（以降、コンパイルという用語がリンクも含まれるという意味でビルドに置き換わる）。           
+		この質問に対する答えは、多数のスレッドや複数のプロセッサを利用することによるビルドの処理速度向上をもたらすであろう。        
+        この質問は、次のような軽い問いかけに置き換える事ができる。並列に無制限のファイルをビルドできると仮定して、最短ビルド回数は何回だろうか？要点は、あるファイルがビルドできるという事は、そのファイルが依存している全てファイルが既にビルド済みであるという事である。問題を簡略化するために、各頂点で表される１ファイルは（ヘッダファイルでさえ）必ずビルドされると仮定する。何回目にビルドを行うかというスケジュールを決定する主たる着眼点は、あるファイルが依存している全てのファイル中で、依存連鎖しているファイルに対する最大の累積ビルド回数を選択するということである。
+		<P>始点方向の隣接頂点における計算値を基準として、新たなの計算値を求める考え方は、Dijkstra（ダイクストラ）の単一始点最短経路アルゴリズムと同じである（ <A href="./dijkstra_shortest_paths.html">          
+				<tt>dijkstra_shortest_paths()</tt></A>
+		を見よ）。この状況と最短経路アルゴリズムとの大きな違いは隣接頂点の最小値の代わりに最大値を選択していくという事である。加えて、頂点が単一始点ではないことも違うが、これについては入次数が０となるような頂点（言い換えれば、どの有向辺も入り込んでいない頂点）全部を始点として取り扱うことにする。従って、デフォルトのパラメータの代わりに、いくらかの特別なパラメータを与えて、ダイクストラのアルゴリズムを使用する。          
+		<P><TT>dijkstra_shortest_paths()</TT> を使うには、このアルゴリズムで使用される頂点と辺のプロパティを最初に設定しなければならない。回数プロパティ（ダイクストラのアルゴリズムにおける距離プロパティを置き換えたもの）と、辺の重みプロパティが必要である。回数プロパティを保持するために          
+			<TT>std::vector</TT> を利用する。辺の重みプロパティは、”グラフ設定”時の組込機能を通じて既に設定されているため、この内部の重みプロパティを重みマップとして、ここで宣言する。          
+			<PRE>  std::vector&lt;int&gt; time(N, 0);
+  typedef std::vector&lt;int&gt;::iterator Time;
+  using boost::edge_weight_t;
+  typedef boost::property_map&lt;Graph, edge_weight_t&gt;::type Weight;
+  Weight weight = get(edge_weight, g);
+</PRE>
+		<P>
+		次に行うことは、入次数が０の頂点を最短経路検索の”始点”頂点として識別することである。入次数は、以下のループ（繰り返し）で計算することができる。
+		<P><PRE>  std::vector&lt;int&gt; in_degree(N, 0);
+  Graph::vertex_iterator i, iend;
+  Graph::out_edge_iterator j, jend;
+  for (boost::tie(i, iend) = vertices(g); i != iend; ++i)
+    for (boost::tie(j, jend) = out_edges(*i, g); j != jend; ++j)
+      in_degree[target(*j, g)] += 1;
+</PRE>
+		<P>次には、コンパイルの”コスト”（累積されたコンパイル回数）を決定する必要がある。この場合、私たちは、それぞれのファイルに対して、そのファイルが直接依存しているファイル中から、累積コンパイル回数の大きいものが選択されることを望んでいる。ゆえに、比較の関数オブジェクトを          
+			<TT>std::greater&lt;int&gt;</TT>  
+        として定義する。また、ダイクストラのアルゴリズムにコンパイル回数の和を計算する方法を与えねばならず、和の関数オブジェクトを&nbsp;          
+			<TT>std::plus&lt;int&gt;</TT>
+		として定義する。          
+		<P><PRE>  std::greater&lt;int&gt; compare;
+  std::plus&lt;int&gt; combine;
+</PRE>
+		<P>ここに至って、言わば <TT>uniform_cost_search()</TT>          
+		という検索アルゴリズムを呼び出す準備が整った。 私たちは、グラフ中の全頂点を探査し、入次数が０の頂点ならば、この検索アルゴリズムを呼び出す。          
+		<P><PRE>  for (boost::tie(i, iend) = vertices(g); i != iend; ++i)
+    if (in_degree[*i] == 0)
+      boost::dijkstra_shortest_paths(g, *i, 
+				     distance_map(&amp;time[0]). 
+				     weight_map(weight). 
+				     distance_compare(compare).
+				     distance_combine(combine));
+</PRE>
+		<P>
+		最後に、それぞれの頂点に対して計算された（何回目にコンパイルするという）スケジュールを出力する。
+		<P><PRE>  std::cout &lt;&lt; &quot;parallel make ordering, &quot; &lt;&lt; std::endl
+       &lt;&lt; &quot;  vertices with same group number&quot; &lt;&lt; std::endl
+       &lt;&lt; &quot;  can be made in parallel&quot; &lt;&lt; std::endl &lt;&lt; std::endl;
+  for (boost::tie(i, iend) = vertices(g); i != iend; ++i)
+    std::cout &lt;&lt; &quot;time_slot[&quot; &lt;&lt; name[*i] &lt;&lt; &quot;] = &quot; &lt;&lt; time[*i] &lt;&lt; std::endl;
+</PRE>
+			<br>
+			上記出力結果:
+			<PRE>  parallel make ordering, 
+    vertices with same group number 
+    can be made in parallel
+  time_slot[dax.h] = 0
+  time_slot[yow.h] = 1
+  time_slot[boz.h] = 0
+  time_slot[zow.h] = 0
+  time_slot[foo.cpp] = 1
+  time_slot[foo.o] = 2
+  time_slot[bar.cpp] = 2
+  time_slot[bar.o] = 3
+  time_slot[libfoobar.a] = 4
+  time_slot[zig.cpp] = 1
+  time_slot[zig.o] = 2
+  time_slot[zag.cpp] = 2
+  time_slot[zag.o] = 3
+  time_slot[libzigzag.a] = 5
+  time_slot[killerapp] = 6
+</PRE>
+		<P>
+			<H2><A name="SECTION001014000000000000000"></A><A name="sec:cycles"></A><BR>
+				循環参照
+			</H2>
+		<P>ビルドシステムが答えることができる別の質問は、”ファイル依存関係中に循環参照が含まれていないか？”である。もし循環参照があれば、ビルドシステムはユーザに対して循環参照を取り除く事ができるようにエラーとして報告する必要がある。循環参照を調べる簡単な方法の１つは、          
+			<A href="./depth_first_search.html">depth-first search （深度優先探査）</A> を実行する事であり、その探査が（探査中の木の中で）訪問済頂点を再度探査する場合には、そこに循環が存在する事になる。１度訪問された頂点は灰色に塗られるので、深度優先探査中のこの色に対するチェックを対象とする事ができる。           
+			BGL 中のグラフ探査アルゴリズム（ depth_first_search() 深度優先探査関数も含む）は、全て&nbsp; <I>visitor</I> （ビジタ）という機構を通じて拡張可能である。ビジタは関数オブジェクトに似ている。しかし、          
+			<TT>operator()</TT> のような関数オブジェクトとは異なり、複数のメソッドを持っている。ビジタのメソッドは、グラフの探査アルゴリズム中の特定条件を満たす箇所で呼び出されるような機能拡張をユーザに与える。           
+			ビジタに関する詳細な記述は <A href="visitor_concepts.html">Visitor Concepts （ビジタ・コンセプト）</A>          
+		の節を見よ。<P>ここでビジタ・クラスを作成し、<A href="./DFSVisitor.html">DFSVisitor</A>  
+        コンセプトのメソッドで、DFS（深度優先探査）が新たな辺を探査するときに呼び出される          
+			<TT>back_edge()</TT>&nbsp;メソッドを実装する。          
+            これは色プロパティの値をチェックすることにより、循環依存が存在するかどうかを判定することのできるメソッドである。 <TT>dfs_visitor&lt;&gt;</TT>           
+        から継承することにより、ビジタ・コンセプトに必要な他のメソッドが、無動作の状態で実装される。        
+        一旦このビジタ・クラスを実装すれば、 BGL         
+            アルゴリズムとして何度でも探査するために構築し流用できる。ビジタ・オブジェクトは BGL        
+        アルゴリズム内部では値渡しなので、このビジタ・オブジェクト中の        
+        <TT>has_cycle</TT>  
+        フラグは値として保持される。         
+		<P><PRE>  template &lt;class Color&gt;
+  struct cycle_detector : public dfs_visitor&lt;&gt;
+  {
+    typedef typename boost::property_traits&lt;Color&gt;::value_type C;
+
+    cycle_detector(Color c, bool&amp; has_cycle) 
+      : _has_cycle(has_cycle), color(c) { }
+
+    template &lt;class Edge, class Graph&gt;
+    void back_edge(Edge e, Graph&amp; g) {
+      _has_cycle = true;
+    }
+  protected:
+    bool&amp; _has_cycle;
+    Color color;
+  };
+</PRE>
+        <P>ここで BGL <TT>depth_first_search()</TT>        
+        アルゴリズムを呼び出し、循環参照探査ビジタとして探査する。       
+		<P><PRE>  bool has_cycle = false;
+  cycle_detector&lt;Color&gt; vis(color, has_cycle);
+  boost::depth_first_search(g, visitor(vis));
+  std::cout &lt;&lt; &quot;The graph has a cycle? &quot; &lt;&lt; has_cycle &lt;&lt; std::endl;
+</PRE>
+		<P>&nbsp; <A href="#fig:file-dep">図１</A> におけるグラフ中には（点線は無視する）循環参照が存在しない。しかし、もしここで <TT>bar.cpp</TT>          
+			&nbsp;と <TT>dax.h</TT>          
+        に依存関係を加えたならば、循環参照が出来上がる。このような依存関係はユーザエラーとして記録される。         
+		<P><PRE>  add_edge(bar_cpp, dax_h, g);
+</PRE>
+			<br>
+			<HR>
+			<TABLE>
+				<TR vAlign="top">
+					<TD noWrap>Copyright &copy; 2000-2001</TD>          
+					<TD><A href="../../../people/jeremy_siek.htm">Jeremy Siek</A>, Indiana University (<A href="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)
+					</TD>
+				</TR>
+			</TABLE>
+		<P>Japanese Translation Copyright (C) 2003 <A href="mailto:oki_miyuki&#64cppll.jp">OKI Miyuki</A>          
+			<BR>
+			<SMALL>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。
+			</SMALL>
+		</P>
+	</BODY>
+</HTML>

@@ -1,0 +1,122 @@
+<HTML>
+<!--
+  -- Copyright (c) Jeremy Siek 2001
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  Silicon Graphics makes no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<Title>Edge Mutable Graph</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+
+<H2><A NAME="concept:EdgeMutableGraph">
+Edge Mutable Graph
+</H2>
+
+<I>Edge Mutable Graph</I> コンセプトは辺の追加と削除をサポートするグラフの
+ためのインターフェースを定義する。
+
+<H3>Refinement of</H3>
+
+<a href="./Graph.html">Graph</a>
+
+<H3>Associated Types</H3>
+
+結びつけられた型はない。
+
+<h3>Valid Expressions</h3>
+
+<ul>
+
+<li><a name="sec:add_edge"><TT>add_edge(u, v, g)</TT></a> 
+は <TT>std::pair&lt;edge_descriptor,&nbsp;bool&gt;</TT> を<b>返す</b>。
+<br><br>
+
+<b>意味:</b> 辺 <i>(u,v)</i> をグラフ中に挿入することを試み、そして
+挿入された辺または多重辺、かつ辺が挿入されたかどうかを述べるフラグを返す。
+この操作はグラフの頂点記述子または頂点イテレータを無効にしないはずである。
+もっとも、辺記述子または辺イテレータを無効にするかもしれないが。
+<br>
+
+<b>事前条件:</b> <i>u</i> と <i>v</i> はグラフ中の頂点である。<br>
+
+<b>事後条件:</b> <i>(u,v)</i> はグラフの辺集合中にある。返された辺記述子は
+<i>u</i> を始点位置に、<i>v</i> を終点位置に持つだろう。もしグラフが多重辺を
+許可しているなら、返されたフラグはいつも <tt>true</tt> である。もしグラフが
+多重辺を許可していないなら、もし <i>(u,v)</i> が既にグラフ中にあったら返された
+フラグは <tt>false</tt> である。もし <i>(u,v)</i> がグラフ中になかったら返さ
+れたフラグは <tt>true</tt> である。
+<br>
+</li><br>
+
+<li><a name="sec:remove_edge_by_pair"><tt>remove_edge(u, v, g)</tt></a>
+は <tt>void</tt> を<b>返す</b>。
+<br><br>
+<b>意味:</b> 辺 <i>(u,v)</i> をグラフから削除する。もしグラフが多重辺を許可
+しているなら、これは <i>(u,v)</i> の全ての存在を削除する。<br>
+<b>事前条件:</b> <i>(u,v)</i> はグラフの辺集合中にある。<br>
+<b>Postcondition:</b> <i>(u,v)</i> はもはやグラフの辺集合中にない。
+<br>
+</li><br>
+
+<li>
+<a name="sec:remove_edge"><tt>remove_edge(e, g)</tt></a>
+は <tt>void</tt> を <b>返す</b>。
+<br><br>
+<b>意味:</b> 辺 <i>e</i> をグラフから削除する。<br>
+<b>事前条件:</b> <i>e</i> はグラフ中の辺である。<br>
+<b>事後条件:</b> <i>e</i> はもはや <tt>g</tt> のための辺集合中にない。
+<br>
+</li><br>
+
+<li>
+<a name="sec:clear_vertex"><tt>clear_vertex(u, g)</tt></a>
+は <tt>void</tt> を <b>返す</b>。
+<br><br>
+<b>意味:</b> 頂点 <i>u</i> への、そして頂点 <i>u</i> からの全ての辺を
+グラフから削除する。<br>
+<b>事前条件:</b> <i>u</i> は <tt>g</tt> の有効な頂点記述子である。<br>
+<b>事後条件:</b> <i>u</i> は <tt>g</tt> 中のどの辺の始点または終点としても
+現れない。
+</li>
+
+</ul>
+
+
+<H3>Complexity guarantees</H3>
+
+<P>
+工事中
+
+<H3>See Also</H3>
+
+<a href="./graph_concepts.html">Graph concepts</a>
+
+
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000-2001</TD><TD>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>, Indiana University (<A HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)
+</TD></TR></TABLE>
+
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:takashi-it@po6.nsk.ne.jp">Takashi Itou</a><br> 
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+
+<p>このドキュメントの対象: Boost Version 1.30.0<br>
+<a href="http://www.boost.org/libs/graph/doc/EdgeMutableGraph.html">最新版ドキュメント (英語)</a></p>
+</BODY>
+</HTML> 

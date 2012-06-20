@@ -1,0 +1,190 @@
+<HTML>
+<!--
+  -- Copyright (c) Jeremy Siek, Lie-Quan Lee, and Andrew Lumsdaine 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  Silicon Graphics makes no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<Title>Boost Graph Library: Constructing Graph Algorithms</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+<H1>Constructing graph algorithms with BGL</H1>
+
+<P>
+BGLの <i>主な</i>目標は、精密なグラフ・クラスを提供する事にあるのではなく、
+また再利用可能なグラフ・アルゴリズムの広範囲にわたる集合を提供することに
+あるのでもない (それらは
+目標であるにもかかわらず)。BGLの主な目標は他者に再利用可能なグラフの
+アルゴリズムを書くよう励ます事である。再利用可能とは最大限に再利用可能
+である事を意味する。汎用プログラミングはアルゴリズムを最大限に再利用可能
+にする手法であり、この章で汎用プログラミングをいかにグラフ・アルゴリズムを
+構築するのに応用するかについて論ずるつもりである。
+
+<P>
+汎用プログラミングの過程を説明するために、グラフの着色アルゴリズムの構築を
+歩み抜けてみようと思う。グラフの着色問題 (またはもっと具体的に頂点着色問題)
+ はグラフ <i>G</i> 中の各頂点を、同じ色で彩られた隣接した二つの頂点が
+ないように、そして最小の色数が使われるようにする事である。一般的に、
+グラフの着色問題は NP完全問題で、従って適度な量の時間で最適解を見つける
+のは不可能である。しかしながら、最小に近い着色を見つけるために発見的手法を
+使う多くのアルゴリズムが存在する。
+
+<P>
+ここで示す今問題にするアルゴリズムは疎なヤコビ行列とヘッセン行列の消去法 [<A
+HREF="bibliography.html#curtis74:_jacob">9</A>,<A
+HREF="bibliography.html#coleman84:_estim_jacob">7</A>,<A
+HREF="bibliography.html#coleman85:_algor">6</A>] 中で用いられている
+線形時間の <TT>SEQ</TT> サブルーチンに基づいている。
+このアルゴリズムはグラフ中の全ての頂点を入力された順序によって定義される順番
+に従って訪れる。各頂点において、アルゴリズムは隣接頂点の色を印付け、それから
+現時点の頂点の色のために最小のまだ印付けられていない色を選ぶ。もし全ての
+色が既に印付けられていたら、新しい色が作成される。色の印番号が現在の頂点番号に
+等しいなら、色は印付けられているとみなされる。これは各頂点のために印を
+置き直さねばならない厄介事から守る。このアルゴリズムの有効性は入力された
+頂点の順番に大変依存する。
+最大先頭 (largest-first) 順序付け [<A
+HREF="bibliography.html#welsch67">31</A>]、
+最小後尾 (smallest-last) 順序付け [<a
+href="bibliography.html#matula72:_graph_theory_computing">29</a>]、
+そして接続次数 (incidence degree) による順序付け [<a
+href="bibliography.html#brelaz79:_new">32</a>]
+を含むいくつかの順序付けアルゴリズムが存在し、そしてそれらはこの着色
+アルゴリズムの有効性を改善する。
+
+<P>
+汎用グラフ・アルゴリズムを構築する際にする最初の決定は、どのグラフ操作が
+アルゴリズムの実装のために必要か決定すること、そしてその操作にどのグラフ・
+コンセプトを結びつけるか決定することである。このアルゴリズム中で頂点の色を
+初期化するために全ての頂点を通して巡回する必要があるだろう。さらに隣接頂点
+もアクセスする必要がある。それゆえ <a
+href="./VertexListGraph.html">VertexListGraph</a> コンセプトを選択する
+つもりである。というのはこれらの操作を含む最小の概念であるからである。
+グラフの型はこのアルゴリズムのためにテンプレート関数中で引数が決められる
+だろう。グラフの型を BGL <a
+href="./adjacency_list.html"><TT>adjacency_list</TT></a> のような
+特定のグラフ・クラスには限定しない。
+なぜかというとこれはアルゴリズムの再利用可能性を著しく制限するだろうからで
+ある (今まで書かれたほとんどのアルゴリズムはそうであるが)。
+グラフの型を <a
+href="./VertexListGraph.html">VertexListGraph</a> をモデルとする型に是非
+限定しよう。これはアルゴリズム中のそれらのグラフ操作の使用によって、
+その上 <TT>function_requires()</TT> と共にコンセプト・チェックとして付け加え
+られた
+明示的な要求として強いられる (コンセプト・チェックについてのさらなる詳細の
+ために章 <A
+HREF="../../concept_check/concept_check.htm">Concept
+Checking</A> を見なさい)。
+
+<P>
+次にこのプログラム中でどの頂点プロパティまたは辺プロパティが使われるであろう
+かについて考える必要がある。この場合、唯一のプロパティは頂点の色である。
+頂点の色へのアクセスを指定する最も融通のきく方法はプロパティ・マップの
+インターフェースを使うことである。これはアルゴリズムの使用者にどのように
+プロパティをしまいたいかを決定する能力を与える。色の読み書き両方が必要で
+あろうから、<a
+href="../../property_map/ReadWritePropertyMap.html">ReadWritePropertyMap</a>
+ としての要求を指定する。カラー・マップの <TT>key_type</TT> はグラフからの
+<TT>vertex_descriptor</TT> でなければならず、<TT>value_type</TT> は
+整数の種類でなければならない。さらに <TT>order</TT> 引数のための
+インターフェースをプロパティ・マップとして指定する。この場合 <a
+href="../../property_map/ReadablePropertyMap.html">ReadablePropertyMap</a>
+ である。順序付けのために、<TT>key_type</TT> は整数のオフセットで、
+<TT>value_type</TT> は <TT>vertex_descriptor</TT> である。再びコンセプト・
+チェックと共にこれらの要求を適用する。このアルゴリズムの返却値はグラフを着色
+するのに必要な色の数で、従って関数の返却値型はグラフの
+ <TT>vertices_size_type</TT> である。次のコードはテンプレート関数としての
+グラフのアルゴリズムのためのインターフェース、コンセプト・チェック、そして
+いくつかの typedef を示す。実装は容易であり、上述で論ぜられていない
+唯一の段階は色の初期化段階で、そしてそこで全ての頂点の色を“着色されてない”
+状態にする。
+
+<P>
+<PRE>
+namespace boost {
+  template &lt;class VertexListGraph, class Order, class Color&gt;
+  typename graph_traits&lt;VertexListGraph&gt;::vertices_size_type
+  sequential_vertex_color_ting(const VertexListGraph&amp; G, 
+    Order order, Color color)
+  {
+    typedef graph_traits&lt;VertexListGraph&gt; GraphTraits;
+    typedef typename GraphTraits::vertex_descriptor vertex_descriptor;
+    typedef typename GraphTraits::vertices_size_type size_type;
+    typedef typename property_traits&lt;Color&gt;::value_type ColorType;
+    typedef typename property_traits&lt;Order&gt;::value_type OrderType;
+
+    function_requires&lt; VertexListGraphConcept&lt;VertexListGraph&gt; &gt;();
+    function_requires&lt; ReadWritePropertyMapConcept&lt;Color, vertex_descriptor&gt; &gt;();
+    function_requires&lt; IntegerConcept&lt;ColorType&gt; &gt;();
+    function_requires&lt; size_type, ReadablePropertyMapConcept&lt;Order&gt; &gt;();
+    typedef typename same_type&lt;OrderType, vertex_descriptor&gt;::type req_same;
+    
+    size_type max_color = 0;
+    const size_type V = num_vertices(G);
+    std::vector&lt;size_type&gt; 
+      mark(V, numeric_limits_max(max_color));
+    
+    typename GraphTraits::vertex_iterator v, vend;
+    for (tie(v, vend) = vertices(G); v != vend; ++v)
+      color[*v] = V - 1; // which means "not colored"
+    
+    for (size_type i = 0; i &lt; V; i++) {
+      vertex_descriptor current = order[i];
+
+      // 隣接頂点の全ての色を印付ける
+      typename GraphTraits::adjacency_iterator ai, aend;
+      for (tie(ai, aend) = adjacent_vertices(current, G); ai != aend; ++ai)
+        mark[color[*ai]] = i; 
+
+      // 隣接頂点によって使われていない最小の色を見つける
+      size_type smallest_color = 0;
+      while (smallest_color &lt; max_color &amp;&amp; mark[smallest_color] == i) 
+        ++smallest_color;
+
+      // もし全ての色を使い切ったら、色の数を増やす
+      if (smallest_color == max_color)
+        ++max_color;
+
+      color[current] = smallest_color;
+    }
+    return max_color;
+  }
+} // namespace boost
+</PRE>
+
+<P>
+
+
+
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000-2001</TD><TD>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>,
+Indiana University (<A
+HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)<br>
+<A HREF="../../../people/liequan_lee.htm">Lie-Quan Lee</A>, Indiana University (<A HREF="mailto:llee@cs.indiana.edu">llee@cs.indiana.edu</A>)<br>
+<A HREF=http://www.osl.iu.edu/~lums>Andrew Lumsdaine</A>,
+Indiana University (<A
+HREF="mailto:lums@osl.iu.edu">lums@osl.iu.edu</A>)
+</TD></TR></TABLE>
+
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:takashi-it@po6.nsk.ne.jp">Takashi Itou</a><br> 
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+
+<p>このドキュメントの対象: Boost Version 1.30.0<br>
+<a href="http://www.boost.org/libs/graph/doc/constructing_algorithms.html">最新版ドキュメント (英語)</a></p>
+</BODY>
+</HTML> 

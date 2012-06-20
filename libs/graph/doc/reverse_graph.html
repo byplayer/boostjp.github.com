@@ -1,0 +1,413 @@
+<HTML>
+<!--
+  --  (C) Copyright David Abrahams and Jeremy Siek 2000. Permission to copy,
+  --  use, modify, sell and distribute this software is granted provided this
+  --  copyright notice appears in all copies. This software is provided
+  --  "as is" without express or implied warranty, and with no claim as
+  --  to its suitability for any purpose.
+  -->
+<Head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<Title>Boost Graph Library: Reverse Graph Adaptor</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+
+
+<H1><A NAME="sec:reverse-graph-adaptor"></A>
+</h1>
+<pre>
+reverse_graph&lt;<a href="./BidirectionalGraph.html">BidirectionalGraph</a>, GraphReference&gt;
+</pre>
+
+<tt>reverse_graph</tt> アダプタは <a
+href="./BidirectionalGraph.html">BidirectionalGraph</a>
+の入辺と出辺を交換し、事実上グラフを転置する。<tt>reverse_graph</tt> の
+構築は定数時間で、グラフの転置された眺めを手に入れるための非常に効率的な
+方法を提供する。
+
+
+<H3>Example</H3>
+
+<a
+href="../example/reverse-graph-eg.cpp"><tt>examples/reverse-graph-eg.cpp</tt></a> からの例。
+
+<pre>
+int
+main()
+{
+  typedef boost::adjacency_list&lt; 
+    boost::vecS, boost::vecS, boost::bidirectionalS,
+  &gt; Graph;
+  
+  Graph G(5);
+  boost::add_edge(0, 2, G);
+  boost::add_edge(1, 1, G);
+  boost::add_edge(1, 3, G);
+  boost::add_edge(1, 4, G);
+  boost::add_edge(2, 1, G);
+  boost::add_edge(2, 3, G);
+  boost::add_edge(2, 4, G);
+  boost::add_edge(3, 1, G);
+  boost::add_edge(3, 4, G);
+  boost::add_edge(4, 0, G);
+  boost::add_edge(4, 1, G);
+
+  std::cout &lt;&lt; &quot;original graph:&quot; &lt;&lt; std::endl;
+  boost::print_graph(G, boost::get(boost::vertex_index, G));
+
+  std::cout &lt;&lt; std::endl &lt;&lt; &quot;reversed graph:&quot; &lt;&lt; std::endl;
+  boost::print_graph(boost::make_reverse_graph(G), 
+                     boost::get(boost::vertex_index, G));
+
+
+  return 0;
+}
+</pre>
+出力は:
+<pre>
+original graph:
+0 --&gt; 2 
+1 --&gt; 1 3 4 
+2 --&gt; 1 3 4 
+3 --&gt; 1 4 
+4 --&gt; 0 1 
+
+reversed graph:
+0 --&gt; 4 
+1 --&gt; 1 2 3 4 
+2 --&gt; 0 
+3 --&gt; 1 2 
+4 --&gt; 1 2 3 
+</pre>
+
+<H3>Template Parameters</H3>
+
+<P>
+<TABLE border>
+<TR>
+<th>パラメータ</th><th>説明</th><th>デフォルト</th>
+</tr>
+
+<TR><TD><TT>BidirectionalGraph</TT></TD>
+<TD>適合されるグラフの型。</TD>
+<TD>&nbsp;</TD>
+</TR>
+
+<TR><TD><TT>GraphReference</TT></TD>
+<TD>もし const の逆グラフ (reverse graph) を作成したいなら型は
+<tt>const&nbsp;BidirectionalGraph&amp;</tt> であるべきで、もし非 const
+の逆グラフ
+を作成したいなら型は <tt>BidirectionalGraph&amp;</tt> であるべきである。
+</TD>
+<TD><tt>const&nbsp;BidirectionalGraph&amp;</tt></TD>
+</TR>
+
+
+</table>
+
+
+<H3>Model of</H3>
+
+<P>
+<a href="./BidirectionalGraph.html">BidirectionalGraph</a>
+と、任意に
+<a href="./VertexListGraph.html">VertexListGraph</a>
+と <a href="./PropertyGraph.html">PropertyGraph</a>
+
+
+<H3>Where Defined</H3>
+
+<P>
+<a href="../../../boost/graph/reverse_graph.hpp"><TT>boost/graph/reverse_graph.hpp</TT></a>
+
+
+<H2>Associated Types</H2>
+
+<hr>
+
+<tt>graph_traits&lt;reverse_graph&gt;::vertex_descriptor</tt>
+<br><br>
+<TT>reverse_graph</TT> と結びついた頂点記述子のための型。
+
+<hr>
+
+<tt>graph_traits&lt;reverse_graph&gt;::edge_descriptor</tt>
+<br><br>
+<TT>reverse_graph</TT> と結びついた辺記述のための型。
+
+<hr>
+
+<tt>graph_traits&lt;reverse_graph&gt;::vertex_iterator</tt>
+<br><br>
+<TT>vertices()</TT> によって返されるイテレータのための型。
+
+<hr>
+
+<tt>graph_traits&lt;reverse_graph&gt;::edge_iterator</tt>
+<br><br>
+<TT>edges()</TT> によって返されるイテレータのための型。
+
+<hr>
+
+
+<tt>graph_traits&lt;reverse_graph&gt;::out_edge_iterator</tt>
+<br><br>
+<TT>out_edges()</TT> によって返されるイテレータのための型。
+
+<hr>
+
+<tt>graph_traits&lt;reverse_graph&gt;::adjacency_iterator</tt>
+<br><br>
+<TT>adjacent_vertices()</TT> によって返されるイテレータのための型。
+
+<hr>
+
+<tt>graph_traits&lt;reverse_graph&gt;::directed_category</tt>
+<br><br>
+グラフが有向 (<TT>directed_tag</TT>) か、または無向 (<TT>undirected_tag</TT>)
+かについての情報を提供する。
+
+<hr>
+
+<tt>graph_traits&lt;reverse_graph&gt;::edge_parallel_category</tt>
+<br><br>
+これはグラフ・クラスが多重辺 (始点と終点が同じ辺) の挿入を許可するかどうか
+を述べる。二つのタグは <TT>allow_parallel_edge-_tag</TT> と
+<TT>disallow_parallel_edge_tag</TT> である。
+<TT>setS</TT> と <TT>hash_setS</TT> の亜種は多重辺を許可しない一方で
+他は多重辺を許可する。
+
+<hr>
+
+<tt>graph_traits&lt;reverse_graph&gt;::vertices_size_type</tt>
+<br><br>
+グラフ中の頂点数を扱うために使われる型。
+
+<hr>
+
+<tt>graph_traits&lt;reverse_graph&gt;::edge_size_type</tt>
+<br><br>
+グラフ中の辺数を扱うために使われる型。
+
+<hr>
+
+<tt>graph_traits&lt;reverse_graph&gt;::degree_size_type</tt>
+<br><br>
+グラフ中の頂点に接続する辺数を扱うために使われる型。 
+
+<hr>
+
+<tt>property_map&lt;reverse_graph, PropertyTag&gt;::type</tt><br>
+and<br>
+<tt>property_map&lt;reverse_graph, PropertyTag&gt;::const_type</tt>
+<br><br>
+グラフ中の頂点プロパティまたは辺プロパティのためのプロパティ・マップ型。
+具体的なプロパティは <tt>PropertyTag</tt> テンプレート引数によって指定され、
+グラフのための <tt>VertexProperty</tt> または <tt>EdgeProperty</tt> 中で
+指定されるプロパティの一つに一致しなければならない。 
+
+<hr>
+
+
+<H2>Member Functions</H2>
+
+<hr>
+
+<pre>
+reverse_graph(BidirectoinalGraph&amp;&nbsp;g)
+</pre>
+コンストラクタ。グラフ <tt>g</tt> の逆にされた (転置された) 眺めを
+作成する。
+
+<hr>
+
+<H2>Non-Member Functions</H2>
+
+<hr>
+
+<pre>
+template <class BidirectionalGraph>
+reverse_graph<BidirectionalGraph>
+make_reverse_graph(BidirectionalGraph&amp; g)
+</pre>
+<tt>reverse_graph</tt> を作成するためのヘルパ関数。
+
+<hr>
+
+<pre>
+std::pair&lt;vertex_iterator,&nbsp;vertex_iterator&gt;
+vertices(const reverse_graph&amp; g)
+</pre>
+グラフ <tt>g</tt> の頂点集合へのアクセスを提供するイテレータ範囲を返す。
+
+<hr>
+
+<pre>
+std::pair&lt;out_edge_iterator,&nbsp;out_edge_iterator&gt;
+out_edges(vertex_descriptor&nbsp;v, const&nbsp;reverse_graph&amp;&nbsp;g)
+</pre>
+グラフ <tt>g</tt> 中の頂点 <tt>v</tt> の出辺へのアクセスを提供する
+イテレータ範囲を返す。これらの出辺は適合されたグラフの入辺に相当する。
+
+<hr>
+
+<pre>
+std::pair&lt;in_edge_iterator,&nbsp;in_edge_iterator&gt;
+in_edges(vertex_descriptor&nbsp;v, const&nbsp;reverse_graph&amp;&nbsp;g)
+</pre>
+グラフ <tt>g</tt> 中の頂点 <tt>v</tt> の入辺へのアクセスを提供する
+イテレータ範囲を返す。これらの入辺は適合されたグラフの出辺に相当する。
+
+<hr>
+
+<pre>
+std::pair&lt;adjacency_iterator,&nbsp;adjacency__iterator&gt;
+adjacent_vertices(vertex_descriptor&nbsp;v, const&nbsp;reverse_graph&amp;&nbsp;g)
+</pre>
+グラフ <tt>g</tt> 中の頂点 <tt>v</tt> の隣接頂点へのアクセスを提供する
+イテレータ範囲を返す。
+
+<hr>
+
+<pre>
+vertex_descriptor
+source(edge_descriptor&nbsp;e, const&nbsp;reverse_graph&amp;&nbsp;g)
+</pre>
+辺 <tt>e</tt> の始点を返す。
+
+<hr>
+
+<pre>
+vertex_descriptor
+target(edge_descriptor&nbsp;e, const&nbsp;reverse_graph&amp;&nbsp;g)
+</pre>
+辺 <tt>e</tt> の終点を返す。
+
+<hr>
+
+<pre>
+degree_size_type
+out_degree(vertex_descriptor&nbsp;u, const&nbsp;reverse_graph&amp;&nbsp;g)
+</pre>
+頂点 <tt>u</tt> を出て行く辺数を返す。
+
+<hr>
+
+<pre>
+degree_size_type
+in_degree(vertex_descriptor&nbsp;u, const&nbsp;reverse_graph&amp;&nbsp;g)
+</pre>
+頂点 <tt>u</tt> に入ってくる辺数を返す。この操作は <TT>Directed</TT>
+テンプレート・パラメータのために <TT>bidirectionalS</TT> が指定された
+場合にのみ使用できる。
+
+<hr>
+
+<pre>
+vertices_size_type
+num_vertices(const reverse_graph&amp; g)
+</pre>
+グラフ <tt>g</tt> 中の頂点数を返す。
+
+<hr>
+
+<pre>
+vertex_descriptor
+vertex(vertices_size_type&nbsp;n, const&nbsp;reverse_graph&amp;&nbsp;g)
+</pre>
+グラフの頂点リスト中の n 番目の頂点を返す。
+
+<hr>
+
+<pre>
+std::pair&lt;edge_descriptor, bool&gt;
+edge(vertex_descriptor&nbsp;u, vertex_descriptor&nbsp;v,
+     const&nbsp;reverse_graph&amp;&nbsp;g)
+</pre>
+グラフ <tt>g</tt> 中の頂点 <tt>u</tt> から頂点 <tt>v</tt> へと接続する辺を
+返す。
+
+<hr>
+
+<pre>
+template &lt;class <a href="./PropertyTag.html">PropertyTag</a>&gt;
+property_map&lt;reverse_graph, PropertyTag&gt;::type
+get(PropertyTag, reverse_graph&amp; g)
+
+template &lt;class <a href="./PropertyTag.html">PropertyTag</a>&gt;
+property_map&lt;reverse_graph, Tag&gt;::const_type
+get(PropertyTag, const reverse_graph&amp; g)
+</pre>
+<tt>PropertyTag</tt> によって指定される頂点プロパティのためのプロパティ・
+マップ・オブジェクトを返す。<tt>PropertyTag</tt> はグラフの
+<tt>VertexProperty</tt> テンプレート引数中で指定されるプロパティの一つに
+一致しなければならない。 
+
+<hr>
+
+<pre>
+template &lt;class <a href="./PropertyTag.html">PropertyTag</a>, class X&gt;
+typename property_traits&lt;property_map&lt;reverse_graph, PropertyTag&gt;::const_type&gt;::value_type
+get(PropertyTag, const reverse_graph&amp; g, X x)
+</pre>
+これは <tt>x</tt> のためのプロパティ値を返し、ここで <tt>x</tt> は頂点記述子
+または辺記述子のどちらか一方である。
+<hr>
+
+<pre>
+template &lt;class <a href="./PropertyTag.html">PropertyTag</a>, class X, class Value&gt;
+void
+put(PropertyTag, const reverse_graph&amp; g, X x, const Value&amp; value)
+</pre>
+これは <tt>x</tt> のためのプロパティ値を <tt>value</tt> にする。
+<tt>x</tt> は頂点記述子または辺記述子のどちらか一方である。<tt>Value</tt> は
+<tt>typename property_traits&lt;property_map&lt;reverse_graph, PropertyTag&gt;::type&gt::value_type</tt> に変更可能でなければならない。 
+
+<hr>
+
+<pre>
+template &lt;class GraphProperties, class <a href="./PropertyTag.html#GraphPropertyTag">GraphPropertyTag</a>&gt;
+typename property_value&lt;GraphProperties, GraphPropertyTag&gt;::type&amp;
+get_property(reverse_graph&amp; g, GraphPropertyTag);
+</pre>
+グラフ・オブジェクト <tt>g</tt> に結びつけられた <tt>GraphPropertyTag</tt>
+によって指定されるプロパティを返す。<tt>property_value</tt> 特性クラスは <a
+href="../../../boost/pending/property.hpp"><tt>boost/pending/property.hpp</tt></a> 中で定義される。
+
+<hr>
+
+<pre>
+template &lt;class GraphProperties, class <a href="./PropertyTag.html#GraphPropertyTag">GraphPropertyTag</a>&gt;
+const typename property_value&lt;GraphProperties, GraphPropertyTag&gt;::type&amp;
+get_property(const reverse_graph&amp; g, GraphPropertyTag);
+</pre>
+グラフ・オブジェクト <tt>g</tt> に結びつけられた <tt>GraphPropertyTag</tt>
+によって指定されるプロパティを返す。<tt>property_value</tt> 特性クラスは <a
+href="../../../boost/pending/property.hpp"><tt>boost/pending/property.hpp</tt></a> 中で定義される。
+
+<hr>
+
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000-2001</TD><TD>
+<a HREF="../../../people/dave_abrahams.htm">Dave Abrahams</a>
+(<A HREF="mailto:david.abrahams@rcn.com">david.abrahams@rcn.com</A>)<br>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>,
+Indiana University (<A
+HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)<br>
+</TD></TR></TABLE>
+
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:takashi-it@po6.nsk.ne.jp">Takashi Itou</a><br> 
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+
+<p>このドキュメントの対象: Boost Version 1.30.0<br>
+<a href="http://www.boost.org/libs/graph/doc/reverse_graph.html">最新版ドキュメント (英語)</a></p>
+</BODY>
+</HTML> 

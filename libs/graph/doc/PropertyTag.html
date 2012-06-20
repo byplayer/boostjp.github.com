@@ -1,0 +1,121 @@
+<HTML>
+<!--
+  -- Copyright (c) Jeremy Siek 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  Silicon Graphics makes no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<Title>Property</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+<H2><A NAME="concept:PropertyTag"></A>
+PropertyTag
+</H2>
+
+プロパティ・タグはグラフの頂点と辺に結びつけられたプロパティを命名もしくは
+識別するために用いられる型である。プロパティの型は実際のプロパティ値の
+型ではない。プロパティ型のオブジェクトはプロパティを指定する型情報を持ち運ぶ
+ことを除いて使われない。独自のプロパティ・タグを定義する方法の説明のために章 <A
+href="using_adjacency_list.html#sec:custom-edge-properties"> Custom
+Edge Properties</a> あたりを見なさい。
+
+
+<h3>Associated Types</h3>
+
+<table border>
+
+<tr>
+<td>プロパティの種類</td>
+<td><TT>property_kind&lt;PropertyTag&gt;::type</TT> </td>
+<td>
+これはプロパティが <a
+name="VertexPropertyTag"><b>頂点プロパティ・タグ</b></a>
+(<tt>vertex_property_tag</tt>) であるか、<a
+name="EdgePropertyTag"><b>辺プロパティ・タグ</b></a> (<tt>edge_property_tag</tt>)であるか、またはグラフ・オブジェクトそれ自身 (<tt>graph_property_tag</tt>) に
+結びつけられた <a
+name="GraphPropertyTag"><b>グラフ・プロパティ・タグ</b></a> であるかを述べる。
+タグは <a
+href="../../../boost/graph/properties.hpp"><tt>boost/graph/properties.hpp</tt></a> 中で定義される。<tt>property_kind</tt> 特性クラスは <a href="../../../boost/pending/property.hpp"><tt>boost/pending/property.hpp</tt></a> 中で定義される。
+</td>
+</tr>
+
+<tr>
+<td>プロパティの ID 番号</td>
+<td><TT>property_num&lt;PropertyTag&gt;::value</TT> </td>
+<td>
+これは部分特殊化版をサポートしないコンパイラを用いる時に (これゆえ二つの
+プロパティ・タグが同じかどうか見つけるために <tt>boost::is_same</tt> が
+使えなくなる) 回避手段として必要とされる。<tt>property_num</tt> 特性クラスは
+<a
+href="../../../boost/pending/property.hpp"><tt>boost/pending/property.hpp</tt></a> 中で定義される。
+</td>
+</tr>
+
+</table>
+
+<h3>Refinement of</h3>
+
+<a
+href="http://www.sgi.com/tech/stl/DefaultConstructible.html">Default Constructible</a> 
+
+
+<h3>Models</h3>
+
+下のプロパティ・タグ・コンセプトのモデルは <a
+href="../../../boost/graph/properties.hpp"><tt>boost/graph/properties.hpp</tt></a> 中で定義される。
+
+<ul>
+  <li><tt>vertex_index_t</tt></li>
+  <li><tt>edge_index_t</tt></li>
+  <li><tt>graph_name_t</tt></li>
+  <li><tt>vertex_name_t</tt></li>
+  <li><tt>edge_name_t</tt></li>
+  <li><tt>edge_weight_t</tt></li>
+  <li><tt>vertex_distance_t</tt></li>
+  <li><tt>vertex_color_t</tt></li>
+  <li><tt>vertex_degree_t</tt></li>
+  <li><tt>vertex_out_degree_t</tt></li>
+  <li><tt>vertex_in_degree_t</tt></li>
+  <li><tt>vertex_discover_time_t</tt></li>
+  <li><tt>vertex_finish_time_t</tt></li>
+</ul>
+
+<h3>See Also</h3>
+
+<a href="./PropertyGraph.html">PropertyGraph</a>
+と
+<a href="../../property_map/property_map.html">Property Map Concepts</a>
+
+<h3>Notes</h3>
+
+部分特殊化版をサポートしないコンパイラにおいて、各プロパティ型もまた
+プロパティ型を独自に識別する <tt>value</tt> と命名された列挙体を含む
+<tt>property_num&lt;PropertyTag&gt;</tt> を特殊化するために必要とされる。
+
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000-2001</TD><TD>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>, Indiana University (<A HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)
+</TD></TR></TABLE>
+
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:takashi-it@po6.nsk.ne.jp">Takashi Itou</a><br> 
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+
+<p>このドキュメントの対象: Boost Version 1.30.0<br>
+<a href="http://www.boost.org/libs/graph/doc/PropertyTag.html">最新版ドキュメント (英語)</a></p>
+</BODY>
+</HTML> 

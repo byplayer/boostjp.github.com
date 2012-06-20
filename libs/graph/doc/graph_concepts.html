@@ -1,0 +1,496 @@
+<HTML>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<!--
+  -- Copyright (c) Jeremy Siek 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  Silicon Graphics makes no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<Title>Boost Graph Concepts</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+
+<H1><A NAME="chapter:graph-concepts"></A>
+Graph Concepts
+</H1>
+
+<P>
+Boost Graph Library (BGL) の中心となるのはインタフェース、
+即ち (ジェネリックプログラミングで言うところの) コンセプトであり、
+それはデータ構造に中立なやり方でグラフをいかに吟味し操作するかを定義する。 
+実際、多少の問題であれば、
+いくつかの関数に暗黙的に基づいてグラフを定義する方がより容易であったり、
+より効率的であるので新たにデータ構造を用いてBGLインタフェースを実装する必要は一切無い。
+<P>
+BGLインタフェースは単一のグラフ・コンセプトとして現れない。 
+代わりにそれは遥かに小さな要素へ分解される。 
+なぜならば、 
+コンセプトの目的は<I>特定の</I>アルゴリズムの要求を取りまとめることだからである。 
+どんなアルゴリズムもすべてのグラフ操作を必要とはしない。 
+概してそのごく一部だけである。 
+更に、 すべての操作には効率的な実装を提供することはできないが、 
+ある特定のアルゴリズムになら、 
+その必要な操作の極めて効率的な実装を提供することができる 多くのグラフ・データ構造がある。 
+多くのより小さなコンセプトへグラフ・インタフェースを分解することで、 
+我々はグラフ・アルゴリズムの作者に それらの中から、 
+彼らのアルゴリズムに最もよく適合するコンセプトを選ぶために有効な選択を供給するのである。
+
+<H2>Graph Structure Concepts Overview</H2>
+
+<P>
+<A HREF="#fig:graph-concepts">図 1</A> にグラフ・コンセプト間の詳細な関係を示す。 
+グラフ・インタフェースを非常に多くのコンセプトに分解したのは、 
+アルゴリズムのインタフェースがグラフの最小限のインタフェースのみを要求・使用するようにし、
+結果、アルゴリズムの再利用性を増加させるためである。
+
+<p></p>
+<DIV ALIGN="CENTER"><A NAME="fig:graph-concepts"></A></A>
+<TABLE>
+<CAPTION ALIGN="BOTTOM"><STRONG>図 1:</STRONG>
+グラフ・コンセプトとその詳細な関係
+</CAPTION>
+<TR><TD><IMG SRC="./figs/concepts.gif"></TD></TR>
+</TABLE>
+</DIV>
+<p></p>
+
+<A HREF="#tab:graph-concept-reqs">表1</A>
+でグラフ・コンセプトへの有効な表現および対応する型を与え、 
+それぞれのコンセプトの詳細な記述へのリンクを提供する。 
+表中で使用される表記法は以下の通りである。
+
+<h3>Notation</h3>
+
+<Table>
+<TR>
+<TD><tt>G</tt></TD>
+<TD>Graph のモデルである型。</TD>
+</TR>
+
+<TR>
+<TD><tt>g</tt></TD>
+<TD>型 <TT>G</TT> のオブジェクト。</TD>
+</TR>
+
+<TR>
+<TD><tt>e</tt></TD>
+<TD>型 <TT>boost::graph_traits&lt;G&gt;::edge_descriptor</TT> のオブジェクト。</TD>
+</TR>
+
+<TR>
+<TD><tt>e_iter</tt></TD>
+<TD>型 <TT>boost::graph_traits&lt;G&gt;::out_edge_iterator</TT> のオブジェクト。</TD>
+</TR>
+
+<TR>
+<TD><tt>u,v</tt></TD>
+<TD>型 <TT>boost::graph_traits&lt;G&gt;::vertex_descriptor</TT> のオブジェクト。</TD>
+</TR>
+
+<TR>
+<TD><TT>ep</TT></TD><TD>型 <TT>G::edge_property_type</TT> のオブジェクト。</TD>
+</TR>
+
+<TR>
+<TD><TT>vp</TT></TD><TD>型 <TT>G::vertex_property_type</TT> のオブジェクト。</TD>
+</TR>
+
+<TR>
+<TD><tt>Property</tt></TD>
+<TD>頂点、または辺のプロパティを指定するための型。</TD>
+</TR>
+
+<TR>
+<TD><tt>property</tt></TD>
+<TD>型 <TT>Property</TT> のオブジェクト。</td>
+</TR>
+
+</table>
+
+
+
+
+<P>
+<BR><P></P>
+<DIV ALIGN="CENTER"><A NAME="tab:graph-concept-reqs"></A>
+<TABLE>
+<CAPTION ALIGN="BOTTOM"><STRONG>表 1:</STRONG>
+    グラフ・コンセプトの要約
+    </CAPTION>
+<TR><TD>  
+<TABLE border>
+<TR><TH ALIGN="LEFT">
+<B>Expression</B> </TH>
+<TH ALIGN="LEFT" VALIGN="TOP"> <B>Return Type or Description</B> </TH>
+</TR>
+<TR><TD ALIGN="LEFT" COLSPAN=2>  
+ <a href="./Graph.html">Graph</a> </TD>
+</TR>
+<TR><TD ALIGN="LEFT">  
+<TT>boost::graph_traits&lt;G&gt;::vertex_descriptor</TT> </TD>
+<TD ALIGN="LEFT" VALIGN="TOP">
+  頂点を表すオブジェクトへの型。</TD>
+</TR>
+<TR><TD ALIGN="LEFT"> 
+<TT>boost::graph_traits&lt;G&gt;::edge_descriptor</TT> </TD>
+<TD ALIGN="LEFT" VALIGN="TOP">
+  辺を表すオブジェクトへの型。</TD>
+</TR>
+<TR><TD ALIGN="LEFT"> 
+<TT>boost::graph_traits&lt;G&gt;::directed_category</TT> </TD>
+<TD ALIGN="LEFT" VALIGN="TOP"> 有向であるか、無向であるか? </TD>
+</TR>
+<TR><TD ALIGN="LEFT"> 
+<TT>boost::graph_traits&lt;G&gt;::edge_parallel_category</TT> </TD>
+<TD ALIGN="LEFT" VALIGN="TOP"> 多重辺を許可するか? </TD>
+</TR>
+<TR><TD ALIGN="LEFT">
+<TT>boost::graph_traits&lt;G&gt;::traversal_category</TT> </TD> <TD
+ALIGN="LEFT" VALIGN="TOP">グラフ上の頂点と辺を巡回するための方法。</TD>
+</TR>
+<!---------------------------------------------------------------->
+<TR><TD ALIGN="LEFT" COLSPAN=2>  
+ <a href="./IncidenceGraph.html">IncidenceGraph</a> Graphの詳細 </TD>
+</TR>
+<TR><TD ALIGN="LEFT">  
+<TT>boost::graph_traits&lt;G&gt;::out_edge_iterator</TT> </TD>
+<TD ALIGN="LEFT" VALIGN="TOP"> 出力辺へのイテレータ。</TD>
+</TR>
+<TR><TD ALIGN="LEFT"> 
+<TT>boost::graph_traits&lt;G&gt;::degree_size_type</TT> </TD>
+<TD ALIGN="LEFT" VALIGN="TOP"> 頂点の次数を表す整数型。 </TD>
+</TR>
+<TR><TD ALIGN="LEFT"> 
+<TT>out_edges(v, g)</TT> </TD>
+<TD ALIGN="LEFT" VALIGN="TOP"> <TT>std::pair&lt;out_edge_iterator, out_edge_iterator&gt;</TT> </TD>
+</TR>
+<TR><TD ALIGN="LEFT"> 
+<TT>source(e, g)</TT> </TD>
+<TD ALIGN="LEFT" VALIGN="TOP"> <TT>vertex_descriptor</TT> </TD>
+</TR>
+<TR><TD ALIGN="LEFT"> 
+<TT>target(e, g)</TT> </TD>
+<TD ALIGN="LEFT" VALIGN="TOP"> <TT>vertex_descriptor</TT> </TD>
+</TR>
+<TR><TD ALIGN="LEFT"> 
+<TT>out_degree(v, g)</TT> </TD>
+<TD ALIGN="LEFT" VALIGN="TOP"> <TT>degree_size_type</TT> </TD>
+</TR>
+<!---------------------------------------------------------------->
+<TR><TD ALIGN="LEFT" COLSPAN=2>  
+ <a href="./BidirectionalGraph.html">BidirectionalGraph</a> IncidenceGraphの詳細 </TD>
+</TR>
+<TR><TD ALIGN="LEFT">  
+<TT>boost::graph_traits&lt;G&gt;::in_edge_iterator</TT> </TD>
+<TD ALIGN="LEFT" VALIGN="TOP"> 入力辺へのイテレータ。 </TD>
+</TR>
+<TR><TD ALIGN="LEFT"> 
+<TT>in_edges(v, g)</TT> </TD>
+<TD ALIGN="LEFT" VALIGN="TOP"> <TT>std::pair&lt;in_edge_iterator, in_edge_iterator&gt;</TT> </TD>
+</TR>
+<TR><TD ALIGN="LEFT"> 
+<TT>in_degree(v, g)</TT> </TD>
+<TD ALIGN="LEFT" VALIGN="TOP"> <TT>degree_size_type</TT> </TD>
+</TR>
+<TR><TD ALIGN="LEFT"> 
+<TT>degree(e, g)</TT> </TD>
+<TD ALIGN="LEFT" VALIGN="TOP"> <TT>degree_size_type</TT> </TD>
+</TR>
+<!---------------------------------------------------------------->
+<TR><TD ALIGN="LEFT" COLSPAN=2>  
+<a href="./AdjacencyGraph.html">AdjacencyGraph</a> Graphの詳細</TD>
+</TR>
+<TR><TD ALIGN="LEFT"> 
+<TT>boost::graph_traits&lt;G&gt;::adjacency_iterator</TT> </TD>
+<TD ALIGN="LEFT" VALIGN="TOP"> 隣接する頂点へのイテレータ。 </TD>
+</TR>
+<TR><TD ALIGN="LEFT"> 
+<TT>adjacent_vertices(v, g)</TT> </TD>
+<TD ALIGN="LEFT" VALIGN="TOP"><TT>std::pair&lt;adjacency_iterator, adjacency_iterator&gt;</TT> </TD>
+</TR>
+<!---------------------------------------------------------------->
+<TR><TD ALIGN="LEFT" COLSPAN=2>  
+<a href="./VertexListGraph.html">VertexListGraph</a> IncidenceGraphとAdjacencyGraphの詳細 </TD>
+</TR>
+<TR><TD ALIGN="LEFT">  
+<TT>boost::graph_traits&lt;G&gt;::vertex_iterator</TT> </TD>
+<TD ALIGN="LEFT" VALIGN="TOP"> グラフの頂点集合へのイテレータ。 </TD>
+</TR>
+<TR><TD ALIGN="LEFT"> 
+<TT>boost::graph_traits&lt;G&gt;::vertices_size_type</TT> </TD>
+<TD ALIGN="LEFT" VALIGN="TOP"> グラフの頂点数を表す符号無し整数型。 </TD>
+</TR>
+<TR><TD ALIGN="LEFT"> 
+<TT>vertices(g)</TT>  </TD>
+<TD ALIGN="LEFT" VALIGN="TOP"><TT>std::pair&lt;vertex_iterator, vertex_iterator&gt;</TT> </TD>
+</TR>
+<TR><TD ALIGN="LEFT"> 
+<TT>num_vertices(g)</TT> </TD>
+<TD ALIGN="LEFT" VALIGN="TOP"> <TT>vertices_size_type</TT>  </TD>
+</TR>
+<!---------------------------------------------------------------->
+<TR><TD ALIGN="LEFT" COLSPAN=2>  
+<a href="./EdgeListGraph.html">EdgeListGraph</a> Graphの詳細 </TD>
+</TR>
+<TR><TD ALIGN="LEFT">  
+<TT>boost::graph_traits&lt;G&gt;::edge_iterator</TT> </TD>
+<TD ALIGN="LEFT" VALIGN="TOP"> グラフの辺集合へのイテレータ。 </TD>
+</TR>
+<TR><TD ALIGN="LEFT"> 
+<TT>boost::graph_traits&lt;G&gt;::edges_size_type</TT> </TD>
+<TD ALIGN="LEFT" VALIGN="TOP"> グラフの辺数を表す符号無し整数型。 </TD>
+</TR>
+<TR><TD ALIGN="LEFT"> 
+<TT>edges(g)</TT> </TD>
+<TD ALIGN="LEFT" VALIGN="TOP"> <TT>std::pair&lt;edge_iterator, edge_iterator&gt;</TT> </TD>
+</TR>
+<TR><TD ALIGN="LEFT">  
+<TT>num_edges(g)</TT> </TD>
+<TD ALIGN="LEFT" VALIGN="TOP"> <TT>edges_size_type</TT>  </TD>
+</TR>
+<TR><TD ALIGN="LEFT"> 
+<TT>source(e, g)</TT> </TD>
+<TD ALIGN="LEFT" VALIGN="TOP"> <TT>vertex_descriptor</TT> </TD>
+</TR>
+<TR><TD ALIGN="LEFT"> 
+<TT>target(e, g)</TT> </TD>
+<TD ALIGN="LEFT" VALIGN="TOP"> <TT>vertex_descriptor</TT> </TD>
+</TR>
+<!---------------------------------------------------------------->
+<TR><TD ALIGN="LEFT" COLSPAN=2>  
+<a href="./AdjacencyMatrix.html">AdjacencyMatrix</a> Graphの詳細 </TD>
+</TR>
+<TR><TD ALIGN="LEFT">  
+<TT>edge(u, v, g)</TT> </TD>
+<TD ALIGN="LEFT" VALIGN="TOP"> <TT>std::pair&lt;edge_descriptor, bool&gt;</TT> </TD>
+</TR>
+<TR><TD ALIGN="LEFT" COLSPAN=2>  
+<a href="./MutableGraph.html">MutableGraph</a> Graphの詳細 </TD>
+</TR>
+<TR><TD ALIGN="LEFT">  
+<TT>add_vertex(g)</TT> </TD>
+<TD ALIGN="LEFT" VALIGN="TOP"> <TT>vertex_descriptor</TT> </TD>
+</TR>
+<TR><TD ALIGN="LEFT">  
+<TT>clear_vertex(v, g)</TT> </TD>
+<TD ALIGN="LEFT" VALIGN="TOP"> <TT>void</TT> </TD>
+</TR>
+<TR><TD ALIGN="LEFT">  
+<TT>remove_vertex(v, g)</TT> </TD>
+<TD ALIGN="LEFT" VALIGN="TOP"> <TT>void</TT> </TD>
+</TR>
+<TR><TD ALIGN="LEFT"> 
+<TT>add_edge(u, v, g)</TT> </TD>
+<TD ALIGN="LEFT" VALIGN="TOP"> <TT>std::pair&lt;edge_descriptor, bool&gt;</TT> </TD>
+</TR>
+<TR><TD ALIGN="LEFT"> 
+<TT>remove_edge(u, v, g)</TT> </TD>
+<TD ALIGN="LEFT" VALIGN="TOP"> <TT>void</TT> </TD>
+</TR>
+<TR><TD ALIGN="LEFT"> 
+<TT>remove_edge(e, g)</TT> </TD>
+<TD ALIGN="LEFT" VALIGN="TOP"> <TT>void</TT> </TD>
+</TR>
+<TR><TD ALIGN="LEFT"> 
+<TT>remove_edge(e_iter, g)</TT> </TD>
+<TD ALIGN="LEFT" VALIGN="TOP"> <TT>void</TT> </TD>
+</TR>
+<!---------------------------------------------------------------->
+<TR><TD ALIGN="LEFT" COLSPAN=2>  
+<a href="./MutablePropertyGraph.html">MutablePropertyGraph</a> Graphの詳細 </TD>
+</TR>
+<TR><TD ALIGN="LEFT">  
+<TT>add_vertex(vp, g)</TT> </TD>
+<TD ALIGN="LEFT" VALIGN="TOP"> <TT>vertex_descriptor</TT> </TD>
+</TR>
+<TR><TD ALIGN="LEFT"> 
+<TT>add_edge(u, v, ep, g)</TT> </TD>
+<TD ALIGN="LEFT" VALIGN="TOP"> <TT>std::pair&lt;edge_descriptor,
+  bool&gt;</TT> </TD>
+</TR>
+<!---------------------------------------------------------------->
+<TR>
+<TD ALIGN="LEFT" COLSPAN=2>  
+<a href="./PropertyGraph.html">PropertyGraph</a> Graphの詳細 </TD>
+</TR>
+<TR><TD ALIGN="LEFT">  
+<TT>boost::property_map&lt;G, Property&gt;::type</TT> </TD>
+<TD ALIGN="LEFT" VALIGN="TOP">変更可能なプロパティ・マップの型。</TD>
+</TR>
+<TR><TD ALIGN="LEFT"> 
+<TT>boost::property_map&lt;G, Property&gt;::const_type</TT> </TD>
+<TD ALIGN="LEFT" VALIGN="TOP">変更不可能なプロパティ・マップの型。</TD>
+</TR>
+<TR><TD ALIGN="LEFT"> 
+<TT>get(property, g)</TT> </TD>
+<TD ALIGN="LEFT" VALIGN="TOP"> プロパティ・マップを得るための関数。 </TD>
+</TR>
+
+<TR><TD ALIGN="LEFT"> 
+<TT>get(property,&nbsp;g,&nbsp;x)</TT>
+</TD>
+<TD ALIGN="LEFT" VALIGN="TOP">辺、または頂点 <TT>x</TT>のプロパティの値を得る。 </TD>
+</TR>
+
+<TR><TD ALIGN="LEFT"> 
+<TT>put(property,&nbsp;g,&nbsp;x,&nbsp;v)</TT>
+</TD>
+<TD ALIGN="LEFT" VALIGN="TOP">辺、または頂点 <TT>x</TT> のプロパティの値を 
+<TT>v</TT> に設定する。 </TD>
+</TR>
+
+</table>
+</table>
+</DIV><P></P>
+<BR>
+
+<P>
+
+<H2><A NAME="sec:undirected-graphs"></A>
+Undirected Graphs
+</H2>
+
+<P>
+BGLの提供する、無向グラフにアクセスし、
+操作するためのインタフェースは 次の章で述べる有向グラフのインタフェースと同様である。 
+しかしながら、 
+振る舞いと意味においていくつかの違いが見られる。 
+例えば、 有向グラフでは、頂点の出力辺と入力辺について議論することができる。 
+無向グラフでは、``入力'' と ``出力'' は無く、 
+ただ頂点に接続する辺があるのみである。 
+とは言っても、 BGLでは無向グラフの接続辺にアクセスするためにも、 
+<TT>out_edges()</TT>(または <TT>in_edges()</TT>) 関数を用いる。 
+同様にして、 無向辺は、``始点''と``終点''は持たず、 
+単に順序付けされていない頂点の組を持つのみであるが、 
+BGLでは、それら頂点にアクセスするためにも、 <TT>source()</TT> と <TT>target()</TT>
+を用いる。 
+BGLが無向グラフへの別個のインタフェースを提供しない理由は、 
+有向グラフ上で有効な多くのアルゴリズムが無向グラフ上でも有効であるからであり、 
+別個のインタフェースを提供すれば、 
+だた単にインタフェースが違うという理由で アルゴリズムを重複させなければならず、 
+それによって利便性を欠いてしまうからである。 
+無向グラフを使用する際には、暗黙のうちにその有向性を無視するのである。 
+下記の例で無向グラフでの <TT>out_edges()</TT>、<TT>source()</TT>
+と <TT>target()</TT> の使用方法を説明する。 
+この例のソースコードと後のコードは<a 
+href="../example/undirected.cpp"><TT>examples/undirected.cpp</TT></a>
+で見つけることが出来る。
+
+<P>
+<PRE>
+  const int V = 2;
+  typedef ... UndirectedGraph;
+  UndirectedGraph undigraph(V);
+
+  std::cout &lt;&lt; "the edges incident to v: ";
+  boost::graph_traits&lt;UndirectedGraph&gt;::out_edge_iterator e, e_end;
+  boost::graph_traits&lt;UndirectedGraph&gt;::vertex_descriptor 
+    s = vertex(0, undigraph);
+  for (tie(e, e_end) = out_edges(s, undigraph); e != e_end; ++e)
+    std::cout &lt;&lt; "(" &lt;&lt; source(*e, undigraph) 
+              &lt;&lt; "," &lt;&lt; target(*e, undigraph) &lt;&lt; ")" &lt;&lt; endl;
+</PRE>
+
+<P>
+たとえ無向グラフへのインタフェースが同じでも、 
+辺の同値性の定義が異なるため、 
+いくつか振る舞いにおいて違いが見られる。 
+有向グラフでは、 辺 <I>(u,v)</I>
+は 辺 <I>(v,u)</I> と決して等しくなることは無いが、 
+無向グラフでは、 それらは等しくなることがある。 
+無向グラフが多重グラフであるならば、 <I>(u,v)</I>
+と <I>(v,u)</I> は多重辺でもよいが、 
+多重グラフで無いならば、 <I>(u,v)</I> と <I>(v,u)</I>
+は同じ辺でなくてはならない。
+<P>
+下記の例で辺の同値性を調べると、 
+有向グラフでは<TT>false</TT>を返すであろうし、 
+無向グラフでは<TT>true</TT>を返すであろう。 
+その違いは更に <TT>add_edge()</TT> の意味にも影響する。 
+下記の例において、更に <TT>add_add(v, u, undigraph)</TT>
+と書いていたならば、 
+<I>u</I> と <I>v</I> の間に(グラフの型が多重辺を許可すれば)多重辺を追加していたであろう。 
+この辺の同値性における違いは辺のプロパティの関連性にも影響する。 
+例における有向グラフで、 
+<I>(u,v)</I> と <I>(v,u)</I> は別個の重みを持つことができるのに対して、 
+一方の無向グラフでは、 
+<I>(u,v)</I> の重みと <I>(v,u)</I>のそれは、 
+両者は同じ辺であるから、等しいのである。
+
+<P>
+<PRE>
+  typedef ... DirectedGraph;
+  DirectedGraph digraph(V);
+  {
+    boost::graph_traits&lt;DirectedGraph&gt;::vertex_descriptor u, v;
+    u = vertex(0, digraph);
+    v = vertex(1, digraph);
+    add_edge(digraph, u, v, Weight(1.2));
+    add_edge(digraph, v, u, Weight(2.4));
+    boost::graph_traits&lt;DirectedGraph&gt;::edge_descriptor e1, e2;
+    bool found;
+    tie(e1, found) = edge(u, v, digraph);
+    tie(e2, found) = edge(v, u, digraph);
+    std::cout &lt;&lt; "in a directed graph is ";
+    std::cout &lt;&lt; "(u,v) == (v,u) ? " &lt;&lt; (e1 == e2) &lt;&lt; std::endl;
+
+    property_map&lt;DirectedGraph, edge_weight_t&gt;::type
+      weight = get(edge_weight, digraph);
+    cout &lt;&lt; "weight[(u,v)] = " &lt;&lt; get(weight, e1) &lt;&lt; endl;
+    cout &lt;&lt; "weight[(v,u)] = " &lt;&lt; get(weight, e2) &lt;&lt; endl;
+  }
+  {
+    boost::graph_traits&lt;UndirectedGraph&gt;::vertex_descriptor u, v;
+    u = vertex(0, undigraph);
+    v = vertex(1, undigraph);
+    add_edge(undigraph, u, v, Weight(3.1));
+    boost::graph_traits&lt;UndirectedGraph&gt;::edge_descriptor e1, e2;
+    bool found;
+    tie(e1, found) = edge(u, v, undigraph);
+    tie(e2, found) = edge(v, u, undigraph);
+    std::cout &lt;&lt; "in an undirected graph is ";
+    std::cout &lt;&lt; "(u,v) == (v,u) ? " &lt;&lt; (e1 == e2) &lt;&lt; std::endl;
+
+    property_map&lt;UndirectedGraph, edge_weight_t&gt;::type
+      weight = get(edge_weight, undigraph);
+    cout &lt;&lt; "weight[(u,v)] = " &lt;&lt; get(weight, e1) &lt;&lt; endl;
+    cout &lt;&lt; "weight[(v,u)] = " &lt;&lt; get(weight, e2) &lt;&lt; endl;
+  }
+</PRE>
+The output is:
+<PRE>
+in a directed graph is (u,v) == (v,u) ? 0
+weight[(u,v)] = 1.2
+weight[(v,u)] = 2.4
+in an undirected graph is (u,v) == (v,u) ? 1
+weight[(u,v)] = 3.1
+weight[(v,u)] = 3.1
+</PRE>
+
+
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000-2001</TD><TD>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>, Indiana University (<A HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)
+</TD></TR></TABLE>
+
+<P>Japanese Translation Copyright (C) 2003&nbsp;KANAHORI&nbsp;Toshihiro &lt;<A href="mailto:kanahori@k.tsukuba-tech.ac.jp">kanahori@k.tsukuba-tech.ac.jp</A>&gt;
+<BR>
+<SMALL>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。
+</SMALL>
+</P>
+</BODY>
+</HTML> 

@@ -1,0 +1,243 @@
+<HTML>
+<!--
+  -- Copyright (c) Jeremy Siek 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  Silicon Graphics makes no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<Title>Boost Graph Library: Edmunds-Karp Maximum Flow</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+<H1><A NAME="sec:edmunds_karp_max_flow">
+<TT>edmunds_karp_max_flow</TT>
+</H1>
+
+<PRE>
+<i>// 名前付きパラメータバージョン</i>
+template &lt;class <a href="./VertexListGraph.html">VertexListGraph</a>, class P, class T, class R&gt;
+typename detail::edge_capacity_value&lt;VertexListGraph, P, T, R&gt;::value_type
+edmunds_karp_max_flow(VertexListGraph& g, 
+   typename graph_traits&lt;VertexListGraph&gt;::vertex_descriptor src,
+   typename graph_traits&lt;VertexListGraph&gt;::vertex_descriptor sink,
+   const bgl_named_params&lt;P, T, R&gt;&amp; params = <i>all defaults</i>)
+
+<i>// 名前無しパラメータバージョン</i>
+template &lt;class <a href="./VertexListGraph.html">VertexListGraph</a>, 
+	  class CapacityEdgeMap, class ResidualCapacityEdgeMap,
+	  class ReverseEdgeMap, class ColorMap, class PredEdgeMap&gt;
+typename property_traits&lt;CapacityEdgeMap&gt;::value_type
+edmunds_karp_max_flow(VertexListGraph&amp; g, 
+   typename graph_traits&lt;Graph&gt;::vertex_descriptor src,
+   typename graph_traits&lt;Graph&gt;::vertex_descriptor sink,
+   CapacityEdgeMap cap, ResidualCapacityEdgeMap res, ReverseEdgeMap rev, 
+   ColorMap color, PredEdgeMap pred)
+</PRE>
+
+<P>
+<tt>edmunds_karp_max_flow()</tt> 関数はネットワークの最大流を計算する。
+最大流の記述のために章 <a
+href="./graph_theory_review.html#sec:network-flow-algorithms">Network
+Flow Algorithms</a> を見なさい。計算された最大流が関数の返却値になるだろう。
+関数はさらに E 中の全ての (u,v) のために流量 f(u,v) を計算する。そしてそれは
+残差容量 r(u,v) = c(u,v) - f(u,v) の形で返される。 
+
+<p>
+このアルゴリズムのために入力グラフとプロパティ・マップのパラメータにいくつかの
+特別な必要条件がある。最初に、ネットワークを表す有向グラフ <i>G=(V,E)</i> は
+ <i>E</i> 中の各辺のための逆辺 (reverse edge) を含むために増やされなければな
+らない。換言すれば、入力グラフは <i>G<sub>in</sub> = (V,{E U E<sup>T</sup>})</i> であるべきである。<tt>ReverseEdgeMap</tt> 引数 <tt>rev</tt> は元のグラフ中の
+各辺をその逆辺にマップしなければならない。
+すなわち <i>E</i> 中の全ての <i>(u,v)</i> に対して
+ <i>(u,v) -> (v,u)</i> である。
+<tt>CapacityEdgeMap</tt> 引数 <tt>cap</tt> は <i>E</i> 中の各辺を正の数に
+マップしなければならず、<i>E<sup>T</sup></i> 中の各辺は 0 にされなければなら
+ない。 
+
+<p>
+アルゴリズムは <a
+href="./bibliography.html#edmonds72:_improvements_netflow">Edmonds and
+Karp</a> に負っている。もっとも <a
+href="./bibliography.html#ahuja93:_network_flows">Network Flows</a> に
+述べられている“ラベリング・アルゴリズム”と呼ばれる亜種を使っているが。
+
+<p>
+このアルゴリズムは最大流問題を実装するための大変単純で容易な解答である。
+しかしながら、このアルゴリズムが <a
+href="./push_relabel_max_flow.html"><tt>push_relabel_max_flow()</tt></a>
+ アルゴリズムほどには良くないいくつかの理由がある。
+
+<ul>
+  <li>非整数の容量の場合、時間複雑性は最疎グラフを除く全てのグラフにとって
+ push-relabel アルゴリズムの <i>O(V<sup>2</sup>E<sup>1/2</sup>)</i>
+ より悪い <i>O(V E<sup>2</sup>)</i> である。
+
+  <li>整数の容量の場合、もし容量の範囲 <i>U</i> が大変大きいならば、
+アルゴリズムに長い時間がかかるだろう。
+</ul>
+
+
+<H3>Where Defined</H3>
+
+<P>
+<a href="../../../boost/graph/edmunds_karp_max_flow.hpp"><TT>boost/graph/edmunds_karp_max_flow.hpp</TT></a>
+
+<P>
+
+<h3>Parameters</h3>
+
+IN: <tt>VertexListGraph&amp; g</tt>
+<blockquote>
+有向グラフ。グラフの型は <a
+  href="./VertexListGraph.html">VertexListGraph</a> のモデルでなければなら
+ない。グラフ中の各辺 <i>(u,v)</i> のために、逆辺 <i>(v,u)</i> もまたグラフ
+中になければならない。
+</blockquote>
+
+IN: <tt>vertex_descriptor src</tt>
+<blockquote>
+流れのネットワーク・グラフのためのソース頂点。
+</blockquote>
+  
+IN: <tt>vertex_descriptor sink</tt>
+<blockquote>
+流れのネットワーク・グラフのためのシンク頂点。 
+</blockquote>
+  
+<h3>Named Parameters</h3>
+
+
+IN: <tt>capacity_map(CapacityEdgeMap cap)</tt>
+<blockquote>
+辺容量プロパティ・マップ。型は定数 <a
+  href="../../property_map/LvaluePropertyMap.html">Lvalue Property Map</a>
+ のモデルでなければならない。マップのキー型はグラフの辺記述子型でなければ
+ならない。
+<br>
+<b>デフォルト:</b> <tt>get(edge_capacity, g)</tt>
+</blockquote>
+  
+OUT: <tt>residual_capacity_map(ResidualCapacityEdgeMap res)</tt>
+<blockquote>
+これは辺をその残差容量にマップする。。型は変更可能の <a
+  href="../../property_map/LvaluePropertyMap.html">Lvalue Property
+  Map</a> のモデルでなければならない。マップのキー型はグラフの辺記述子型で
+なければならない。
+<br>
+<b>デフォルト:</b> <tt>get(edge_residual_capacity, g)</tt>
+</blockquote>
+
+IN: <tt>reverse_edge_map(ReverseEdgeMap rev)</tt>
+<blockquote>
+グラフ中の全ての辺 <i>(u,v)</i> を逆辺 <i>(v,u)</i> にマップする辺プロパティ・
+マップ。マップは定数 <a
+href="../../property_map/LvaluePropertyMap.html">Lvalue
+Property Map</a> のモデルでなければならない。マップのキー型はグラフの
+辺記述子型でなければならない。
+<br>
+<b>デフォルト:</b> <tt>get(edge_reverse, g)</tt>
+</blockquote>
+
+UTIL: <tt>color_map(ColorMap color)</tt>
+<blockquote>
+幅有線探索の段階の間進行過程を保持するためにアルゴリズムによって使われる。
+アルゴリズムの終了時に、白色の頂点は最小カット集合を定義する。マップは <a
+  href="../../property_map/LvaluePropertyMap.html">Lvalue Property Map</a>
+ のモデルでなければならない。マップのキー型はグラフの頂点記述子型であるべき
+で、値型は <a
+  href="./ColorValue.html">ColorValue</a> のモデルでなければならない。
+<br>
+
+<b>デフォルト:</b> サイズ <tt>num_vertices(g)</tt> の
+ <tt>default_color_type</tt> の <tt>std::vector</tt> から作られた <a
+ href="../../property_map/iterator_property_map.html">
+</tt>iterator_property_map</tt></a>で、添え字マップには
+ <tt>i_map</tt> を用いる。
+</blockquote>
+
+UTIL: <tt>predecessor_map(PredEdgeMap pred)</tt>
+<blockquote>
+増大した道を格納するためにアルゴリズムによって使われる。マップは変更可能の <a
+  href="../../property_map/LvaluePropertyMap.html">Lvalue Property Map</a>
+ でなければならない。キー型はグラフの頂点記述子型であるべきで、値型は
+グラフの辺記述子型でなければならない。
+<br>
+
+<b>デフォルト:</b> サイズ <tt>num_vertices(g)</tt> の
+ 辺記述子の <tt>std::vector</tt> から作られた <a
+ href="../../property_map/iterator_property_map.html">
+</tt>iterator_property_map</tt></a>で、添え字マップには
+ <tt>i_map</tt> を用いる。
+</blockquote>
+
+IN: <tt>vertex_index_map(VertexIndexMap i_map)</tt>
+<blockquote>
+グラフの各頂点を <tt>[0, num_vertices(g))</tt> の範囲において唯一の整数に
+マップしなさい。このプロパティ・マップはカラー・マップまたは
+先行点マップのためにデフォルトが使われた時にのみ必要である。
+頂点添え字マップは <a
+  href="../../property_map/ReadablePropertyMap.html">Readable Property
+  Map</a> のモデルでなければならない。マップのキー型はグラフの頂点記述子型で
+なければならない。
+<br>
+<b>デフォルト:</b> <tt>get(vertex_index, g)</tt>
+</blockquote>
+
+
+<h3>Complexity</h3>
+時間複雑性は普通の場合には <i>O(V E<sup>2</sup>)</i> でもしくは容量値が
+定数 <i>U</i> で範囲づけられた整数であるならば <i>O(V E U)</i> である。
+
+<h3>Example</h3>
+
+<a
+href="../example/edmunds-karp-eg.cpp"><tt>example/edmunds-karp-eg.cpp</tt></a>
+中のプログラムは最大流問題の例 (辺容量を伴うグラフ) を DIMACS 形式で書かれた
+ファイルから読み、最大流を計算する。
+
+<h3>See Also</h3>
+
+<a href="./push_relabel_max_flow.html"><tt>push_relabel_max_flow()</tt></a>.
+
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000-2001</TD><TD>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>, Indiana University (<A HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)
+</TD></TR></TABLE>
+
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:takashi-it@po6.nsk.ne.jp">Takashi Itou</a><br> 
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+
+<p>このドキュメントの対象: Boost Version 1.30.0<br>
+<a href="http://www.boost.org/libs/graph/doc/edmunds_karp_max_flow.html">最新版ドキュメント (英語)</a></p>
+</BODY>
+</HTML> 
+<!--  LocalWords:  HTML Siek Edmunds BGCOLOR ffffff ee VLINK ALINK ff IMG SRC
+ -->
+<!--  LocalWords:  gif ALT BR sec edmunds karp TT DIV CELLPADDING TR TD PRE lt
+ -->
+<!--  LocalWords:  typename VertexListGraph CapacityEdgeMap ReverseEdgeMap gt
+ -->
+<!--  LocalWords:  ResidualCapacityEdgeMap VertexIndexMap src rev ColorMap pred
+ -->
+<!--  LocalWords:  PredEdgeMap tt href html hpp ul li nbsp br LvaluePropertyMap
+ -->
+<!--  LocalWords:  num ColorValue DIMACS cpp pre config iostream dimacs int std
+ -->
+<!--  LocalWords:  namespace vecS directedS cout endl iter ei HR valign nowrap
+ -->
+<!--  LocalWords:  jeremy siek htm Univ mailto jsiek lsc edu
+p -->

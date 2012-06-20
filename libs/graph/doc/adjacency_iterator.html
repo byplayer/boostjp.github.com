@@ -1,0 +1,133 @@
+<html>
+
+<head>
+<! meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>Adjacency Iterator Adaptor Documentation</title>
+</head>
+
+<body bgcolor="#FFFFFF" text="#000000">
+
+<img src="../../../c++boost.gif" alt="c++boost.gif (8819 bytes)"
+align="center" width="277" height="86">
+
+<h1>Adjacency Iterator Adaptor</h1>
+
+Defined in header
+<a href="../../../boost/graph/adjacency_iterator.hpp">boost/graph/adjacency_iterator.hpp</a>
+
+<p>
+隣接イテレータ・アダプタは <tt>out_edge_iterator</tt> を隣接イテレータに
+変形する。すなわち、辺の方々を巡回するイテレータを取り、それらの
+<b><i>終点</i></b>の方々を巡回するイテレータを作成する。このアダプタと共に
+<a
+href="IncidenceGraph.html">Incidence Graph</a> をモデルとするグラフ型を
+取り、<a href="AdjacencyGraph.html">Adjacency
+Graph</a> によって要求される能力を付け加えるのは些細な事である。
+
+<h2>Synopsis</h2>
+
+<pre>
+namespace boost {
+  template &lt;class Graph, class VertexDescriptor, class OutEdgeIter&gt;
+  class adjacency_iterator_generator {
+  public:
+    typedef <a href="../../utility/iterator_adaptors.htm#iterator_adaptor">iterator_adaptor</a>&lt;...&gt; type;
+  };
+}
+</pre>
+
+<hr>
+
+<h3>Example</h3>
+
+<p>
+下記は <tt>adjacency_iterator_generator</tt> クラスの使い方の例である。
+
+<p>
+<PRE>
+#include &lt;boost/graph/adjacency_iterator.hpp&gt;
+
+class my_graph {
+  // ...
+  typedef ... out_edge_iterator;
+  typedef ... vertex_descriptor;
+  typedef boost::adjacency_iterator_generator&lt;my_graph, vertex_descriptor, out_edge_iterator&gt;::type adjacency_iterator;
+  // ...
+};
+
+</PRE>
+
+<h3>Template Parameters</h3>
+
+<Table border>
+<TR>
+<TH>パラメータ</TH><TH>説明</TH>
+</TR>
+
+<TR>
+<TD><tt>Graph</tt></TD>
+<TD>グラフ型で、それは <a
+href="./IncidenceGraph.html">Incidence Graph</a> をモデルとしなければならない。
+</TD>
+</TR>
+
+<TR>
+<TD><tt>VertexDescriptor</tt></TD>
+<TD>これは <tt>graph_traits&lt;Graph&gt;::vertex_descriptor</tt> と同じ型で
+なければならない。これがテンプレート・パラメータである理由は、
+<tt>adjacency_iterator_generator</tt> の主な使用はグラフ・クラスの定義の
+<b><i>内側</i></b>であり、その文脈中でまだ完全に定義されていないグラフ・
+クラスの上で <tt>graph_traits</tt> を使えないからである。
+<br>
+<b>デフォルト:</b> <tt>graph_traits&lt;Graph&gt;::vertex_descriptor</tt></TD>
+</TR>
+
+<TR>
+<TD><tt>OutEdgeIter</tt></TD>
+<TD>これは
+<tt>graph_traits&lt;Graph&gt;::out_edge_iterator</tt> と同じ型でなければ
+ならない。<br>
+<b>デフォルト:</b> <tt>graph_traits&lt;Graph&gt;::out_edge_iterator
+</TD>
+</TR>
+
+</Table>
+
+<h3>Model of</h3>
+
+隣接イテレータ・アダプタ (型 <tt>adjacency_iterator_generator<...>::type</tt>)
+ は <a
+href="../../utility/MultiPassInputIterator.html">Multi-Pass Input Iterator</a>
+ のモデルである。
+
+<h3>Members</h3>
+
+隣接イテレータ型は <tt>reference</tt> の型が <tt>value_type</tt> と同じで
+それから <tt>operator*()</tt> が値返しであることを除けば、<a
+href="http://www.sgi.com/tech/stl/RandomAccessIterator.html">Random Access Iterator</a> コンセプトによって要求されるメンバ関数と演算子を実装している。
+さらに次のコンストラクタを持つ:
+
+<pre>
+adjacency_iterator_generator::type(const OutEdgeIter&amp; it)
+</pre>
+
+<hr>
+<p>Revised <!--webbot bot="Timestamp" s-type="EDITED" s-format="%d %b %Y" startspan -->19 Aug 2001<!--webbot bot="Timestamp" endspan i-checksum="14767" --></p>
+<p>ｩ Copyright Jeremy Siek 2000. Permission to copy, use,
+modify, sell and distribute this document is granted provided this copyright
+notice appears in all copies. This document is provided &quot;as is&quot;
+without express or implied warranty, and with no claim as to its suitability for
+any purpose.</p>
+
+<font color="FF0000">[訳注: 原文がcharset=windows-1252であり、&copyがｩと化けている。]</font>
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:takashi-it@po6.nsk.ne.jp">Takashi Itou</a><br> 
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+
+<p>このドキュメントの対象: Boost Version 1.30.0<br>
+<a href="http://www.boost.org/libs/graph/doc/adjacency_iterator.html">最新版ドキュメント (英語)</a></p>
+</body>
+
+</html>

@@ -1,0 +1,143 @@
+<HTML>
+<!--
+  -- Copyright (c) Jeremy Siek 2000-2001
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  Jeremy Siek makes no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<Title>Boost Graph Library: Connected Components</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+
+<H1>
+<A NAME="sec:connected-components">
+<TT>connected_components</TT></A>
+</H1>
+
+<PRE>
+<i>// 名前付きパラメータバージョン</i>
+template &lt;class VertexListGraph, class ComponentMap, class P, class T, class R&gt;
+typename property_traits&lt;ComponentMap&gt;::value_type
+connected_components(VertexListGraph&amp; G, ComponentMap comp,
+    const bgl_named_params&lt;P, T, R&gt;&amp; params = <i>all defaults</i>);
+
+<i>// この関数の名前なしパラメータバージョンは存在しない</i>
+</PRE>
+
+<P>
+<TT>connected_components()</TT> 関数は無向グラフの連結成分を DFS に基づく方法
+を用いて計算する。無向グラフの<b><I>連結成分</I></b>はすべての互いに到達可能
+な頂点の集合である。もしグラフが増大する間、連結成分を保持する必要があるなら、
+<a
+href="./incremental_components.html">
+<TT>incremental_components()</TT></a> 関数の素集合に基づく方法の方が速い。“静的な”グラフには
+この DFS に基づく方法の方が速い&nbsp;[<A
+HREF="bibliography.html#clr90">8</A>]。
+<P>
+アルゴリズムの出力は成分プロパティ・マップ <TT>comp</TT> に記録
+され、そしてそれは各頂点に割り当てられた成分番号を与える数を含んでいる。
+全成分数が関数の返却値である。
+<H3>Where Defined</H3>
+
+<P>
+<a href="../../../boost/graph/connected_components.hpp"><TT>boost/graph/connected_components.hpp</TT></a>
+
+
+<h3>Parameters</h3>
+
+IN: <tt>const Graph&amp; g</tt>
+<blockquote>
+無向グラフ。グラフの型は <a
+href="VertexListGraph.html">Vertex List Graph</a> かつ <a
+href="IncidenceGraph.html">Incidence Graph</a> のモデルでなければならない。
+</blockquote>
+
+OUT: <tt>ComponentMap c</tt>
+<blockquote>
+アルゴリズムはグラフ中にある連結成分数を計算し、各成分に整数のラベルを
+割り当てる。アルゴリズムはそれから成分プロパティ・マップ中の
+成分番号を記録する事によってグラフ中の各頂点がどの成分に属しているかを登録
+する。<tt>ComponentMap</tt> 型は <a
+href="../../property_map/WritablePropertyMap.html">Writable Property
+Map</a> のモデルでなければならない。値型は汎整数型であるべきで、できれば
+グラフの <tt>vertices_size_type</tt> に等しい方が望ましい。キー型はグラフの
+頂点記述子型でなければならない。
+</blockquote>
+
+<h3>Named Parameters</h3>
+
+UTIL: <tt>color_map(ColorMap color)</tt>
+<blockquote>
+これはグラフの進行過程を保持するためにアルゴリズムによって使われる。
+<tt>ColorMap</tt> 型は <a
+ href="../../property_map/ReadWritePropertyMap.html">Read/Write Property Map</a> のモデルでなければならず、かつキー型はグラフの頂点記述子型でなければなら
+ず、またカラー・マップの値型は <a
+ href="./ColorValue.html">ColorValue</a> のモデルでなければならない。<br>
+
+<b>デフォルト:</b> サイズ <tt>num_vertices(g)</tt> の 
+<tt>default_color_type</tt> の <tt>std::vector</tt> から作られた
+<a href="../../property_map/iterator_property_map.html">
+<tt>iterator_property_map</tt></a>で、添え字マップには 
+<tt>i_map</tt> を用いる。
+</blockquote>
+
+IN: <tt>vertex_index_map(VertexIndexMap i_map)</tt>
+<blockquote>
+これは各頂点を <tt>[0, num_vertices(g))</tt> の範囲において整数にマップする。
+このパラメータはデフォルトのカラー・プロパティ・マップが使われた時にのみ
+必要である。
+<tt>VertexIndexMap</tt> の型は <a
+href="../../property_map/ReadablePropertyMap.html">Readable Property
+Map</a> のモデルでなければならない。マップの値型は汎整数型でなければならない。
+グラフの頂点記述子型はマップのキー型として使用できる必要がある。<br>
+
+ <b>デフォルト:</b> <tt>get(vertex_index, g)</tt>
+</blockquote>
+
+
+<H3>Complexity</H3>
+
+<P>
+連結成分のアルゴリズムの時間複雑性もまた
+<i>O(V + E)</i> である。
+
+<P>
+
+<h3>See Also</h3>
+
+<a href="./strong_components.html"><tt>strong_components()</tt></a>
+and <a href="./incremental_components.html"><tt>incremental_components()</tt></a>
+
+<H3>Example</H3>
+
+<P>
+ファイル <a
+href="../example/connected_components.cpp"><tt>examples/connected_components.cpp</tt></a> は無向グラフの連結成分を計算する例を含む。
+
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000-2001</TD><TD>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>, Indiana University (<A HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)
+</TD></TR></TABLE>
+
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:takashi-it@po6.nsk.ne.jp">Takashi Itou</a><br> 
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+
+<p>このドキュメントの対象: Boost Version 1.30.0<br>
+<a href="http://www.boost.org/libs/graph/doc/connected_components.html">最新版ドキュメント (英語)</a></p>
+</BODY>
+</HTML> 

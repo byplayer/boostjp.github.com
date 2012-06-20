@@ -1,0 +1,339 @@
+<HTML>
+<!--
+  -- Copyright (c) Jeremy Siek 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  Silicon Graphics makes no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<Meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<Title>Boost Graph Library: Using Property Maps</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+
+<H1><A NAME="sec:property-maps"></A>
+Property Maps
+</H1>
+
+<P>
+抽象的な数学のグラフの世界と、それを使って解決される具体的な問題は、主に、頂点や辺に付加されたプロパティによって結ばれている。プロパティとは例えば、距離、容量、重み、色などだ。データ構造の実装の点では、プロパティを付加する方法は数多く有るが、グラフのアルゴリズムはプロパティの実装の詳細を取り扱うべきではない。 <A HREF="../../property_map/property_map.html">Property Map Concepts</A> 節で定義される<I>プロパティマップ</I>を使えば、グラフからプロパティにジェネリックにアクセスできる。 BGL アルゴリズムはプロパティにアクセスするのにこのインタフェースを使っている。
+
+<P>
+
+<H2>Property Map Interface</H2>
+
+<P>
+プロパティマップのインタフェースでは、個々のプロパティが別々のプロパティマップオブジェクトを使ってアクセスされる事になっている。以下の例は、 Dijkstra 最短経路アルゴリズムの内部で使われる <TT>relax()</TT> 関数の実装である。この関数では、辺の重みと頂点の距離というプロパティにアクセスする必要が有る。 <TT>relax()</TT> はテンプレート関数として書かれているので、多くの異なる状況で使うことができる。関数への引数の内、 <TT>weight</TT> と <TT>distance</TT> はプロパティマップオブジェクトだ。一般に、BGL アルゴリズムは、関数が必要とする全てのプロパティに対して、プロパティマップを明示的に渡す。プロパティマップインタフェースはいくつかの関数を定義しているが、ここではその内 <TT>get()</TT> と <TT>put()</TT> の2つを使う。 <TT>get()</TT> 関数はプロパティマップオブジェクト (例えば <TT>distance</TT> ) と<I>キー</I>オブジェクトをとる。距離プロパティの場合は、キーとして頂点オブジェクト <TT>u</TT> と <TT>v</TT> を使う。 <TT>get()</TT> 関数はその頂点のプロパティ値を返す。
+
+<P>
+<PRE>
+  template &lt;class Edge, class Graph,
+            class WeightPropertyMap, 
+            class DistancePropertyMap&gt;
+  bool relax(Edge e, const Graph&amp; g, 
+             WeightPropertyMap weight, 
+             DistancePropertyMap distance)
+  {
+    typedef typename graph_traits&lt;Graph&gt;::vertex_descriptor Vertex;
+    Vertex u = source(e,g), v = target(e,g);
+    if ( get(distance, u) + get(weight, e) &lt; get(distance, v)) {
+      put(distance, v, get(distance, u) + get(weight, e));
+      return true;
+    } else
+      return false;
+  }
+</PRE>
+
+関数 <TT>get()</TT> はプロパティ値のコピーを返す。プロパティマップインタフェースには <TT>at()</TT> という関数も有り、こちらはプロパティ値への参照 (マップが変更可能でなければ const 参照) を返す。
+
+<P>
+STL の <TT>iterator_traits</TT> クラス同様、プロパティマップ型に関連する型を推論するために使われる <TT>property_traits</TT> クラスが有る。関連する型とは、キーと値の型、プロパティマップカテゴリ (マップが読み取り可能か、書き込み可能か、両方か、を知るのに使う) である。 <TT>relax()</TT> 関数では、距離プロパティの型のローカル変数を宣言するために、 <TT>property_traits</TT> を使った。
+
+<P>
+<PRE>
+  {
+    typedef typename graph_traits&lt;Graph&gt;::vertex_descriptor Vertex;
+    Vertex u = source(e,g), v = target(e,g);
+    typename property_traits&lt;DistancePropertyMap&gt;::value_type
+      du, dv; // local variables of the distance property type
+    du = get(distance, u);
+    dv = get(distance, v);
+    if (du + get(weight, e) &lt; dv) {
+      put(distance, v, du + get(weight, e));
+      return true;
+    } else
+      return false;
+  }
+</PRE>
+
+<P>
+グラフのプロパティには 2 種類有る。内部プロパティと外部プロパティだ。
+
+<P>
+<DL>
+<DT><STRONG>内部プロパティ (Interior Properties)</STRONG></DT>
+<DD>とは、何らかの方法でグラフオブジェクトの「内部」に格納されたプロパティである。プロパティ値オブジェクトの寿命はグラフオブジェクトの寿命と同じだ。
+
+<P>
+</DD>
+<DT><STRONG>外部プロパティ (Exterior Properties)</STRONG></DT>
+<DD>とは、グラフオブジェクトの「外部」に格納されたプロパティである。プロパティ値オブジェクトの寿命はグラフオブジェクトとは独立している。これは、一時的にしか必要でないプロパティに便利だ。例えば、 <TT>breadth_first_search()</TT> で使われる色プロパティのように、特定のアルゴリズムの間だけ必要な場合だ。外部プロパティを BGL のアルゴリズムに使う時は、外部プロパティ用のプロパティマップオブジェクトをアルゴリズムへの引数として渡す必要が有る。
+</DD>
+</DL>
+
+<P>
+
+<H2><A NAME="sec:interior-properties"></A>
+Interior Properties
+</H2>
+
+<P>
+内部プロパティ記憶領域をサポートするグラフ型 (<TT>adjacency_list</TT> など) では、 <a
+href="./PropertyGraph.html">PropertyGraph</a> で定義されるインタフェースを使ってプロパティマップにアクセスできる。 <TT>get(Property, g)</TT> は、グラフからプロパティマップオブジェクトを取得する関数である。第 1 引数はどのプロパティにアクセスしたいかを示すプロパティ型だ。第 2 引数はグラフオブジェクトだ。グラフ型は、どのプロパティに (そしてそれによってどのタグに) アクセスできるかを記述しておかなければならない。グラフ型とマップされたプロパティによって、プロパティマップの型が決まる。プロパティマップの型を推論するジェネリックな方法を与える特性クラス <TT>property_map</TT> が定義されている。あるグラフ型の距離プロパティと重みプロパティのプロパティマップを得る方法を以下のコードで示す。
+
+<P>
+<PRE>
+  property_map&lt;Graph, vertex_distance_t&gt;::type d
+    = get(vertex_distance, g);
+
+  property_map&lt;Graph, edge_weight_t&gt;::type w
+    = get(edge_weight, g);
+</PRE>
+
+<P>
+一般に BGL では、アルゴリズムに必要な全てのプロパティマップを、アルゴリズムに明示的に渡す事が要求される。例えば、 BGL の Dijkstra 最短経路アルゴリズムは、距離、重み、色、頂点 ID の 4 個のプロパティマップを要求する。
+
+<P>
+いくつか又は全てのプロパティがグラフの内部プロパティである場合が多いので、 Dijkstra のアルゴリズムは以下のようにして呼べる (あるグラフ <TT>g</TT> と始点 <TT>src</TT> が有るとする) 。
+
+<P>
+<PRE>
+  dijkstra_shortest_paths(g, src,  
+    distance_map(get(vertex_distance, g)).
+    weight_map(get(edge_weight, g)).
+    color_map(get(vertex_color, g)).
+    vertex_index_map(get(vertex_index, g)));
+</PRE>
+
+<P>
+全てのプロパティマップを指定するのは多少煩わしいので、 BGL はデフォルトで、いくつかのプロパティが内部プロパティで、グラフから <TT>get(Property, g)</TT> でアクセスできる事を仮定する。または、そのプロパティマップが内部的に使われるだけならば、アルゴリズムは配列を使って自分でプロパティマップを作り、グラフの頂点インデックスのマップを配列内のオフセットとして使う。以下に、名前付きパラメータ全てにデフォルトを使った <TT>dijkstra_shortest_paths</TT> アルゴリズムの呼び出しを示す。この呼び出しは先程の Dijkstra のアルゴリズムの呼び出しと等価である。
+
+<P>
+<PRE>
+  dijkstra_shortest_paths(g, src);
+</PRE>
+
+<P>
+次の質問は、「そもそもグラフオブジェクトにどうやって内部プロパティを付加するのか？」である。これは使うグラフクラスによる。 BGL の <TT>adjacency_list</TT> グラフクラスは、グラフの辺や頂点に任意の数のプロパティを格納できるように、プロパティのメカニズム (<A HREF="using_adjacency_list.html#sec:adjacency-list-properties">Internal Properties</A> の節を参照) を使っている。
+
+<P>
+
+<H2><A NAME="sec:exterior-properties"></A>
+Exterior Properties
+</H2>
+
+<P>
+この節では、外部プロパティマップを構築する 2 つの方法を説明する。もっとも、グラフの外部プロパティマップを作る方法は無限にある。
+
+<P>
+第 1 の方法には、アダプタクラス <TT>random_access_iterator_property_map</TT> を使う。このクラスはランダムアクセスイテレータをラップし、プロパティマップを作る。ランダムアクセスイテレータはプロパティ値の範囲の先頭を指している必要が有り、範囲の長さはグラフの頂点か辺の数 (頂点と辺のどちらのプロパティマップかによる) と等しい必要がある。アダプタには、 ID プロパティマップも与える必要がある。頂点か辺の記述子をプロパティ値のオフセット (指定されたランダムアクセスイテレータからのオフセット) にマップするのに、この ID プロパティマップを使うからだ。 ID プロパティマップは、一般にグラフの内部プロパティマップである。以下の例では、配列に格納される容量プロパティと流れプロパティのための外部プロパティマップを作るために、 <TT>random_access_iterator_property_map</TT> をどう使うのかを示す。配列のインデックスは辺の ID だ。辺の ID はプロパティを使ってグラフに追加される。 ID の値は、辺がグラフに追加される時に与えられる。この例の完全なソースコードは <TT>examples/exterior_edge_properties.cpp</TT> に有る。 <TT>print_network()</TT> 関数は、流れと容量の値付きでグラフを出力する。
+
+<P>
+<PRE>
+  typedef adjacency_list&lt;vecS, vecS, bidirectionalS, 
+    no_property, property&lt;edge_index_t, std::size_t&gt; &gt; Graph;
+
+  const int num_vertices = 9;
+  Graph G(num_vertices);
+
+  int capacity_array[] = { 10, 20, 20, 20, 40, 40, 20, 20, 20, 10 };
+  int flow_array[] = { 8, 12, 12, 12, 12, 12, 16, 16, 16, 8 };
+
+  // 各辺をグラフに追加し、各辺に ID を割り当てる。
+  add_edge(0, 1, 0, G);
+  // ...
+
+  typedef boost::graph_traits&lt;Graph&gt;::edge_descriptor Edge;
+  typedef property_map&lt;Graph, edge_index_t&gt;::type EdgeID_Map;
+  EdgeID_Map edge_id = get(edge_index, G);
+
+  boost::random_access_iterator_property_map
+    &lt;int*, int, int&amp;, EdgeID_Map&gt; 
+      capacity(capacity_array, edge_id), 
+      flow(flow_array, edge_id);
+
+  print_network(G, capacity, flow);
+</PRE>
+
+<P>
+第 2 の方法には、プロパティマップとしてポインタ型 (プロパティ値の配列へのポインタ) を使う。ポインタからのオフセットとして使うために、キーの型が整数である必要が有る。テンプレートパラメータ <TT>VertexList=vecS</TT> を使った <TT>adjacency_list</TT> クラスは頂点記述子として整数を使う (0 からグラフ内の頂点数までの値が振られる) 。よって、この頂点記述子はポインタプロパティマップのキーとして適当だ。 <TT>VertexList</TT> が <TT>vecS</TT> でなければ、頂点記述子は整数ではないので、ポインタプロパティマップは使えない。代わりに、上で説明した ID プロパティと <TT>random_access_iterator_property_map</TT> を使う方法を使う必要が有る。適用される辺イテレータの定義によっては、 <TT>edge_list</TT> クラスも頂点記述子に整数型を使う場合が有る。 <TT>examples/bellman_ford.cpp</TT> の例では、 <TT>edge_list</TT> の頂点プロパティマップにポインタが使われている。
+
+<P>
+ポインタがプロパティマップとして使えるのは、ポインタ用のプロパティマップのインタフェースを実装する関数オーバロードや <TT>property_traits</TT> の特殊化版が、ヘッダ <a href="../../../boost/property_map.hpp"><TT>boost/property_map.hpp</TT></a> に存在するからだ。これらの関数の定義をここにリストアップする。
+
+<P>
+<PRE>
+namespace boost {
+  template &lt;class T&gt;
+  struct property_traits&lt;T*&gt; {
+    typedef T value_type;
+    typedef ptrdiff_t key_type;
+    typedef lvalue_property_map_tag category;
+  };
+
+  template &lt;class T&gt;
+  void put(T* pa, std::ptrdiff_t key, const T&amp; value) { pa[key] = value;  }
+
+  template &lt;class T&gt;
+  const T&amp; get(const T* pa, std::ptrdiff_t key) { return pa[key]; }
+
+  template &lt;class T&gt;
+  const T&amp; at(const T* pa, std::ptrdiff_t key) { return pa[key]; }
+
+  template &lt;class T&gt;
+  T&amp; at(T* pa, std::ptrdiff_t key) { return pa[key]; }
+}
+</PRE>
+
+<P>
+以下の例では、グラフ内の各頂点に対応する都市名を格納するために配列を使い、 (<TT>breadth_first_search()</TT> の呼び出しに必要な) 頂点の色を格納するために <TT>std::vector</TT> を使う。 (<TT>begin()</TT> の呼び出しで得られる) <TT>std::vector</TT> のイテレータはポインタなので<small><a href="#tnote1">[訳注1]</a></small>、 <TT>std::vector::iterator</TT> にもポインタプロパティマップの方法が使えるのである。この例の完全なソースコードは <a href="../example/city_visitor.cpp"><TT>examples/city_visitor.cpp</TT></a> に有る。
+
+<P>
+<PRE>
+// city_visitor の定義は省略...
+
+int main(int,char*[])
+{
+  enum { SanJose, SanFran, LA, SanDiego, Fresno, LosVegas, Reno,
+         Sacramento, SaltLake, Pheonix, N };
+
+  // 頂点名プロパティの配列
+  std::string names[] = { &quot;San Jose&quot;, &quot;San Francisco&quot;,  &quot;San Jose&quot;,
+                          &quot;San Francisco&quot;, &quot;Los Angeles&quot;, &quot;San Diego&quot;, 
+                          &quot;Fresno&quot;, &quot;Los Vegas&quot;, &quot;Reno&quot;, &quot;Sacramento&quot;,
+                          &quot;Salt Lake City&quot;, &quot;Pheonix&quot; };
+
+  // 全ての都市間の連絡道路を指定する。
+  typedef std::pair&lt;int,int&gt; E;
+  E edge_array[] = { E(Sacramento, Reno), ... };
+
+  // グラフの型を指定する。
+  typedef adjacency_list&lt;vecS, vecS, undirectedS&gt; Graph;
+  // edge_array の辺に基づいて、グラフオブジェクトを作る。
+  Graph G(N, edge_array, edge_array + sizeof(edge_array)/sizeof(E));
+
+  // DFS や BFS を使うには、頂点に「色を付ける」必要が有る。
+  // ここでは外部プロパティの記憶領域として std::vector を使う。
+  std::vector&lt;default_color_type&gt; colors(N);
+
+  cout &lt;&lt; &quot;*** Depth First ***&quot; &lt;&lt; endl;
+  depth_first_search(G, city_visitor(names), colors.begin());
+  cout &lt;&lt; endl;
+
+  // 始点を取得。
+  boost::graph_traits&lt;Graph&gt;::vertex_descriptor 
+    s = vertex(SanJose, G);
+
+  cout &lt;&lt; &quot;*** Breadth First ***&quot; &lt;&lt; endl;
+  breadth_first_search(G, s, city_visitor(names), colors.begin());
+
+  return 0;
+}
+</PRE>
+
+<P>
+
+<H2><A NAME="sec:custom-exterior-property-maps"></A>
+Constructing an Exterior Property Map
+</H2>
+
+<P>
+独自の外部プロパティマップを実装するのはそれほど難しくない。必要なのは、自分のクラスのモデルにしたい <a href="property_map.html">property map concept</a> に要求される関数をオーバロードする事だけだ。要するに、せいぜい <TT>put()</TT> と <TT>get()</TT> をオーバロードして、<TT>operator[]</TT> を実装するぐらいだ。また、 <TT>property_traits</TT> で定義される全ての型について、自分のプロパティマップにネストした typedef を定義するか、自分のプロパティマップ型に対する <TT>property_traits</TT> の特殊化版を作る必要が有る。
+
+<P>
+<TT>random_access_iterator_property_map</TT> クラスの実装は、外部プロパティマップの作り方の良い例になっている。以下に <TT>random_access_iterator_property_map</TT> クラスの簡単化した実装、名付けて <TT>iterator_pa</TT> <small><a href="#tnote2">[訳注2]</a></small>を示す。
+
+<P>
+まず、 <TT>iterator_map</TT> クラス自身の定義から始める。このアダプタクラスがとるテンプレートパラメータは、適用対象の <TT>Iterator</TT> 型と ID プロパティマップの 2 つだ。 ID プロパティマップの仕事は、キーとなるオブジェクト (一般に頂点か辺の記述子) を、整数のオフセットにマップする事だ。プロパティマップになるために、 <TT>iterator_map</TT> クラスには <TT>key_type</TT> 、 <TT>value_type</TT> 、 <TT>category</TT> の 3 つの typedef が必要だ。 <TT>IDMap</TT> のキーの型を知るために <TT>property_traits</TT> を使い、 <TT>Iterator</TT> の値の型を知るために <TT>iterator_traits</TT> を使う。 <TT>at()</TT>  関数を実装しようとしているので、カテゴリとして <TT>boost::lvalue_property_map_tag</TT> を選ぶ。
+
+<P>
+<PRE>
+  template &lt;class Iterator, class IDMap&gt;
+  class iterator_map
+  {
+  public:
+    typedef typename boost::property_traits&lt;IDMap&gt;::key_type key_type; 
+    typedef typename std::iterator_traits&lt;Iterator&gt;::value_type value_type;
+    typedef boost::lvalue_property_map_tag category;
+
+    iterator_map(Iterator i = Iterator(), 
+                const IDMap&amp; id = IDMap()) 
+      : m_iter(i), m_id(id) { }
+    Iterator m_iter;
+    IDMap m_id;
+  };
+</PRE>
+
+<P>
+次に <TT>get()</TT> 、 <TT>put()</TT> 、 <TT>at()</TT> の 3 つのプロパティマップ関数を実装する。各関数で <TT>key</TT> オブジェクトは <TT>m_id</TT> プロパティマップを使って整数のオフセットに変換され、ランダムアクセスイテレータ <TT>m_iter</TT> からのオフセットに使われる。
+
+<P>
+<PRE>
+  template &lt;class Iter, class ID&gt;
+  typename std::iterator_traits&lt;Iter&gt;::value_type
+  get(const iterator_map&lt;Iter,ID&gt;&amp; i,
+      typename boost::property_traits&lt;ID&gt;::key_type key)
+  {
+    return i.m_iter[i.m_id[key]];
+  }
+  template &lt;class Iter, class ID&gt;
+  void
+  put(const iterator_map&lt;Iter,ID&gt;&amp; i,
+      typename boost::property_traits&lt;ID&gt;::key_type key,
+      const typename std::iterator_traits&lt;Iter&gt;::value_type&amp; value)
+  {
+    i.m_iter[i.m_id[key]] = value;
+  }
+  template &lt;class Iter, class ID&gt;
+  typename std::iterator_traits&lt;Iter&gt;::reference
+  at(const iterator_map&lt;Iter,ID&gt;&amp; i,
+      typename boost::property_traits&lt;ID&gt;::key_type key)
+  {
+    return i.m_iter[i.m_id[key]];
+  }
+</PRE>
+
+<P>
+以上だ。これで <TT>iterator_map</TT> クラスは完成であり、前節の <TT>random_access_iterator_property_map</TT> と全く同じように使える。
+
+<P>
+
+
+<br>
+<HR>
+<p><a name="tnote1">[訳注1]</a> <tt>std::vector</tt> のイテレータがポインタである事は標準では保証されていない。代表的な例外は VC.NET である。<br>
+<a name="tnote2">[訳注2]</a> <tt>iterator_map</tt> の間違いと思われる。</p>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000-2001</TD><TD>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>, Indiana University (<A HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)
+</TD></TR></TABLE>
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:gimite@mx12.freecom.ne.jp">Hiroshi Ichikawa</a><br>
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+<p>このドキュメントの対象: Boost Version 1.30.0<br>
+<a href="http://www.boost.org/libs/graph/doc/using_property_maps.html">最新版ドキュメント (英語)</a></p>
+
+</BODY>
+</HTML> 

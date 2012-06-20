@@ -1,0 +1,512 @@
+<HTML>
+<!--
+  -- Copyright (c) Jeremy Siek, Lie-Quan Lee, and Andrew Lumsdaine 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  We make no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<Title>The Boost Graph Library</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+<h1>The Boost Graph Library (BGL)
+<a href="http://cseng.awl.com/book/0,3828,0201729148,00.html">
+<img src="bgl-cover.jpg" ALT="BGL Book" ALIGN="RIGHT"></a>
+</h1>
+
+<!--
+<P>
+Graphs are mathematical abstractions that are useful for solving many
+types of problems in computer science. Consequently, these
+abstractions must also be represented in computer programs.  A
+standardized generic interface for traversing graphs is of utmost
+importance to encourage reuse of graph algorithms and data structures.
+Part of the Boost Graph Library is an interface for how the structure
+of a graph can be accessed using a generic interface that hides the
+details of the graph data structure implementation. This is an
+``open'' interface in the sense that any graph library that implements
+this interface will be interoperable with the BGL generic algorithms
+and with other algorithms that also use this interface. BGL provides
+some general purpose graph classes that conform to this interface, but
+they are not meant to be the ``only'' graph classes; there certainly
+will be other graph classes better for certain situations.  We believe
+that the main contribution of the BGL is the formulation of this
+interface.
+-->
+<P>
+グラフは計算機科学の多くの種類の問題を解決するのに有用な
+数学的抽象概念である。
+必然的に、この抽象概念はコンピュータプログラムでも
+表現されなければならない。
+グラフを渡る(traverse)ための標準化されたジェネリックなインタフェースは、
+グラフのアルゴリズムとデータ構造の再利用を促す上で最も重要である。
+Boost Graph Library はグラフの構造へどのようにアクセスするかを定めた
+インタフェースである。これは、グラフのデータ構造の実装の詳細を隠す
+ジェネリックなインタフェースである。
+これは以下のような意味に置いて``オープンな''インタフェースである。すなわち、このインタフェースを
+実装したグラフライブラリはどれでも、 BGL のジェネリックなアルゴリズムや、
+このインタフェースを用いる他のアルゴリズムと相互運用できるようになる。
+BGL はこのインタフェースに準じたいくつかの汎用クラスを提供する。
+しかし、それらは``唯一の''グラフクラスであることを意味しない; 
+特定の状況に応じて
+他のよりよいグラフクラスがもちろんあり得るだろう。
+我々は BGL の主な貢献が、このインタフェースの定式化にあると確信している。
+
+<!--
+<P>
+The BGL graph interface and graph components are <I>generic</I> in the
+same sense as the the Standard Template Library (STL)&nbsp;[<A
+HREF="bibliography.html#austern99:_gener_progr_stl">2</A>].
+
+In the following sections we review the role that generic programming
+plays in the STL and compare that to how we applied generic
+programming in the context of graphs.
+-->
+<P>
+BGL グラフインタフェースおよびグラフコンポーネントは、標準テンプレートライブラリ (STL) &nbsp;
+[<A HREF="bibliography.html#austern99:_gener_progr_stl">2</A>] と同じ意味で
+<I>ジェネリックな</I>インタフェースである。
+
+続く節で、ジェネリックプログラミングが STL において演じる役割を再検討し、
+我々がジェネリックプログラミングをどのようにグラフの文脈に適用したかと比較する。
+
+<!--
+<P>
+Of course, if you are already are familiar with generic programming,
+please dive right in! Here's the <a
+href="./table_of_contents.html">Table of Contents</a>.
+-->
+<P>
+もちろん、あなたがすでにジェネリックプログラミングに親しんでいるなら、
+今すぐに飛び込んでくれて結構！ここが<a href="./table_of_contents.html">目次</a>だ。
+
+<!--
+<P>
+The source for the BGL is available as part of the Boost distribution
+which you can <a href="http://www.boost.org/more/download.html">
+download from here</a>.
+-->
+<P>
+BGL のソースコードは Boost 配布物の一部として入手可能である。
+<a href="http://www.boost.org/more/download.html">ここからダウンロードできる</a>。
+
+<H2>Genericity in STL</H2>
+
+<!--
+<P>
+There are three ways in which the STL is generic.  
+-->
+<P>
+STL は三つの理由からジェネリックである。
+
+<P>
+
+<!--
+<H3>Algorithm/Data-Structure Interoperability</H3>
+-->
+<H3>アルゴリズム / データ構造の相互運用性</H3>
+
+<!--
+<P>
+First, each algorithm is written in a data-structure neutral way,
+allowing a single template function to operate on many different
+classes of containers. The concept of an iterator is the key
+ingredient in this decoupling of algorithms and data-structures.  The
+impact of this technique is a reduction in the STL's code size from
+<i>O(M*N)</i> to <i>O(M+N)</i>, where <i>M</i> is the number of
+algorithms and <i>N</i> is the number of containers. Considering a
+situation of 20 algorithms and 5 data-structures, this would be the
+difference between writing 100 functions versus only 25 functions! And
+the differences continues to grow faster and faster as the number of
+algorithms and data-structures increase.
+-->
+<P>
+第一に、各アルゴリズムはデータ構造に中立な方法で書かれており、
+単一のテンプレート関数が多くの異なるコンテナクラスを操作できるようにしている。
+イテレータの概念は、このアルゴリズムとデータ構造の分離において鍵となる構成要素である。
+このテクニックの効果は、 STL のコード量を <i>O(M*N)</i> から <i>O(M+N)</i> へと削減する。
+ここで <i>M</i> はアルゴリズムの数、 <i>N</i> はコンテナの数である。
+20 種類のアルゴリズムと 5 種類のデータ構造という状況を考えると、
+これは 100 の関数を書き下ろすことと 25 との差になる！
+そしてその差は、アルゴリズムとデータ構造が増えるに連れて、ますます伸び続ける。
+
+<P>
+
+<!--
+<H3>Extension through Function Objects</H3>
+-->
+<H3>関数オブジェクトを通じた拡張</H3>
+
+<!--
+<P>
+STL がジェネリックである二つ目の理由は
+The second way STL is generic is that its algorithms and containers
+are extensible. The user can adapt and customize the STL through the
+use of function objects. This flexibility is what makes STL such a
+great tool for solving real-world problems. Each programming problem
+brings its own set of entities and interactions that must be
+modeled. Function objects provide a mechanism for extending the STL to
+handle the specifics of each problem domain.
+-->
+<P>
+STL がジェネリックである二つ目の理由は、アルゴリズムとコンテナが拡張可能なことである。
+ユーザは関数オブジェクトを用いて STL を改造し、カスタマイズできる。
+実世界の問題を解決するにあたって STL を素晴らしいツールたらしめているのは、このフレキシビリティである。
+各々のプログラミングの問題は、モデル化されなければならない固有の概念の集りや相互作用を伴う。
+関数オブジェクトは、 STL を個々の問題領域の仕様を扱えるよう拡張するためのメカニズムを提供する。
+
+<P>
+
+<!--
+<H3>Element Type Parameterization</H3>
+-->
+<H3>要素型のパラメータ化</H3>
+
+<!--
+<P>
+The third way that STL is generic is that its containers are
+parameterized on the element type. Though hugely important, this is
+perhaps the least ``interesting'' way in which STL is generic.
+Generic programming is often summarized by a brief description of
+parameterized lists such as <TT>std::list&lt;T&gt;</TT>. This hardly scratches
+the surface!
+-->
+<P>
+STL がジェネリックである三つ目の理由は、そのコンテナが要素の型に関してパラメータ化されていることである。
+非常に重要であるにもかかわらず、これは STL がジェネリックである理由として恐らく最も``関心を引かない''ものである。
+ジェネリックプログラミングは、 <TT>std::list&lt;T&gt;</TT> のようなパラメータ化されたリストの
+短い記述で片づけられることがよくある。
+これはせいぜい上っ面をなぞっただけに過ぎない！
+
+<P>
+
+<H2>Genericity in the Boost Graph Library</A>
+</H2>
+
+<!--
+<P>
+Like the STL, there are three ways in which the BGL is generic.
+-->
+<P>
+STL と同様に、三つの理由から BGL はジェネリックである。
+
+<P>
+
+<!--
+<H3>Algorithm/Data-Structure Interoperability</H3>
+-->
+<H3>アルゴリズム / データ構造の相互運用性</H3>
+
+<!--
+<P>
+First, the graph algorithms of BGL are written to an interface that
+abstracts away the details of the particular graph data-structure.
+Like the STL, the BGL uses iterators to define the interface for
+data-structure traversal. There are three distinct graph traversal
+patterns: traversal of all vertices in the graph, through all of the
+edges, and along the adjacency structure of the graph (from a vertex
+to each of its neighbors). There are separate iterators for each
+pattern of traversal.
+-->
+<P>
+第一に、 BGL のグラフアルゴリズムは、特定のグラフのデータ構造から詳細を取り去るインタフェースに向けて書かれている。
+STL と同様、 BGL はデータ構造を渡る(traversal)ためのインタフェースを定義するのにイテレータを用いる。
+三つの異なるグラフの渡り方(traversal pattern)がある：
+グラフのすべての頂点を渡る(traversal)もの、すべての辺を通るもの、そして
+グラフの隣接する構造に沿って、ある頂点からその近傍の各々へと
+それぞれの渡り方(pattern of traversal)のために別々のイテレータが用意されている。
+
+<!--
+<P>
+This generic interface allows template functions such as <a
+href="./breadth_first_search.html"><TT>breadth_first_search()</TT></a>
+to work on a large variety of graph data-structures, from graphs
+implemented with pointer-linked nodes to graphs encoded in
+arrays. This flexibility is especially important in the domain of
+graphs. Graph data-structures are often custom-made for a particular
+application. Traditionally, if a programmer wants to reuse an
+algorithm implementation they must convert/copy their graph data into
+the graph library's prescribed graph structure.  This is the case with
+libraries such as LEDA, GTL, Stanford GraphBase, and especially true
+of graph algorithms written in Fortran. This severely limits the reuse
+of their graph algorithms.
+-->
+<P>
+このジェネリックなインタフェースは、
+ポインタでリンクされたノードで実装されたものから配列にエンコードされたものに至るまで、
+多彩なグラフのデータ構造で働くように、 <a href="./breadth_first_search.html"><TT>breadth_first_search()</TT></a> のようなテンプレート関数を許している。
+このフレキシビリティはグラフの領域では特に重要である。
+グラフのデータ構造は、特定のアプリケーションのためにしばしばカスタムメイドされる。
+伝統的には、プログラマがアルゴリズムの実装を再利用したいと思えば、彼らのグラフデータを
+グラフライブラリの既定のグラフ構造へと変換 / コピーしなければならない。
+<font color="red">これは LEDA 、 GTL 、 Stanford GraphBase などで起こる問題であり、
+特に Fortlan で書かれたグラフアルゴリズムで真である。
+(This is the case with libraries such as LEDA, GTL, Stanford GraphBase, and especially true
+of graph algorithms written in Fortran.)
+</font>
+このことは、それらのグラフアルゴリズムの再利用を著しく制限する。
+
+<!--
+<P>
+In contrast, custom-made (or even legacy) graph structures can be used
+as-is with the generic graph algorithms of BGL using <I>external
+adaptation</I> (see Section <A HREF="./leda_conversion.html">How to
+Convert Existing Graphs to BGL</A>).  External adaptation wraps a new
+interface around a data-structure without copying and without placing
+the data inside adaptor objects.  The BGL interface was carefully
+designed to make this adaptation easy. To demonstrate this, we have
+built interfacing code for using LEDA graphs, Stanford GraphBase
+graphs, and even Fortran-style arrays in BGL graph algorithms.
+-->
+<P>
+対照的に、 <I>external adaptation</I> (<A HREF="./leda_conversion.html">How to Convert Existing Graphs to BGL</A>を
+参照) を用いた BGL のジェネリックなグラフアルゴリズムでは、
+カスタムメイドな (あるいはレガシーですらある) グラフ構造を利用することができる。
+ external adaptation は、データ構造を新しいインタフェースでラップする。
+その際にアダプタオブジェクトの内側のデータをコピーしたり置いたりることはない。
+BGL のインタフェースはこの適応が容易になるように注意深く設計されている。
+このことを示すために、 LEDA のグラフや Stanford GraphBase のグラフ、さらには Fortlan スタイルの配列ですら
+ BGL のグラフアルゴリズムで使えるようにインタフェースするコードを作成した。
+
+<P>
+
+<!--
+<H3>Extension through Visitors</H3>
+-->
+<H3>Visitor による拡張</H3>
+
+<!--
+<P>
+Second, the graph algorithms of BGL are extensible. BGL introduces the
+notion of a <I>visitor</I> which is just a function object with
+multiple methods.  In graph algorithms there are often several key
+``event points'' at which it is useful to insert user-defined
+operations. The visitor object has a different method that is invoked
+at each event point. The particular event points and corresponding
+visitor methods depend on the particular algorithm.  They often
+include methods like <TT>start_vertex()</TT>,
+<TT>discover_vertex()</TT>, <TT>examine_edge()</TT>,
+<tt>tree_edge()</tt> and <TT>finish_vertex()</TT>.
+-->
+<P>
+第二に、 BGL のグラフアルゴリズムは拡張可能である。
+BGL は <i>visitor</I> の概念を導入している。これはただの多数のメソッドを持つ関数オブジェクトである。
+グラフアルゴリズムには、多くの場合、鍵となる``イベントポイント(event point)''がいくつか用意されている。
+これらはユーザ定義操作を挿入するのに用いられる。
+visitor オブジェクトは各イベントポイントで呼び出される異なるメソッドを持つ。
+特定のイベントポイントと対応する visitor のメソッドは特定のアルゴリズムに依存する。
+それらはしばしば <TT>start_vertex()</TT> 、 <TT>discover_vertex()</TT> 、 <TT>examine_edge()</TT> 、 
+<tt>tree_edge()</tt> ないし <TT>finish_vertex() </TT> といったメソッドを含む。
+
+<P>
+
+<!--
+<H3>Vertex and Edge Property Multi-Parameterization</H3>
+-->
+<H3>頂点と辺のプロパティの多重パラメータ化</H3>
+
+<!--
+<P>
+The third way that BGL is generic is analogous to the parameterization
+of the element-type in STL containers, though again the story is a bit
+more complicated for graphs. We need to associate values with both the
+vertices and the edges of the graph (we will call an associated value
+a property).  In addition, it will often be necessary to associate
+multiple properties with each vertex and edge, which is what we mean
+by multi-parameterization. Similar to how the <TT>std::list&lt;T&gt;</TT>
+class has the parameter <TT>T</TT> for its element type, BGL graph
+classes have template parameters for vertex and edge ``properties''. A
+property specifies the parameterized type of the property and also assigns
+an identifying tag to the property, which is used to distinguish
+between the multiple properties. The property value attached to a
+particular vertex or edge can be obtained via a <I>property
+map</I>, of which there is one for each property.
+-->
+<P>
+BGL がジェネリックである第三の理由は、 STL コンテナにおける要素型のパラメータ化に類するものである。
+しかし、グラフでは、話はまた少しばかり複雑になる。
+我々は値をグラフと頂点と辺の両方に関連づける必要がある（関連づけられた値をプロパティと呼ぶ）。
+加えて、複数のプロパティを各々の頂点と辺に関連づける必要がよく出てくる。
+我々はこれを多重パラメータ化と呼ぶ。
+<TT>std::list&lt;T&gt;</TT> クラスが要素型として <TT>T</TT> パラメータを持つのと同様に、
+BGL のグラフクラスは頂点と辺の``プロパティ''に関するテンプレートパラメータを持つ。
+あるプロパティはそのプロパティのパラメータ化された型を定義し、
+またそのプロパティを識別するタグを割り当てる。このタグは複数のプロパティを
+識別できるようにする為に用いられる。
+特定の頂点または辺に付随するプロパティ値は、
+各々のプロパティについて一つずつ存在する <I>プロパティマップ</I> によって
+取得される。
+
+<!--
+<P>
+Traditional graph libraries and graph structures fall down when it
+comes to the parameterization of graph properties. This is one of the
+primary reasons that graph data-structures must be custom-built for
+applications. The parameterization of properties in the  BGL graph
+classes makes them well suited for re-use.
+-->
+<P>
+伝統的なグラフライブラリとグラフ構造は、グラフのプロパティをパラメータ化しようとした時に破綻する。
+これは、グラフのデータ構造がアプリケーションに対してカスタムビルドされなければならない主要な理由の一つである。
+BGL グラフクラスにおけるプロパティのパラメータ化は、それらを再利用に適すようにしてくれる。
+
+<p>
+
+<H2>Algorithms</H2>
+
+<!--
+<P>
+The BGL algorithms consist of a core set of algorithm <I>patterns</I>
+(implemented as generic algorithms) and a larger set of graph
+algorithms. The core algorithm patterns are
+-->
+<P>
+BGL のアルゴリズムは中核となる（ジェネリックアルゴリズムで実装された）アルゴリズム<I>パターン</I>のセットと、
+より大きなグラフアルゴリズムのセットからなる。中核となるアルゴリズムパターンは
+
+<P>
+
+<!--
+<UL>
+<LI>Breadth First Search
+</LI>
+<LI>Depth First Search
+</LI>
+<LI>Uniform Cost Search
+</LI>
+</UL>
+-->
+<UL>
+<LI>幅優先探索
+</LI>
+<LI>深さ優先探索
+</LI>
+<LI>均一コスト探索(Uniform Cost Search)
+</LI>
+</UL>
+
+<!--
+<P>
+The algorithm patterns by themselves do not compute any meaningful
+quantities over graphs, they are merely building blocks for
+constructing graph algorithms. The graph algorithms in  BGL currently
+include
+-->
+<P>
+アルゴリズムパターンそれ自身は、グラフ上の意味のある値を計算することはない。
+それらはグラフアルゴリズムを構築するためのビルディングブロックでしかない。
+現在のところ BGL に含まれるのグラフアルゴリズムは
+
+<P>
+
+<!--
+<UL>
+<LI>Dijkstra's Shortest Paths</LI>
+<LI>Bellman-Ford Shortest Paths</LI>
+<LI>Johnson's All-Pairs Shortest Paths</LI>
+<LI>Kruskal's Minimum Spanning Tree</LI>
+<LI>Prim's Minimum Spanning Tree</LI>
+<LI>Connected Components</LI>
+<LI>Strongly Connected Components</LI>
+<LI>Dynamic Connected Components (using Disjoint Sets)</LI>
+<LI>Topological Sort</LI>
+<LI>Transpose</LI>
+<LI>Reverse Cuthill Mckee Ordering</LI>
+<LI>Smallest Last Vertex Ordering</LI>
+<LI>Sequential Vertex Coloring</LI>
+</UL>
+-->
+<UL>
+<LI>Dijkstraの最短経路(Dijkstra's Shortest Paths)</LI>
+<LI>Bellman-Fordの最短経路(Bellman-Ford Shortest Paths)</LI>
+<LI>Johnsonの全点対間最短路 (Johnson's All-Pairs Shortest Paths)</LI>
+<LI>Kruskalの最短距離木(Kruskal's Minimum Spanning Tree)</LI>
+<LI>Primの最短距離木(Prim's Minimum Spanning Tree)</LI>
+<LI>連結構成要素(Connected Components)</LI>
+<LI>強連結構成要素(Strongly Connected Components)</LI>
+<LI>動的連結構成要素（互いに素な集合を用いる）(Dynamic Connected Components (using Disjoint Sets))</LI>
+<LI>トポロジカルソート(Topological Sort)</LI>
+<LI>転置(Transpose)</LI>
+<LI>逆Cuthill Mckee順序(Reverse Cuthill Mckee Ordering)</LI>
+<LI><font color="red">最小最終頂点順序(Smallest Last Vertex Ordering)</font></LI>
+<LI>シーケンシャルな頂点色づけ(Sequential Vertex Coloring)</LI>
+</UL>
+
+<P>
+
+<H2>Data Structures</H2>
+
+<!--
+<P>
+BGL currently provides two graph classes that implement a generalized
+adjacency list and an edge list adaptor.
+-->
+<P>
+現在のところ BGL は二つのクラスを提供している。
+一つは一般化された連接リストを実装し、もう一つは辺リストアダプタを実装している。
+
+<P>
+
+<UL>
+<LI><TT>adjacency_list</TT></LI>
+<LI><TT>adjacency_matrix</TT></LI>
+<LI><TT>edge_list</TT></LI>
+</UL>
+
+<!--
+<P>
+The <TT>adjacency_list</TT> class is the general purpose ``swiss army
+knife'' of graph classes. It is highly parameterized so that it can be
+optimized for different situations: the graph is directed or
+undirected, allow or disallow parallel edges, efficient access to just
+the out-edges or also to the in-edges, fast vertex insertion and
+removal at the cost of extra space overhead, etc.
+-->
+<P>
+<TT>adjacency_list</TT> クラスは汎用なグラフクラスの``スイスアーミーナイフ[訳注：十徳ナイフ]''である。
+これは高度にパラメータ化されており、異なる状況に対して最適化する事ができる：
+有向グラフか無向グラフか、
+並行辺を許すかどうか、
+出辺のみに効果的にアクセスするようにするか、それとも入辺にもそうするか、
+余計な容量のオーバーヘッドのコストを支払っても頂点の挿入と削除を高速に行うか、
+等々。
+
+<!--
+<P>
+The <TT>edge_list</TT> class is an adaptor that takes any kind of edge
+iterator and implements an <a href="./EdgeListGraph.html">EdgeListGraph</a>.
+-->
+<P>
+<TT>edge_list</TT> クラスはあらゆる種類の辺イテレータを取るアダプタである。
+このクラスは <a href="./EdgeListGraph.html">EdgeListGraph</a> を実装している。
+
+
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000-2001</TD><TD>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>,
+Indiana University (<A
+HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)<br>
+<A HREF="../../../people/liequan_lee.htm">Lie-Quan Lee</A>, Indiana University (<A HREF="mailto:llee@cs.indiana.edu">llee@cs.indiana.edu</A>)<br>
+<A HREF=http://www.osl.iu.edu/~lums>Andrew Lumsdaine</A>,
+Indiana University (<A
+HREF="mailto:lums@osl.iu.edu">lums@osl.iu.edu</A>)
+</TD></TR></TABLE>
+
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:kn@mm.neweb.ne.jp">Kent.N</a><br> 
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+
+</BODY>
+</HTML> 

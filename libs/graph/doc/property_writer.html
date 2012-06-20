@@ -1,0 +1,197 @@
+<HTML>
+<!--
+  -- Copyright (c) Jeremy Siek, Lie-Quan Lee, and Andrew Lumsdaine 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  We make no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<Meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<Title>Boost Graph Library: property_writer</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+<H1>
+<pre>
+property_writer&lt;PropertyMap, OutputIterator, EventTag&gt;
+</pre>
+</H1>
+
+これは、アルゴリズム内のあるイベントで、頂点や辺の特徴<small><a href="#tnote1">[訳注1]</a></small>を出力するために使う <a href="./EventVisitor.html">EventVisitor</a> である。
+
+<p>
+<a href="./bfs_visitor.html"><tt>bfs_visitor</tt></a> や <a href="./dfs_visitor.html"><tt>dfs_visitor</tt></a> などのアルゴリズム別のアダプタでラップする事で、 <tt>property_writer</tt> を グラフアルゴリズムで使えるようになる。また、<tt>std::pair</tt> を使って他のイベントビジタと結合して、 EventVisitorList を作れる。
+
+<h3>Example</h3>
+
+以下は <a href="../example/dave.cpp"><tt>examples/dave.cpp</tt></a> からの抜粋である。
+
+<pre>
+  std::ostream_iterator<int> cout_int(std::cout, " ");
+  std::ostream_iterator<char> cout_char(std::cout, " ");
+
+  boost::breadth_first_search
+    (G, vertex(a, G), make_bfs_visitor(
+     std::make_pair(write_property(name, cout_char, on_discover_vertex()),
+     std::make_pair(write_property(distance.begin(), cout_int, 
+                                   on_discover_vertex()),
+     std::make_pair(print_edge(name, std::cout, on_examine_edge()),
+                    print_endl(std::cout, on_finish_vertex()
+                    ))))));
+</pre>
+
+<h3>Model of</h3>
+
+<a href="./EventVisitor.html">EventVisitor</a>
+
+
+<H3>Where Defined</H3>
+
+<P>
+<a href="../../../boost/graph/visitors.hpp">
+<TT>boost/graph/visitors.hpp</TT></a>
+
+<H3>Template Parameters</H3>
+
+<P>
+<TABLE border>
+<TR>
+<th>パラメータ</th><th>説明</th><th>デフォルト</th>
+</tr>
+
+<TR><TD><TT>PropertyMap</TT></TD>
+<TD>
+<a href="../../property_map/ReadablePropertyMap.html">ReadablePropertyMap</a> 。その <tt>key_type</tt> はグラフの頂点記述子型か辺記述子型 (イベントタグの種類で決まる) で、 <tt>value_type</tt> は <tt>OutputIterator</tt> の <tt>value_type</tt> に変換可能でなければならない。
+</TD>
+<TD>&nbsp;</TD>
+</TR>
+
+<TR><TD><TT>OutputIterator</TT></TD>
+<TD>
+特徴の値を出力するために使うイテレータの型。 <a href="http://www.sgi.com/tech/stl/OutputIterator.html">OutputIterator</a> のモデルでなければならない。
+</TD>
+<TD>&nbsp;</TD>
+</TR>
+
+
+<TR><TD><TT>EventTag</TT></TD>
+<TD>
+グラフアルゴリズム中、いつ <tt>property_writer</tt> が呼び出されるかを指定するタグ。
+</TD>
+<TD>&nbsp;</TD>
+</TR>
+
+</table>
+
+<H2>Associated Types</H2>
+
+<table border>
+
+<tr>
+<th>型</th><th>説明</th>
+</tr>
+
+<tr>
+<td><tt>property_writer::event_filter</tt></td>
+<td>
+テンプレートパラメータ <tt>EventTag</tt> と同じ型。
+</td>
+</tr>
+
+</table>
+
+<h3>Member Functions</h3>
+
+<p>
+
+<table border>
+<tr>
+<th>メンバ</th><th>説明</th>
+</tr>
+
+<tr>
+<td><tt>
+property_writer(PropertyMap pa, OutputIterator out);
+</tt></td>
+<td>
+プロパティマップ <tt>pa</tt> と出力イテレータ <tt>out</tt> を使って <tt>property_writer</tt> オブジェクトを構築する。
+</td>
+</tr>
+
+<tr>
+<td><tt>
+template &lt;class X, class Graph&gt;<br>
+void operator()(X x, const Graph& g);
+</tt></td>
+<td>
+<tt>x</tt> に対応する特徴の値を出力イテレータに書き込む。<br>
+<tt>*out++ = get(pa, x);</tt>
+</td>
+</tr>
+
+</table>
+
+<h3>Non-Member Functions</h3>
+
+<table border>
+<tr>
+<th>関数</th><th>説明</th>
+</tr>
+
+<tr><td><tt>
+template &lt;class PropertyMap, class OutputIterator, class Tag&gt;<br>
+property_writer&lt;PropertyMap, OutputIterator, Tag&gt;<br>
+write_property(PropertyMap pa, OutputIterator out, Tag);
+</tt></td><td>
+<tt>property_writer</tt> を作る便利な方法。
+</td></tr>
+
+</table>
+
+<h3>See Also</h3>
+
+<a href="./visitor_concepts.html">Visitor concepts</a>
+<p>
+イベントビジタ: <a
+<a href="./distance_recorder.html"><tt>distance_recorder</tt></a> 、
+<a href="./predecessor_recorder.html"><tt>predecessor_recorder</tt></a> 、
+<a href="./time_stamper.html"><tt>time_stamper</tt></a> 。
+
+
+<br>
+<HR>
+<p><a name="tnote1">[訳注1]</a> あるプロパティマップにおける、その頂点 (辺) をキーとする値の事。</p>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000-2001</TD><TD>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>,
+Indiana University (<A
+HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)<br>
+<A HREF="../../../people/liequan_lee.htm">Lie-Quan Lee</A>, Indiana University (<A HREF="mailto:llee@cs.indiana.edu">llee@cs.indiana.edu</A>)<br>
+<A HREF=http://www.osl.iu.edu/~lums>Andrew Lumsdaine</A>,
+Indiana University (<A
+HREF="mailto:lums@osl.iu.edu">lums@osl.iu.edu</A>)
+</TD></TR></TABLE>
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:gimite@mx12.freecom.ne.jp">Hiroshi Ichikawa</a><br>
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+<p>このドキュメントの対象: Boost Version 1.30.0<br>
+<a href="http://www.boost.org/libs/graph/doc/property_writer.html">最新版ドキュメント (英語)</a></p>
+
+</BODY>
+</HTML> 
+<!--  LocalWords:  PropertyMap OutputIterator EventTag EventVisitor bfs dfs EventVisitorList
+ -->
+<!--  LocalWords:  cpp num dtime ftime int WritablePropertyMap map
+ -->
+<!--  LocalWords:  const Siek Univ Quan Lumsdaine
+ -->

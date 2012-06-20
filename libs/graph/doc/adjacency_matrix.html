@@ -1,0 +1,558 @@
+<!-- saved from url=(0022)http://internet.e-mail -->
+<HTML>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<!--
+  -- Copyright (c) Jeremy Siek 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  Jeremy Siek makes no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<Title>Boost Graph Library: Adjacency Matrix</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+<H1><A NAME="sec:adjacency-matrix-class"></A>
+<pre>
+adjacency_matrix&lt;Directed, VertexProperty, 
+                 EdgeProperty, GraphProperty,
+                 Allocator&gt;
+</pre>
+</H1>
+
+
+<tt>adjacency_matrix</tt> クラスは 従来からの隣接行列を用いて 
+BGL グラフインタフェースを提供する。
+頂点数 <i>V</i> のグラフに対して、
+<i>V x V</i> 行列を用いる。
+その行列では、各要素 <i>a<sub>ij</sub></i> は 
+頂点 <i>i</i> から 頂点 <i>j</i> への辺が存在するか否かを示すブール値のフラグである。
+<a
+href="#fig:adj-matrix-graph">図 1</a> ではグラフの隣接行列表現が示されている。
+
+<P></P>
+<DIV ALIGN="center"><A NAME="fig:adj-matrix-graph"></A><A NAME="1509"></A>
+<TABLE>
+<CAPTION ALIGN="BOTTOM"><STRONG>図 1:</STRONG> 有向グラフの隣接行列表現。</CAPTION>
+<TR><TD><IMG SRC="./figs/adj-matrix-graph3.gif" width="386" height="284"></TD>
+<TD><IMG SRC="./figs/adj-matrix2.gif" width="135" height="136"></TD></TR>
+</TABLE>
+</DIV><P></P>
+
+この隣接行列形式の 隣接リストに対する利点は
+辺の挿入と削除が定数時間で終了するという点である。
+いくつか不便な点もある。
+まず1つ目は、使用するメモリの量が 
+<i>O(V + E)</i> (ここで、<i>E</i> は辺の数) ではなく、
+<i>O(V<sup>2</sup>)</i> である という点である。
+2つ目は、全ての辺を辿る処理(例えば、幅優先探索)は、
+<i>O(V<sup>2</sup>)</i> 時間内で実行されるが、
+隣接リストでは <i>O(V + E)</i> 時間である。
+つまり、密度の高い(<i>E</i> が <i>V<sup>2</sup></i>に近い)グラフに対しては、
+<tt>adjacency_matrix</tt> の方がよく、
+密度の低い(<i>E</i> が <i>V<sup>2</sup></i> よりもずっと小さい)グラフに対しては、
+<a
+href="adjacency_list.html"><tt>adjacency_list</tt></a> の方がよい という事である。
+
+<tt>adjacency_matrix</tt> クラスは プロパティテンプレートパラメータを介して 
+頂点と辺にオブジェクトを付与する事を可能とすることで、
+既存のデータ構造を拡張したものである。
+第 XXX 章には内部プロパティの使用方法について説明がある。
+
+無向グラフの場合には、
+<tt>adjacency_matrix</tt> クラスは <i>V x V</i> 行列を全て使用せず、
+代わりに下の三角部分(対角成分とその下)を用いる。
+それは、無向グラフの隣接行列は対称行列となるからである。
+これによって使用するメモリは <i>(V<sup>2</sup>)/2</i> へと軽減される。
+<a
+href="#fig:undir-adj-matrix-graph">図 2</a> で無向グラフの隣接行列表現を示している。
+
+<P></P>
+<DIV ALIGN="center"><A NAME="fig:undir-adj-matrix-graph"></A><A NAME="1509"></A>
+<TABLE>
+<CAPTION ALIGN="BOTTOM"><STRONG>図 2:</STRONG> 無向グラフの隣接行列表現。</CAPTION>
+<TR><TD><IMG SRC="./figs/undir-adj-matrix-graph3.gif" width="260" height="240"></TD>
+<TD><IMG SRC="./figs/undir-adj-matrix2.gif" width="135" height="136"></TD></TR>
+</TABLE>
+</DIV><P></P>
+
+
+<h3>Example</h3>
+
+<a href="#fig:adj-matrix-graph">図 1</a>のグラフを生成する。 
+<pre>
+  enum { A, B, C, D, E, F, N };
+  const char* name = "ABCDEF";
+  
+  typedef boost::adjacency_matrix&lt;boost::directedS> Graph;
+  Graph g(N);
+  add_edge(B, C, g);
+  add_edge(B, F, g);
+  add_edge(C, A, g);
+  add_edge(C, C, g);
+  add_edge(D, E, g);
+  add_edge(E, D, g);
+  add_edge(F, A, g);
+
+  std::cout &lt;&lt; "vertex set: ";
+  boost::print_vertices(g, name);
+  std::cout &lt;&lt; std::endl;
+
+  std::cout &lt;&lt; "edge set: ";
+  boost::print_edges(g, name);
+  std::cout &lt;&lt; std::endl;
+
+  std::cout &lt;&lt; "out-edges: " &lt;&lt; std::endl;
+  boost::print_graph(g, name);
+  std::cout &lt;&lt; std::endl;
+</pre>
+The output is:
+<pre>
+  vertex set: A B C D E F 
+
+  edge set: (B,C) (B,F) (C,A) (C,C) (D,E) (E,D) (F,A) 
+
+  out-edges: 
+  A --> 
+  B --> C F 
+  C --> A C 
+  D --> E 
+  E --> D 
+  F --> A 
+</pre>
+
+<a href="#fig:undir-adj-matrix-graph">図 2</a>のグラフを生成する。 
+<pre>
+  enum { A, B, C, D, E, F, N };
+  const char* name = "ABCDEF";
+
+  typedef boost::adjacency_matrix&lt;boost::undirectedS> UGraph;
+  UGraph ug(N);
+  add_edge(B, C, ug);
+  add_edge(B, F, ug);
+  add_edge(C, A, ug);
+  add_edge(D, E, ug);
+  add_edge(F, A, ug);
+
+  std::cout &lt;&lt; "vertex set: ";
+  boost::print_vertices(ug, name);
+  std::cout &lt;&lt; std::endl;
+
+  std::cout &lt;&lt; "edge set: ";
+  boost::print_edges(ug, name);
+  std::cout &lt;&lt; std::endl;
+
+  std::cout &lt;&lt; "incident edges: " &lt;&lt; std::endl;
+  boost::print_graph(ug, name);
+  std::cout &lt;&lt; std::endl;
+</pre>
+出力:
+<pre>
+  vertex set: A B C D E F 
+
+  edge set: (C,A) (C,B) (E,D) (F,A) (F,B) 
+
+  incident edges: 
+  A &lt;--> C F 
+  B &lt;--> C F 
+  C &lt;--> A B 
+  D &lt;--> E 
+  E &lt;--> D 
+  F &lt;--> A B 
+</pre>
+
+
+<h3>Where Defined</h3>
+
+<a href="../../../boost/graph/adjacency_matrix.hpp"><tt>boost/graph/adjacency_matrix.hpp</tt></a>
+
+
+<h3>Template Parameters</h3>
+
+<p>
+<table border>
+
+<TR>
+<th>Parameter</th><th>Description</th><th>Default</th>
+</tr>
+
+<tr>
+  <td><tt>Directed</tt></td>
+  <td>グラフが有効か無向かを選ぶ選択子。オプションは <tt>directedS</tt> と <tt>undirectedS</tt>。</td>
+  <td><tt>directedS</tt></td>
+</tr>
+<tr>
+  <td><tt>VertexProperty</tt></td>
+  <td>内部プロパティ記憶域を指定する。</td>
+  <td><tt>no_property</tt></td>
+</tr>
+<tr>
+  <td><tt>EdgeProperty</tt></td>
+  <td>内部プロパティ記憶域を指定する。</td>
+  <td><tt>no_property</tt></td>
+</tr>
+<tr>
+  <td><tt>GraphProperty</tt></td>
+  <td>グラフのオブジェクトの内部プロパティ記憶域を指定する。</td>
+  <td><tt>no_property</tt></td>
+</tr>
+
+</table>
+
+<h3>Model Of</h3>
+
+<a href="./VertexAndEdgeListGraph.html">VertexAndEdgeListGraph</a>, <a
+href="./AdjacencyMatrix.html">AdjacencyMatrix</a>, <a
+href="./MutablePropertyGraph.html">MutablePropertyGraph</a>,
+<a href="../../utility/CopyConstructible.html">CopyConstructible</a>,
+and <a href="../../utility/Assignable.html">Assignable</a>.
+
+
+<h3>Associates Types</h3>
+
+<hr>
+
+<tt>graph_traits&lt;adjacency_matrix&gt;::vertex_descriptor</tt>
+<br><br>
+<tt>adjacency_matrix</tt> と対応付けられた頂点記述子の型。<br>
+(<a href="./Graph.html">Graph</a> からの要求。)
+
+<hr>
+
+<tt>graph_traits&lt;adjacency_matrix&gt;::edge_descriptor</tt>
+<br><br>
+<tt>adjacency_matrix</tt> と対応付けられた辺記述子の型。<br>
+(<a href="./Graph.html">Graph</a> からの要求。)
+
+<hr>
+<tt>graph_traits&lt;adjacency_matrix&gt;::vertex_iterator</tt>
+<br><br>
+	<tt>vertices()</tt> によって返されるイテレータの型。
+	この頂点イテレータは 
+	<a href="http://www.sgi.com/tech/stl/RandomAccessIterator.html">RandomAccessIterator</a>のモデルである。<br>
+	(<a href="VertexListGraph.html">VertexListGraph</a> からの要求。)
+
+<hr>
+<tt>graph_traits&lt;adjacency_matrix&gt;::edge_iterator</tt>
+<br><br>
+	<tt>edges()</tt> によって返されるイテレータの型。
+	この辺イテレータは 
+	<a href="../../utility/MultiPassInputIterator.html">MultiPassInputIterator</a>のモデルである。<br>
+	(<a href="EdgeListGraph.html">EdgeListGraph</a> からの要求。)
+
+<hr>
+<tt>graph_traits&lt;adjacency_matrix&gt;::out_edge_iterator</tt>
+<br><br>
+	<tt>out_edges()</tt> によって返されるイテレータの型。
+	このイテレータは 
+	<a href="../../utility/MultiPassInputIterator.html">MultiPassInputIterator</a>のモデルである。<br>
+	(<a href="IncidenceGraph.html">IncidenceGraph</a> からの要求。)
+
+<hr>
+<tt>graph_traits&lt;adjacency_matrix&gt;::adjacency_iterator</tt>
+<br><br>
+	<tt>adjacent_vertices()</tt> によって返されるイテレータの型。
+	このイテレータは出辺イテレータと同じコンセプトのモデルである。<br>
+	(<a href="AdjacencyGraph.html">AdjacencyGraph</a> からの要求。)
+
+<hr>
+<tt>graph_traits&lt;adjacency_matrix&gt;::directed_category</tt>
+<br><br>
+	グラフが 有向(<tt>directed_tag</tt>)であるか 
+	無向(<tt>undirected_tag</tt>)であるかに関する情報を提供する。<br>
+	(<a href="Graph.html">Graph</a> からの要求。)
+
+<hr>
+<tt>graph_traits&lt;adjacency_matrix&gt;::edge_parallel_category</tt>
+<br><br>
+	隣接行列は多重辺の挿入を許可しないので、
+	この型は常に <tt>disallow_parallel_edge_tag</tt> である。<br>
+	(<a href="Graph.html">Graph</a> からの要求。)
+
+<hr>
+<tt>graph_traits&lt;adjacency_matrix&gt;::vertices_size_type</tt>
+<br><br>
+	グラフの頂点数を扱うための型。<br>
+	(<a href="VertexListGraph.html">VertexListGraph</a> からの要求。)
+
+<hr>
+<tt>graph_traits&lt;adjacency_matrix&gt;::edges_size_type</tt>
+<br><br>
+	グラフの辺数を扱うための型。<br>
+	(<a href="EdgeListGraph.html">EdgeListGraph</a> からの要求。)
+
+<hr>
+<tt>graph_traits&lt;adjacency_matrix&gt;::degree_size_type</tt>
+<br><br>
+	頂点からの出辺数を扱うための型。<br>
+	(<a href="IncidenceGraph.html">IncidenceGraph</a> からの要求。)
+
+<hr>
+<tt>property_map&lt;adjacency_matrix, PropertyTag&gt;::type</tt><br>
+<tt>property_map&lt;adjacency_matrix, PropertyTag&gt;::const_type</tt>
+<br><br>
+	グラフの頂点 もしくは 辺のプロパティに対するマップの型。
+  	具体的なプロパティはテンプレート引数 <tt>PropertyTag</tt> によって指定され、
+  	グラフの <tt>VertexProperty</tt> もしくは <tt>EdgeProperty</tt> で
+  	指定されているプロパティの内の1つに適合していなければならない。<br>
+	(<a href="PropertyGraph.html">PropertyGraph</a> からの要求。)
+
+<hr>
+
+<h3>Member Functions</h3>
+
+<hr>
+<pre>
+adjacency_matrix(vertices_size_type n,
+                 const GraphProperty& p = GraphProperty())
+</pre>
+頂点数 <tt>n</tt>、辺数 0 であるグラフのオブジェクトを生成する。<br>
+(<a href="MutableGraph.html">MutableGraph</a> からの要求。)
+
+<hr>
+<pre>
+template &lt;typename EdgeIterator&gt;
+adjacency_matrix(EdgeIterator first,
+                 EdgeIterator last,
+                 vertices_size_type n,
+                 const GraphProperty& p = GraphProperty())
+</pre>
+	頂点数 <tt>n</tt> で、辺が <tt>[first, last)</tt> の範囲で
+	与えられたリストで指定された辺をもつグラフのオブジェクトを生成する。
+	<tt>EdgeIterator</tt> の値の型は <tt>std::pair</tt> でなければならず、
+	それは整数型の組である。
+  	それら整数は頂点に対応し、<tt>[0, n)</tt> の範囲になければならない。<br>
+	(<a href="IteratorConstructibleGraph.html">IteratorConstructibleGraph</a> からの要求。)
+
+<hr>
+<pre>
+template &lt;typename EdgeIterator, typename EdgePropertyIterator&gt;
+adjacency_matrix(EdgeIterator first, EdgeIterator last,
+                 EdgePropertyIterator ep_iter,
+                 vertices_size_type n,
+                 const GraphProperty& p = GraphProperty())
+</pre>
+	頂点数 <tt>n</tt> で、辺が <tt>[first, last)</tt> の範囲で
+	与えられたリストで指定された辺をもつグラフのオブジェクトを生成する。
+	<tt>EdgeIterator</tt> の値の型は <tt>std::pair</tt> でなければならず、
+	それは整数型の組である。
+  	それら整数は頂点に対応し、<tt>[0, n)</tt> の範囲になければならない。
+  	<tt>ep_iter</tt> の <tt>value_type</tt> は <tt>EdgeProperty</tt> であるべきである。
+
+<hr>
+
+
+<h3>Non-Member Functions</h3>
+
+<hr>
+<pre>
+std::pair&lt;vertex_iterator, vertex_iterator&gt;
+vertices(const adjacency_matrix&amp; g)
+</pre>
+グラフ <tt>g</tt> の頂点集合へのアクセスを提供するイテレータの範囲を返す。
+(<a href="VertexListGraph.html">VertexListGraph</a> からの要求。)
+
+<hr>
+<pre>
+std::pair&lt;edge_iterator, edge_iterator&gt;
+edges(const adjacency_matrix&amp; g)
+</pre>
+グラフ <tt>g</tt> の辺集合へのアクセスを提供するイテレータの範囲を返す。
+(<a href="EdgeListGraph.html">EdgeListGraph</a> からの要求。)
+
+<hr>
+<pre>
+std::pair&lt;adjacency_iterator, adjacency_iterator&gt;
+adjacent_vertices(vertex_descriptor v, const adjacency_matrix&amp; g)
+</pre>
+グラフ <tt>g</tt> で頂点 <tt>v</tt> に隣接する頂点へのアクセスを提供するイテレータの範囲を返す。
+(<a href="AdjacencyGraph.html">AdjacencyGraph</a> からの要求。)
+
+<hr>
+<pre>
+std::pair&lt;out_edge_iterator, out_edge_iterator&gt;
+out_edges(vertex_descriptor v, const adjacency_matrix&amp; g)
+</pre>
+グラフ <tt>g</tt> で頂点 <tt>v</tt> の出辺へのアクセスを提供するイテレータの範囲を返す。
+グラフが無向であれば、このイテレータの範囲は、
+頂点 <tt>v</tt> に接続する全ての辺へのアクセスを提供する。<br>
+(<a href="IncidenceGraph.html">IncidenceGraph</a> からの要求。)
+
+<hr>
+<pre>
+vertex_descriptor
+source(edge_descriptor e, const adjacency_matrix&amp; g)
+</pre>
+辺 <tt>e</tt> の始点を返す。<br>
+(<a href="IncidenceGraph.html">IncidenceGraph</a> からの要求。)
+
+<hr>
+<pre>
+vertex_descriptor
+target(edge_descriptor e, const adjacency_matrix&amp; g)
+</pre>
+辺 <tt>e</tt> の終点を返す。<br>
+(<a href="IncidenceGraph.html">IncidenceGraph</a> からの要求。)
+
+<hr>
+<pre>
+degree_size_type
+out_degree(vertex_descriptor u, const adjacency_matrix&amp; g)
+</pre>
+頂点 <tt>u</tt> を出る辺の数を返す。<br>
+(<a href="IncidenceGraph.html">IncidenceGraph</a> からの要求。)
+<hr>
+
+<hr>
+<pre>
+vertices_size_type num_vertices(const adjacency_matrix&amp; g)
+</pre>
+グラフ <tt>g</tt> の頂点数を返す。<br>
+(<a href="VertexListGraph.html">VertexListGraph</a> からの要求。)
+
+<hr>
+<pre>
+edges_size_type num_edges(const adjacency_matrix&amp; g)
+</pre>
+グラフ <tt>g</tt> の辺数を返す。<br>
+(<a href="EdgeListGraph.html">EdgeListGraph</a> からの要求。)
+
+<hr>
+<pre>
+vertex_descriptor vertex(vertices_size_type n, const adjacency_matrix&amp; g)
+</pre>
+グラフの頂点リスト内の <tt>n</tt> 番目の頂点を返す。
+
+<hr>
+<pre>
+std::pair&lt;edge_descriptor, bool&gt;
+edge(vertex_descriptor u, vertex_descriptor v,
+     const adjacency_matrix&amp; g)
+</pre>
+グラフ <tt>g</tt> で、頂点 <tt>u</tt> を頂点 <tt>v</tt> へ接続する頂点を返す。<br>
+(<a href="AdjacencyMatrix.html">AdjacencyMatrix</a> からの要求。)
+
+<hr>
+<pre>
+std::pair&lt;edge_descriptor, bool&gt;
+add_edge(vertex_descriptor u, vertex_descriptor v,
+         adjacency_matrix&amp; g)
+</pre>
+	辺 <tt>(u,v)</tt> をグラフへ追加し、その新しい辺への辺記述子を返す。
+	既に辺があれば二重には追加されず、<tt>bool</tt> のフラグは<tt>false</tt>となる。
+	この処理はグラフのいかなるイテレータ 及び 記述子を無効化することは無い。<br>
+(<a href="MutableGraph.html">MutableGraph</a> からの要求。)
+
+<hr>
+<pre>
+std::pair&lt;edge_descriptor, bool&gt;
+add_edge(vertex_descriptor u, vertex_descriptor v,
+         const EdgeProperty& p,
+         adjacency_matrix&amp; g)
+</pre>
+	辺 <tt>(u,v)</tt> をグラフへ追加し、
+	その新しい辺にその辺の内部プロパティ記憶域の値として、
+	<tt>p</tt> を付与する。
+	更なる詳細は 前にあるメンバ関数 <tt>add_edge()</tt> を見よ。
+
+<hr>
+<pre>
+void remove_edge(vertex_descriptor u, vertex_descriptor v,
+                 adjacency_matrix&amp; g)
+</pre>
+グラフから辺 <tt>(u,v)</tt> を削除する。<br>
+(<a href="MutableGraph.html">MutableGraph</a> からの要求。)
+
+<hr>
+<pre>
+void remove_edge(edge_descriptor e, adjacency_matrix&amp; g)
+</pre>
+グラフから辺 <tt>e</tt> を削除する。
+この操作は <tt>remove_edge(source(e, g), target(e, g), g)</tt> を呼び出すのと
+等価である。<br>
+(<a href="MutableGraph.html">MutableGraph</a> からの要求。)
+
+<hr>
+<pre>
+void clear_vertex(vertex_descriptor u, adjacency_matrix&amp; g)
+</pre>
+グラフから頂点 <tt>u</tt> に接続する全ての辺を削除する。
+その頂点はグラフの頂点集合からは削除されない。<br>
+(<a href="MutableGraph.html">MutableGraph</a> からの要求。)
+
+<hr>
+<pre>
+template &lt;typename Property&gt;
+property_map&lt;adjacency_matrix, Property&gt;::type
+get(Property, adjacency_matrix&amp; g)
+
+template &lt;typename Property&gt;
+property_map&lt;adjacency_matrix, Property&gt;::const_type
+get(Property, const adjacency_matrix&amp; g)
+</pre>
+<tt>Property</tt> で指定される頂点プロパティへの 
+プロパティマップのオブジェクトを返す。
+<tt>Property</tt> はグラフのテンプレート引数 <tt>VertexProperty</tt> 
+で指定されるプロパティの1つと適合していなければならない。<br>
+(<a href="PropertyGraph.html">PropertyGraph</a> からの要求。)
+
+<hr>
+<pre>
+template &lt;typename Property, typename X&gt;
+typename property_traits&lt;
+  typenamae property_map&lt;adjacency_matrix, Property&gt;::const_type
+&gt;::value_type
+get(Property, const adjacency_matrix&amp; g, X x)
+</pre>
+頂点 もしくは 辺 の記述子 <tt>x</tt> に対するプロパティ値を返す。<br>
+(<a href="PropertyGraph.html">PropertyGraph</a> からの要求。)
+
+<hr>
+<pre>
+template &lt;typename Property, typename X, typename Value&gt;
+void
+put(Property, const adjacency_matrix&amp; g, X x, const Value& value)
+</pre>
+<tt>x</tt> のプロパティ値を <tt>value</tt> にセットする。
+<tt>x</tt> は 頂点 もしくは 辺 の記述子である。
+<tt>Value</tt> は 
+<tt>typename property_traits&lt;property_map&lt;adjacency_matrix, Property&gt;::type&gt;::value_type</tt> 
+に変換可能でなければならない。<br>
+(<a href="PropertyGraph.html">PropertyGraph</a> からの要求。)
+
+<hr>
+<pre>
+template &lt;typename GraphProperty, typename GraphProperty&gt;
+typename property_value&lt;GraphProperty, GraphProperty&gt;::type&amp;
+get_property(adjacency_matrix&amp; g, GraphProperty)
+</pre>
+グラフのオブジェクト <tt>g</tt> に付与された <tt>GraphProperty</tt> 
+で指定されたプロパティを返す。
+特性クラス <tt>property_value</tt> は <tt>boost/pending/property.hpp</tt> で定義される。
+
+<hr>
+<pre>
+template &lt;typename GraphProperty, typename GraphProperty&gt;
+const typename property_value&lt;GraphProperty, GraphProperty&gt;::type&amp;
+get_property(const adjacency_matrix&amp; g, GraphProperty)
+</pre>
+グラフのオブジェクト <tt>g</tt> に付与された <tt>GraphProperty</tt> 
+で指定されたプロパティを返す。
+特性クラス <tt>property_value</tt> は <tt>boost/pending/property.hpp</tt> で定義される。
+
+<hr>
+
+<P>Japanese Translation Copyright (C) 2003&nbsp;KANAHORI&nbsp;Toshihiro &lt;<A href="mailto:kanahori@k.tsukuba-tech.ac.jp">kanahori@k.tsukuba-tech.ac.jp</A>&gt;
+<BR>
+<SMALL>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。
+</SMALL>
+</P>

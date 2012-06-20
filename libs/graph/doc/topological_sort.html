@@ -1,0 +1,142 @@
+<HTML>
+<!--
+  -- Copyright (c) Jeremy Siek 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  Jeremy Siek makes no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<Title>Boost Graph Library: Topological Sort</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+
+<H1><A NAME="sec:topological-sort">
+<TT>topological_sort</TT>
+</H1>
+
+<PRE>
+template &lt;typename VertexListGraph, typename OutputIterator,
+          typename P, typename T, typename R&gt;
+void topological_sort(VertexListGraph&amp; g, OutputIterator result,
+    const bgl_named_params&lt;P, T, R&gt;&amp; params = <i>all defaults</i>)
+</PRE>
+
+<P>
+トポロジカルソート・アルゴリズムは、例えば辺 <i>(u,v)</i> がグラフ中に現れる
+と、順序において <i>u</i> が <i>v</i> の前に来るように頂点の線形の順序付けを
+行う。グラフは非循環有向グラフ (DAG) でなければならない。実装は主に <a
+href="./depth_first_search.html"><tt>depth_first_search()</tt></a> への呼び出し
+によって成り立っている。
+</p>
+
+<h3>Where Defined:</h3>
+<a href="../../../boost/graph/topological_sort.hpp"><TT>boost/graph/topological_sort.hpp</TT></a>
+
+<h3>Parameters</h3>
+
+IN: <tt>VertexListGraph&amp; g</tt>
+<blockquote>
+非循環有向グラフ (DAG)。グラフの型は <a href="./VertexListGraph.html">Vertex List Graph</a> のモデルでなければならない。もしグラフが DAG でなければ、<a href="./exception.html#not_a_dag"><tt>not_a_dag</tt></a> 例外が送出され、ユーザは
+ <tt>result</tt> の範囲の内容を捨てるべきである。
+</blockquote>
+
+OUT: <tt>OutputIterator result</tt>
+<blockquote>
+グラフの頂点記述子はトポロジカル順序によって <TT>result</TT> 出力イテレータに
+出力される。イテレータの型は <a
+href="http://www.sgi.com/tech/stl/OutputIterator.html">Output
+Iterator</a> のモデルでなければならない。
+</blockquote>
+
+<h3>Named Parameters</h3>
+
+UTIL/OUT: <tt>color_map(ColorMap color)</tt>
+<blockquote>
+これはグラフを通る進行過程を保持するためにアルゴリズムによって使われる。
+<tt>ColorMap</tt> 型は <a
+href="../../property_map/ReadWritePropertyMap.html">Read/Write
+Property Map</a> のモデルでなければならず、かつキー型はグラフの頂点記述子型
+でなければならず、またカラー・マップの値型は
+<a href="./ColorValue.html">ColorValue</a> をモデルとしなければならない。<br>
+<b>デフォルト:</b> サイズ <tt>num_vertices(g)</tt> の 
+<tt>default_color_type</tt> の <tt>std::vector</tt> から作られた
+<a href="../../property_map/iterator_property_map.html">
+<tt>iterator_property_map</tt></a>で、添え字マップには 
+<tt>i_map</tt> を用いる。
+</blockquote>
+
+IN: <tt>vertex_index_map(VertexIndexMap i_map)</tt>
+<blockquote>
+これは各頂点を <tt>[0, num_vertices(g))</tt> の範囲において整数に
+マップする。
+このパラメータはデフォルトのカラー・プロパティ・マップが使われた時にのみ必要である。
+<tt>VertexIndexMap</tt> の型は <a
+href="../../property_map/ReadablePropertyMap.html">Readable Property
+Map</a> のモデルでなければならない。マップの値型は汎整数型でなければならない。
+グラフの頂点記述子型はマップのキー型として使用できる必要がある。<br>
+
+ <b>デフォルト:</b> <tt>get(vertex_index, g)</tt>
+</blockquote>
+
+
+<H3>Complexity</H3>
+
+時間複雑性は <i>O(V + E)</i> である。
+
+
+<H3>Example</H3>
+
+<P>
+頂点のトポロジカル順序を計算する。
+
+<P>
+<PRE>
+  typedef adjacency_list&lt; vecS, vecS, directedS, color_property&lt;&gt; &gt; Graph;
+  typedef boost::graph_traits&lt;Graph&gt;::vertex_descriptor Vertex;
+  Pair edges[7] = { Pair(0,1), Pair(2,4),
+                    Pair(2,5),
+                    Pair(0,3), Pair(1,4),
+                    Pair(4,3), Pair(5,5) };
+  Graph G(6, edges, edges + 7);
+
+  typedef std::vector&lt; Vertex &gt; container;
+  container c;
+  topological_sort(G, std::back_inserter(c));
+
+  cout &lt;&lt; "A topological ordering: ";
+  for ( container::reverse_iterator ii=c.rbegin(); ii!=c.rend(); ++ii)
+    cout &lt;&lt; index(*ii) &lt;&lt; " ";
+  cout &lt;&lt; endl;
+</PRE>
+出力:
+<PRE>
+  A topological ordering: 2 5 0 1 4 3
+</PRE>
+
+
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000-2001</TD><TD>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>, Indiana University (<A HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)
+</TD></TR></TABLE>
+
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:takashi-it@po6.nsk.ne.jp">Takashi Itou</a><br> 
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+
+<p>このドキュメントの対象: Boost Version 1.30.0<br>
+<a href="http://www.boost.org/libs/graph/doc/topological_sort.html">最新版ドキュメント (英語)</a></p>
+</BODY>
+</HTML> 

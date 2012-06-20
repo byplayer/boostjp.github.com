@@ -1,0 +1,173 @@
+<HTML>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<!--
+  -- Copyright (c) Jeremy Siek, Lie-Quan Lee, and Andrew Lumsdaine 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  We make no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<Title>IteratorConstructibleGraph</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+<H1><A NAME="concept:IteratorConstructibleGraph"></A>
+IteratorConstructibleGraph
+</H1>
+
+IteratorConstructibleGraph のコンセプトは、
+辺イテレータの一種を用いて生成されるグラフの型へのインタフェースを示す。
+辺イテレータは
+グラフ上の辺を表す 整数値の組 <i>(i,j)</i> を間接参照する 
+<a
+href="http://www.sgi.com/tech/stl/InputIterator.html">InputIterator</a>
+であればよい。
+2つの整数値 <i>i</i> と <i>j</i> は頂点を表し、
+<i>0 <= i < |V|</i> かつ <i>0 <= j <
+|V|</i> である。
+辺イテレータの指す値の型は<tt>std::pair&lt;T,T&gt;</tt> 
+(または、少なくとも <tt>first</tt> と <tt>second</tt> のメンバを持つ構造体)
+で、その組の 型 <tt>T</tt> は
+グラフの <tt>vertices_size_type</tt> (つまり整数型)に変換可能でなければならない。
+このコンセプトに要求される有効な式は2つあり、
+どちらもコンストラクタである。
+1つ目はグラフのオブジェクトをイテレータの 開始/終了 範囲から生成する。
+2つ目は同じく、イテレータの 開始/終了 範囲と更に、
+頂点の数、辺の数を必要とする。
+グラフと辺イテレータによっては、
+2つ目のコンストラクタが1つ目のよりも効率的な場合もある。
+
+<h3>Example</h3>
+
+次にある例では2つのグラフのオブジェクトを辺(頂点の組)の配列から生成している。
+型 <tt>Edge*</tt> は<a
+href="http://www.sgi.com/tech/stl/InputIterator.html">InputIterator</a>
+に対する要求を満たし、
+よって、グラフの生成に使用することが出来る。
+
+<pre>
+  typedef ... IteratorConstructibleGraph;
+  typedef boost::graph_traits<IteratorConstructibleGraph> Traits;
+
+  typedef std::pair<Traits::vertices_size_type, 
+    Traits::vertices_size_type> Edge;
+  Edge edge_array[] =
+    { Edge(0,1), Edge(0,2), Edge(0,3), Edge(0,4), Edge(0,5),
+      Edge(1, 2), Edge(1,5), Edge(1,3),
+      Edge(2, 4), Edge(2,5),
+      Edge(3, 2), 
+      Edge(4, 3), Edge(4,1),
+      Edge(5, 4) };
+  Edge* first = edge_array,
+    last = edge_array + sizeof(edge_array)/sizeof(Edge);
+
+  IteratorConstructibleGraph G1(first, last);
+  // do something with G1 ...
+  
+  Traits::vertices_size_type size_V = 6;
+  Traits::edges_size_type size_E = sizeof(edge_array)/sizeof(Edge);
+  IteratorConstructibleGraph G2(first, last, size_V, size_E);
+  // do something with G2 ...
+</pre>
+
+<h3>Refinement of</h3>
+
+<a href="Graph.html">Graph</a>
+
+<h3>Notation</h3>
+
+<Table>
+<tr>
+<td><tt>G</tt></td>
+<td>IteratorConstructibleGraph のモデルであるグラフの型。</td>
+<tr>
+
+<tr>
+<td><tt>g</tt></td>
+<td>型 <tt>G</tt> のオブジェクト。</td>
+</tr>
+
+<tr>
+<td><tt>first, last</tt></td>
+<td>辺イテレータ(上記参照)。</td>
+</tr>
+
+<tr>
+<td><tt>Tr</tt></td>
+<td>型 <tt>graph_traits&lt;G&gt;</tt> のオブジェクト。</td>
+</tr>
+
+<tr>
+<td><tt>n_vertices</tt></td>
+<td>型 <tt>Tr::vertices_size_type</tt> のオブジェクト。</td>
+</tr>
+
+<tr>
+<td><tt>n_edges</tt></td>
+<td>型 <tt>Tr::edges_size_type</tt> のオブジェクト。</td>
+</tr>
+
+</Table>
+
+
+<h3>Valid Expressions</h3>
+
+<Table border>
+
+<tr>
+<td>
+<pre>G g(first, last);</pre>
+グラフのオブジェクト <tt>g</tt> を辺の範囲 <tt>[first,last)</tt> から生成する。
+</td>
+<tr>
+
+<tr>
+<td>
+<pre>G g(first, last, n_vertices, n_edges);</pre>
+グラフのオブジェクト <tt>g</tt> を辺の範囲 <tt>[first,last)</tt> と、
+頂点数、辺数から生成する。
+このコンストラクタの方が、
+グラフのサイズ情報の無いコンストラクタより効率的な場合がある。
+</td>
+</tr>
+
+</Table>
+
+
+<!--
+<H3>Concept Checking Class</H3>
+
+<PRE>
+</PRE>
+-->
+
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000-2001</TD><TD>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>,
+Indiana University (<A
+HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)<br>
+<A HREF="../../../people/liequan_lee.htm">Lie-Quan Lee</A>, Indiana University (<A HREF="mailto:llee@cs.indiana.edu">llee@cs.indiana.edu</A>)<br>
+<A HREF=http://www.osl.iu.edu/~lums>Andrew Lumsdaine</A>,
+Indiana University (<A
+HREF="mailto:lums@osl.iu.edu">lums@osl.iu.edu</A>)
+</TD></TR></TABLE>
+
+<P>Japanese Translation Copyright (C) 2003&nbsp;KANAHORI&nbsp;Toshihiro &lt;<A href="mailto:kanahori@k.tsukuba-tech.ac.jp">kanahori@k.tsukuba-tech.ac.jp</A>&gt;
+<BR>
+<SMALL>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。
+</SMALL>
+</P>
+</BODY>
+</HTML> 

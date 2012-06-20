@@ -1,0 +1,101 @@
+<HTML>
+<!--
+  -- Copyright (c) Jeremy Siek 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  Silicon Graphics makes no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<Title>Boost Graph Library: Bandwidth</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+<H1><A NAME="sec:bandwidth">
+<TT>bandwidth</TT>
+</H1>
+
+<pre>
+  (1)
+  template &lt;typename Graph&gt;
+  typename graph_traits&lt;Graph&gt;::vertices_size_type
+  bandwidth(const Graph& g)
+
+  (2)
+  template &lt;typename Graph, typename VertexIndexMap&gt;
+  typename graph_traits&lt;Graph&gt;::vertices_size_type
+  bandwidth(const Graph& g, VertexIndexMap index_map)
+</pre>
+
+無向グラフの <b><i>帯域幅 (bandwidth)</i></b> は二つの隣接頂点の間の最大距離
+で、頂点が構成単位間隔に置かれた線上で測定された距離である。別の言い方を
+すると、
+もし無向グラフの頂点 <i>G=(V,E)</i> に各々 0 から <i>|V| - 1</i> までの
+<i>index[v]</i> によって与えられる添え字が割り当てられているなら、<i>G</i>
+の帯域幅は<br><br>
+<i>B(G) = max { |index[u] - index[v]|&nbsp;&nbsp;| (u,v) in E }</i><br>
+<br>である。<br>
+
+
+<h3>Defined in</h3>
+
+<a href="../../../boost/graph/bandwidth.hpp"><tt>boost/graph/bandwidth.hpp</tt></a>
+
+
+<hr>
+
+<H1><A NAME="sec:ith-bandwidth">
+<TT>ith_bandwidth</TT>
+</H1>
+
+<pre>
+  (1)
+  template &lt;typename Graph&gt;
+  typename graph_traits&lt;Graph&gt;::vertices_size_type
+  ith_bandwidth(typename graph_traits&lt;Graph&gt;::vertex_descriptor i,
+		const Graph&amp; g)
+
+  (2)
+  template &lt;typename Graph, typename VertexIndexMap&gt;
+  typename graph_traits&lt;Graph&gt;::vertices_size_type
+  ith_bandwidth(typename graph_traits&lt;Graph&gt;::vertex_descriptor i,
+		const Graph&amp; g,
+		VertexIndexMap index)
+</pre>
+
+グラフの <b><i>i 番目の帯域幅 (i-th bandwidth)</i></b> は <i>i 番目</i>の頂点
+とその隣接のいずれかとの間の最大距離である。<br><br>
+<i>B<sub>i</sub>(G) = max { |index[i] - index[j]|&nbsp;&nbsp;| (i,j) in E }</i><br>
+<br>
+それで帯域幅 <i>B(G)</i> は i 番目の帯域幅 <i>B<sub>i</sub>(G)</i> の最大値
+として表すことができる。<br><br>
+<i>B(G) = max { B<sub>i</sub>(G) &nbsp;&nbsp;| i=0...|V|-1 }</i><br>
+
+<h3>Defined in</h3>
+
+<a href="../../../boost/graph/bandwidth.hpp"><tt>boost/graph/bandwidth.hpp</tt></a>
+
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000-2001</TD><TD>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>, Indiana University (<A HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)
+</TD></TR></TABLE>
+
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:takashi-it@po6.nsk.ne.jp">Takashi Itou</a><br> 
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+
+<p>このドキュメントの対象: Boost Version 1.30.0<br>
+<a href="http://www.boost.org/libs/graph/doc/bandwidth.html">最新版ドキュメント (英語)</a></p>
+</BODY>
+</HTML> 

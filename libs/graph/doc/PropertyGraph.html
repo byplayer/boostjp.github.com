@@ -1,0 +1,221 @@
+<HTML>
+<!--
+  -- Copyright (c) Jeremy Siek 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  Silicon Graphics makes no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<Title>PropertyGraph</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+<H2><A NAME="concept:PropertyGraph"></A>
+PropertyGraph
+</H2>
+
+PropertyGraph はグラフ中の頂点または辺の各々に関連したいくつかのプロパティを
+持つグラフである。与えられたグラフが各頂点または各辺に関連したいくつかの
+プロパティを持っている事がある時に、タグはどのプロパティがアクセスされて
+いるか確認するために使われる。グラフはプロパティ・マップ・オブジェクトを
+返す関数を提供する。
+
+<P>
+
+<H3>Refinement of</H3>
+
+<a href="./Graph.html">Graph</a>
+
+<h3>Notation</h3>
+
+<Table>
+<TR>
+<TD><tt>G</tt></TD>
+<TD>PropertyGraph のモデルの型。</TD>
+</TR>
+
+<TR>
+<TD><tt>g</tt></TD>
+<TD>型 <tt>G</tt> のオブジェクト。</TD>
+</TR>
+
+<TR>
+<TD><tt>X</tt></TD>
+<TD>頂点または <tt>G</tt> のための辺記述子型のどちらか一方。</TD>
+</TR>
+
+<TR>
+<TD><tt>x</tt></TD>
+<TD>型 <tt>X</tt> のオブジェクト。</TD>
+</TR>
+
+
+<TR>
+<TD><tt>Map</tt></TD>
+<TD>型 <tt>boost::property_map&lt;G, Property&gt;::const_type</tt>。</TD>
+</TR>
+
+<TR>
+<TD><tt>v</tt></TD>
+<TD>型 <tt>boost::property_traits&lt;Map&gt;::value_type</tt> のオブジェクト。</TD>
+</TR>
+
+<TR>
+<TD><tt>PropertyTag</tt></TD>
+<TD><a href="./PropertyTag.html">PropertyTag</a> コンセプトをモデルとした型。</TD>
+</TR>
+
+<TR>
+<TD><tt>p</tt></TD>
+<TD>型 <tt>PropertyTag</tt> のオブジェクト。</td>
+</TR>
+
+<TR>
+<TD><tt>pmap</tt></TD>
+<TD>型 <tt>Map</tt> のオブジェクト。</td>
+</TR>
+
+</table>
+
+<H3>Associated types</H3>
+
+<table border>
+
+<tr>
+<td><pre>boost::property_map&lt;G, PropertyTag&gt;::type</pre>
+<TT>PropertyTag</TT> によって指定されるプロパティのためのプロパティ・マップの
+型。この型はグラフの頂点または記述子型と同じキー型を持つ <a
+href="../../property_map/ReadWritePropertyMap.html">ReadWritePropertyMap</a>
+のモデルでなければならない。
+</td>
+</tr>
+
+<tr>
+<td><pre>boost::property_map&lt;G, PropertyTag&gt;::const_type</pre>
+<TT>PropertyTag</TT> によって指定されるプロパティのための const プロパティ・マップの型。この型はグラフの頂点または辺記述子型と同じキー型を持つ <a
+href="../../property_map/ReadablePropertyMap.html">ReadablePropertyMap</a>
+のモデルでなければならない。
+</td>
+</tr>
+
+</table>
+
+<h3>Valid Expressions</h3>
+
+<table border>
+
+<tr>
+<td> <TT>get(p,&nbsp;g)</TT> </td>
+<td>
+<tt>PropertyTag</tt> 型によって指定されるプロパティのためのプロパティ・マップ
+を返す。オブジェクト <tt>p</tt> は型を伝えるために使われるだけである。
+<br>
+返却値型: <TT>g</TT> が変更可能ならば <TT>boost::property_map&lt;G,&nbsp;PropertyTag&gt;::type</TT> で、そうでなければ <TT>boost::property_map&lt;G,&nbsp;PropertyTag&gt;::const_type</TT>。
+</td>
+</TR>
+
+<tr>
+<td> <TT>get(p,&nbsp;g,&nbsp;x)</TT> </td>
+<td>
+オブジェクト <tt>x</tt> (頂点または辺) に関連した、<tt>PropertyTag</tt> 型
+によって指定されるプロパティ型を返す。オブジェクト <tt>p</tt> は型を
+伝えるために使われるだけである。
+この関数は次と同義である:
+<br>
+<tt>get(get(p, g), x)</tt><br>
+返却値型: <tt>boost::property_traits&lt;Map&gt;::value_type</tt>
+</td>
+</TR>
+
+<tr>
+<td> <TT>put(p,&nbsp;g,&nbsp;x,&nbsp;v)</TT> </td>
+<td>
+オブジェクト <tt>x</tt> (頂点または辺) に関連した、<tt>PropertyTag</tt> 型
+によって指定されるプロパティを値 <tt>v</tt> に設定する。オブジェクト <tt>p</tt>
+は型を伝えるために使われるだけである。
+この関数は次と同義である:
+<br>
+<tt>
+pmap = get(p, g);<br>
+put(pmap, x, v)
+</tt><br>
+返却値型: <TT>void</TT>
+</td>
+</TR>
+
+
+</TABLE>
+
+<H3>Complexity</H3>
+
+<tt>get()</tt> プロパティ・マップ関数は定数時間のはずである。
+
+
+<H3>Models</H3>
+
+
+<UL>
+<LI><tt>adjacency_list</tt> ここに <tt>VertexProperty=property&lt;vertex_distance_t,int,property&lt;vertex_in_degree_t,int&gt; &gt;</tt> かつ <tt>PropertyTag=vertex_distance_t</tt>。</li>
+<li><tt>adjacency_list</tt> ここに <tt>VertexPropertyTag=property&lt;vertex_distance_t,int,property&lt;vertex_in_degree_t,int&gt; &gt;</TT> かつ <tt>PropertyTag=vertex_in_degree_t</tt>。</li>
+</UL>
+
+
+<H3>Concept Checking Class</H3>
+
+<PRE>
+  template &lt;class Graph, class X, class PropertyTag&gt;
+  struct PropertyGraphConcept
+  {
+    typedef typename property_map&lt;G, PropertyTag&gt;::type Map;
+    typedef typename property_map&lt;G, PropertyTag&gt;::const_type const_Map;
+    void constraints() {
+      function_requires&lt; GraphConcept&lt;G&gt; &gt;();
+      function_requires&lt; ReadWritePropertyMapConcept&lt;Map, X&gt; &gt;();
+      function_requires&lt; ReadablePropertyMapConcept&lt;const_Map, X&gt; &gt;();
+
+      Map pmap = get(PropertyTag(), g);
+      pval = get(PropertyTag(), g, x);
+      put(PropertyTag(), g, x, pval);
+      ignore_unused_variable_warning(pmap);
+    }
+    void const_constraints(const G&amp; g) {
+      const_Map pmap = get(PropertyTag(), g);
+      pval = get(PropertyTag(), g, x);
+      ignore_unused_variable_warning(pmap);
+    }
+    G g;
+    X x;
+    typename property_traits&lt;Map&gt;::value_type pval;
+  };
+</PRE>
+
+
+<h3>See Also</h3>
+
+<a href="./property_map.html"><tt>property_map</tt></a>
+
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000-2001</TD><TD>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>, Indiana University (<A HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)
+</TD></TR></TABLE>
+
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:takashi-it@po6.nsk.ne.jp">Takashi Itou</a><br> 
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+
+<p>このドキュメントの対象: Boost Version 1.30.0<br>
+<a href="http://www.boost.org/libs/graph/doc/PropertyGraph.html">最新版ドキュメント (英語)</a></p>
+</BODY>
+</HTML> 

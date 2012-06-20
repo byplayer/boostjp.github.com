@@ -1,0 +1,113 @@
+<HTML>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<!--
+  -- Copyright (c) Jeremy Siek, Lie-Quan Lee, and Andrew Lumsdaine 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  We make no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<Title>BasicMatrix</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+<H1><A NAME="concept:BasicMatrix"></A>
+BasicMatrix
+</H1>
+
+BasicMatrix のコンセプトは2次元のテーブルの要素にアクセスするための 
+最小限のインタフェースを提供する。
+
+
+<H3>Refinement of</H3>
+
+なし。
+
+<h3>Notation</h3>
+
+<Table>
+<TR>
+<TD>{<tt>M,I,V</tt>}</TD>
+<TD>行列, インデックス, 値の型 で、BasicMatrix のコンセプトをモデル化する。</TD>
+</TR>
+
+<TR>
+<TD><tt>A</tt></TD>
+<TD>型 <tt>M</tt> のオブジェクト。</TD>
+</TR>
+
+<TR>
+<TD><tt>i, j</tt></TD>
+<TD>型 <tt>I</tt> のオブジェクト。</TD>
+</TR>
+
+</table>
+
+<H3>Associated Types</H3>
+
+なし。
+
+<h3>Valid Expressions</h3>
+
+<Table border>
+
+<tr>
+<td><a name="sec:elt-access"><TT>A[i][j]</TT></a></TD>
+<TD>インデックス <tt>(i,j)</tt> にある要素オブジェクトへの参照を返す。<br>
+返値の型: mutable <tt>A</tt> に対しては、<TT>V&amp;</TT>。 
+constant <tt>A</tt> に対しては、<TT>const V&amp;</TT>。
+</TD>
+</TR>
+
+</table>
+
+<H3>Complexity guarantees</H3>
+
+要素へのアクセスは定数時間で終了する。
+
+<H3>Concept Checking Class</H3>
+
+<pre>
+  template &lt;class M, class I, class V&gt;
+  struct BasicMatrixConcept
+  {
+    void constraints() {
+      V&amp; elt = A[i][j];
+      const_constraints(A);
+      ignore_unused_variable_warning(elt);      
+    }
+    void const_constraints(const M&amp; A) {
+      const V&amp; elt = A[i][j];
+      ignore_unused_variable_warning(elt);      
+    }
+    M A;
+    I i, j;
+  };
+</pre>
+
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000-2001</TD><TD>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>,
+Indiana University (<A
+HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)
+</TD></TR></TABLE>
+
+<P>Japanese Translation Copyright (C) 2003&nbsp;KANAHORI&nbsp;Toshihiro &lt;<A href="mailto:kanahori@k.tsukuba-tech.ac.jp">kanahori@k.tsukuba-tech.ac.jp</A>&gt;
+<BR>
+<SMALL>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。
+</SMALL>
+</P>
+</BODY>
+</HTML> 

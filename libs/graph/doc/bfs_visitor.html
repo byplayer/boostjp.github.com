@@ -1,0 +1,127 @@
+<HTML>
+<!--
+  -- Copyright (c) Jeremy Siek, Lie-Quan Lee, and Andrew Lumsdaine 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  We make no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<Title>Boost Graph Library: bfs_visitor</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+<H1>
+<pre>
+bfs_visitor&lt;EventVisitorList&gt;
+</pre>
+</H1>
+
+このクラスは、 <a href="./EventVisitor.html">EventVisitor</a> のリスト (<tt>std::pair</tt> を使って作られる) を <a href="./BFSVisitor.html">BFSVisitor</a> に変換するアダプタである。
+
+
+<h3>Example</h3>
+
+以下は <a href="../example/bfs.cpp"><tt>examples/bfs.cpp</tt></a> からの抜粋である。ここでは 3 つのイベントビジタを結合して BFS ビジタを作っている。関数 <tt>boost::record_distances</tt> 、 <tt>boost::record_predecessors</tt> 、 <tt>copy_graph</tt> は全て、イベントビジタを作る関数だ。
+
+<pre>
+  // Construct graph G and obtain the source vertex s ...
+
+  boost::breadth_first_search(G, s, 
+   boost::make_bfs_visitor(
+    std::make_pair(boost::record_distances(d, boost::on_tree_edge()),
+    std::make_pair(boost::record_predecessors(p.begin(), 
+                                              boost::on_tree_edge()),
+                   copy_graph(G_copy, boost::on_examine_edge())))) );
+</pre>
+
+
+<h3>Model of</h3>
+
+<a href="./BFSVisitor.html">BFSVisitor</a>
+
+<H3>Template Parameters</H3>
+
+<P>
+<TABLE border>
+<TR>
+<th>パラメータ</th><th>説明</th><th>デフォルト</th>
+</tr>
+
+<TR><TD><TT>EventVisitorList</TT></TD>
+<TD>
+<tt>std::pair</tt> で作られた <a href="./EventVisitor.html">EventVisitor</a> のリスト。
+</TD>
+<TD><a href="./null_visitor.html"><tt>null_visitor</tt></a></TD>
+</TR>
+
+</table>
+
+<H3>Where Defined</H3>
+
+<P>
+<a href="../../../boost/graph/breadth_first_search.hpp">
+<TT>boost/graph/breadth_first_search.hpp</TT></a>
+
+<h3>Member Functions</h3>
+
+このクラスは <a href="./BFSVisitor.html">BFSVisitor</a> に要求される全てのメンバ関数を実装している。それぞれの関数で、適切なイベントが EventVisitorList の中の <a
+href="./EventVisitor.html">EventVisitor</a> にディスパッチされる。
+
+<h3>Non-Member Functions</h3>
+
+<table border>
+<tr>
+<th>関数</th><th>説明</th>
+</tr>
+
+<tr><td><tt>
+template &lt;class EventVisitorList&gt;<br>
+bfs_visitor&lt;EventVisitorList&gt;<br>
+make_bfs_visitor(EventVisitorList ev_list);
+</tt></td><td>
+イベントビジタのリストを BFS ビジタに適合させたものを返す。
+</td></tr>
+
+</table>
+
+<h3>See Also</h3>
+
+<a href="./visitor_concepts.html">Visitor concepts</a>
+<p>
+イベントビジタ: <a
+ href="./predecessor_recorder.html"><tt>predecessor_recorder</tt></a> 、
+<a href="./distance_recorder.html"><tt>distance_recorder</tt></a> 、
+<a href="./time_stamper.html"><tt>time_stamper</tt></a> 、
+<a href="./property_writer.html"><tt>property_writer</tt></a> 。
+
+
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000-2001</TD><TD>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>,
+Indiana University (<A
+HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)<br>
+<A HREF="../../../people/liequan_lee.htm">Lie-Quan Lee</A>, Indiana University (<A HREF="mailto:llee@cs.indiana.edu">llee@cs.indiana.edu</A>)<br>
+<A HREF=http://www.osl.iu.edu/~lums>Andrew Lumsdaine</A>,
+Indiana University (<A
+HREF="mailto:lums@osl.iu.edu">lums@osl.iu.edu</A>)
+</TD></TR></TABLE>
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:gimite@mx12.freecom.ne.jp">Hiroshi Ichikawa</a><br>
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+<p>このドキュメントの対象: Boost Version 1.30.0<br>
+<a href="http://www.boost.org/libs/graph/doc/bfs_visitor.html">最新版ドキュメント (英語)</a></p>
+
+</BODY>
+</HTML> 

@@ -1,0 +1,312 @@
+<HTML>
+<!--
+  -- Copyright (c) Jeremy Siek 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  Silicon Graphics makes no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<Title>MutableGraph</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+
+<H2><A NAME="sec:MutableGraph"></A>
+MutableGraph
+</H2>
+
+MutableGraph は辺と頂点の追加または削除によって変化させる事ができる。
+
+<H3>Refinement of</H3>
+
+<a href="./Graph.html">Graph</a>
+
+<h3>Notation</h3>
+
+<Table>
+<TR>
+<TD><tt>G</tt></TD>
+<TD>Graph のモデルの型。</TD>
+</TR>
+
+<TR>
+<TD><tt>g</tt></TD>
+<TD>型が <tt>G</tt> のオブジェクト。</TD>
+</TR>
+
+<TR>
+<TD><tt>e</tt></TD>
+<TD>型が <tt>boost::graph_traits&lt;G&gt;::edge_descriptor</tt> のオブジェクト。</TD>
+</TR>
+
+<TR>
+<TD><tt>u,v</tt></TD>
+<TD>型が <tt>boost::graph_traits&lt;G&gt;::vertex_descriptor</tt> のオブジェクト。</TD>
+</TR>
+
+<TR>
+<TD><tt>iter</tt></TD>
+<TD>型が <tt>boost::graph_traits&lt;G&gt;::out_edge_iterator</tt> のオブジェクト。</TD>
+</TR>
+
+<TR>
+<TD><tt>p</tt></TD>
+<TD>
+<a
+href="http://www.sgi.com/tech/stl/Predicate.html">Predicate</a>
+をモデルとし、引数型が <tt>edge_descriptor</tt> 型に一致する型のオブジェクト。
+</TR>
+
+</table>
+
+<H3>Valid Expressions</H3>
+
+<table border>
+
+<tr>
+<TD><a name="sec:add-edge"><TT>add_edge(u,&nbsp;v,&nbsp;g)</TT></a></TD>
+<TD>
+辺 <i>(u,v)</i> をグラフ中に挿入し、新しい辺を指す辺記述子を返す。
+もしグラフが多重辺を禁じていて、辺 <i>(u,v)</i> が既にグラフ中にあるなら、
+返された <tt>bool</tt> フラグは <tt>false</tt> であり、返された辺記述子は
+既に存在する辺を指す。無向グラフにとって辺 <i>(u,v)</i> は辺 <i>(v,u)</i> に
+等しいので、<tt>add_edge()</tt> 関数を呼んだ後、これは辺 <i>(u,v)</i> が
+<i>u</i> の出辺に現れ、辺 <i>(u,v)</i> (同様に辺 <i>(v,u)</i>) が <i>v</i>の
+出辺に現れるであろう事を暗示する事に注意せよ。言い換えると、<i>v</i>は
+<i>u</i> に隣接しており、<i>u</i> は <i>v</i> に隣接しているであろう。
+<br>
+返却値型: <TT>std::pair&lt;edge_descriptor, bool&gt;</TT>
+</TD>
+</tr>
+
+<tr>
+<TD><a name="sec:remove_edge"><TT>remove_edge(u,&nbsp;v,&nbsp;g)</TT></a></TD>
+<TD>
+辺 <i>(u,v)</i> をグラフから削除する。もしグラフが多重辺を許可しているなら、
+これは <i>(u,v)</i> のすべての存在を削除する。<br>
+返却値型: <TT>void</TT><br>
+事前条件: <i>u</i> と <i>v</i> はグラフ中の頂点である。<br>
+事後条件: <i>(u,v)</i> はもはや <TT>g</TT> の辺集合中にない。
+<br>
+</TD>
+</TR>
+
+
+<tr>
+<TD><TT>remove_edge(e,&nbsp;g)</TT></TD>
+<TD>
+辺 <i>e</i> をグラフから削除する。<br>
+返却値型: <TT>void</TT><br>
+事前条件: <i>e</i> はグラフ中の辺である。<br>
+事後条件: <i>e</i> はもはや <TT>g</TT> の辺集合中にない。
+</TD>
+</TR>
+
+<tr>
+<TD><TT>remove_edge(iter,&nbsp;g)</TT></TD>
+<TD
+<tt>iter</tt> によって指される辺をグラフから削除する。
+この式はグラフが <a
+href="./IncidenceGraph.html">IncidenceGraph</a>
+のモデルでもある場合にのみ必要である。
+<br>
+返却値型: <TT>void</TT><br>
+事前条件: <tt>*iter</tt> はグラフ中の辺である。<br>
+事後条件: <tt>*iter</tt> はもはや <TT>g</TT> の辺集合中にない。
+</TD>
+</TR>
+
+<tr>
+<TD><TT>remove_edge_if(p,&nbsp;g)</TT></TD>
+<TD>
+述語 <tt>p</tt> が true を返す全ての辺をグラフ <tt>g</tt> から削除する。
+<br>
+返却値型: <TT>void</TT>
+</TD>
+</TR>
+
+<tr>
+<TD><TT>remove_out_edge_if(u,&nbsp;p,&nbsp;g)</TT></TD>
+<TD>
+述語 <tt>p</tt> が true を返す全ての頂点 <tt>u</tt> の出辺を削除する。
+この式はグラフが <a
+href="./IncidenceGraph.html">IncidenceGraph</a>
+のモデルでもある場合にのみ必要である。
+<br>
+返却値型: <TT>void</TT>
+</TD>
+</TR>
+
+<tr>
+<TD><TT>remove_in_edge_if(u,&nbsp;p,&nbsp;g)</TT></TD>
+<TD>
+述語 <tt>p</tt> が true を返す全ての頂点 <tt>u</tt> の入辺を削除する。
+この式はグラフが <a
+href="./BidirectionalGraph.html">BidirectionalGraph</a>
+のモデルでもある場合にのみ必要である。
+<br>
+返却値型: <TT>void</TT>
+</TD>
+</TR>
+
+
+<tr>
+<TD><a name="sec:add-vertex"><TT>add_vertex(g)</TT></a></TD>
+<TD>
+新しい頂点をグラフに追加する。新しい頂点のための <TT>vertex_descriptor</TT>
+が返される。
+<br>
+返却値型: <TT>vertex_descriptor</TT>
+</TD>
+</TR>
+
+
+<tr>
+<TD><TT>clear_vertex(u,&nbsp;g)</TT></TD>
+<TD>
+頂点 <tt>u</tt> への、そして頂点 <tt>u</tt> からの全ての辺をグラフから削除する。<br>
+返却値型: <TT>void</TT><br>
+事前条件: <tt>u</tt> は <TT>g</TT> の有効な頂点記述子である。<br>
+事後条件: <tt>u</tt> は <TT>g</tt> 中のどの辺の始点としても終点としても
+現れない。
+</TD>
+</TR>
+
+<tr>
+<TD><a name="sec:remove-vertex"><TT>remove_vertex(u,&nbsp;g)</TT></a></TD>
+<TD>
+<i>u</i> をグラフの頂点集合から削除する。グラフ中に終点が <i>u</i> の
+辺が残っていると未定義のふるまいとなるかもしれない事に注意せよ。一般的に
+<TT>clear_vertex()</TT> 関数を最初に呼ぶべきである。<br>
+返却値型: <TT>void</TT><br>
+事前条件: <TT>u</TT> は <TT>g</TT> の有効な頂点記述子である。<br>
+事後条件: <TT>num_vertices(g)</TT> は一つ減り、<TT>u</TT> はもはやグラフの
+頂点集合中に現れず、そしてもはや有効な頂点記述子ではない。
+</TD>
+</TR>
+</TABLE>
+
+<P>
+</LI>
+</UL>
+
+<P>
+
+<H3>Complexity Guarantees</H3>
+
+<P>
+
+<UL>
+<LI>
+辺の挿入は償却定数時間か、または多重辺 (いくつかのグラフ・タイプの“特徴”で
+ある) の追加を防ぐ事も調べているなら <i>O(log(E/V))</i> になり得る。
+</LI>
+<LI>辺の除去は <i>O(E)</i> である事が保証される。</LI>
+<LI>頂点の挿入は償却定数時間である事が保証される。</LI>
+<LI>頂点の消去は <i>O(E + V)</i> である。</LI>
+<LI>頂点の除去は <i>O(E + V)</i> である。</LI>
+</UL>
+
+<H3>Models</H3>
+
+<UL>
+<LI><TT>adjacency_list</TT>
+</LI>
+</UL>
+
+
+<H3>Concept Checking Class</H3>
+
+<PRE>
+  template &lt;class G&gt;
+  struct MutableGraphConcept
+  {
+    typedef typename boost::graph_traits&lt;G&gt;::edge_descriptor edge_descriptor;
+    void constraints() {
+      v = add_vertex(g);
+      clear_vertex(v, g);
+      remove_vertex(v, g);
+      e_b = add_edge(u, v, g);
+      remove_edge(u, v, g);
+      remove_edge(e, g);
+    }
+    G g;
+    edge_descriptor e;
+    std::pair&lt;edge_descriptor, bool&gt; e_b;
+    typename boost::graph_traits&lt;G&gt;::vertex_descriptor u, v;
+    typename boost::graph_traits&lt;G&gt;::out_edge_iterator iter;
+  };
+
+  template &lt;class edge_descriptor&gt;
+  struct dummy_edge_predicate {
+    bool operator()(const edge_descriptor& e) const {
+      return false;
+    }
+  };
+
+  template &lt;class G&gt;
+  struct MutableIncidenceGraphConcept
+  {
+    void constraints() {
+      function_requires&lt; MutableGraph&lt;G&gt; &gt;();
+      remove_edge(iter, g);
+      remove_out_edge_if(u, p, g);
+    }
+    G g;
+    typedef typename boost::graph_traits&lt;G&gt;::edge_descriptor edge_descriptor;
+    dummy_edge_predicate&lt;edge_descriptor&gt; p;
+    typename boost::graph_traits&lt;G&gt;::vertex_descriptor u;
+    typename boost::graph_traits&lt;G&gt;::out_edge_iterator iter;
+  };
+
+  template &lt;class G&gt;
+  struct MutableBidirectionalGraphConcept
+  {
+    void constraints() {
+      function_requires&lt; MutableIncidenceGraph&lt;G&gt; &gt;();
+      remove_in_edge_if(u, p, g);
+    }
+    G g;
+    typedef typename boost::graph_traits&lt;G&gt;::edge_descriptor edge_descriptor;
+    dummy_edge_predicate&lt;edge_descriptor&gt; p;
+    typename boost::graph_traits&lt;G&gt;::vertex_descriptor u;
+  };
+
+  template &lt;class G&gt;
+  struct MutableEdgeListGraphConcept
+  {
+    void constraints() {
+      function_requires&lt; MutableGraph&lt;G&gt; &gt;();
+      remove_edge_if(p, g);
+    }
+    G g;
+    typedef typename boost::graph_traits&lt;G&gt;::edge_descriptor edge_descriptor;
+    dummy_edge_predicate&lt;edge_descriptor&gt; p;
+  };
+</PRE>
+
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000-2001</TD><TD>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>, Indiana University (<A HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)
+</TD></TR></TABLE>
+
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:takashi-it@po6.nsk.ne.jp">Takashi Itou</a><br> 
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+
+<p>このドキュメントの対象: Boost Version 1.30.0<br>
+<a href="http://www.boost.org/libs/graph/doc/MutableGraph.html">最新版ドキュメント (英語)</a></p>
+</BODY>
+</HTML> 

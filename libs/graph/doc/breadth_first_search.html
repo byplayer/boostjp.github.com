@@ -1,0 +1,303 @@
+<HTML>
+<!--
+  -- Copyright (c) Jeremy Siek 2000, 2001
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  Silicon Graphics makes no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<Title>Boost Graph Library: Breadth-First Search</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+<H1><A NAME="sec:bfs">
+<TT>breadth_first_search</TT>
+</H1>
+
+<P>
+<PRE>
+<i>// 名前付きパラメータバージョン</i>
+template &lt;class <a href="./VertexListGraph.html">VertexListGraph</a>, class P, class T, class R&gt;
+void breadth_first_search(VertexListGraph& G, 
+  typename graph_traits&lt;VertexListGraph&gt;::vertex_descriptor s, 
+  const bgl_named_params&lt;P, T, R&gt;&amp; params);
+
+<i>// 名前無しパラメータバージョン</i>
+template &lt;class VertexListGraph, class Buffer, class BFSVisitor, 
+	  class ColorMap&gt;
+void breadth_first_search(const VertexListGraph&amp; g, 
+   typename graph_traits&lt;VertexListGraph&gt;::vertex_descriptor s, 
+   Buffer&amp; Q, BFSVisitor vis, ColorMap color);
+</PRE>
+
+
+<p>
+<tt>breadth_first_search()</tt> 関数は有向グラフまたは無向グラフの幅優先巡回
+[<a href="./bibliography.html#moore59">49</a>] を行う。幅優先巡回は、
+始点から遠方に離れた頂点を訪れる前に近い頂点を訪れる。
+この文脈中で“距離”とは始点からの最短経路中の辺の数として定義される。
+<tt>breadth_first_search()</tt> 関数は始点から全ての到達可能な頂点への
+最短経路を計算するのに使用でき、結果として最短経路の距離が得られる。
+BFS に関連した更なる定義は章<a
+href="./graph_theory_review.html#sec:bfs-algorithm">
+Breadth-First Search</a> を見よ。
+</p>
+
+<p>
+BFS は巡回を実装するのに二つのデータ構造を使っている: 各頂点のカラー・マーカー
+とキューである。白色の頂点は未発見で、一方灰色の頂点は発見されたけれども
+未発見の隣接頂点を持つ。黒色の頂点は発見されており、他の黒色もしくは灰色の
+頂点にのみ隣接している。アルゴリズムは頂点 <i>u</i> をキューから取り除き、
+各出辺 <i>(u,v)</i> を調べながら進められる。もし隣接頂点 <i>v</i> がまだ
+未発見ならば、灰色に色づけしてキューに置く。すべての出辺を調べた後、
+頂点 <i>u</i> を黒色に色づけして手順を繰り返す。BFS アルゴリズムの疑似コード
+を下に示す。
+</p>
+
+<table>
+<tr>
+<td valign="top">
+<pre>
+BFS(<i>G</i>, <i>s</i>)
+  <b>for</b> each vertex <i>u in V[G]</i>
+    <i>color[u] :=</i> WHITE 
+    <i>d[u] := infinity</i> 
+    <i>p[u] := u</i> 
+  <b>end for</b>
+  <i>color[s] :=</i> GRAY 
+  <i>d[s] := 0</i> 
+  ENQUEUE(<i>Q</i>, <i>s</i>)
+  <b>while</b> (<i>Q != &Oslash;</i>) 
+    <i>u :=</i> DEQUEUE(Q)
+    <b>for</b> each vertex <i>v in Adj[u]</i>
+      <b>if</b> (<i>color[v] =</i> WHITE)
+        <i>color[v] :=</i> GRAY 
+        <i>d[v] := d[u] + 1</i>  
+        <i>p[v] := u</i>  
+        ENQUEUE(<i>Q</i>, <i>v</i>)
+      <b>else</b>
+        <b>if</b> (<i>color[v] =</i> GRAY) 
+          ...
+        <b>else</b> 
+          ...
+    <b>end for</b>
+    <i>color[u] :=</i> BLACK
+  <b>end while</b>
+  return (<i>d</i>, <i>p</i>)
+</pre>
+</td>
+<td valign="top">
+<pre>
+
+頂点 <i>u</i> の初期化
+
+
+
+
+
+
+頂点 <i>s</i> の発見
+
+頂点 <i>u</i> の調査
+辺 <i>(u,v)</i> の調査
+<i>(u,v)</i> は 木の辺 
+
+
+
+頂点 <i>v</i> の発見
+<i>(u,v)</i> は 木でない辺
+
+<i>(u,v)</i> は灰色の終点を持つ
+
+<i>(u,v)</i> は黒色の終点を持つ
+
+頂点 <i>u</i> の終了
+</pre>
+</tr>
+</table>
+
+<tt>breadth_first_search()</tt> 関数は一定のイベント・ポイントと呼ばれる、
+ユーザ定義のアクションで拡張する事ができる。アクションはビジタ・オブジェクトの
+形で提供されなければならない。すなわち、型が <a
+href="./BFSVisitor.html">BFS Visitor</a> の要求を満たしているオブジェクトであ
+る。上の擬似コード内で、イベント・ポイントは右側のラベルである。更に各
+イベント・ポイントの記述を以下に示した。デフォルトでは
+<tt>breadth_first_search()</tt> 関数はどんなアクションも実行しない。距離や
+先行点の記録さえも。しかしながらこれらは <a
+href="./distance_recorder.html"><tt>distance_recorder</tt></a> と <a
+href="./predecessor_recorder.html"><tt>predecessor_recorder</tt></a>
+のイベント・ビジタを用いて容易に追加できる。
+
+<H3>Where Defined</H3>
+
+<P>
+<a href="../../../boost/graph/breadth_first_search.hpp"><TT>boost/graph/breadth_first_search.hpp</TT></a>
+
+<P>
+
+<h3>Parameters</h3>
+
+IN: <tt>VertexListGraph&amp; g</tt>
+<blockquote>
+有向グラフまたは無向グラフ。グラフの型は <a
+href="./VertexListGraph.html">Vertex List Graph</a> のモデルでなければならない。</blockquote>
+
+IN: <tt>vertex_descriptor s</tt>
+<blockquote>
+探索が開始される始点。
+</blockquote>
+
+
+<h3>Named Parameters</h3>
+
+IN: <tt>visitor(BFSVisitor vis)</tt>
+<blockquote>
+アルゴリズムの内側で <a
+href="BFSVisitor.html">BFS Visitor</a> コンセプトで指定された
+イベント・ポイントで呼び出されるビジタ・オブジェクト。
+ビジタ・オブジェクトは値渡しされる <a
+ href="#1">[1]</a>。<br>
+<b>デフォルト:</b> <tt>bfs_visitor&lt;null_visitor&gt;</tt>
+</blockquote>
+
+UTIL/OUT: <tt>color_map(ColorMap color)</tt>
+<blockquote>
+これはグラフを通る進行過程を保持するためにアルゴリズムによって使われる。
+アルゴリズムは開始時に全ての頂点の色を白色に初期化するため、ユーザは
+<tt>breadth_first_search()</tt> を呼ぶ前にカラー・マップを初期化する必要はない。もし複合的な幅優先探索をグラフ上で行う必要があるなら (例えばいくつかの
+切断された成分があるなら) <a
+ href="./breadth_first_visit.html"><tt>breadth_first_visit()</tt></a> 関数を
+使って独自の初期化を行いなさい。
+
+  <p><tt>ColorMap</tt> の型は <a
+ href="../../property_map/ReadWritePropertyMap.html">Read/Write Property Map</a> のモデルでなければならなく、そのキー型はグラフの頂点記述子型でなければならな
+く、カラー・マップの値型は <a
+href="./ColorValue.html">ColorValue</a> をモデルとしなければならない。<br>
+<b>デフォルト:</b> 
+サイズ <tt>num_vertices(g)</tt> の <tt>default_color_type</tt> の
+<tt>std::vector</tt> から作られた <a
+ href="../../property_map/iterator_property_map.html">
+</tt>iterator_property_map</tt></a>で、添え字マップには
+ <tt>i_map</tt> を用いる。 
+</blockquote>
+
+IN: <tt>vertex_index_map(VertexIndexMap i_map)</tt>
+<blockquote>
+これは各頂点を <tt>[0, num_vertices(g))</tt> の範囲において整数にマップする。
+このパラメータはデフォルトのカラー・プロパティ・マップが使われた時にのみ必要で
+ある。
+<tt>VertexIndexMap</tt> の型は <a
+ href="../../property_map/ReadablePropertyMap.html">Readable Property
+ Map</a> のモデルでなければならない。マップの値型は汎整数型でなければならない。グラフの頂点記述子型はマップのキー型として使用できる必要がある。<br>
+ <b>デフォルト:</b> <tt>get(vertex_index, g)</tt>
+</blockquote>
+
+UTIL: <tt>buffer(Buffer&amp; Q)</tt>
+<blockquote>
+頂点が発見される順序を決定するために使用されるキュー。もしFIFO キューが使われ
+ると、
+巡回は通常の BFS 順序付けに従う。他の型のキューも使用できるが、巡回順序は異な
+る。例えば Dijkstra のアルゴリズムは優先度付きキューを用いて実装
+する事ができる。<tt>Buffer</tt> の型は <a href="./Buffer.html">Buffer</a>
+のモデルでなければならない。buffer の <tt>value_type</tt> はグラフの
+<tt>vertex_descriptor</tt> 型でなければならない。
+<br>
+<b>デフォルト:</b> <tt>boost::queue</tt>
+</blockquote>  
+
+
+<H3><A NAME="SECTION001330300000000000000">
+Complexity</A>
+</H3>
+
+<P>
+時間複雑性は <i>O(E + V)</i> である。 
+
+<P>
+
+<h3>Visitor Event Points</h3>
+
+<ul>
+<li><b><tt>vis.initialize_vertex(v, g)</tt></b> は探索の開始前に各頂点で呼び出される。
+
+<li><b><tt>vis.examine_vertex(u, g)</tt></b> は各頂点においてそれがキューから削除される時に呼び出される。
+
+<li><b><tt>vis.examine_edge(e, g)</tt></b> は各頂点のあらゆる出辺において、頂点が
+キューから削除された後で直ちに呼び出される。
+
+<li><b><tt>vis.tree_edge(e, g)</tt></b> は <tt>examine_edge()</tt> に加えて
+辺が木の辺の場合に呼び出される。辺 <tt>e</tt> の終点はこの時に
+発見される。
+
+<li><b><tt>vis.discover_vertex(u, g)</tt></b> はアルゴリズムが初めて
+頂点 <i>u</i> に出会った時に呼び出される。始点に近い全ての頂点が
+発見されており、始点から遠方に離れた頂点はまだ発見されていない。
+
+<li><b><tt>vis.non_tree_edge(e, g)</tt></b> は <tt>examine_edge()</tt> に加え
+て辺が tree edge でない場合に呼び出される。
+
+<li><b><tt>vis.gray_target(e, g)</tt></b> は <tt>non_tree_edge()</tt> に加えて
+調査時点で終点が灰色に色づけされている場合に呼び出される。灰色は頂点が現在
+キュー中にある印である。
+
+<li><b><tt>vis.black_target(e, g)</tt></b> は <tt>non_tree_edge()</tt> に加え
+て調査時点で終点が黒色に色づけされている場合に呼び出される。黒色は頂点がもはや
+キュー中にはない印である。
+
+<li><b><tt>vis.finish_vertex(u, g)</tt></b> は <i>u</i> の全ての出辺が
+調べられ、全ての隣接頂点が発見された後で呼び出される。
+
+</ul>
+
+<H3><A NAME="SECTION001330400000000000000">
+Example</A>
+</H3>
+
+<P>
+<a
+href="../example/bfs-example.cpp"><TT>example/bfs-example.cpp</TT></a>
+中にある例は、<A HREF="./graph_theory_review.html#fig:bfs-example">Figure
+5</A> のグラフにおいて BGL 幅優先探索アルゴリズムを用いて実演している。
+<a href="../example/bfs-example2.cpp"><TT>example/bfs-example2.cpp</TT></a>
+のファイルは同じ例を含むが、使われている <tt>adacency_list</tt> クラスは
+<tt>VertexList</tt>を持っており、<tt>EdgeList</tt> が <tt>listS</tt> に
+置かれている。
+</P>
+
+<h3>See Also</h3>
+
+<a href="./bfs_visitor.html"><tt>bfs_visitor</tt></a> と
+ <a href="./depth_first_search.html"><tt>depth_first_search()</tt></a>
+
+<h3>Notes</h3>
+
+<p><a name="1">[1]</a> 
+ビジタのパラメータは値渡しされるので、もしビジタが状態を持っているなら、
+アルゴリズムの間のいかなる状態の変更も、送ったビジタ・オブジェクトには行われず
+ビジタ・オブジェクトのコピーに対して行われる。それゆえポインタまたは
+リファレンスによってこの状態をビジタに保持させる事を望むかもしれない。
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000-2001</TD><TD>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>, Indiana University (<A HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)
+</TD></TR></TABLE>
+
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:takashi-it@po6.nsk.ne.jp">Takashi Itou</a><br> 
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+
+<p>このドキュメントの対象: Boost Version 1.30.0<br>
+<a href="http://www.boost.org/libs/graph/doc/breadth_first_search.html">最新版ドキュメント (英語)</a></p>
+</BODY>
+</HTML> 

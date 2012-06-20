@@ -1,0 +1,196 @@
+<HTML>
+<!--
+  -- Copyright (c) Jeremy Siek, Lie-Quan Lee, and Andrew Lumsdaine 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  We make no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<Title>Boost Graph Library: Dijkstra Visitor</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+<H1>Dijkstra Visitor Concept</H1>
+
+このコンセプトは <a href="./dijkstra_shortest_paths.html"><tt>dijkstra_shortest_paths()</tt></a> 用のビジタのインタフェースと、関連するアルゴリズムを定義する。ユーザはこのインタフェースに一致するクラスを作って、そのクラスのオブジェクトを <tt>dijkstra_shortest_paths()</tt> に渡す事で、探索中に実行される操作を追加できる。
+
+<h3>Refinement of</h3>
+
+<a href="../../utility/CopyConstructible.html">Copy Constructible</a>
+(ビジタのコピーは軽い操作である方がいい).
+
+
+<h3>Notation</h3>
+
+<Table>
+<TR>
+<TD><tt>V</tt></TD>
+<TD>Dijkstra Visitor のモデルの型。</TD>
+</TR>
+
+<TR>
+<TD><tt>vis</tt></TD>
+<TD><tt>V</tt> 型のオブジェクト。</TD>
+</TR>
+
+<TR>
+<TD><tt>G</tt></TD>
+<TD>Graph のモデルの型。</TD>
+</TR>
+
+<TR>
+<TD><tt>g</tt></TD>
+<TD><tt>G</tt> 型のオブジェクト。</TD>
+</TR>
+
+<TR>
+<TD><tt>e</tt></TD>
+<TD><tt>boost::graph_traits&lt;G&gt;::edge_descriptor</tt> 型のオブジェクト。</TD>
+</TR>
+
+<TR>
+<TD><tt>s,u,v</tt></TD>
+<TD><tt>boost::graph_traits&lt;G&gt;::vertex_descriptor</tt> 型のオブジェクト。</TD>
+</TR>
+
+<TR>
+<TD><tt>DistanceMap</tt></TD>
+<TD><a href="../../property_map/ReadWritePropertyMap.html">Read/Write Property Map</a> のモデルの型。</TD>
+</TR>
+
+<TR>
+<TD><tt>d</tt></TD>
+<TD><tt>DistanceMap</tt> 型のオブジェクト。</TD>
+</TR>
+
+<TR>
+<TD><tt>WeightMap</tt></TD>
+<TD><a href="../../property_map/ReadWritePropertyMap.html">Readable Property Map</a> のモデルの型。</TD>
+</TR>
+
+<TR>
+<TD><tt>w</tt></TD>
+<TD><tt>DistanceMap</tt> 型のオブジェクト。</TD>
+</TR>
+
+</table>
+
+<h3>Associated Types</h3>
+
+無し
+<p>
+
+<h3>Valid Expressions</h3>
+
+<table border>
+<tr>
+<th>名前</th><th>式</th><th>戻り値</th><th>説明</th>
+</tr>
+
+<tr>
+<td>Initialize Vertex</td>
+<td><tt>vis.initialize_vertex(u, g)</tt></td>
+<td><tt>void</tt></td>
+<td>
+初期化される時に、グラフの各頂点に対して実行される。
+</td>
+</tr>
+
+<tr>
+<td>Examine Vertex</td>
+<td><tt>vis.examine_vertex(u, g)</tt></td>
+<td><tt>void</tt></td>
+<td>
+各頂点がキューからポップされる時に、その頂点に対して実行される。これは頂点 <tt>u</tt> の各出力辺に対して <tt>examine_edge()</tt> が実行される直前に起こる。
+</td>
+</tr>
+
+<tr>
+<td>Examine Edge</td>
+<td><tt>vis.examine_edge(e, g)</tt></td>
+<td><tt>void</tt></td>
+<td>
+各頂点が発見された後に、その頂点の各出力辺に対して実行される。
+</td>
+</tr>
+
+<tr>
+<td>Discover Vertex</td>
+<td><tt>vis.discover_vertex(u, g)</tt></td>
+<td><tt>void</tt></td>
+<td>
+各頂点に初めて遭遇した時に実行される。
+</td>
+</tr>
+
+<tr>
+<td>Edge Relaxed</td>
+<td><tt>vis.edge_relaxed(e, g)</tt></td>
+<td><tt>void</tt></td>
+<td>
+調査時に、以下の条件が満たされれば、その辺は緩和される (距離が減らされる) 。この時、このメソッドが実行される。<br>
+<tt>
+tie(u,v) = incident(e, g);<br>
+D d_u = get(d, u), d_v = get(d, v);<br>
+W w_e = get(w, e);<br>
+assert(compare(combine(d_u, w_e), d_v));<br>
+</tt>
+</td>
+</tr>
+
+<tr>
+<td>Edge Not Relaxed</td>
+<td><tt>vis.edge_not_relaxed(e, g)</tt></td>
+<td><tt>void</tt></td>
+<td>
+調査時に、辺が緩和 (上を参照) されなければ、このメソッドが実行される。
+</td>
+</tr>
+
+<tr>
+<td>Finish Vertex</td>
+<td><tt>vis.finish_vertex(u, g)</tt></td>
+<td><tt>void</tt></td>
+<td>
+ある頂点の全ての出力辺が探索木に追加され、全ての隣接する頂点が発見された後に、その頂点に対して実行される (ただし、隣接する頂点の出力辺を調査するよりは前に) 。
+</td>
+</tr>
+
+</table>
+
+<h3>Models</h3>
+
+<ul>
+ <li><a href="./dijkstra_visitor.html"><tt>dijkstra_visitor</tt></a>
+</ul>
+
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000-2001</TD><TD>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>,
+Indiana University (<A
+HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)<br>
+<A HREF="../../../people/liequan_lee.htm">Lie-Quan Lee</A>, Indiana University (<A HREF="mailto:llee@cs.indiana.edu">llee@cs.indiana.edu</A>)<br>
+<A HREF=http://www.osl.iu.edu/~lums>Andrew Lumsdaine</A>,
+Indiana University (<A
+HREF="mailto:lums@osl.iu.edu">lums@osl.iu.edu</A>)
+</TD></TR></TABLE>
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:gimite@mx12.freecom.ne.jp">Hiroshi Ichikawa</a><br>
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+<p>このドキュメントの対象: Boost Version 1.30.0<br>
+<a href="http://www.boost.org/libs/graph/doc/DijkstraVisitor.html">最新版ドキュメント (英語)</a></p>
+
+</BODY>
+</HTML> 

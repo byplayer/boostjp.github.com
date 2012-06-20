@@ -1,0 +1,306 @@
+<HTML>
+<!--
+  -- Copyright (c) Jeremy Siek 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  Silicon Graphics makes no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<Title>Bellman Ford Shortest Paths</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+
+<H1><A NAME="sec:bellman-ford"></A>
+<TT>bellman_ford_shortest_paths</TT>
+</H1>
+
+<P>
+<PRE>
+<i>// 名前付きパラメータバージョン</i>
+template &lt;class <a href="./EdgeListGraph.html">EdgeListGraph</a>, class Size, class P, class T, class R&gt;
+bool bellman_ford_shortest_paths(EdgeListGraph&amp; g, Size N, 
+  const bgl_named_params&lt;P, T, R&gt;&amp; params = <i>all defaults</i>)
+
+<i>// 名前無しパラメータバージョン</i>
+template &lt;class <a href="./EdgeListGraph.html">EdgeListGraph</a>, class Size, class WeightMap,
+	  class PredecessorMap, class DistanceMap,
+	  class <a href="http://www.sgi.com/tech/stl/BinaryFunction.html">BinaryFunction</a>, class <a href="http://www.sgi.com/tech/stl/BinaryPredicate.html">BinaryPredicate</a>,
+	  class <a href="./BellmanFordVisitor.html">BellmanFordVisitor</a>&gt;
+bool bellman_ford_shortest_paths(EdgeListGraph&amp; g, Size N, 
+  WeightMap weight, PredecessorMap pred, DistanceMap distance, 
+  BinaryFunction combine, BinaryPredicate compare, BellmanFordVisitor v)
+</PRE>
+
+<P>
+Bellman-Ford アルゴリズム&nbsp;[<A
+HREF="bibliography.html#bellman58">4</A>,<A
+HREF="bibliography.html#ford62:_flows">11</A>,<A
+HREF="bibliography.html#lawler76:_comb_opt">20</A>,<A
+HREF="bibliography.html#clr90">8</A>] は、正と負の両方の辺の重みを持つ
+グラフの単一始点の最短経路問題を解く。最短経路問題の定義のために、
+章 <A
+HREF="./graph_theory_review.html#sec:shortest-paths-algorithms">Shortest-Paths
+Algorithms</A> を見なさい。
+もし正の辺の重みを持つ最短経路問題を解く必要があるだけなら、Dijkstra の
+アルゴリズムがより効率的な代替手段を提供する。もし全ての辺の重みが 1 に
+等しいなら幅優先探索がより一層効率的な代替手段を提供する。
+</p>
+
+<p>
+<tt>bellman_ford_shortest_paths()</tt> 関数を呼ぶ前に、ユーザは始点に 0 の
+距離を割り当て、他の全ての頂点に無限大の距離を割り当てなければならない。
+Bellman-Ford アルゴリズムはグラフ中の全ての辺を通してループし、各辺に
+リラックス操作
+ (減らす操作) を適用する事によって進められる。下記の擬似コード中で、
+<i>v</i> は <i>u</i> の隣接頂点で、<i>w</i> は辺にそれらの重みをマップし、
+<i>d</i> は今の所見られる各辺への最短経路の長さを記録する距離マップ
+である。<i>p</i> は各辺の親を記録する先行点マップで、それは結局最短経路木中
+で親となるであろう。
+</p>
+
+<table>
+<tr>
+<td valign="top">
+<pre>
+RELAX(<i>u</i>, <i>v</i>, <i>w</i>, <i>d</i>, <i>p</i>)
+  <b>if</b> (<i>w(u,v) + d[u] < d[v]</i>) 
+    <i>d[v] := w(u,v) + d[u]</i>
+    <i>p[v] := u</i>
+  <b>else</b>
+    ...
+</pre>
+</td>
+<td valign="top">
+<pre>
+
+
+辺をリラックスする (減らす) <i>(u,v)</i>
+
+
+辺 <i>(u,v)</i> は リラックスされていない (減らされていない)
+</pre>
+</td>
+</tr>
+</table>
+
+<p>
+アルゴリズムはグラフ中に負の閉路が存在しないならば、各辺への距離が
+可能な限り最小に減らされた事が保証された後にこのループを <i>|V|</i> 回
+繰り返す。もし負の閉路が存在するならば、グラフ中に適当に最小化されない
+辺が存在する事になるだろう。つまり、<i>w(u,v) + d[u] < d[v]</i> であるような
+辺 <i>(u,v)</i> が存在することになるだろう。
+アルゴリズムは全ての辺が最小化されたかどうか最後に一回調べる
+ためにグラフ中の辺をループし、もしよければ <tt>true</tt> を返し、そうでなければ
+ <tt>false</tt> を返す。
+</p>
+
+<table>
+<tr>
+<td valign="top">
+<pre>
+BELLMAN-FORD(<i>G</i>)
+  <b>for</b> each vertex <i>u in V</i> 
+    <i>d[u] := infinity</i>
+    <i>p[u] := u</i> 
+  <b>end for</b>
+  <b>for</b> <i>i := 1</i> <b>to</b> <i>|V|-1</i> 
+    <b>for</b> each edge <i>(u,v) in E</i> 
+      RELAX(<i>u</i>, <i>v</i>, <i>w</i>, <i>d</i>, <i>p</i>)
+    <b>end for</b>
+  <b>end for</b>
+  <b>for</b> each edge <i>(u,v) in E</i> 
+    <b>if</b> (<i>w(u,v) + d[u] < d[v]</i>)
+      <b>return</b> (false, , )
+    <b>else</b> 
+      ...
+  <b>end for</b>
+  <b>return</b> (true, <i>p</i>, <i>d</i>)
+</pre>
+</td>
+<td valign="top">
+<pre>
+
+頂点 <i>u</i> の初期化
+
+
+
+
+辺 <i>(u,v)</i> の調査
+
+
+
+
+
+辺 <i>(u,v)</i> は最小化されていない 
+
+辺 <i>(u,v)</i> は最小化されている 
+</pre>
+</td>
+</tr>
+</table>
+<tt>bellman_ford_shortest_paths()</tt> 関数から出力を得るための主な二つの選択が
+存在する。
+ユーザが <tt>distance_map()</tt> パラメータを通して距離
+プロパティ・マップを提供するならばグラフ中の始点から他の全ての頂点への
+最短距離は距離マップに記録されるだろう (もし関数が <tt>true</tt>
+ を返すなら)。
+二番目の選択は最短経路木を <tt>predecessor_map() </tt>に記録する事である。
+<i>V</i> 中の各頂点 <i>u</i> にとって、最短経路木中では <i>p[u]</i> が
+ <i>u</i> の先行点になるだろう (但し <i>p[u] = u</i> でここに <i>u</i> が始点
+であるかまたは始点からは到達不能な頂点である場合を除く)。
+これらの二つの選択に加え、ユーザはアルゴリズムのイベント・ポイントのどれかの
+間アクションを取れる独自のビジタをそこに提供する事ができる。 
+<P>
+
+<h3>Parameters</h3>
+
+
+IN: <tt>EdgeListGraph&amp; g</tt> 
+<blockquote>
+型が <a href="./EdgeListGraph.html">Edge List Graph</a> のモデルの
+有向グラフまたは無向グラフでなければならない。
+</blockquote>
+
+IN: <tt>Size N</tt>
+<blockquote>
+グラフ中の頂点の数。型 <tt>Size</tt> は汎整数型でなければならない。
+</blockquote>
+
+
+<h3>Named Parameters</h3>
+
+IN: <tt>weight_map(WeightMap w)</tt>
+<blockquote>
+グラフ中の各辺の重み　(そして“長さ”もしくは“コスト”として知られる)。
+<tt>WeightMap</tt> の型は <a
+ href="../../property_map/ReadablePropertyMap.html">Readable Property
+ Map</a> のモデルでなければならない。このプロパティ・マップのキー型は
+グラフの辺記述子でなければならない。重みマップの値型は距離マップの値型を伴った <i>Addable</i> でなければならない。
+<br>
+<b>デフォルト:</b> <tt>get(edge_weight, g)</tt>
+</blockquote>
+
+OUT: <tt>predecessor_map(PredecessorMap p_map)</tt> 
+<blockquote>
+先行点マップ (predecessor map) は最小全域木中に辺を記録する。
+アルゴリズムの完了時に、<i>V</i> 中の全ての <i>u</i> のための辺 <i>(p[u],u)</i>
+ は最小全域木中にある。もし <i>p[u] = u</i> なら <i>u</i> は始点かまたは始点
+から到達不能な頂点である。
+<tt>PredecessorMap</tt> の型はキーと頂点の型がグラフの頂点記述子型と同じ <a
+ href="../../property_map/ReadWritePropertyMap.html">Read/Write
+ Property Map</a> でなければならない。 
+<br>
+<b>デフォルト:</b> <tt>dummy_property_map</tt>
+</blockquote>
+
+IN/OUT: <tt>distance_map(DistanceMap d)</tt> 
+<blockquote>
+グラフ <i>g</i> 中の始点から各頂点への最短経路の重みは、このプロパティ・マップ
+中に記録される。<tt>DistanceMap</tt> の型は <a
+ href="../../property_map/ReadWritePropertyMap.html">Read/Write
+ Property Map</a> のモデルでなければならない。プロパティ・マップのキー型は
+グラフの頂点記述子型でなければならず、距離マップの値型は <a
+ href="http://www.sgi.com/tech/stl/LessThanComparable.html">Less
+ Than Comparable</a> でなければならない。
+<br>
+<b>デフォルト:</b> <tt>get(vertex_distance, g)</tt>
+</blockquote>
+
+IN: <tt>visitor(BellmanFordVisitor v)</tt>
+<blockquote>
+ビジタ・オブジェクトで、その型は <a
+ href="./BellmanFordVisitor.html">Bellman-Ford Visitor</a> のモデルで
+なければならない。ビジタ・オブジェクトは値渡しされる <a
+ href="#1">[1]</a>。
+<br>
+<b>デフォルト:</b> <tt>bellman_visitor&lt;null_visitor&gt;</tt>
+</blockquote>
+
+IN: <tt>distance_combine(BinaryFunction combine)</tt>
+<blockquote>
+この関数オブジェクトはリラックス (減少) 段階中で、加算の役割を置き換える。
+第一引数の型は距離マップの値型に一致していなければならず、
+第二引数の型は重みマップの値型に一致していなければならない。
+結果型は距離マップの値型と同じでなければならない。
+<br>
+<b>デフォルト:</b><tt>std::plus&lt;D&gt;</tt>
+  ここに <tt>D=typename&nbsp;property_traits&lt;DistanceMap&gt;::value_type</tt>.
+</blockquote>
+
+IN: <tt>distance_compare(BinaryPredicate compare)</tt>
+<blockquote>
+この関数オブジェクトはリラックス (減少) 段階中で、距離を比較する less-than (<)
+ 演算子の役割を置き換える。引数の型は距離マップの値型に一致して
+いなければならない。
+<br>
+<b>デフォルト:</b> <tt>std::less&lt;D&gt;</tt>
+  ここに <tt>D=typename&nbsp;property_traits&lt;DistanceMap&gt;::value_type</tt>.
+</blockquote>
+
+<P>
+
+<H3>Complexity</H3>
+
+<P>
+時間複雑性は <i>O(V E)</i> である。
+
+
+<h3>Visitor Event Points</h3>
+
+<ul>
+<li><b><tt>vis.examine_edge(e, g)</tt></b> はグラフ中の各辺において
+ <i>|V|</i> 回呼び出される。
+<li><b><tt>vis.edge_relaxed(e, g)</tt></b> は終点のための距離ラベルが減じられた
+時に呼び出される。頂点 <i>v</i> のための最近のリラックス (減少) にあずかった
+辺 <i>(u,v)</i> は最短経路木の中にある辺である。
+<li><b><tt>vis.edge_not_relaxed(e, g)</tt></b> はもし終点のための距離ラベルが
+減じられなかった時に呼び出される。
+<li><b><tt>vis.edge_minimized(e, g)</tt></b> はアルゴリズムの第二段階の
+間、各辺が最小化されたかどうかの検査の間に呼び出される。もし辺が最小化
+されていればこの関数が呼び出される。
+<li><b><tt>vis.edge_not_minimized(e, g)</tt></b> もまた、アルゴリズムの第二
+段階の間、各辺が最小化されたかどうかの検査の間に呼び出される。
+もし辺が最小化されていなければ、この関数が呼び出される。これはグラフ中に
+負の閉路が存在する時に起こる。
+</ul>
+
+<H3>Example</H3>
+
+<P>
+Bellman-Ford のアルゴリズムを用いた例が <a
+href="../example/bellman-example.cpp"><TT>examples/bellman-example.cpp</TT></a>
+ 中にある。
+
+<h3>Notes</h3>
+
+<p><a name="1">[1]</a> 
+ビジタのパラメータは値渡しされるので、もしビジタが状態を持っているなら、
+アルゴリズムの間のいかなる状態の変更も、送ったビジタ・オブジェクトには行われず
+ビジタ・オブジェクトのコピーに対して行われる。それゆえポインタまたは
+リファレンスによってこの状態をビジタに保持させる事を望むかもしれない。
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy; 2000</TD><TD>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>, Indiana University (<A HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)
+</TD></TR></TABLE>
+
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:takashi-it@po6.nsk.ne.jp">Takashi Itou</a><br> 
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+
+<p>このドキュメントの対象: Boost Version 1.30.0<br>
+<a href="http://www.boost.org/libs/graph/doc/bellman_ford_shortest.html">最新版ドキュメント (英語)</a></p>
+</BODY>
+</HTML> 

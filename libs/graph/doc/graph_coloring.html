@@ -1,0 +1,195 @@
+<HTML>
+<!--
+  -- Copyright (c) Jeremy Siek, Lie-Quan Lee, and Andrew Lumsdaine  2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  We make no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<Title>Graph Coloring Example</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+<H1>Graph Coloring</H1>
+
+隣接頂点が別個の色を持っているようにグラフ中の頂点に色を割り当てる事を含む
+グラフ (もしくは頂点) の着色の問題は、スケジューリング、
+レジスタの割り当て、最適化、そして並列数値計算のような科学や技術の応用
+の多くで発生する。
+
+<P>
+数学的に、無向グラフ <i>G=(V,E)</i> の適切な頂点の彩色は、<i>G</i> 中に
+辺 <i>(u,v)</i> が存在する時はいつでも <i>c(u) != c(v)</i> となるような
+マップ <i>c: V -> S</i> である。集合 <i>S</i> の要素は利用可能色
+ (available colors) と呼ばれる。
+問題は多くの場合、与えられたグラフ <i>G</i> のための最小濃度 (色数) を
+決定する事か、またはいくつかの色でもってグラフを着色できるかどうか尋ねる事で
+ある。例えば隣接した州が異なる色になるような方法で地図上でアメリカを着色する
+のにどれだけの色が必要であろうか。
+コンパイラはある点において決まった数のレジスタに変数と一時値を割り当てる
+事ができるかどうか決定する必要がある。
+もし目的のマシンが <i>K</i> 個のレジスタを持っているなら、個々の衝突グラフ
+は <i>K</i> 個の色で着色できるだろうか。(衝突グラフの各頂点は一時値を
+表し、各辺は同じレジスタに割り当てられない一時値のペアを示す。)
+
+<P>
+他の例は最適化の際の大規模な非線形問題と微分方程式の差分による疎な
+ヤコビ行列の評価中にある。非線形関数 <i>F</i> が与えられると、
+ヤコビ行列の評価は都合がよいベクトル <i>d</i> の選択によって
+<i>Jd</i> を評価する事によって得られる。Curtis、Powell そして Reid
+ [<a href="bibliography.html#curtis74:_jacob">9</a>] は <i>J</i> の列グループは
+このグループ中の二つの列が同じ行の位置に 0 でない値を持っていなければ
+<i>Jd</i> を一回評価する事によって決定できる事に気づいた。
+それゆえ質問が出てきた。近似のヤコビ行列を計算するのに必要な関数の
+評価数はいくつだろうか。
+実を言うともし次の要素でグラフを構築するならこの質問はグラフを着色するための
+最小色数を計算するのと同じである。それは、頂点が <i>J</i> の列を表し、二つの
+列が同じ行の位置に 0 でない値を持つなら、そしてもってさえいれば、辺が存在
+するようにする。
+
+<P>
+しかしながら、一般のグラフを最小数の色 (集合 <i>S</i> の濃度) で
+彩色する事は NP 完全問題 [<a
+href="bibliography.html#garey79:computers-and-intractability">30</a>]
+ として知られている。人は解答を発見するために発見的手法にしばしば頼る。
+広く用いられている一般的などん欲を基本としたアプローチは、<i>G</i> の
+順序づけられた頂点の列挙
+ <i>v<sub>1</sub>, ..., v<sub>n</sub></i> から始めて、<i>v<sub>i</sub></i> に
+<i>i</i> のために <i>1</i> から <i>n</i> のできるだけ小さな色を割り当てる。
+章 <a
+href="constructing_algorithms.html">Constructing graph
+algorithms with BGL</a> 中でこのアルゴリズムを汎用プログラミングの
+物の考え方でいかに書くかについて示した。しかしながら、頂点の順序付け
+は劇的に色づけに影響を及ぼす。任意の順序は非常に下手に遂行されるかもしれない
+のに対し他の順序付けは最も望ましい色づけを生じさせるかもしれない。
+どん欲な色づけの発見的手法を助けるために最大先頭 (largest-first) 順序付け、
+最小後尾 (smallest-last) 順序付け、接続次数 (incidence degree) による順序付け
+を含むいくつかの順序付けアルゴリズムが研究されてきた。
+
+<P>
+BGL の枠組みの中では、そのような順序付けを書くことはアルゴリズムの記述に
+密接に従うので、そのような順序付けを構築/原型作りをする事はかなり容易
+である。例として、最小後尾 (smallest-last) 順序付けのアルゴリズムを示す。
+<P>
+最小後尾 (smallest-last) 順序付け [<a
+href="bibliography.html#matula72:_graph_theory_computing">29</a>] の基本的な
+着想は次の通りである。頂点 <i>v<sub>k+1</sub>, ..., v<sub>n</sub></i> が
+選択されたと仮定すると、<i>V - {v<sub>k+1</sub>, ..., v<sub>n</sub>}</i>
+ によって誘導された副グラフ中の <i>v<sub>k</sub></i> の次数が最小となる
+ように <i>v<sub>k</sub></i> を選びなさい。
+
+<P>
+アルゴリズムはバケットが次数である場合に、グラフ中の頂点のためにバケット・
+ソートを使う。二つの頂点プロパティ・マップ、<TT>degree</TT> と <TT>marker</TT>
+がアルゴリズム中で使われる。前者は各頂点の次数を格納するための物に対して
+後者は隣接頂点の巡回の間頂点が順序付けられたか処理されているかを記録するため
+の物である。順序付けは <TT>order</TT> 中にしまわれる。アルゴリズムは次の
+通りである。
+
+<UL>
+<LI>すべての頂点をバケット・ソータに置く。
+</LI>
+<LI>バケット・ソータ中の最小の次数を持つ頂点 <tt>node</tt> を見つける。
+</LI>
+<LI><tt>node</tt> に番号を付けその次数とバケット・ソータ中の位置を更新
+するためにその隣接頂点を通して巡回する。
+</LI>
+<LI>全ての頂点が番号付けられるまで段階 2 に行く。
+</LI>
+</UL>
+
+<P>
+<PRE>
+namespace boost {
+  template &lt;class VertexListGraph, class Order, class Degree, 
+            class Marker, class BucketSorter&gt;
+  void 
+  smallest_last_ordering(const VertexListGraph&amp; G, Order order, 
+                         Degree degree, Marker marker, 
+                         BucketSorter&amp; bucket_sorter) {
+    typedef typename graph_traits&lt;VertexListGraph&gt; GraphTraits;
+
+    typedef typename GraphTraits::vertex_descriptor Vertex;
+    //typedef typename GraphTraits::size_type size_type;
+    typedef size_t size_type;
+
+    const size_type num = num_vertices(G);
+    
+    typename GraphTraits::vertex_iterator v, vend;
+    for (tie(v, vend) = vertices(G); v != vend; ++v) {
+      put(marker, *v, num);
+      put(degree, *v, out_degree(*v, G));
+      degree_buckets.push(*v);
+    }
+ 
+    size_type minimum_degree = 1;
+    size_type current_order = num - 1;
+    
+    while ( 1 ) {
+      typedef typename BucketSorter::stack MDStack;
+      MDStack minimum_degree_stack = degree_buckets[minimum_degree];
+      while (minimum_degree_stack.empty())
+        minimum_degree_stack = degree_buckets[++minimum_degree];
+      
+      Vertex node = minimum_degree_stack.top();
+      put(order, current_order, node);
+      
+      if ( current_order == 0 ) //全ての頂点を見つける
+        break;
+      
+      minimum_degree_stack.pop();
+      put(marker, node, 0); //node は順序付けられた
+      
+      typename GraphTraits::adjacency_iterator v, vend;
+      for (tie(v,vend) = adjacent_vertices(node, G); v != vend; ++v)
+        
+        if ( get(marker, *v) &gt; current_order ) { //*v は順序付けられていない頂点
+          put(marker, *v, current_order);   //node に隣接する列を記録する
+          
+          //最小次数が減る可能性がある
+          //ここでその跡を付け続ける
+          put(degree, *v, get(degree, *v) - 1); 
+          minimum_degree = std::min(minimum_degree, get(degree, *v)); 
+          
+          //バケット・ソータ中の *v の位置を更新する
+          degree_buckets.update(*v);
+        }
+
+      current_order--;
+    }
+    //この点で get(order, i) == vertex(i, g) である
+  }
+} // namespace boost
+</PRE>
+
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000-2001</TD><TD>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>,
+Indiana University (<A
+HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)<br>
+<A HREF="../../../people/liequan_lee.htm">Lie-Quan Lee</A>, Indiana University (<A HREF="mailto:llee@cs.indiana.edu">llee@cs.indiana.edu</A>)<br>
+<A HREF=http://www.osl.iu.edu/~lums>Andrew Lumsdaine</A>,
+Indiana University (<A
+HREF="mailto:lums@osl.iu.edu">lums@osl.iu.edu</A>)
+</TD></TR></TABLE>
+
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:takashi-it@po6.nsk.ne.jp">Takashi Itou</a><br> 
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+
+<p>このドキュメントの対象: Boost Version 1.30.0<br>
+<a href="http://www.boost.org/libs/graph/doc/graph_coloring.html">最新版ドキュメント (英語)</a></p>
+</BODY>
+</HTML> 

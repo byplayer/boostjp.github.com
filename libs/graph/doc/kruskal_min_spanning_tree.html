@@ -1,0 +1,182 @@
+<HTML>
+<!--
+  -- Copyright (c) Jeremy Siek 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  Silicon Graphics makes no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<Title>Boost Graph Library: Kruskal Minimum Spanning Tree</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+
+<H1><A NAME="sec:kruskal">
+<TT>kruskal_minimum_spanning_tree</TT>
+</H1>
+
+<PRE>
+template &lt;class Graph, class OutputIterator, class P, class T, class R&gt;
+void kruskal_minimum_spanning_tree(Graph&amp; g, OutputIterator tree_edges, 
+    const bgl_named_params&lt;P, T, R&gt;&amp; params = <i>all defaults</i>);
+</PRE>
+
+<P>
+<tt>kruskal_minimum_spanning_tree()</tt> 関数は重みを伴う無向グラフの
+最小全域木 (MST) を探し出す。MST は木中の辺の重みの合計が最小化されたグラフ中
+の全ての頂点を接続する辺の集合である。さらに詳しくは章 <a
+href="graph_theory_review.html#sec:minimum-spanning-tree">Minimum
+Spanning Tree Problem</a> を見なさい。MST 中の辺は <tt>tree_edges</tt>
+ 出力イテレータに出力される。この関数は MST を計算するために Kruskal の
+アルゴリズムを用いる &nbsp;[<A
+HREF="bibliography.html#kruskal56">18</A>,<A
+HREF="bibliography.html#clr90">8</A>,<A
+HREF="bibliography.html#tarjan83:_data_struct_network_algo">27</A>,<A
+HREF="bibliography.html#graham85">15</A>] 。
+</p>
+<p>
+Kruskal のアルゴリズムは木中の各頂点単独で、かつ最小全域木 <i>T</i> 中には
+辺がない状態で開始する。それからアルゴリズムは辺の重みが増加する順にグラフ中
+の各辺を調査する。もし辺が異なった木中にある二つの頂点を接続しているなら、
+アルゴリズムは二つの木を一つの木に併合し、辺を <i>T</i> に加える。
+素集合操作の高速な実装を提供するために、“ランクによる結合”と“道の圧縮”
+の手続き (<tt>MAKE-SET</tt>、<tt>FIND-SET</tt>、そして
+ <tt>UNION-SET</tt>) を用いる。アルゴリズムは次のようなものである:
+</p>
+
+<pre>
+KRUSKAL-MST(<i>G</i>, <i>w</i>) 
+  <i>T := &Oslash;</i> 
+  <b>for</b> each vertex <i>u in V</i> 
+    MAKE-SET(<i>DS</i>, <i>u</i>) 
+  <b>end for</b>
+  <b>for</b> each edge <i>(u,v) in E</i> in order of nondecreasing weight 
+    <b>if</b> FIND-SET(<i>DS</i>, <i>u</i>) != FIND-SET(<i>DS</i>, <i>v</i>) 
+      UNION-SET(<i>DS</i>, <i>u</i>, <i>v</i>) 
+      <i>T := T U {(u,v)}</i> 
+  <b>end for</b>
+  <b>return</b> <i>T</i>
+</pre>
+
+
+<H3>Where Defined</H3>
+
+<P>
+<a href="../../../boost/graph/kruskal_min_spanning_tree.hpp"><TT>boost/graph/kruskal_min_spanning_tree.hpp</TT></a>
+
+<P>
+
+<h3>Parameters</h3>
+
+IN: <tt>const Graph&amp; g</tt> 
+<blockquote>
+無向グラフ。グラフの型は <a
+href="./VertexListGraph.html">Vertex List Graph</a> と <a
+href="./EdgeListGraph.html">Edge List Graph</a> のモデルでなければならない。
+</blockquote>
+
+IN: <tt>OutputIterator spanning_tree_edges</tt>
+<blockquote>
+最小全域木の辺はこの <a
+ href="http://www.sgi.com/tech/stl/OutputIterator.html">Output
+ Iterator</a> に出力される。
+</blockquote>
+
+
+<h3>Named Parameters</h3>
+
+IN: <tt>weight_map(WeightMap w_map)</tt> 
+<blockquote>
+グラフ中の各辺の重みまたは“長さ”。<tt>WeightMap</tt> の型は <a
+href="../../property_map/ReadablePropertyMap.html">Readable Property Map</a>
+ のモデルでなければならず、その値型は <a
+ href="http://www.sgi.com/tech/stl/LessThanComparable.html">Less Than
+ Comparable</a> でなければならない。このマップのキー型はグラフの辺記述子型
+である必要がある。<br>
+<b>デフォルト:</b> <tt>get(edge_weight, g)</tt>
+</blockquote>
+
+UTIL: <tt>rank_map(RankMap r_map)</tt> 
+<blockquote>
+これは素集合データ構造によって使われる。<tt>RankMap</tt> は <a
+ href="../../property_map/ReadWritePropertyMap.html">Read/Write
+ Property Map</a> のモデルでなければならない。グラフの頂点記述子型は
+ランク・マップのキー型として使用できる必要がある。ランク・マップの値型は
+汎整数型でなければならない。
+<br>
+<b>デフォルト:</b> サイズ <tt>num_vertices(g)</tt> の整数の
+ <tt>std::vector</tt> から作られた <a
+ href="../../property_map/iterator_property_map.html">
+ <tt>iterator_property_map</tt></a> で、添え字マップには
+ <tt>i_map</tt> を用いる。 
+</blockquote>
+
+UTIL: <tt>predecessor_map(PredecessorMap p_map)</tt> 
+<blockquote>
+これは素集合データ構造によって使われ、全域木中の先行点 (predecessors) を
+格納するのに使われては<b>いない</b>。全域木の先行点は全域木の辺の出力から
+得ることができる。<tt>PredecessorMap</tt> の型は <a
+ href="../../property_map/ReadWritePropertyMap.html">Read/Write
+ Property Map</a> のモデルでなければならない。先行点マップのキー型、値型は
+グラフの頂点記述子型でなければならない。
+<br>
+<b>デフォルト:</b> サイズ <tt>num_vertices(g)</tt> の頂点記述子の
+ <tt>std::vector</tt> から作られた <a
+ href="../../property_map/iterator_property_map.html">
+ <tt>iterator_property_map</tt></a> で、添え字マップには
+ <tt>i_map</tt> を用いる。
+</blockquote>
+
+IN: <tt>vertex_index_map(VertexIndexMap i_map)</tt> 
+<blockquote>
+これは各頂点を <tt>[0, num_vertices(g))</tt> の範囲において整数にマップする。
+これはランク・マップまたは先行点マップにデフォルトが使われた時にのみ必要で
+ある。
+<tt>VertexIndexMap</tt> は <a
+ href="../../property_map/ReadablePropertyMap.html">Readable Property
+ Map</a> のモデルでなければならない。マップの値型は汎整数型でなければなら
+ない。グラフの頂点記述子型はマップのキー型として使用できる必要がある。 
+<br>
+<b>デフォルト:</b> <tt>get(vertex_index, g)</tt>
+</blockquote>
+
+
+<H3>Complexity</H3>
+
+<P>
+時間複雑性は <i>O(E log E)</i> である。
+
+<H3>Example</H3>
+
+<P>
+ファイル <a
+href="../example/kruskal-example.cpp"><TT>examples/kruskal-example.cpp</TT></a>
+は Kruskal のアルゴリズムの使用例を含む。
+contains an example of using Kruskal's algorithm.
+
+
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000-2001</TD><TD>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>, Indiana University (<A HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)
+</TD></TR></TABLE>
+
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:takashi-it@po6.nsk.ne.jp">Takashi Itou</a><br> 
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+
+<p>このドキュメントの対象: Boost Version 1.30.0<br>
+<a href="http://www.boost.org/libs/graph/doc/kruskal_min_spanning_tree.html">最新版ドキュメント (英語)</a></p>
+</BODY>
+</HTML> 

@@ -1,0 +1,114 @@
+<HTML>
+<!--
+  -- Copyright (c) Jeremy Siek 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  Silicon Graphics makes no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<Title>Boost Graph Library: Depth-First Visit</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+<H2><A NAME="sec:dfs"></A>
+<TT>depth_first_visit</TT>
+</H2>
+
+
+<P>
+<PRE>
+template &lt;class <a href="./IncidenceGraph.html">IncidenceGraph</a>, class <a href="./DFSVisitor.html">DFSVisitor</a>, class <a href="#ColorMap">ColorMap</a>&gt;
+void depth_first_visit(IncidenceGraph& g,
+  typename graph_traits&lt;IncidenceGraph&gt;::vertex_descriptor s, 
+  DFSVisitor&amp; vis, ColorMap color)
+</PRE>
+
+<P>
+この関数は <a
+href="./graph_theory_review.html#sec:dfs-algorithm">depth-first
+pattern</a> を使って、始点 <tt>s</tt> と同じ連結成分中にある全ての頂点を
+訪れる。時々単独で有用ではあるが、この関数の主な目的は 
+<TT>depth_first_search()</TT> の実装のためにある。
+<p>
+ユーザによって提供される <tt>DFSVisitor</tt> はアルゴリズムの内側の
+各イベント・ポイントで行われるアクションを決定する。
+<p>
+<tt>ColorMap</tt> は訪れられた頂点の過程を保持するためにアルゴリズムに
+よって使われる。
+<P>
+
+<h3>Where Defined:</h3>
+
+<a href="../../../boost/graph/depth_first_search.hpp"><TT>boost/graph/depth_first_search.hpp</TT></a>
+
+
+<h3>Parameters</h3>
+
+IN <tt>IncidenceGraph&amp; g</tt>
+<blockquote>
+有向グラフまたは無向グラフ。グラフの型は <a
+ href="./IncidenceGraph.html">Incidence Graph</a> のモデルでなければならない。
+</blockquote>
+
+IN: <tt>vertex_descriptor s</tt>
+<blockquote>
+探索が開始される始点。
+</blockquote>
+
+IN: <tt>DFSVisitor visitor</tt>
+<blockquote>
+アルゴリズムの内側で <a href="./DFSVisitor.html">DFS
+ Visitor</a> コンセプトで指定されるイベント・ポイントで呼び出される
+ビジタ・オブジェクト。ビジタ・オブジェクトは値渡しされる <a
+  href="#1">[1]</a>。
+</blockquote>
+
+UTIL: <tt>ColorMap color</tt>
+<blockquote>
+これはグラフを通る進行過程を保持するためにアルゴリズムによって使われる。
+<tt>ColorMap</tt> の型は <a
+ href="../../property_map/ReadWritePropertyMap.html">Read/Write
+ Property Map</a> のモデルでなければならず、かつキー型はグラフの頂点記述子型
+でなければならず、またカラー・マップの値型は
+ <a href="./ColorValue.html">Color Value</a> をモデルとしなければならない。
+</blockquote>
+
+<P>
+
+<h3>Complexity</h3>
+
+時間複雑性は <i>O(E)</i> である。
+
+
+<h3>Notes</h3>
+
+<p><a name="1">[1]</a> 
+ビジタのパラメータは値渡しされるので、もしビジタが状態を持っているなら、
+アルゴリズムの間のいかなる状態の変更も、送ったビジタ・オブジェクトには行われず
+ビジタ・オブジェクトのコピーに対して行われる。それゆえポインタまたは
+リファレンスによってこの状態をビジタに保持させる事を望むかもしれない。
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000-2001</TD><TD>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>, Indiana University (<A HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)
+</TD></TR></TABLE>
+
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:takashi-it@po6.nsk.ne.jp">Takashi Itou</a><br> 
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+
+<p>このドキュメントの対象: Boost Version 1.30.0<br>
+<a href="http://www.boost.org/libs/graph/doc/depth_first_visit.html">最新版ドキュメント (英語)</a></p>
+</BODY>
+</HTML> 

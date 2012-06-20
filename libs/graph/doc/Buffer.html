@@ -1,0 +1,125 @@
+<HTML>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<!--
+  -- Copyright (c) Jeremy Siek 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  Silicon Graphics makes no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<Title>Buffer</Title>
+</HEAD>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+<h3>Buffer Concept</h3>
+
+Buffer とは、その中に何かしらアイテムを書き込んだり、削除したりできる もの である。
+Buffer の<i>コンセプト</i>は、ほとんど要求を持たない。
+アイテムが格納の仕方や 削除される時に関して、
+いかなる特定の順序付けも要求してはいないが、
+例によって、
+ソートに関しては順序付けのポリシーがいくつかある。
+
+<h3>Notation</h3>
+
+<table>
+<tr> <td> <tt>B</tt> </td>  <td> Buffer のモデルである型。</td></tr>
+<tr> <td> <tt>T</tt> </td>  <td> <tt>B</tt> の値の型。</td></tr>
+<tr> <td> <tt>t</tt> </td>  <td> <tt>T</tt> のオブジェクト。</td></tr>
+</table>
+
+
+<h3>Members</h3>
+
+Buffer をモデル化する型 は 以下のメンバーを持たなければならない。
+
+<p>
+
+<table border="1">
+
+<tr> <td><b>Member</b></td> <td><b>Description</b></td> </tr>
+
+<tr> <td> <tt>value_type</tt> </td> 
+     <td>	Buffer 内に格納されるオブジェクトの型。
+     		その値の型は <a href="http://www.sgi.com/tech/stl/Assignable.html">Assignable</a>
+     		でなければならない。</td>
+    </tr>
+
+<tr> <td> <tt>size_type</tt>  </td>
+     <td> Buffer 内のオブジェクトの数を表す 符号無し整数型。</td>
+    </tr>
+
+<tr> <td> <tt>void push(const T& t)</tt> </td>
+     <td> <tt>t</tt> を Buffer 内に挿入する。
+     		<tt>size()</tt> は 1 インクリメントされる。</td>
+     </tr>
+
+<tr> <td> <tt>void pop()</tt> </td>
+     <td> Buffer からオブジェクトを削除する。
+     		<tt>size()</tt> は 1 デクリメントされる。
+     		事前条件: <tt>empty()</tt> は <tt>false</tt> である。</td>
+     </tr>
+
+<tr> <td> <tt>T& top()</tt> </td>
+     <td> Buffer 内のあるオブジェクトへの 非const な参照を返す。
+     		事前条件: <tt>empty()</tt> は <tt>false</tt> である。</td>
+     </tr>
+
+<tr> <td> <tt>const T& top() const</tt> </td>
+     <td> Buffer 内のあるオブジェクトへの const な参照を返す。
+     		事前条件: <tt>empty()</tt> は <tt>false</tt> である。</td>
+     </tr>
+
+<tr> <td> <tt>void size() const</tt> </td>
+     <td> Buffer 内のオブジェクトの数を返す。
+          不変式: <tt>size() >= 0</tt>. </td>
+     </tr>
+
+<tr> <td> <tt>bool empty() const</tt> </td>
+     <td> <tt>b.size() == 0</tt> と等価。</td>
+     </tr>
+
+</table>
+
+<h3>Complexity Guarantees</h3>
+
+<UL>
+
+<LI> <tt>push()</tt>、<tt>pop()</tt> と <tt>size()</tt> は 
+	Generalized Queue の サイズに関して、
+	高々 線形時間の計算量でなければならない。
+
+<LI> <tt>top()</tt> と <tt>empty()</tt> は定数時間で終了しなければならない。
+
+</UL>
+
+<h3>Models</h3>
+
+<UL>
+<LI><a href="http://www.sgi.com/tech/stl/stack.html"><tt>std::stack</tt></a>
+<LI><a href="../../boost/pending/mutable_queue.hpp"><tt>boost::mutable_queue</tt></a>
+</UL>
+
+<p>
+
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000-2001</TD><TD>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>, Indiana University and C++ Library & Compiler Group/SGI (<A HREF="mailto:jsiek@engr.sgi.com">jsiek@engr.sgi.com</A>)
+</TD></TR></TABLE>
+
+</BODY>
+</HTML> 
+

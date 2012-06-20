@@ -1,0 +1,462 @@
+<HTML>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<!--
+  Copyright (C) 2001, Andreas Scherer, Jeremy Siek, Lie-Quan Lee,
+  and Andrew Lumsdaine
+
+  Permission to use, copy, modify, distribute and sell this software and its
+  documentation for any purpose is hereby granted without fee, provided that
+  the above copyright notice appears in all copies and that both that
+  copyright notice and this permission notice appear in supporting
+  documentation.
+  
+  We make no representations about the suitability of this software for any
+  purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Title>Boost Graph Library: Stanford Graph Interface</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+<H1> BGL で SGB グラフを使用する方法    
+</H1>
+
+ Boost グラフ・ライブラリ (BGL) ヘッダ <a     
+href="../../../boost/graph/stanford_graph.hpp"
+><tt>&lt;boost/graph/stanford_graph.hpp&gt;</tt></a> は、Stanford GraphBase (SGB)     
+のグラフ・ポインタを BGL 互換な     
+<a href="./VertexListGraph.html">VertexListGraph</a>&nbsp;に適合する。ただし、グラフ・アダプタ・<b>クラス</b>は<i>使用されない</i>。     
+SGB の <tt>Graph*</tt> それ自身は VertexListGraph     
+のモデルから設計されている。VertexListGraph コンセプトは、 <tt>Graph*</tt>     
+のための適切な非メンバ関数から定義されることにより構成されている。  
+
+<H2><a name="sec:SGB"></a>
+ スタンフォード・グラフベース（The Stanford GraphBase）    
+</H2>
+
+<P>&quot;<a href="http://www-cs-staff.stanford.edu/~knuth/sgb.html">Stanford 
+GraphBase</a>  (SGB)     
+は、非常に多様なグラフやネットワークを生成したり調査したりするコンピュータ・プログラムとデータセットの集まりである&quot;&nbsp;     
+SGB は、１９９３年に     
+<a href="http://www-cs-staff.stanford.edu/~knuth">Donald E. Knuth</a>
+ （クヌース先生）により開発され公開された。完全に文書化されたソースコードは <a href="ftp://labrea.stanford.edu/pub/sgb/sgb.tar.gz">Stanford     
+University （スタンフォード大学）</a> の anonymous ftp     
+から入手でき、"The Stanford GraphBase, A Platform for     
+Combinatorial Computing,"     
+という本の中にも書かれている。この本は ACM Press と Addison-Wesley     
+Publishing Company により１９９３年に共同出版された（この本は電子媒体ではないが、付加的な情報として幾らかの章を含んでいる）。<H3><a name="sec:CWEB"></a>    
+ 必要環境    
+</H3>
+
+SGB のソースコードは、調和のとれた規則を持つ <a href="http://www-cs-staff.stanford.edu/~knuth/lp.html">Literate     
+Programming</a> <a href="http://www.ascii.co.jp/books/detail/4-7561/4-7561-0190-9.html">（文芸的プログラミング）</a>パラダイムにより書かれている。従って、あなたのコンピュータが <a href="http://www-cs-staff.stanford.edu/~knuth/cweb.html">CWEB</a>     
+システムをサポートしているかを確認する必要がある。CWEB     
+ソースコードは <a href="ftp://labrea.stanford.edu/pub/sgb/sgb.tar.gz">Stanford     
+University （スタンフォード大学）</a> の anonymous ftp     
+から入手できる。Unix システムにおける CWEB の立ち上げは、CWEB  
+ディストリビューション（配布パッケージ）により基本として存在し文書化されている。コンパイル済みバイナリ・パッケージである実行可能な     
+Win32 環境の CWEB ツールは、以下の URL: <a href="http://www.literateprogramming.com">www.literateprogramming.com</a>     
+から入手できる。    
+
+<H3><a name="sec:SGB:Installation"></a>
+ SGB のインストール    
+</H3>
+
+<a href="#sec:SGB">SGB ソース</a>を入手し、実際に動作する <a href="#sec:CWEB">CWEB  
+システム</a>（少なくとも &quot;ctangle&quot;  
+プロセッサが必要）をインストールできたならば、ほとんど SGB  
+ソースをコンパイルする準備ができている。SGB  
+は”古い表記スタイルの C”で書かれている。しかし、Boost  
+グラフ・ライブラリでは &quot;新しい表記スタイルの C&quot; と 
+&quot;C++&quot; で扱うことを期待している。幸運なことに  
+SGB  
+ディストリビューションには、&quot;K&amp;R（カーニハン＆リッチ）スタイルの 
+C&quot; から &quot;ANSI スタイルの C&quot; に全てのソースコードを変換する適切なパッチが付属している。従って、Boost  
+グラフ・ライブラリにおいて、スタンフォード・グラフベース  
+(SGB) のスムーズな集積化を可能にしている。    
+
+<ul>
+<li>
+<b>Unix</b>: SGB  
+書庫を解凍した後に、それらファイルを解凍したルート・ディレクトリの場所で     
+"<tt>make tests</tt>" と "<tt>make install</tt>&quot; を実行する前に     
+"<tt>ln -s PROTOTYPES/*.ch .</tt>" を実行する（或いは、単純に SGB 
+ソースファイルの隣にチェンジファイルをコピーしてもよい）。 Unix 
+の SGB <tt>Makefile</tt>  は、都合よく SGB ソースファイルに 
+&quot;チェンジファイル&quot; をマッチさせて、自動的に &quot;ctangle&quot; 
+プロセッサにかけてくれる。生成された C 
+のファイルは、スムーズにコンパイラの実行をパスするであろう。    
+</li>
+<li>
+<b>Win32</b>: SGB ディストリビューションの &quot;MSVC&quot; 
+サブディレクトリに &quot;デベロッパ・スタジオ・プロジェクト&quot; 
+（そして、単体の &quot;ワークスペース・ファイル&quot;）のセットが含まれており、 Microsoft Developer Studio 
+6 に適用できる。インストール方法は付属するファイル <tt>README.MSVC</tt>&nbsp;に書かれている。 
+&quot;MSVC&quot; 
+のコントリビューション（処理系依存パッケージ）は、&quot;プロトタイプ（試作品）&quot;がうまく動作するように更新され続けてきたので、うまく動作するか心配する必要はない。    
+</li>
+</ul>
+
+<H3><a name="sec:UsingSGB"></a> SGB の使用    
+</H3>
+
+<a href="#sec:SGB:Installation">SGB のインストール</a> 
+を終えたならば、SGB <tt>Graph*</tt> を <a href="../../../boost/graph/stanford_graph.hpp"    
+><tt>&lt;boost/graph/stanford_graph.hpp&gt;</tt></a>（これについては<a href="#sec:BGL:Interface">次</a> 
+で説明する）と共に使用して BGL 
+グラフ・インタフェースを利用できる。残りのすべき事は C++ 
+コンパイラに SGB ヘッダファイルの場所（デフォルトでは、Unix 
+の場合 <tt>/usr/local/sgb/include</tt>  で、Win32 の場合 SGB 
+をインストールした &quot;MSVC&quot; 
+サブディレクトリ）を指定し、リンカに SGB 
+スタティック・ライブラリの場所（Unix では <tt>libgb.a</tt>  
+で、Win32 では <tt>libgb.lib</tt>  
+）を指定するのみである。これらの具体的な方法については、個別のコンパイラに付属する説明文書を参照せよ。    
+
+<H3><a name="sec:SGB:Problems"></a>
+ 技術詳細    
+</H3>
+
+<ul>
+<li>
+<b>ヘッダファイルに関して</b>: ２つの SGB モジュール <tt>gb_graph</tt> 
+と <tt>gb_io</tt>  は、プリプロセッサでスイッチ SYSV 
+を使用する。このスイッチで SYSV が定義されている場合（<tt>#if 
+defined(SYSV)</tt> ）されている場合には <tt>&lt;string.h&gt;</tt>  が 
+include され、SYSV が定義されていない場合（ #if !<tt>defined(SYSV)</tt> 
+）には <tt>&lt;strings.h&gt;</tt>  が include 
+される。いくらかのコンパイラでは、例えば <tt>gcc</tt>/<tt>g++</tt> 
+であるが、この事を考慮する必要は無い（ <tt>gcc</tt>  は <tt>&lt;string.h&gt; 
+</tt>を参照すること無しに "string" 
+関数を呼べる）、しかし他のコンパイラでは、例えば Win32 
+の MSVC であるが、この事を考慮する必要がある（ゆえに全ての 
+<a href="#sec:SGB">SGB ディストリビューション</a>の &quot;MSVC&quot; 
+サブディレクトリにおける &quot;デベロッパ・スタジオ・プロジェクト&quot; 
+には、SYSV 
+が適切に定義されている）。コンパイラの環境に合わせて慎重に 
+SYSV を定義するか定義しないかを選択する必要がある。    
+</li>
+<li>
+<b>二重インクルード防止の失敗</b>: どの SGB 
+ヘッダファイルも複数回のインクルードを防止するための "internal     
+include guards"（二重インクルード防止）を施していない。問題回避のためにも、コンパイル・ユニット（*.h; 
+*.cpp; *.hpp; *.inc 等）で <a href="#sec:Wrapper"> BGL ラッパ</a> 
+の前後に SGB ヘッダファイルを #include してはならない。BGL 
+インタフェースは、そのようにしても十分使用できる。    
+</li>
+<li>
+<b>プリプロセッサのマクロ</b>: The SGB headerfiles make liberal use of the     
+preprocessor <i>without</i> sticking to a particular convention (like     
+all-uppercase names or a particular prefix).&nbsp; At the time of writing,     
+already three of these preprocessor macros collide with the conventions of     
+either C++, g++, or BGL, and are fixed in <a href="#sec:Wrapper">the BGL     
+wrapper</a>.&nbsp; We can not guarantee that no other preprocessor-induced     
+problems may arise (but we are willing to learn about any such collisions).     
+</li>
+</ul>
+
+<H2><a name="sec:BGL:Interface"></a>
+ SGB のための BGL インタフェース    
+</H2>
+
+<H3><a name="sec:Wrapper"></a>
+ 定義場所    
+</H3>
+
+<a href="../../../boost/graph/stanford_graph.hpp"
+><tt>&lt;boost/graph/stanford_graph.hpp&gt;</tt></a>
+
+<p> The main purpose of this Boost Graph Library (BGL) headerfile is to
+<tt>#include</tt> all global definitions for the general stuff of the
+<a href="#sec:SGB">Stanford GraphBase</a> (SGB) and its various graph generator
+functions by reading all <a href="#sec:SGB:Problems">SGB headerfiles</a> as in
+section 2 of the "<tt>test_sample</tt>" program.
+
+<p> On top of the SGB stuff, the BGL <tt>stanford_graph.hpp</tt>     
+header adds and defines appropriate types and functions for using the     
+SGB graphs in the BGL framework.&nbsp; Apart from the improved     
+interface, the <a href="#sec:UsingSGB">SGB (static) library</a> is     
+used "as is" in the context of BGL.<H3>モデル
+</H3>
+
+<a href="./VertexListGraph.html">Vertex List Graph</a> and <a     
+href="./PropertyGraph.html">Property Graph</a>.  The set of property     
+tags that can be used with the SGB graph is described in the <a     
+href="#properties">Vertex and Edge Properties</a> section below.<H3><a name="sec:Example"></a> 
+ 例    
+</H3>
+
+The example program <a href="../example/miles_span.cpp">     
+<tt>&lt;example/miles_span.cpp&gt;</tt></a> represents the first     
+application of the generic framework of BGL to an SGB graph.&nbsp; It     
+uses Prim's algorithm to solve the "minimum spanning tree"     
+problem.&nbsp; In addition, the programs <a     
+href="../../../libs/graph/example/girth.cpp">
+<tt>&lt;example/girth.cpp&gt;</tt></a> and <a     
+href="../example/roget_components.cpp">
+<tt>&lt;example/roget_components.cpp&gt;</tt></a> have been ported     
+from the SGB.&nbsp; We intend to implement more algorithms from SGB in     
+a generic fashion and to provide the remaining example programs of SGB     
+for the BGL framework.&nbsp; If you would like to help, feel free to     
+submit your contributions!<H3>関連型
+</H3>
+
+<hr>
+
+<tt>graph_traits&lt;Graph*&gt;::vertex_descriptor</tt><br><br>
+The type for the vertex descriptors associated with the <tt>Graph*</tt>.     
+We use the type <tt>Vertex*</tt> as the vertex descriptor.     
+
+<hr>
+
+<tt>graph_traits&lt;Graph*&gt;::edge_descriptor</tt><br><br> The type     
+for the edge descriptors associated with the <tt>Graph*</tt>.  This is     
+the type <tt>boost::sgb_edge</tt>. In addition to supporting all the     
+required operations of a BGL edge descriptor, the     
+<tt>boost::sgb_edge</tt> class has the following constructor.     
+<pre>
+   sgb_edge::sgb_edge(Arc* arc, Vertex* source)
+</pre>
+
+<hr>
+
+<tt>graph_traits&lt;Graph*&gt;::vertex_iterator</tt><br><br>
+The type for the iterators returned by <tt>vertices()</tt>.     
+
+<hr>
+
+<tt>graph_traits&lt;Graph*&gt;::out_edge_iterator</tt><br><br>
+The type for the iterators returned by <tt>out_edges()</tt>.     
+
+<hr>
+
+<tt>graph_traits&lt;Graph*&gt;::adjacency_iterator</tt><br><br>
+The type for the iterators returned by <tt>adjacent_vertices()</tt>.     
+
+<hr>
+
+<tt>graph_traits&lt;Graph*&gt;::vertices_size_type</tt><br><br>
+The type used for dealing with the number of vertices in the graph.     
+
+<hr>
+
+<tt>graph_traits&lt;Graph*&gt;::edge_size_type</tt><br><br>
+The type used for dealing with the number of edges in the graph.     
+
+<hr>
+
+<tt>graph_traits&lt;Graph*&gt;::degree_size_type</tt><br><br>
+The type used for dealing with the number of edges incident to a vertex     
+in the graph.     
+
+<hr>
+
+<tt>graph_traits&lt;Graph*&gt;::directed_category</tt><br><br>
+Provides information about whether the graph is directed or     
+undirected. An SGB <tt>Graph*</tt> is directed so this type is     
+<tt>directed_tag</tt>.
+
+<hr>
+
+<tt>graph_traits&lt;Graph*&gt;::traversal_category</tt><br><br>
+An SGB <tt>Graph*</tt> provides traversal of the vertex set,     
+out edges, and adjacent vertices. Therefore the traversal category     
+tag is defined as follows:     
+<pre>
+struct sgb_traversal_tag :
+  public virtual vertex_list_graph_tag,
+  public virtual incidence_graph_tag,
+  public virtual adjacency_graph_tag { };
+</pre>
+
+<hr>
+
+<tt>graph_traits&lt;Graph*&gt;::edge_parallel_category</tt><br><br>
+This describes whether the graph class allows the insertion of parallel edges     
+(edges with the same source and target).&nbsp; The SGB <tt>Graph*</tt>     
+does not prevent addition of parallel edges, so this type     
+is <tt>allow_parallel_edge_tag</tt>.     
+
+<hr>
+
+<H3>非メンバ関数
+</H3>
+
+<hr>
+
+<pre>
+std::pair&lt;vertex_iterator,&nbsp;vertex_iterator&gt;
+vertices(Graph*&nbsp;g)
+</pre>
+Returns an iterator-range providing access to the vertex set of graph     
+<tt>g</tt>.
+
+<hr>
+
+<pre>
+std::pair&lt;out_edge_iterator,&nbsp;out_edge_iterator&gt;
+out_edges(vertex_descriptor&nbsp;v, Graph*&nbsp;g)
+</pre>
+Returns an iterator-range providing access to the out-edges of vertex     
+<tt>v</tt> in graph <tt>g</tt>.<br>     
+There is no corresponding <tt>in_edges</tt> function.     
+
+<hr>
+
+<pre>
+std::pair&lt;adjacency_iterator,&nbsp;adjacency_iterator&gt;
+adjacent_vertices(vertex_descriptor&nbsp;v, Graph*&nbsp;g)
+</pre>
+Returns an iterator-range providing access to the adjacent vertices of vertex     
+<tt>v</tt> in graph <tt>g</tt>.     
+
+<hr>
+
+<pre>
+vertex_descriptor
+source(edge_descriptor&nbsp;e, Graph*&nbsp;g)
+</pre>
+Returns the source vertex of edge <tt>e</tt>.     
+
+<hr>
+
+<pre>
+vertex_descriptor
+target(edge_descriptor&nbsp;e, Graph*&nbsp;g)
+</pre>
+Returns the target vertex of edge <tt>e</tt>.     
+
+<hr>
+
+<pre>
+degree_size_type
+out_degree(vertex_descriptor&nbsp;v, Graph*&nbsp;g)
+</pre>
+Returns the number of edges leaving vertex <tt>v</tt>.<br>     
+There is no corresponding <tt>in_degree</tt> function.     
+
+<hr>
+
+<pre>
+vertices_size_type
+num_vertices(Graph*&nbsp;g)
+</pre>
+Returns the number of vertices in the graph <tt>g</tt>.     
+
+<hr>
+
+<pre>
+edge_size_type
+num_edges(Graph*&nbsp;g)
+</pre>
+Returns the number of edges in the graph <tt>g</tt>.     
+
+<hr>
+
+<pre>
+vertex_descriptor
+vertex(vertices_size_type&nbsp;n, Graph*&nbsp;g)
+</pre>
+Returns the (0-based) nth vertex in the graph's vertex list.     
+
+<hr>
+
+<pre>
+template &lt;class <a href="./PropertyTag.html">PropertyTag</a>&gt;
+property_map&lt;Graph*, PropertyTag&gt;::type
+get(PropertyTag, Graph*&amp; g)
+
+template &lt;class <a href="./PropertyTag.html">PropertyTag</a>&gt;
+property_map&lt;Graph*, Tag&gt;::const_type
+get(PropertyTag, const Graph*&amp; g)
+</pre>
+Returns the property map object for the vertex property specified by     
+<TT>PropertyTag</TT>. The <TT>PropertyTag</TT> must be one of     
+the described below.     
+
+<hr>
+
+<h3>頂点プロパティと辺プロパティ</h3>
+
+The SGB <tt>Vertex</tt> and <tt>Arc</tt> structures provide     
+&quot;utility&quot; fields for storing extra information.  We provide     
+BGL wrappers that provide access to these fields through <a     
+href="../../property_map/property_map.html">property maps</a>.  In     
+addition, vertex index and edge length maps are provided. A property     
+map object can be obtained from a SGB <tt>Graph*</tt> using the     
+<tt>get()</tt> function described in the <a     
+href="./PropertyGraph.html">Property Graph</a> concept.     
+
+<p>
+The following list of property tags can be used to specify which
+utility field you would like a property map for.
+</p>
+
+<pre>
+<i>// vertex properties</i>
+template &lt;class T&gt; u_property;
+template &lt;class T&gt; v_property;
+template &lt;class T&gt; w_property;
+template &lt;class T&gt; x_property;
+template &lt;class T&gt; y_property;
+template &lt;class T&gt; z_property;
+
+<i>// edge properties</i>
+template &lt;class T&gt; a_property;
+template &lt;class T&gt; b_property;
+</pre>
+
+<p>
+The template parameter <tt>T</tt> for these tags is limited to the
+types in the <tt>util</tt> union declared in the SGB header
+<tt>gb_graph.h</tt>, which are <tt>Vertex*</tt>, <tt>Arc*</tt>,
+<tt>Graph*</tt>, <tt>char*</tt>, and <tt>long</tt>. The property maps
+for the utility fields are models of <a
+href="../../property_map/LvaluePropertyMap.html">Lvalue Property
+Map</a>.
+</p>
+
+<p>
+The property map for vertex indices can be obtained using the
+<tt>vertex_index_t</tt> tag, and this property map is a <a
+href="../../property_map/ReadablePropertyMap.html">Readable Property
+Map</a>. A property map for edge length's can be obtained using the
+<tt>edge_length_t</tt> tag, and this property map is a <a
+href="../../property_map/LvaluePropertyMap.html">Lvalue Property
+Map</a> whose value type is <tt>long</tt>.
+</p>
+
+<p>
+Property map objects can be obtained via the <tt>get()</tt> function
+of the Property Graph concept. The type of the property map is given
+by the <a href="./property_map.html"><tt>property_map</tt></a> traits
+class.</p>
+
+
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2001</TD><TD>     
+<A HREF="http://www.pobox.com/~scherer">Andreas Scherer</A>,
+Aachen (<A
+HREF="mailto:andreas.scherer@pobox.com">andreas.scherer@pobox.com</A>)<br>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>,
+Indiana University (<A
+HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)<br>
+<A HREF="../../../people/liequan_lee.htm">Lie-Quan Lee</A>,
+Indiana University (<A
+HREF="mailto:llee@cs.indiana.edu">llee@cs.indiana.edu</A>)<br>
+<A HREF=http://www.osl.iu.edu/~lums>Andrew Lumsdaine</A>,
+Indiana University (<A
+HREF="mailto:lums@osl.iu.edu">lums@osl.iu.edu</A>)
+</TD></TR></TABLE>
+		<P>Japanese Translation Copyright (C) 2003 <A href="mailto:oki_miyuki&#64cppll.jp">OKI Miyuki</A>               
+			<BR>
+			<SMALL>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。
+			</SMALL>
+		</P>
+</BODY>
+</HTML> 

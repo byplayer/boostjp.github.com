@@ -1,0 +1,81 @@
+<HTML>
+<!--
+  -- Copyright (c) Jeremy Siek 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  Jeremy Siek makes no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<Title>Boost Graph Library: Named Parameters</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+<H1><A NAME="sec:bgl-named-params"></A>
+<pre>
+bgl_named_params&lt;Param, Type, Rest&gt;
+</pre>
+</H1>
+
+<p>
+多くの Boost.Graph アルゴリズムは長いパラメータ列を持ち、その多くはデフォルト値を持つ。これがいくつかの問題を起こす。 1 つは、 C++ がテンプレート関数のデフォルト値を扱う仕組みを持っていない事だ。しかし、異なる数のパラメータを持つ複数のバージョンのアルゴリズムを作り、各バージョンが一部のパラメータにデフォルト値を与える事で、この問題は克服される。これは Boost.Graph の以前のバージョンで使われていたアプローチだ。しかし、この解決法はまだ、いくつかの理由で不充分だ。
+
+<ul>
+  <li>パラメータのデフォルト値は特定の順序でしか使えない。デフォルト値の順序がユーザの状況に合わなければ、ユーザは全てのパラメータを与えるという手段に訴えなければならない。
+
+  <li>パラメータ列が長いので、順序を忘れやすい。
+</ul>
+
+<p>
+より良い解決法を与えるのが <tt>bgl_named_params</tt> だ。このクラスを使えば、パラメータを任意の順序で与える事ができ、パラメータ名によって引数をパラメータに適合できる。
+
+<p>
+以下のコードで、名前付きパラメータのテクニックを使って <tt>bellman_ford_shortest_paths</tt> を呼び出す例を示す。各引数は、引数がどのパラメータに与えられるのかを示す名前を持つ関数に渡される。それぞれの名前付きパラメータは、カンマではなく<b>ピリオド</b>で区切られる。
+
+<pre>
+  bool r = boost::bellman_ford_shortest_paths(g, int(N), 
+     boost::weight_map(weight).
+     distance_map(&amp;distance[0]).
+     predecessor_map(&amp;parent[0]));
+</pre>
+
+<p>引数が正しいパラメータ関数に適合される限り、引数が与えられる順序はどうでも良い。これは、上のものと等価な <tt>bellman_ford_shortest_paths</tt> の呼び出しである。
+
+<pre>
+  bool r = boost::bellman_ford_shortest_paths(g, int(N), 
+     boost::predecessor_map(&amp;parent[0]).
+     distance_map(&amp;distance[0]).
+     weight_map(weight));
+</pre>
+
+<p>一般に、ユーザは <tt>bgl_named_params</tt> クラスを直接使う必要は無い。 <tt>boost::weight_map</tt> のような <tt>bgl_named_params</tt> のインスタンスを作る関数が有るからだ。
+
+
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000-2001</TD><TD>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>,
+Indiana University (<A
+HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)<br>
+<A HREF="../../../people/liequan_lee.htm">Lie-Quan Lee</A>, Indiana University (<A HREF="mailto:llee@cs.indiana.edu">llee@cs.indiana.edu</A>)<br>
+<A HREF=http://www.osl.iu.edu/~lums>Andrew Lumsdaine</A>,
+Indiana University (<A
+HREF="mailto:lums@osl.iu.edu">lums@osl.iu.edu</A>)
+</TD></TR></TABLE>
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:gimite@mx12.freecom.ne.jp">Hiroshi Ichikawa</a><br>
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+<p>このドキュメントの対象: Boost Version 1.30.0<br>
+<a href="http://www.boost.org/libs/graph/doc/bgl_named_params.html">最新版ドキュメント (英語)</a></p>
+</BODY>
+</HTML>

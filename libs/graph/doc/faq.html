@@ -1,0 +1,218 @@
+<HTML>
+<!--
+  -- Copyright (c) Jeremy Siek, Lie-Quan Lee, and Andrew Lumsdaine 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  We make no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<Title>Boost Graph Library: FAQ</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+<h1>Frequently Asked Questions</h1>
+
+
+<ol>
+
+<!--
+<li>Why does the BGL interface use friend functions (or free functions)
+  instead of member functions?<br>
+-->
+<li>BGL インターフェイスはなぜメンバ関数ではなくフレンド関数（または非メンバ関数）を用いるのですか？<br>
+<!--
+<p>
+For the most part, the differences between member functions and free
+functions are syntactic, and not very important, though people can get
+religious about them. However, we had one technical reason for
+favoring free functions. A programmer can overload a free function for
+a type coming from a 3rd party without modifying the source
+code/definition of that type. There are several uses of this in the
+BGL. For example, Stanford GraphBase and LEDA graphs can both be used
+in BGL algorithms because of overloads in <tt>stanford_graph.hpp</tt>
+and <tt>leda_graph.hpp</tt>. One can even use
+<tt>std::vector&lt;std::list&gt;</tt> as a graph due to the overloads
+in <tt>vector_as_graph.hpp</tt>.
+</p>
+-->
+<p>
+多くの部分でメンバ関数と非メンバ関数の違いは文法的なもので、それほど重要でもないが、
+にもかかわらず、人々はそれら[訳注：メンバ関数]に関する信仰を持つものらしい。
+しかし、我々が自由関数を好むのには一つの技術的な理由がある。
+プログラマはサードパーティに由来する型に対して、その型のソースコードや定義を変更することなく、
+非メンバ関数をオーバーロードできる。
+BGL ではこれがいくつかの方法で使われている。
+例えば、 Stanford GraphBase と LEDA のグラフはいずれも BGL アルゴリズムで使用できる。
+なぜなら <tt>stanford_graph.hpp</tt> と <tt>leda_graph.hpp</tt> でオーバーロードされているからである。
+<tt>std::vector&lt;std::list&gt;</tt> でさえ、 <tt>vector_as_graph.hpp</tt> でオーバーロードされているので、グラフとして使う事ができる。
+<!--
+<p>
+Of course, there is a way to adapt 3rd party classes into an interface
+with member functions. You create an adaptor class. However, the
+disadvantage of an adaptor class (compared to overloaded functions) is
+that one has to physically wrap and unwrap the objects as they go
+into/out of BGL algorithms. So the overloaded function route is more
+convenient.  Granted, this is not a huge difference, but since there
+weren't other strong reasons, it was enough for us to choose member
+functions.
+</p>
+-->
+<p>
+もちろん、メンバ関数でサードパーティ製クラスをインターフェイスに適応させる方法もある。
+アダプタクラスを作成するのである。
+しかし、（オーバーロード関数と比較した）アダプタクラスの短所は、
+オブジェクトが BGL アルゴリズムに出入りする際に、それを実際にラップしたり
+アンラップしたりしなければならないことである。
+とは言え、これは大きな違いではない。しかし他の強い理由が存在しない以上、
+メンバ関数を選ぶには十分な理由だった。
+</p>
+ 
+<!--
+<p> 
+Our religious reason for choosing free functions is to send the message
+that BGL is a generic library, and not a traditional object-oriented
+library. OO was hip in the 80s and 90s, but its time we moved beyond!
+</p>
+-->
+<p> 
+我々が非メンバ関数を選んだ信仰上の理由は、
+ BGL がジェネリックなライブラリであって、
+伝統的なオブジェクト指向ライブラリでないというメッセージを送るためである。
+OO は 80 年代と 90 年代に一世を風靡したが、今やそれを越えていく時なのだ！
+</p>
+</li>
+
+
+
+
+<!--
+<li>How do I create a graph where the edges are sorted/ordered? <br>
+  <p>The example <a href="../example/ordered_out_edges.cpp">
+  <tt>ordered_out_edges.cpp</tt></a> shows how to do this.</p>
+  </li>
+-->
+<li>辺が整列され / 順序づけられているとき、どのようにグラフを作成すればよいかですか？<br>
+  <p>この <a href="../example/ordered_out_edges.cpp">
+  <tt>ordered_out_edges.cpp</tt></a> 例で、どのようにするのか示している。</p>
+  </li>
+
+<!--
+<li>Why does the algorithm X work with <tt>adjacency_list</tt> where
+ <tt>VertexList=vecS</tt> but not when <tt>VertexList=listS</tt>? <br><br>
+-->
+<li>
+<tt>VertexList=vecS</tt> であって <tt>VertexList=listS</tt> でないようなアルゴリズム X が、
+ なぜ <tt>adjacency_list</tt> で動作するのですか？<br><br>
+<!--
+ Often the reason is that the algorithm expects to find the
+ <tt>vertex_index</tt> property stored in the graph. When
+ <tt>VertexList=vecS</tt>, the <tt>adjacency_list</tt> automatically
+ has a <tt>vertex_index</tt> property. However, when <tt>VertexList=listS</tt>
+ this is not the case, and the <tt>vertex_index</tt> property must be
+ explicitly added, and initialized. For example,
+<pre>
+  // specify the graph type
+  typedef adjacency_list&lt;listS, listS, undirectedS,
+                         property&lt;vertex_index_t, std::size_t&gt;,
+                         no_property
+                        &gt; graph_t;
+
+  // construct a graph object
+  graph_t G(num_nodes);
+  // obtain a property map for the vertex_index property
+  property_map&lt;graph_t, vertex_index_t&gt;::type
+    index = get(vertex_index, G);
+  // initialize the vertex_index property values
+  graph_traits&lt;graph_t&gt;::vertex_iterator vi, vend;
+  graph_traits&lt;graph_t&gt;::vertices_size_type cnt = 0;
+  for(tie(vi,vend) = vertices(G); vi != vend; ++vi)
+    put(index, *vi, cnt++);
+</pre>
+-->
+その理由は、次のようなものであることが多い。
+アルゴリズムは、グラフの中に格納された <tt>vertex_index</tt> プロパティが見つかる事を期待する。
+ <tt>VertexList=vecS</tt> のとき、 <tt>adjacency_list</tt> は自動的に <tt>vertex_index</tt> プロパティを持つ。
+しかし、 <tt>VertexList=listS</tt> のときはそうではないので、
+ <tt>vertex_index</tt> プロパティを明示的に加え、初期化しなければならない。例えば、
+<pre>
+  // グラフの型を定義
+  typedef adjacency_list&lt;listS, listS, undirectedS,
+                         property&lt;vertex_index_t, std::size_t&gt;,
+                         no_property
+                        &gt; graph_t;
+
+  // グラフオブジェクトの構築
+  graph_t G(num_nodes);
+  // vertex_index_property のプロパティマップを得る
+  property_map&lt;graph_t, vertex_index_t&gt;::type
+    index = get(vertex_index, G);
+  // vertex_index プロパティの値を初期化する
+  graph_traits&lt;graph_t&gt;::vertex_iterator vi, vend;
+  graph_traits&lt;graph_t&gt;::vertices_size_type cnt = 0;
+  for(tie(vi,vend) = vertices(G); vi != vend; ++vi)
+    put(index, *vi, cnt++);
+</pre>
+</li>
+
+<!--
+<li>When using algorithm X, why do I get an error about a property
+not being found, such as:
+<pre>
+../../../boost/concept_check.hpp:209: no match for
+`boost::detail::error_property_not_found & == 
+ boost::detail::error_property_not_found &'
+</pre>
+or a message such as:
+<pre>
+../../..\boost/graph/depth_first_search.hpp(78) : error C2664: 'white'
+: cannot convert parameter 1 from 
+ 'struct boost::detail::error_property_not_found'
+ to 'enum boost::default_color_type'
+</pre>
+-->
+<li>アルゴリズム X を用いるとき、プロパティが見つからないというエラーが出るのはなぜでしょうか？
+こんな感じです：
+<pre>
+../../../boost/concept_check.hpp:209: no match for
+`boost::detail::error_property_not_found & == 
+ boost::detail::error_property_not_found &'
+</pre>
+あるいはこんなメッセージ：
+<pre>
+../../..\boost/graph/depth_first_search.hpp(78) : error C2664: 'white'
+: cannot convert parameter 1 from 
+ 'struct boost::detail::error_property_not_found'
+ to 'enum boost::default_color_type'
+</pre>
+
+<!--
+The reason is that the algorithm expected to find some property (like color or
+weight) attached to the vertices or edges of the graph, but didn't
+find it. You need to either add an interior property to the graph, or
+create an exterior property map for the property and pass it as an
+argument to the algorithm.</li>
+-->
+その理由は、そのアルゴリズムが、グラフの頂点や辺に付随するいくつかの
+プロパティ（色や重みのような）が見つかることを期待しているのに、
+見つからなかったためである。
+グラフに内部プロパティを追加するか、さもなくばそのプロパティのための
+外部プロパティマップを作成してアルゴリズムの引数としてそれを渡す
+必要がある。
+</li>
+
+
+<p> </p>
+<hr>
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:kn@mm.neweb.ne.jp">Kent.N</a><br> 
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+
+</ol>

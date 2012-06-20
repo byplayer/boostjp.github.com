@@ -1,0 +1,155 @@
+<HTML>
+<!--
+  -- Copyright (c) Jeremy Siek, Lie-Quan Lee, and Andrew Lumsdaine 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  We make no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<Title>Boost Graph Library: EventVisitor</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+<H1>EventVisitor Concept</H1>
+
+このコンセプトは単独イベントビジタのインタフェースを定義する。 EventVisitor は適用メンバ関数 (<tt>operator()</tt>) を持つ。これは、 EventVisitor 内の <tt>event_filter</tt> typedef で指定されるイベントが起きた時に、グラフアルゴリズム内で実行される。 EventVisitor を組み合わせて <a href="./EventVisitorList.html">EventVistorList</a> を作成できる。
+
+<p>
+以下に、 BGL アルゴリズムによって実行されるイベントのタグのリストを示す。各タグは、アルゴリズムのビジタのメンバ関数と対応している。例えば、<a href="./breadth_first_search.html"><tt>breadth_first_search()</tt></a> の <a href="./BFSVisitor.html">BFSVisitor</a> には <tt>cycle_edge()</tt> というメンバ関数が有る。これに対応するタグは <tt>on_cycle_edge</tt> だ。 <tt>operator()</tt> の第 1 引数は、イベントタグによって決まる、辺か頂点の記述子でなければならない。
+
+<pre>
+namespace boost {
+  struct on_initialize_vertex { };
+  struct on_start_vertex { };
+  struct on_discover_vertex { };
+  struct on_examine_edge { };
+  struct on_tree_edge { };
+  struct on_cycle_edge { };
+  struct on_finish_vertex { };
+  struct on_forward_or_cross_edge { };
+  struct on_back_edge { };
+  struct on_edge_relaxed { };
+  struct on_edge_not_relaxed { };
+  struct on_edge_minimized { };
+  struct on_edge_not_minimized { };
+} // namespace boost
+</pre>
+
+
+<h3>Refinement of</h3>
+
+<a href="../../utility/CopyConstructible.html">Copy Constructible</a>
+(ビジタのコピーは軽い操作である方がいい)
+
+<h3>Notation</h3>
+
+<Table>
+<TR>
+<TD><tt>G</tt></TD>
+<TD><a href="./Graph.html">Graph</a> のモデルの型。</TD>
+</TR>
+
+<TR>
+<TD><tt>g</tt></TD>
+<TD><tt>G</tt> 型のオブジェクト。</TD>
+</TR>
+
+<TR>
+<TD><tt>V</tt></TD>
+<TD>EventVisitor のモデルの型。</TD>
+</TR>
+
+<TR>
+<TD><tt>vis</tt></TD>
+<TD><tt>V</tt> 型のオブジェクト。</TD>
+</TR>
+
+<TR>
+<TD><tt>x</tt></TD>
+<TD><tt>boost::graph_traits&lt;G&gt;::vertex_descriptor</tt> 型か
+ <tt>boost::graph_traits&lt;G&gt;::edge_descriptor</tt> 型のオブジェクト。</TD>
+</TR>
+
+</table>
+
+<h3>Associated Types</h3>
+
+<Table border>
+
+<TR>
+<TD>Event Filter </TD>
+<TD><TT>V::event_filter</TT></TD>
+<TD>
+どのイベントによってビジタが実行されるかを指定するタグ構造体。
+</TD>
+</TR>
+
+</table>
+
+<h3>Valid Expressions</h3>
+
+<Table border>
+
+<tr>
+<th>名前</th><th>式</th><th>戻り値</th><th>説明</th>
+</tr>
+
+<tr>
+<td>Apply Visitor</td>
+<td><TT>vis(x, g)</TT></TD>
+<TD><TT>void</TT></TD>
+<TD>
+オブジェクト <tt>x</tt> に対してビジタの操作を実行する。 <tt>x</tt> はグラフの辺か頂点の記述子である。
+</TD>
+</TR>
+
+
+</table>
+
+
+<h3>Models</h3>
+
+<ul>
+ <li><a
+ href="./predecessor_recorder.html"><tt>predecessor_recorder</tt></a>
+ <li><a href="./distance_recorder.html"><tt>distance_recorder</tt></a>
+ <li><a href="./time_stamper.html"><tt>time_stamper</tt></a>
+ <li><a href="./property_writer.html"><tt>property_writer</tt></a>
+ <li><a href="./null_visitor.html"><tt>null_visitor</tt></a>
+</ul>
+
+<h3>See Also</h3>
+
+<a href="./EventVisitorList.html">EventVisitorList</a>,
+<a href="./visitor_concepts.html">Visitor concepts</a>
+
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000-2001</TD><TD>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>,
+Indiana University (<A
+HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)<br>
+<A HREF="../../../people/liequan_lee.htm">Lie-Quan Lee</A>, Indiana University (<A HREF="mailto:llee@cs.indiana.edu">llee@cs.indiana.edu</A>)<br>
+<A HREF=http://www.osl.iu.edu/~lums>Andrew Lumsdaine</A>,
+Indiana University (<A
+HREF="mailto:lums@osl.iu.edu">lums@osl.iu.edu</A>)
+</TD></TR></TABLE>
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:gimite@mx12.freecom.ne.jp">Hiroshi Ichikawa</a><br>
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+<p>このドキュメントの対象: Boost Version 1.30.0<br>
+<a href="http://www.boost.org/libs/graph/doc/EventVisitor.html">最新版ドキュメント (英語)</a></p>
+
+</BODY>
+</HTML> 

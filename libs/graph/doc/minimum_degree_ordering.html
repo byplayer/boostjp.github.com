@@ -1,0 +1,176 @@
+<HTML>
+<!--
+  -- Copyright (c) Lie-Quan Lee and Jeremy Siek, 2001
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  Silicon Graphics makes no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<Title>Boost Graph Library: Minimum Degree Ordering</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+<H1><A NAME="sec:mmd">
+<TT>minimum_degree_ordering</TT>
+</H1>
+
+
+<pre>
+  template &lt;class AdjacencyGraph, class OutDegreeMap,
+           class InversePermutationMap, 
+           class PermutationMap, class SuperNodeSizeMap, class VertexIndexMap&gt;
+  void minimum_degree_ordering
+    (AdjacencyGraph& G,
+     OutDegreeMap outdegree,
+     InversePermutationMap inverse_perm,
+     PermutationMap perm, 
+     SuperNodeSizeMap supernode_size, int delta, VertexIndexMap id) 
+</pre>
+
+<p>
+最小次数順序付け [<A
+HREF="bibliography.html#LIU:MMD">21</A>, <A
+href="bibliography.html#George:evolution">35</a>] は記入 (fill-in) を減少する
+行列並べ替え
+のアルゴリズムである。Cholesky の因数分解 (対称行列のためのガウスの消去法の
+亜種である) を使って <i>A x = b</i> のような方程式の体系を解く場合、
+多くの機会に 0 であった行列中の要素が消去過程のために 0 でなくなる。
+これが“記入 (fill-in)”と呼ばれる事で、記入は行列をより疎でなくし、それゆえ
+後の消去段階と因数分解の結果を使う計算中でより多くの時間と領域を消費するので
+まずい。
+行列の行の並び替えは生じる記入 (fill-in) の量に劇的に影響を及ぼすことが
+できることが現在明らかである。それで <i>A x = b</i> を解く代わりに、
+並べ替えられた (しかし等価な) 体系 <i>(P A P<sup>T</sup>)(P x) = P b</i>
+ を解く。最善の順序付けは NP完全問題 (すなわち、適度な量の時間で
+解くことはできない) なので代わりに発見的手法を用いて“十分に良い”順序付けを
+見つけるだけにする。最小次数順序付けアルゴリズムは一つのそのようなアプローチ
+である。
+
+<p>
+対称行列 <TT>A</TT> は通常は無向グラフで表される。しかしながらこの関数の
+ためには入力は有向グラフであることを必要とする。各々の 0 でない行列の記入
+は<TT>G</TT> 中の二つの有向辺 (<TT>e(i,j)</TT> と<TT>e(j,i)</TT>) で
+表されなければならない。
+
+<p>
+アルゴリズムの出力は新しい順序付け中の頂点である。
+<pre>
+  inverse_perm[new_index[u]] == old_index[u]
+</pre>
+<p> 古い添え字を新しい添え字に置換する。 
+<pre>
+  perm[old_index[u]] == new_index[u]
+</pre>
+<p>次の等式は常に保たれる。
+<pre>
+  for (size_type i = 0; i != inverse_perm.size(); ++i)
+    perm[inverse_perm[i]] == i;
+</pre>
+
+<h3>Parameters</h3>
+
+<ul>
+
+<li> <tt>AdjacencyGraph&amp; G</tt> &nbsp;(IN) <br> 
+有向グラフ。グラフの型は <a
+  href="./AdjacencyGraph.html">Adjacency Graph</a>、<a
+  href="./VertexListGraph.html">Vertex List Graph</a>、<a
+ href="./IncidenceGraph.html">Incidence Graph</a>、そして <a
+ href="./MutableGraph.html">Mutable Graph</a> のモデルでなければならない。
+それに加え、関数 <tt>num_vertices()</tt> と <TT>out_degree()</TT> を
+必要とする。
+
+<li> <tt>OutDegreeMap outdegree</tt> &nbsp(WORK) <br>
+これは内部的に頂点の出次数を格納するのに使われる。これはキー型がグラフの
+頂点記述子型と同じで、値型が汎整数型である <a
+ href="../../property_map/LvaluePropertyMap.html">
+  LvaluePropertyMap</a> でなければならない。
+
+<li> <tt>InversePermutationMap inverse_perm</tt> &nbsp(OUT) <br> 
+新しい頂点の順序付け。新しい添え字から古い添え字 (逆置換) へのマップとして
+得られる。これは値型とキー型が符号付き整数の <a
+href="../../property_map/LvaluePropertyMap.html">LvaluePropertyMap</a>
+ でなければならない。
+
+<li> <tt>PermutationMap perm</tt> &nbsp(OUT) <br> 
+新しい頂点の順序付け。古い添え字から新しい添え字 (置換) へのマップとして
+得られる。これは値型とキー型が符号付き整数の <a
+href="../../property_map/LvaluePropertyMap.html">LvaluePropertyMap</a>
+ でなければならない。
+
+<li> <tt>SuperNodeSizeMap supernode_size</tt> &nbsp(WORK/OUT) <br> 
+これは内部的に上位ノードの大きさを記録するために、また役立つ情報を保持する
+ために使われる。これは符号無し整数の値型と頂点記述子のキー型を持つ <a
+  href="../../property_map/LvaluePropertyMap.html">
+  LvaluePropertyMap</a> である。
+
+<li> <tt>int delta</tt> &nbsp(IN) <br> 
+多重消去を制御する変数。もしこれが 0 以上であれば、多重消去が許可されて
+いる。<tt>delta</tt> の値は最小次数と消去されるべき頂点の次数の間を述べる。
+  
+<li> <tt>VertexIndexMap id</tt> &nbsp(IN) <br> 
+内部的に頂点をその添え字にマップするために使われる。これはキー型がグラフの
+頂点記述子と同じで整数型の値型を持つ <a
+  href="../../property_map/ReadablePropertyMap.html"> Readable
+  Property Map</a> でなければならない。
+
+</ul>
+
+
+<h3>Example</h3>
+
+<a
+href="../example/minimum_degree_ordering.cpp"><tt>example/minimum_degree_ordering.cpp</tt></a> を見なさい。
+
+
+<h3>Implementation Notes</h3>
+
+<p>工事中
+
+<p>それはガウスの消去法の過程をシミュレートする各段階でグラフ中の最小次数
+を持つ頂点を選ぶ。
+
+<p>この実装は全体消去、不完全な次数の更新、多重消去、そして外部の次数を
+含む多くの拡張を提供する。最小次数のアルゴリズム史概論のために [<A
+href="bibliography.html#George:evolution">35</a>] を見なさい。
+
+<p>
+<b>グラフの消去</b> <i>G<sub>v</sub></i> はグラフ <i>G</i> から頂点 <i>v</i>
+ とその全ての接続辺を除去し、それから<i>v</i> へ隣接している全ての頂点を
+クリークにするために付け加える事 (すなわち、辺が既に存在していないならば
+各隣接頂点のペア間に辺を付け加える) によって得られる。
+
+グラフ <i>G</i> は行列 <i>A</i> の 0 でない構成を表現しているグラフであると
+仮定してみよう。すると行列 <i>A</i> の行 <i>i</i> におけるガウスの消去法の
+段階を実行する事は ... に等しい。
+
+
+
+
+
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2001</TD><TD>
+<A HREF="../../../people/liequan_lee.htm">Lie-Quan Lee</A>, Indiana University (<A HREF="mailto:llee@cs.indiana.edu">llee@cs.indiana.edu</A>) <br>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>, Indiana University (<A HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)
+</TD></TR></TABLE>
+
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:takashi-it@po6.nsk.ne.jp">Takashi Itou</a><br> 
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+
+<p>このドキュメントの対象: Boost Version 1.30.0<br>
+<a href="http://www.boost.org/libs/graph/doc/minimum_degree_ordering.html">最新版ドキュメント (英語)</a></p>
+</BODY>
+</HTML> 

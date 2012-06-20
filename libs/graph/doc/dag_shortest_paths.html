@@ -1,0 +1,290 @@
+<HTML>
+<!--
+  -- Copyright (c) Jeremy Siek 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  Jeremy Siek makes no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<Title>Boost Graph Library: Directed Acyclic Graph Shortest Paths</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+<H1><A NAME="sec:dag_shortest_paths"></A>
+<TT>dag_shortest_paths</TT>
+</H1>
+
+
+<P>
+<PRE>
+<i>// 名前付きパラメータバージョン</i>
+template &lt;class VertexListGraph, class Param, class Tag, class Rest&gt;
+void dag_shortest_paths(const VertexListGraph&amp; g,
+   typename graph_traits&lt;VertexListGraph&gt;::vertex_descriptor s,
+   const bgl_named_params&lt;Param,Tag,Rest&gt;&amp; params)
+
+<i>// 名前無しパラメータバージョン</i>
+template &lt;class VertexListGraph, class DijkstraVisitor, 
+	  class DistanceMap, class WeightMap, class ColorMap, 
+	  class PredecessorMap,
+	  class Compare, class Combine, 
+	  class DistInf, class DistZero&gt;
+void dag_shortest_paths(const VertexListGraph&amp; g,
+   typename graph_traits&lt;VertexListGraph&gt;::vertex_descriptor s, 
+   DistanceMap distance, WeightMap weight, ColorMap color,
+   PredecessorMap pred, DijkstraVisitor vis, 
+   Compare compare, Combine combine, DistInf inf, DistZero zero)
+</PRE>
+
+<P>
+このアルゴリズム&nbsp;[<A HREF="bibliography.html#clr90">8</A>] は
+重み付きの非循環有向グラフ (DAG) の単一始点の最短経路問題を解く。
+このアルゴリズムは DAG にとって、Dijkstra や Bellman-Ford アルゴリズムより
+一層効率的である。全ての辺の重みが 1 に等しい時はこのアルゴリズムの代わりに
+幅優先探索を使いなさい。最短経路問題の定義のために、最短経路問題のいくつかの
+背景についての章 <A
+HREF="graph_theory_review.html#sec:shortest-path-algorithms">Shortest-Paths
+Algorithms</A> を見なさい。 
+</P>
+
+<P>
+<tt>dag_shortest_paths()</tt> 関数から出力を得るための主な二つの選択が
+存在する。<tt>distance_map()</tt> パラメータを通して距離プロパティ・
+マップを提供するならばグラフ中の始点から他の全ての頂点への最短距離は
+距離マップに記録されるだろう。
+さらに最短経路木を先行点マップ (predecessor map) に記録する事ができる。
+その場合 <i>V</i> 中の各頂点 <i>u</i> にとって、最短経路木中では <i>p[u]</i>
+ が <i>u</i> の先行点になるだろう (但し <i>p[u] = u</i> でここに <i>u</i> が
+始点であるかまたは始点からは到達不能な頂点である場合を除く)。これらの二つの
+選択に加え、ユーザはアルゴリズムのイベント・ポイントのどれかの間アクションを
+取れる独自のビジタを提供する事ができる。 
+</P>
+
+<h3>Where Defined</h3>
+
+<a href="../../../boost/graph/dag_shortest_paths.hpp"><tt>boost/graph/dag_shortest_paths.hpp</tt></a>
+
+<h3>Parameters</h3>
+
+IN: <tt>const VertexListGraph&amp; g</tt> 
+<blockquote>
+アルゴリズムが適用されるグラフオブジェクト。<tt>VertexListGraph</tt> の型は <a
+href="./VertexListGraph.html">Vertex List Graph</a> のモデルでなければならない。</blockquote>
+
+IN: <tt>vertex_descriptor s</tt> 
+<blockquote>
+始点。全ての距離はこの頂点から計算され、最短経路木はこの頂点を根とする。 
+</blockquote>
+
+<h3>Named Parameters</h3>
+
+IN: <tt>weight_map(WeightMap w_map)</tt>   
+<blockquote>
+グラフ中の各辺の重みまたは“長さ”。<tt>WeightMap</tt> の型は <a
+href="../../property_map/ReadablePropertyMap.html">Readable Property Map</a>
+ のモデルでなければならない。グラフの辺記述子型は重みマップのキー型と
+して使用できる必要がある。マップの値型は距離マップの値型を伴った
+ <i>Addable</i> でなければならない。
+<br>
+<b>デフォルト:</b>  <tt>get(edge_weight, g)</tt>
+</blockquote>
+
+IN: <tt>vertex_index_map(VertexIndexMap i_map)</tt> 
+<blockquote>
+これは各頂点を <tt>[0, num_vertices(g))</tt> の範囲において整数にマップする。
+これは辺がリラックスされた (減らされた) 時、ヒープ・データ構造を効率よく更新
+するのに必要である。<tt>VertexIndexMap</tt> は <a
+href="../../property_map/ReadablePropertyMap.html">Readable Property Map</a>
+ のモデルでなければならない。マップの値型は汎整数型でなければならない。
+グラフの頂点記述子型はマップのキー型として使用できる必要がある。
+<br>
+<b>デフォルト:</b> <tt>get(vertex_index, g)</tt>
+</blockquote>
+
+OUT: <tt>predecessor_map(PredecessorMap p_map)</tt> 
+<blockquote>
+先行点マップ (predecessor map) は最小全域木中に辺を記録する。アルゴリズムの
+完了時に、<i>V</i> 中の全ての <i>u</i> のための辺 <i>(p[u],u)</i> は最小全域木
+中にある。もし <i>p[u] = u</i> なら <i>u</i> は始点かまたは始点から到達不能な
+頂点である。 <tt>PredecessorMap</tt> の型はキーと頂点の型がグラフの頂点記述子型
+と同じ <a
+ href="../../property_map/ReadWritePropertyMap.html">Read/Write
+ Property Map</a> でなければならない。 
+<br>
+<b>デフォルト:</b> <tt>dummy_property_map</tt>
+</blockquote>
+
+UTIL/OUT: <tt>distance_map(DistanceMap d_map)</tt> 
+<blockquote>
+グラフ <tt>g</tt> 中の始点 <tt>s</tt> から各頂点への最短経路の重みは、この
+プロパティ・マップ中に記録される。最短経路の重みは、最短経路に沿った辺の重みの
+和である。<tt>DistanceMap</tt> の型は <a
+ href="../../property_map/ReadWritePropertyMap.html">Read/Write
+ Property Map</a> のモデルでなければならない。グラフの頂点記述子型は
+距離マップのキー型として使用できる必要がある。
+距離マップの値型は <tt>combine</tt> 関数
+オブジェクトと単位要素のための <tt>zero</tt> オブジェクトから作られた <a
+  href="./Monoid.html">Monoid</tt></a> の要素型である。
+さらに距離の値型は <tt>compare</tt> 関数オブジェクトによって供給される <a
+ href="http://www.sgi.com/tech/stl/StrictWeakOrdering.html">
+ StrictWeakOrdering</a>
+ の順序付けを持っていなければならない。 
+<br>
+<b>デフォルト:</b> サイズ <tt>num_vertices(g)</tt> の <tt>WeightMap</tt> の
+値型の <tt>std::vector</tt> から作られた <a
+ href="../../property_map/iterator_property_map.html">
+ <tt>iterator_property_map</tt></a> で、添え字マップには <tt>i_map</tt>
+ を用いる。
+</blockquote>
+
+IN: <tt>distance_compare(CompareFunction cmp)</tt> 
+<blockquote>
+この関数はどの頂点が始点により近いか決定するために距離を比較するのに使われる。
+<tt>CompareFunction</tt> の型は <a
+ href="http://www.sgi.com/tech/stl/BinaryPredicate.html">Binary
+ Predicate</a> のモデルでなければならず、<tt>DistanceMap</tt> プロパティ・
+マップの値型に一致する引数型を持たなければならない。
+<br>
+<b>デフォルト:</b>
+  <tt>std::less&lt;D&gt;</tt> ここに <tt>D=typename
+  property_traits&lt;DistanceMap&gt;::value_type</tt>
+</blockquote>
+
+IN: <tt>distance_combine(CombineFunction cmb)</tt> 
+<blockquote>
+この関数は道の距離を計算するために、距離を結合するのに使われる。
+<tt>CombineFunction</tt> の型は <a
+ href="http://www.sgi.com/tech/stl/BinaryFunction.html">Binary
+ Function</a> のモデルでなければならない。二項関数の第一引数の型は
+ <tt>DistanceMap</tt> プロパティ・マップの値型に一致していなければならず、
+第二引数の型は <tt>WeightMap</tt> プロパティ・マップの値型に一致していなければ
+ならない。結果型は距離の値型と同じでなければならない。
+<br>
+<b>デフォルト:</b> <tt>std::plus&lt;D&gt;</tt> ここに
+   <tt>D=typename property_traits&lt;DistanceMap&gt;::value_type</tt>
+</blockquote>
+
+IN: <tt>distance_inf(D inf)</tt> 
+<blockquote>
+<tt>inf</tt> オブジェクトは <tt>D</tt> オブジェクトのどの値よりも最も大きく
+なければならない。すなわち、<tt>d != inf</tt> の場合どれでも
+ <tt>compare(d, inf) == true</tt> でなければならない。
+<tt>D</tt> の型は <tt>DistanceMap</tt> の値型である。
+<br>
+<b>デフォルト:</b> <tt>std::numeric_limits&lt;D&gt;::max()</tt>
+</blockquote>
+
+IN: <tt>distance_zero(D zero)</tt> 
+<blockquote>
+<tt>zero</tt> の値は距離の値と <tt>combine</tt> 関数オブジェクトによって
+作られた<a href="./Monoid.html">Monoid</a> のための単一要素でなけけばならない。
+<tt>D</tt> の型は <tt>DistanceMap</tt> の値型である。 
+<br>
+<b>デフォルト:</b> <tt>D()</tt>
+</blockquote>
+
+UTIL/OUT: <tt>color_map(ColorMap c_map)</tt> 
+<blockquote>
+これは頂点に印をつけるためにアルゴリズムの実行の間使われる。頂点は白色から
+始めて、それがキュー中に挿入された時に灰色になる。それからそれがキューから
+取り除かれた時に黒色になる。アルゴリズムの終了時に、始点から到達可能な頂点は
+黒色に色づけされている。その他の全ての頂点は白色のままである。<tt>ColorMap</tt>
+ の型は <a href="../../property_map/ReadWritePropertyMap.html">Read/Write
+ Property Map</a> のモデルでなければならない。頂点記述子はマップのキー型として
+使用できる必要があり、マップの値型は <a
+href="./ColorValue.html">Color Value</a> のモデルでなければならない。 
+<br>
+<b>デフォルト:</b> <tt>サイズ num_vertices(g)</tt> の
+ <tt>default_color_type</tt> の <tt>std::vector</tt> から作られた <a
+  href="../../property_map/iterator_property_map.html">
+  <tt>iterator_property_map</tt></a> で、添え字マップには
+ <tt>i_map</tt> を用いる。
+</blockquote>
+  
+OUT: <tt>visitor(DijkstraVisitor v)</tt>  
+<blockquote>
+アルゴリズム内の一定のイベント・ポイントの間に起こしたいアクションを指定する
+のに使いなさい。<tt>DijkstraVisitor</tt> は <a
+href="./DijkstraVisitor.html">Dijkstra Visitor</a> コンセプトのモデルでなけ
+ればならない。ビジタ・オブジェクトは値渡しされる <a
+ href="#1">[1]</a>。
+<br>
+<b>デフォルト:</b> <tt>dijkstra_visitor&lt;null_visitor&gt;</tt>
+</blockquote>
+
+
+<H3>Complexity</H3>
+
+<P>
+時間複雑性は <i>O(V + E)</i> である。
+
+<h3>Visitor Event Points</h3>
+
+<ul>
+<li><b><tt>vis.initialize_vertex(u, g)</tt></b>
+ はアルゴリズムの開始前に各頂点で呼び出される。
+<li><b><tt>vis.examine_vertex(u, g)</tt></b>
+ は頂点が集合 <i>S</i> に加えられた
+時に呼び出される。この時点で <i>(p[u],u)</i> は最短経路木の辺である事が
+分かるので <i>d[u] = delta(s,u) = d[p[u]] + w(p[u],u)</i> である。更に
+調査された頂点の距離は単調増加
+ <i>d[u<sub>1</sub>] <= d[u<sub>2</sub>] <= d[u<sub>n</sub>]</i> である。
+<li><b><tt>vis.examine_edge(e, g)</tt></b>
+ は頂点の各出辺において、
+頂点が集合 <i>S</i> に加えられた後で直ちに呼び出される。
+<li><b><tt>vis.edge_relaxed(e, g)</tt></b>
+ は辺 <i>(u,v)</i> において、
+もし <i>d[u] + w(u,v) < d[v]</i> であるなら呼び出される。
+頂点 <i>v</i> のための最近のリラックス (減少) にあずかった辺 <i>(u,v)</i>
+ は最短経路木の中にある辺である。
+<li><b><tt>vis.discover_vertex(v, g)</tt></b>
+ は頂点 <i>v</i> において、
+<i>(u,v)</i> が調査されて <i>v</i> が白色である時に呼び出される。
+頂点が発見されていれば灰色に色づけされており、各到達可能な頂点はきっかり一度
+発見されるからである。
+<li><b><tt>vis.edge_not_relaxed(e, g)</tt></b>
+はもし辺がリラックスされない (上を見よ) なら呼び出される。
+<li><b><tt>vis.finish_vertex(u, g)</tt></b>
+ は頂点の出辺が全て調査された後に呼び出される。
+</ul>
+
+<H3>Example</H3>
+
+<P>
+<a href="../example/dag_shortest_paths.cpp">
+<TT>example/dag_shortest_paths.cpp</TT></a> を見よ。これはこのアルゴリズムの
+使用例である。
+
+<H3>Notes</H3>
+
+<p><a name="1">[1]</a> 
+ビジタのパラメータは値渡しされるので、もしビジタが状態を持っているなら、
+アルゴリズムの間のいかなる状態の変更も、送ったビジタ・オブジェクトには行われず
+ビジタ・オブジェクトのコピーに対して行われる。それゆえポインタまたは
+リファレンスによってこの状態をビジタに保持させる事を望むかもしれない。
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000-2001</TD><TD>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>, Indiana University (<A HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)
+</TD></TR></TABLE>
+
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:takashi-it@po6.nsk.ne.jp">Takashi Itou</a><br> 
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+
+<p>このドキュメントの対象: Boost Version 1.30.0<br>
+<a href="http://www.boost.org/libs/graph/doc/dag_shortest_paths.html">最新版ドキュメント (英語)</a></p>
+</BODY>
+</HTML> 
+

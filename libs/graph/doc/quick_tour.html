@@ -1,0 +1,1224 @@
+<html>
+
+<!--
+  -- Copyright (c) Jeremy Siek 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  Silicon Graphics makes no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+
+<head>
+<title>Quick Tour of Boost Graph Library</title>
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+</head>
+
+<body bgcolor="#ffffff" link="#0000ee" text="#000000" vlink="#551a8b" alink="#ff0000">
+
+<img src="../../../c++boost.gif" alt="C++ Boost" width="277" height="86"><br clear>
+<h1>A Quick Tour of the Boost Graph Library</h1>
+<!--
+<p>The domain of graph data structures and algorithms is in some respects more
+complicated than that of containers. The abstract iterator interface used by STL
+is not sufficiently rich to encompass the numerous ways that graph algorithms
+may traverse a graph. Instead, we formulate an abstract interface that serves
+the same purpose for graphs that iterators do for basic containers (though
+iterators still play a large role). <a href="#fig:analogy">Figure 1</a> depicts
+the analogy between the STL and the BGL.
+-->
+<p>いくつかの点において、グラフのデータ構造とアルゴリズムという領域はコンテナのそれよりずっと複雑である。
+STL で用いられている抽象的イテレータというインタフェースは、
+グラフアルゴリズムがグラフを渡る(traverse)無数の方法を網羅するのに十分なほど高機能とは言えない。
+我々はそれに代わる抽象的インタフェースを定式化した。
+このインタフェースは、イテレータが基本的なコンテナで為すことと同じ用途をグラフに提供する
+(イテレータも未だに大きな役割を演じているが)。
+<a href="#fig:analogy">Figure 1</a> は STL と BGL の間の類似性を表している。
+<p>&nbsp;</p>
+<div align="CENTER">
+  <a name="fig:analogy"></a><a name="752"></a>
+  <table>
+    <caption valign="bottom"><strong>Figure 1:</strong> The analogy between the
+      STL and the BGL.</caption>
+    <tr>
+      <td><img src="figs/analogy.gif" width="518" height="335"></td>
+    </tr>
+  </table>
+</div>
+<p>&nbsp;</p>
+<!--
+The graph abstraction consists of a set of vertices (or nodes), and a set of
+edges (or arcs) that connect the vertices. <a href="#fig:quick-start">Figure 2</a>
+depicts a directed graph with five vertices (labeled 0 through 4) and 11 edges.
+The edges leaving a vertex are called the <i>out-edges</i> of the vertex. The
+edges <tt>{(0,1),(0,2),(0,3),(0,4)}</tt> are all out-edges of vertex 0. The
+edges entering a vertex are called the <i>in-edges</i> of the vertex. The edges <tt>{(0,4),(2,4),(3,4)}</tt>
+are all in-edges of vertex 4.
+-->
+グラフの抽象化は頂点（またはノード）の集合と、頂点に接続された辺（またはアーク）の集合からなる。
+<a href="#fig:quick-start">Figure 2</a> は（0 から 4 のラベルを振られている) 五つの頂点と 11 の辺を持つ有向グラフを表す。
+頂点を出発した(leaving)辺はその頂点の <i>出辺</i> と呼ばれる。
+<tt>{(0,1),(0,2),(0,3),(0,4)}</tt> の辺はすべて頂点 0 の出辺のである。
+頂点に入ってくる(entering)辺はその頂点の <i>入辺</i> と呼ばれる。
+<tt>{(0,4),(2,4),(3,4)}</tt> の辺はすべて頂点 4 の入辺である。
+<p>&nbsp;</p>
+<div align="CENTER">
+  <a name="fig:quick-start"></a>
+  <table>
+    <caption valign="bottom"><strong>Figure 2:</strong> An example of a directed
+      graph.</caption>
+    <tr>
+      <td><img src="figs/quick_start.gif" width="103" height="124"></td>
+    </tr>
+  </table>
+</div>
+<p>&nbsp;</p>
+<!--
+<p>In the following sections we will use the BGL to construct this example graph
+and manipulate it in various ways. The complete source code for this example can
+be found in <a href="../example/quick_tour.cpp"><tt>examples/quick_tour.cpp</tt></a>.
+Each of the following sections discusses a &quot;slice&quot; of this example
+file. Excerpts from the output of the example program will also be listed.
+-->
+<p>続く節では、 BGL を用いてこの例のグラフを構築し、様々な方法で操作してみる。
+この例の完全なソースコードは<a href="../example/quick_tour.cpp"><tt>examples/quick_tour.cpp</tt></a>
+で見ることができる。
+各節はこのソースファイルの&quot;一部分&quot;について議論する。
+プログラムの出力からの引用も載せている。
+<p>&nbsp;
+<h2>Constructing a Graph</h2>
+<!--
+<p>In this example we will use the BGL <a href="adjacency_list.html"><tt>adjacency_list</tt></a>
+class to demonstrate the main ideas in the BGL interface. The <tt>adjacency_list</tt>
+class provides a generalized version of the classic &quot;adjacency list&quot;
+data structure. The <tt>adjacency_list</tt> is a template class with six
+template parameters, though here we only fill in the first three parameters and
+use the defaults for the remaining three. The first two template arguments (<tt>vecS,
+vecS</tt>) determine the data structure used to represent the out-edges for each
+vertex in the graph and the data structure used to represent the graph's vertex
+set (see section <a href="using_adjacency_list.html#sec:choosing-graph-type">Choosing
+the <tt>Edgelist</tt> and <tt>VertexList</tt></a> for information about the
+tradeoffs of the different data structures). The third argument, <tt>bidirectionalS</tt>,
+selects a directed graph that provides access to both out and in-edges. The
+other options for the third argument are <tt>directedS</tt> which selects a
+directed graph with only out-edges, and <tt>undirectedS</tt> which selects an
+undirected graph.
+-->
+<p>BGL インタフェースの主な考え方を示すために、この例では BGL の <a href="adjacency_list.html"><tt>adjacency_list</tt></a> クラスを用いる。
+<tt>adjacency_list</tt> クラスは古典的な &quot; 隣接リスト &quot; データ構造を一般化したものである。
+<tt>adjacency_list</tt> は六つのテンプレートパラメータを持つテンプレートクラスである。
+ここで我々は最初の三つのパラメータだけを埋めて、残りの三つについてはデフォルトのものを用いている。
+最初の二つのテンプレート引数 (<tt>vecS, vecS</tt>) は、グラフの各頂点に対する出辺を表現するデータ構造と、
+グラフの頂点セットを表現するデータ構造を決定する (各データ構造のトレードオフについての情報は<a href="using_adjacency_list.html#sec:choosing-graph-type">Choosing the <tt>Edgelist</tt> and <tt>VertexList</tt></a>を参照)。
+三番目の引数 <tt>bidirectionalS</tt> は、出辺と入辺の両方へのアクセスを提供する有向グラフを選択している。
+第三引数への他のオプションとしては、出辺のみの有向グラフを選択する <tt>directedS</tt> と、
+無向グラフを選択する <tt>undirectedS</tt> がある。
+<!--
+<p>Once we have the graph type selected, we can create the graph in <a href="#fig:quick-start">Figure
+2</a> by declaring a graph object and filling in edges using the <a href="MutableGraph.html#sec:add-edge"><tt>add_edge()</tt></a>
+function of the <a href="MutableGraph.html">MutableGraph</a> interface (which <tt>adjacency_list</tt>
+implements). We use the array of pairs <tt>edge_array</tt> merely as a
+convenient way to explicitly create the edges for this example.
+-->
+<p>
+グラフの型を選択した後、
+グラフオブジェクトを宣言し、 <a href="MutableGraph.html">MutableGraph</a> インタフェース 
+(<tt>adjacency_list</tt> が実装している) の <a href="MutableGraph.html#sec:add-edge"><tt>add_edge()</tt></a> 関数を用いて辺を埋めることで、
+ <a href="#fig:quick-start">Figure 2</a> 
+のグラフを作ることができる。
+ (intの) 組の配列 <tt>edge_array</t> は、例の辺を明示的に作成するための便利な方法として用いているだけである。
+<p>&nbsp;
+<!--
+<pre>
+  #include &lt;iostream&gt;                  // for std::cout
+  #include &lt;utility&gt;                   // for std::pair
+  #include &lt;algorithm&gt;                 // for std::for_each
+  #include &lt;boost/graph/graph_traits.hpp&gt;
+  #include &lt;boost/graph/adjacency_list.hpp&gt;
+  #include &lt;boost/graph/dijkstra_shortest_paths.hpp&gt;
+
+  using namespace boost;
+  
+  int main(int,char*[])
+  {
+    // create a typedef for the Graph type
+    typedef adjacency_list&lt;vecS, vecS, bidirectionalS&gt; Graph;
+
+    // Make convenient labels for the vertices
+    enum { A, B, C, D, E, N };
+    const int num_vertices = N;
+    const char* name = "ABCDE";
+
+    // writing out the edges in the graph
+    typedef std::pair&lt;int, int&gt; Edge;
+    Edge edge_array[] = 
+    { Edge(A,B), Edge(A,D), Edge(C,A), Edge(D,C),
+      Edge(C,E), Edge(B,D), Edge(D,E), };
+    const int num_edges = sizeof(edge_array)/sizeof(edge_array[0]);
+
+    // declare a graph object
+    Graph g(num_vertices);
+
+    // add the edges to the graph object
+    for (int i = 0; i &lt; num_edges; ++i)
+      add_edge(edge_array[i].first, edge_array[i].second, g);
+    ...
+    return 0;
+  }
+</pre>
+-->
+<pre>
+  #include &lt;iostream&gt;                  // for std::cout
+  #include &lt;utility&gt;                   // for std::pair
+  #include &lt;algorithm&gt;                 // for std::for_each
+  #include &lt;boost/graph/graph_traits.hpp&gt;
+  #include &lt;boost/graph/adjacency_list.hpp&gt;
+  #include &lt;boost/graph/dijkstra_shortest_paths.hpp&gt;
+
+  using namespace boost;
+  
+  int main(int,char*[])
+  {
+    // グラフの型のための typedef を作成
+    typedef adjacency_list&lt;vecS, vecS, bidirectionalS&gt; Graph;
+
+    // 頂点のため便宜上のラベルを作る
+    enum { A, B, C, D, E, N };
+    const int num_vertices = N;
+    const char* name = "ABCDE";
+
+    // グラフの辺を書き出す
+    typedef std::pair&lt;int, int&gt; Edge;
+    Edge edge_array[] = 
+    { Edge(A,B), Edge(A,D), Edge(C,A), Edge(D,C),
+      Edge(C,E), Edge(B,D), Edge(D,E), };
+    const int num_edges = sizeof(edge_array)/sizeof(edge_array[0]);
+
+    // グラフオブジェクトを宣言
+    Graph g(num_vertices);
+
+    // グラフオブジェクトに辺を追加
+    for (int i = 0; i &lt; num_edges; ++i)
+      add_edge(edge_array[i].first, edge_array[i].second, g);
+    ...
+    return 0;
+  }
+</pre>
+<!--
+<p>Instead of calling the <tt>add_edge()</tt> function for each edge, we could
+use the <a href="adjacency_list.html#sec:iterator-constructor">edge iterator
+constructor</a> of the graph. This is typically more efficient than using <tt>add_edge()</tt>.
+Pointers to the <tt>edge_array</tt> can be viewed as iterators, so we can call
+the iterator constructor by passing pointers to the beginning and end of the
+array.
+-->
+<p>各辺に <tt>add_edge()</tt> 関数を呼ぶ代わりに、
+グラフの <a href="adjacency_list.html#sec:iterator-constructor">辺イテレータのコンストラクタ
+</a> を使うことができる。
+典型的にはこれは <tt>add_edge()</tt> を使うより効率がよい。
+<tt>edge_array</tt> へのポインタはイテレータと見なされるため、
+配列の先頭と終端へのポインタを渡すことでイテレータのコンストラクタを呼び出すことができる。
+<!--
+<pre>
+    Graph g(edge_array, edge_array + sizeof(edge_array) / sizeof(E), num_vertices);
+</pre>
+<p>Instead of creating a graph with a certain number of vertices to begin with,
+it is also possible to add and remove vertices with the <a href="MutableGraph.html#sec:add-vertex"><tt>add_vertex()</tt></a>
+and <a href="MutableGraph.html#sec:remove-vertex"><tt>remove_vertex()</tt></a>
+functions, also of the <a href="MutableGraph.html">MutableGraph</a> interface.
+-->
+<pre>
+    Graph g(edge_array, edge_array + sizeof(edge_array) / sizeof(E), num_vertices);
+</pre>
+<p>最初に頂点の個数を明確にしてグラフを作成する代わりに、
+<a href="MutableGraph.html">MutableGraph</a> インタフェースの
+ <a href="MutableGraph.html#sec:add-vertex"><tt>add_vertex()</tt></a> 関数と
+ <a href="MutableGraph.html#sec:remove-vertex"><tt>remove_vertex()</tt></a> 関数
+で頂点を追加、削除することもできる。
+
+<h2>Accessing the Vertex Set</h2>
+<!--
+<p>Now that we have created a graph, we can use the graph interface to access
+the graph data in different ways. First we can access all of the vertices in the
+graph using the <a href="VertexListGraph.html#sec:vertices"><tt>vertices()</tt></a>
+function of the <a href="VertexListGraph.html">VertexListGraph</a> interface.
+This function returns a <tt>std::pair</tt> of <i>vertex iterators</i> (the <tt>first</tt>
+iterator points to the &quot;beginning&quot; of the vertices and the <tt>second</tt>
+iterator points &quot;past the end&quot;). Dereferencing a vertex iterator gives
+a vertex object. The type of the vertex iterator is given by the <a href="graph_traits.html"><tt>graph_traits</tt></a>
+class. Note that different graph classes can have different associated vertex
+iterator types, which is why we need the <tt>graph_traits</tt> class. Given some
+graph type, the <tt>graph_traits</tt> class will provide access to the <tt>vertex_iterator</tt>
+type.
+-->
+<p>
+さて、グラフができあがった。グラフのデータにアクセスする為に、このグラフインターフェイスを
+様々な方法で用いることができる。
+第一に、
+ <a href="VertexListGraph.html">VertexListGraph</a> インタフェースの
+ <a href="VertexListGraph.html#sec:vertices"><tt>vertices()</tt></a> 関数を用いて
+グラフのすべての頂点にアクセスできる。
+この関数は<i>頂点イテレータ</i>の <tt>std::pair</tt> を返す
+ (<tt>一つ目の</tt>イテレータは&quot;始めの&quot;頂点を指し、<tt>二つ目の</tt>イテレータは&quot;最後の次&quot;を指す) 。
+頂点イテレータを参照外しすると頂点オブジェクトが得られる。
+頂点イテレータの型は <a href="graph_traits.html"><tt>graph_traits</tt></a> クラスによって与えられる。
+異なるグラフクラスは異なる頂点イテレータ型に関連づけられている点に注意して欲しい。そのために
+ <tt>graph_traits</tt> が必要とされるのである。
+いくつかのグラフ型では、 <tt>graph_traits</tt> クラスが <tt>vertex_iterator</tt> 型へのアクセスを提供する。
+<!--
+<p>The following example prints out the index for each of the vertices in the
+graph. All vertex and edge properties, including index, are accessed via
+property map objects. The <a href="property_map.html"><tt>property_map</tt></a>
+class is used to obtain the property map type for a specific property (specified
+by <tt>vertex_index_t</tt>, one of the BGL predefined properties) and function
+call <tt>get(vertex_index, g)</tt> returns the actual property map object.
+-->
+<p>次の例はグラフの各々の頂点に対するインデックスを表示する。
+インデックスを含むすべての頂点と辺のプロパティはプロパティマップオブジェクトを通じて
+アクセスできる。
+<a href="property_map.html"><tt>property_map</tt></a> クラスは
+ (BGL の定義済みプロパティの一つである <tt>vertex_index_t</tt> によって特定された) 
+あるプロパティのためのプロパティマップ型を取得するのに使われる。
+また <tt>get(vertex_index, g)</tt> 関数呼び出しは実際のプロパティマップオブジェクトを返す。
+<p>&nbsp;
+<!--
+<pre>
+  // ...
+  int main(int,char*[])
+  {
+    // ...
+
+    // get the property map for vertex indices
+    typedef property_map&lt;Graph, vertex_index_t&gt;::type IndexMap;
+    IndexMap index = get(vertex_index, g);
+
+    std::cout &lt;&lt; &quot;vertices(g) = &quot;;
+    typedef graph_traits&lt;Graph&gt;::vertex_iterator vertex_iter;
+    std::pair&lt;vertex_iter, vertex_iter&gt; vp;
+    for (vp = vertices(g); vp.first != vp.second; ++vp.first)
+      std::cout &lt;&lt; index[*vp.first] &lt;&lt;  &quot; &quot;;
+    std::cout &lt;&lt; std::endl;
+    // ...
+    return 0;
+  }
+</pre>
+The output is:
+<pre>
+  vertices(g) = 0 1 2 3 4
+</pre>
+-->
+<pre>
+  // ...
+  int main(int,char*[])
+  {
+    // ...
+
+    // 頂点インデックスのためのプロパティマップを得る
+    typedef property_map&lt;Graph, vertex_index_t&gt;::type IndexMap;
+    IndexMap index = get(vertex_index, g);
+
+    std::cout &lt;&lt; &quot;vertices(g) = &quot;;
+    typedef graph_traits&lt;Graph&gt;::vertex_iterator vertex_iter;
+    std::pair&lt;vertex_iter, vertex_iter&gt; vp;
+    for (vp = vertices(g); vp.first != vp.second; ++vp.first)
+      std::cout &lt;&lt; index[*vp.first] &lt;&lt;  &quot; &quot;;
+    std::cout &lt;&lt; std::endl;
+    // ...
+    return 0;
+  }
+</pre>
+出力は次の通り：
+<pre>
+  vertices(g) = 0 1 2 3 4
+</pre>
+<p>&nbsp;
+<h2>Accessing the Edge Set</h2>
+<!--
+<p>The set of edges for a graph can be accessed with the <a href="EdgeListGraph.html#sec:edges"><tt>edges()</tt></a>
+function of the <a href="EdgeListGraph.html">EdgeListGraph</a> interface.
+Similar to the <tt>vertices()</tt> function, this returns a pair of iterators,
+but in this case the iterators are <i>edge iterators</i>. Dereferencing an edge
+iterator gives an edge object. The <tt>source()</tt> and <tt>target()</tt>
+functions return the two vertices that are connected by the edge. Instead of
+explicitly creating a <tt>std::pair</tt> for the iterators, this time we will
+use the <a href="../../utility/tie.html"><tt>tie()</tt></a> helper function.
+This handy function can be used to assign the parts of a <tt>std::pair</tt> into
+two separate variables, in this case <tt>ei</tt> and <tt>ei_end</tt>. This is
+usually more convenient than creating a <tt>std::pair</tt> and is our method of
+choice for the BGL.
+-->
+<p>グラフの辺の集合には
+ <a href="EdgeListGraph.html">EdgeListGraph</a> インタフェースの
+ <a href="EdgeListGraph.html#sec:edges"><tt>edges()</tt></a> 関数を用いて
+アクセスすることができる。
+<tt>vertices()</tt> 関数と同様に、
+これはイテレータの組を返すが、この場合のイテレータは <i>辺イテレータ</i> である。
+辺イテレータを参照外しすると辺オブジェクトが得られる。
+イテレータに明示的に <tt>std::pair</tt> を作成する代わりに、
+今回は <a href="../../utility/tie.html"><tt>tie()</tt></a> ヘルパ関数を用いている。
+この便利な関数は <tt>std::pair</tt> の中身を二つの変数、この場合 <tt>ei</tt> と <tt>ei_end</tt> に
+代入する為に使う事ができる。
+これはたいていの場合 <tt>std::pair</tt> を作成するよりずっと便利であり、
+BGL の為に我々が選択した方法である。
+<p>&nbsp;
+<!--
+<pre>
+  // ...
+  int main(int,char*[])
+  {
+    // ...
+    std::cout &lt;&lt; &quot;edges(g) = &quot;;
+    graph_traits&lt;Graph&gt;::edge_iterator ei, ei_end;
+    for (tie(ei, ei_end) = edges(g); ei != ei_end; ++ei)
+        std::cout &lt;&lt; &quot;(&quot; &lt;&lt; index[source(*ei, g)] 
+                  &lt;&lt; &quot;,&quot; &lt;&lt; index[target(*ei, g)] &lt;&lt; &quot;) &quot;;
+    std::cout &lt;&lt; std::endl;
+    // ...
+    return 0;
+  }
+</pre>
+The output is:
+<pre>
+  edges(g) = (0,1) (0,2) (0,3) (0,4) (2,0) (2,4) (3,0)
+    (3,1) (3,4) (4,0) (4,1)
+</pre>
+-->
+<pre>
+  // ...
+  int main(int,char*[])
+  {
+    // ...
+    std::cout &lt;&lt; &quot;edges(g) = &quot;;
+    graph_traits&lt;Graph&gt;::edge_iterator ei, ei_end;
+    for (tie(ei, ei_end) = edges(g); ei != ei_end; ++ei)
+        std::cout &lt;&lt; &quot;(&quot; &lt;&lt; index[source(*ei, g)] 
+                  &lt;&lt; &quot;,&quot; &lt;&lt; index[target(*ei, g)] &lt;&lt; &quot;) &quot;;
+    std::cout &lt;&lt; std::endl;
+    // ...
+    return 0;
+  }
+</pre>
+出力は以下の通り：
+<pre>
+  edges(g) = (0,1) (0,2) (0,3) (0,4) (2,0) (2,4) (3,0)
+    (3,1) (3,4) (4,0) (4,1)
+</pre>
+<p>&nbsp;
+<h2>The Adjacency Structure</h2>
+<!--
+<p>In the next few examples we will explore the adjacency structure of the graph
+from the point of view of a particular vertex. We will look at the vertices'
+in-edges, out-edges, and its adjacent vertices. We will encapsulate this in an
+&quot;exercise vertex&quot; function, and apply it to each vertex in the graph.
+To demonstrate the STL-interoperability of BGL, we will use the STL <tt>for_each()</tt>
+function to iterate through the vertices and apply the function.
+-->
+<p>続くいくつかの例で、特定の頂点の視点からグラフの隣接構造を探索しよう。
+頂点の入辺、出辺、そして近接する頂点を見て回る。
+これを &quot;exercise vertex&quot; 関数に閉じこめて、グラフの各頂点に適用してみよう。
+ BGL と STL との相互運用性を示すために、 STL の <tt>for_each()</tt> 関数を
+使って頂点を辿り、関数を適用してみることにする。
+<p>&nbsp;
+<!--
+<pre>
+  //...
+  int main(int,char*[])
+  {
+    //...
+    std::for_each(vertices(g).first, vertices(g).second,
+                  exercise_vertex&lt;Graph&gt;(g));
+    return 0;
+  }
+</pre>
+-->
+<pre>
+  //...
+  int main(int,char*[])
+  {
+    //...
+    std::for_each(vertices(g).first, vertices(g).second,
+                  exercise_vertex&lt;Graph&gt;(g));
+    return 0;
+  }
+</pre>
+<!--
+<p>We use a functor for <tt>exercise_vertex</tt> instead of just a function
+because the graph object will be needed when we access information about each
+vertex; using a functor gives us a place to keep a reference to the graph object
+during the execution of the <tt>std::for_each()</tt>. Also we template the
+functor on the graph type so that it is reusable with different graph classes.
+Here is the start of the <tt>exercise_vertex</tt> functor:
+<p>&nbsp;
+<pre>
+  template &lt;class Graph&gt; struct exercise_vertex {
+    exercise_vertex(Graph&amp; g_) : g(g_) {}
+    //...
+    Graph&amp; g;
+  };
+</pre>
+-->
+<p> <tt>exercise_vertex</tt> には、ただの関数の代わりにファンクタを用いる。
+なぜなら各頂点の情報にアクセスする際にグラフオブジェクトが必要となるためである；
+ファンクタを使えば、 <tt>std::for_each()</tt> が実行されている間、
+グラフオブジェクトへの参照を保持する場所が与えられるからだ。
+また、ファンクタをグラフの型についてテンプレートにすることにより、異なるグラフクラスで
+再利用できるようになる。
+ここが <tt>exercise_vertex</tt> ファンクタの始まりである：
+<p>&nbsp;
+<pre>
+  template &lt;class Graph&gt; struct exercise_vertex {
+    exercise_vertex(Graph&amp; g_) : g(g_) {}
+    //...
+    Graph&amp; g;
+  };
+</pre>
+<p>&nbsp;
+<h3>Vertex Descriptors</h3>
+<!--
+<p>The first thing we need to know in order to write the <tt>operator()</tt>
+method of the functor is the type for the vertex objects of the graph. The
+vertex type will be the parameter to the <tt>operator()</tt> method. To be
+precise, we do not deal with actual vertex objects, but rather with <i>vertex
+descriptors</i>. Many graph representations (such as adjacency lists) do not
+store actual vertex objects, while others do (e.g., pointer-linked graphs). This
+difference is hidden underneath the &quot;black-box&quot; of the vertex
+descriptor object. The vertex descriptor is something provided by each graph
+type that can be used to access information about the graph via the <tt>out_edges()</tt>,
+<tt>in_edges()</tt>, <tt>adjacent_vertices()</tt>, and property map functions
+that are described in the following sections. The <tt>vertex_descriptor</tt>
+type is obtained through the <tt>graph_traits</tt> class. The <tt>typename</tt>
+keyword used below is necessary because the type on the left hand side of the
+scope <tt>::</tt> operator (the <tt>graph_traits&lt;Graph&gt;</tt> type) is
+dependent on a template parameter (the <tt>Graph</tt> type). Here is how we
+define the functor's apply method:
+<p>&nbsp;
+<pre>
+  template &lt;class Graph&gt; struct exercise_vertex {
+    //...
+    typedef typename graph_traits&lt;Graph&gt;
+      ::vertex_descriptor Vertex;
+
+    void operator()(const Vertex&amp; v) const
+    {
+      //...
+    }
+    //...
+  };
+</pre>
+<p>&nbsp;
+-->
+<p>ファンクタの <tt>operator()</tt> メソッドを書くために最初に知る必要がある
+ものは、グラフの頂点オブジェクトの型である。
+頂点の型は <tt>operator()</tt> メソッドへのパラメータとなる。
+正確には、実際の頂点オブジェクトではなくむしろ<i>頂点記述子</i> を扱う。
+隣接リストのようなグラフ表現の多くは実際の頂点オブジェクトを保持しないが、
+一方で、例えばポインタでリンクされたグラフなどはそうではない。
+この違いは頂点記述子という &quot;ブラックボックス&quot; の下に隠される。
+頂点記述子は各々のグラフ型によって提供され、
+ <tt>out_edges()</tt> 、 <tt>in_edges()</tt> 、 <tt>adjacent_vertices()</tt> および
+次節で述べるプロパティマップ関数によって、グラフに関する情報へアクセスする為に使われる。
+<tt>vertex_descriptor</tt> 型は <tt>graph_traits</tt> クラスを通じて取得される。
+スコープ <tt>::</tt> 演算子の左側 (<tt>graph_traits&lt;Graph&gt;</tt> 型) が
+テンプレートパラメータ (<tt>Graph</tt> 型) に依存しているので、
+以下で使われている <tt>typename</tt> キーワードは必須である。
+ファンクタの<font color="red">適用メソッド(apply method)</font>は
+次のように定義する：
+<p>&nbsp;
+<pre>
+  template &lt;class Graph&gt; struct exercise_vertex {
+    //...
+    typedef typename graph_traits&lt;Graph&gt;
+      ::vertex_descriptor Vertex;
+
+    void operator()(const Vertex&amp; v) const
+    {
+      //...
+    }
+    //...
+  };
+</pre>
+<p>&nbsp;
+<!--
+<h3>Out-Edges, In-Edges, and Edge Descriptors</h3>
+<p>The out-edges of a vertex are accessed with the <a href="IncidenceGraph.html#sec:out-edges"><tt>out_edges()</tt></a>
+function of the <a href="IncidenceGraph.html">IncidenceGraph</a> interface. The <tt>out_edges()</tt>
+function takes two arguments: the first argument is the vertex and the second is
+the graph object. The function returns a pair of iterators which provide access
+to all of the out-edges of a vertex (similar to how the <tt>vertices()</tt>
+function returned a pair of iterators). The iterators are called <i>out-edge
+iterators</i> and dereferencing one of these iterators gives an <i>edge
+descriptor</i> object. An edge descriptor plays the same kind of role as the
+vertex descriptor object, it is a &quot;black box&quot; provided by the graph
+type. The following code snippet prints the source-target pairs for each
+out-edge of vertex <tt>v</tt>.
+<p>&nbsp;
+<pre>
+  template &lt;class Graph&gt; struct exercise_vertex {
+    //...
+    void operator()(const Vertex&amp; v) const
+    {
+      typedef graph_traits&lt;Graph&gt; GraphTraits;
+      typename property_map&lt;Graph, vertex_index_t&gt;::type 
+        index = get(vertex_index, g);
+
+      std::cout &lt;&lt; &quot;out-edges: &quot;;
+      typename GraphTraits::out_edge_iterator out_i, out_end;
+      typename GraphTraits::edge_descriptor e;
+      for (tie(out_i, out_end) = out_edges(v, g); 
+           out_i != out_end; ++out_i) {
+        e = *out_i;
+        Vertex src = source(e, g), targ = target(e, g);
+        std::cout &lt;&lt; &quot;(&quot; &lt;&lt; index[src] &lt;&lt; &quot;,&quot; 
+                  &lt;&lt; index[targ] &lt;&lt; &quot;) &quot;;
+      }
+      std::cout &lt;&lt; std::endl;
+      //...
+    }
+    //...
+  };
+</pre>
+For vertex 0 the output is:
+<pre>
+  out-edges: (0,1) (0,2) (0,3) (0,4)
+</pre>
+-->
+<h3>Out-Edges, In-Edges, and Edge Descriptors</h3>
+<p>頂点の出辺は <a href="IncidenceGraph.html">IncidenceGraph</a> インタフェースの
+ <a href="IncidenceGraph.html#sec:out-edges"><tt>out_edges()</tt></a> 関数でアクセスされる。
+ <tt>out_edges()</tt> 関数は二つの引数を取る：一つ目の引数は頂点、二つ目はグラフオブジェクトである。
+この関数は、頂点のすべての出辺へのアクセスを提供するイテレータの組を返す
+(<tt>vertices()</tt> 関数がどのようにイテレータの組を返すのか、と同じように)。
+そのイテレータは <i>出辺イテレータ</i> 呼ばれ、
+これらのイテレータの一つを参照外しすることで<i>辺記述子</i>オブジェクトが得られる。
+辺記述子は頂点記述子と同種の役割を演じる、グラフ型が提供する
+ &quot;ブラックボックス&quot; である。
+以下のコード断片は頂点 <tt>v</tt> の各出辺に対する始点 - 終点の組を表示するものである。
+<p>&nbsp;
+<pre>
+  template &lt;class Graph&gt; struct exercise_vertex {
+    //...
+    void operator()(const Vertex&amp; v) const
+    {
+      typedef graph_traits&lt;Graph&gt; GraphTraits;
+      typename property_map&lt;Graph, vertex_index_t&gt;::type 
+        index = get(vertex_index, g);
+
+      std::cout &lt;&lt; &quot;out-edges: &quot;;
+      typename GraphTraits::out_edge_iterator out_i, out_end;
+      typename GraphTraits::edge_descriptor e;
+      for (tie(out_i, out_end) = out_edges(v, g); 
+           out_i != out_end; ++out_i) {
+        e = *out_i;
+        Vertex src = source(e, g), targ = target(e, g);
+        std::cout &lt;&lt; &quot;(&quot; &lt;&lt; index[src] &lt;&lt; &quot;,&quot; 
+                  &lt;&lt; index[targ] &lt;&lt; &quot;) &quot;;
+      }
+      std::cout &lt;&lt; std::endl;
+      //...
+    }
+    //...
+  };
+</pre>
+頂点 0 についての出力は以下の通り：
+<pre>
+  out-edges: (0,1) (0,2) (0,3) (0,4)
+</pre>
+<!--
+<p>The <a href="BidirectionalGraph.html#sec:in-edges"><tt>in_edges()</tt></a>
+function of the <a href="BidirectionalGraph.html">BidirectionalGraph</a>
+interface provides access to all the in-edges of a vertex through <i>in-edge
+iterators</i>. The <tt>in_edges()</tt> function is only available for the <tt>adjacency_list</tt>
+if <tt>bidirectionalS</tt> is supplied for the <tt>Directed</tt> template
+parameter. There is an extra cost in space when <tt>bidirectionalS</tt> is
+specified instead of <tt>directedS</tt>.
+<p>&nbsp;
+<pre>
+  template &lt;class Graph&gt; struct exercise_vertex {
+    //...
+    void operator()(const Vertex&amp; v) const
+    {
+      //...
+      std::cout &lt;&lt; &quot;in-edges: &quot;;
+      typedef typename graph_traits&lt;Graph&gt; GraphTraits;
+      typename GraphTraits::in_edge_iterator in_i, in_end;
+      for (tie(in_i, in_end) = in_edges(v,g); 
+           in_i != in_end; ++in_i) {
+        e = *in_i;
+        Vertex src = source(e, g), targ = target(e, g);
+        std::cout &lt;&lt; &quot;(&quot; &lt;&lt; index[src] &lt;&lt; &quot;,&quot; &lt;&lt; index[targ] &lt;&lt; &quot;) &quot;;
+      }
+      std::cout &lt;&lt; std::endl;
+      //...
+    }
+    //...
+  };
+</pre>
+For vertex 0 the output is:
+<pre>
+  in-edges: (2,0) (3,0) (4,0)
+</pre>
+<p>&nbsp;
+-->
+<p><a href="BidirectionalGraph.html">BidirectionalGraph</a> インタフェースの
+ <a href="BidirectionalGraph.html#sec:in-edges"><tt>in_edges()</tt></a> 関数は、
+ <i>入辺イテレータ</i> を通じて頂点のすべての入辺へのアクセスを提供する。
+ <tt>Directed</tt> テンプレートパラメータに
+ <tt>bidirectionalS</tt> が与えらている場合は、
+ <tt>in_edges()</tt> 関数は
+ <tt>adjacency_list</tt> に対してのみ利用できる。
+<tt>directedS</tt> でなく <tt>bidirectionalS</tt> が定義されている時は、
+メモリ容量に余分のコストが掛かる。
+<p>&nbsp;
+<pre>
+  template &lt;class Graph&gt; struct exercise_vertex {
+    //...
+    void operator()(const Vertex&amp; v) const
+    {
+      //...
+      std::cout &lt;&lt; &quot;in-edges: &quot;;
+      typedef typename graph_traits&lt;Graph&gt; GraphTraits;
+      typename GraphTraits::in_edge_iterator in_i, in_end;
+      for (tie(in_i, in_end) = in_edges(v,g); 
+           in_i != in_end; ++in_i) {
+        e = *in_i;
+        Vertex src = source(e, g), targ = target(e, g);
+        std::cout &lt;&lt; &quot;(&quot; &lt;&lt; index[src] &lt;&lt; &quot;,&quot; &lt;&lt; index[targ] &lt;&lt; &quot;) &quot;;
+      }
+      std::cout &lt;&lt; std::endl;
+      //...
+    }
+    //...
+  };
+</pre>
+頂点 0 についての出力は以下の通り：
+<pre>
+  in-edges: (2,0) (3,0) (4,0)
+</pre>
+<p>&nbsp;
+<!--
+<h3>Adjacent Vertices</h3>
+<p>Given the out-edges of a vertex, the target vertices of these edges are <i>adjacent</i>
+to the source vertex. Sometimes an algorithm does not need to look at the edges
+of the graph and only cares about the vertices. Therefore the graph interface
+also includes the <a href="AdjacencyGraph.html#sec:adjacent-vertices"><tt>adjacent_vertices()</tt></a>
+function of the <a href="AdjacencyGraph.html">AdjacencyGraph</a> interface which
+provides direct access to the adjacent vertices. This function returns a pair of
+<i>adjacency iterators</i>. Dereferencing an adjacency iterator gives a vertex
+descriptor for an adjacent vertex.
+<p>&nbsp;
+<pre>
+  template &lt;class Graph&gt; struct exercise_vertex {
+    //...
+    void operator()(Vertex v) const
+    {
+      //...
+      std::cout &lt;&lt; &quot;adjacent vertices: &quot;;
+      typename graph_traits&lt;Graph&gt;::adjacency_iterator ai;
+      typename graph_traits&lt;Graph&gt;::adjacency_iterator ai_end;
+      for (tie(ai, ai_end) = adjacent_vertices(v, g);
+           ai != ai_end; ++ai)
+        std::cout &lt;&lt; index[*ai] &lt;&lt;  &quot; &quot;;
+      std::cout &lt;&lt; std::endl;
+    }
+    //...
+  };
+</pre>
+For vertex 4 the output is:
+<pre>
+  adjacent vertices: 0 1
+</pre>
+<p>&nbsp;
+-->
+<h3>Adjacent Vertices</h3>
+<p>ある頂点の出辺が与えられたとき、その各辺の終点は始点に<i>隣接</i>しているという。
+ときどき、アルゴリズムはグラフの辺を見る必要がなく、頂点にのみ注目することがある。
+そのためグラフインタフェースは隣接する頂点への直接アクセスを提供する関数、
+ <a href="AdjacencyGraph.html">AdjacencyGraph</a> インタフェースの
+ <a href="AdjacencyGraph.html#sec:adjacent-vertices"><tt>adjacent_vertices()</tt></a> 関数を含んでいる。
+この関数は<i>隣接イテレータ</i>の組を返す。
+隣接イテレータを参照外しすると、隣接する頂点の頂点記述子が得られる。
+<p>&nbsp;
+<pre>
+  template &lt;class Graph&gt; struct exercise_vertex {
+    //...
+    void operator()(Vertex v) const
+    {
+      //...
+      std::cout &lt;&lt; &quot;adjacent vertices: &quot;;
+      typename graph_traits&lt;Graph&gt;::adjacency_iterator ai;
+      typename graph_traits&lt;Graph&gt;::adjacency_iterator ai_end;
+      for (tie(ai, ai_end) = adjacent_vertices(v, g);
+           ai != ai_end; ++ai)
+        std::cout &lt;&lt; index[*ai] &lt;&lt;  &quot; &quot;;
+      std::cout &lt;&lt; std::endl;
+    }
+    //...
+  };
+</pre>
+頂点 4 についての出力は：
+<pre>
+  adjacent vertices: 0 1
+</pre>
+<p>&nbsp;
+<!--
+<h2>Adding Some Color to your Graph</h2>
+<p>BGL attempts to be as flexible as possible in terms of accommodating how
+properties are attached to a graph. For instance, a property such as edge weight
+may need to be used throughout a graph object's lifespan and therefore it would
+be convenient to have the graph object also manage the property storage. On the
+other hand, a property like vertex color may only be needed for the duration of
+a single algorithm, and it would be better to have the property stored
+separately from the graph object. The first kind of property is called an <i>internally
+stored property</i> while the second kind is called an <i>externally stored
+property</i>. BGL uses a uniform mechanism to access both kinds of properties
+inside its graph algorithms called the <i>property map</i> interface, described
+in Section <a href="property_map.html">Property Map Concepts</a>. In addition,
+the <a href="PropertyGraph.html">PropertyGraph</a> concept defines the interface
+for obtaining a property map object for an internally stored property.
+-->
+<h2>Adding Some Color to your Graph</h2>
+<p>BGL は、プロパティをグラフに加えるやり方を工夫することで、
+可能な限りフレキシブルであろうと試みている。
+例えば、辺の重みのようなプロパティはグラフオブジェクトの生存期間を通じて使われるだろうから、
+グラフオブジェクトがプロパティの記憶域も管理してくれるのが便利だろう。
+その一方で、頂点の色のようなプロパティは一つのアルゴリズムの間だけ必要とされるので、
+グラフオブジェクトとは別に格納する方が良いだろう。
+プロパティの種類の一つ目は<i>内部格納プロパティ(internally stored property)</i>と呼ばれ、もう一つは
+<i>外部格納プロパティ(externally stored property)</i>と呼ばれる。
+グラフアルゴリズム内部にある両方の種類のプロパティにアクセスするために、
+ BGL は<i>プロパティマップ</i>インタフェースと呼ばれる単一の機構を用いる。
+プロパティマップについては <a href="property_map.html">Property Map Concepts</a> 節で述べる。
+加えて、 <a href="PropertyGraph.html">PropertyGraph</a> コンセプトは
+内部格納プロパティのプロパティマップオブジェクトを取得するための
+インタフェースを定義している。
+<!--
+<p>The BGL <tt>adjacency_list</tt> class allows users to specify internally
+stored properties through plug-in template parameters of the graph class. How to
+do this is discussed in detail in Section <a href="using_adjacency_list.html#sec:adjacency-list-properties">Internal
+Properties</a>. Externally stored properties can be created in many different
+ways, although they are ultimately passed as separate arguments to the graph
+algorithms. One straightforward way to store properties is to create an array
+indexed by vertex or edge index. In the <tt>adjacency_list</tt> with <tt>vecS</tt>
+specified for the <tt>VertexList</tt> template parameter, vertices are
+automatically assigned indices, which can be accessed via the property map for
+the <tt>vertex_index_t</tt>. Edges are not automatically assigned indices.
+However the property mechanism can be used to attach indices to the edges which
+can be used to index into other externally stored properties.
+-->
+<p>BGLの <tt>adjacency_list</tt> クラスは
+グラフクラスのプラグインテンプレートパラメータを通じて
+内部格納プロパティを指定できるようにする。
+どのようにこれを行うかは、
+ <a href="using_adjacency_list.html#sec:adjacency-list-properties">Internal Properties</a> 
+節で詳細に議論されている。
+外部格納プロパティは多くの異なる方法で作成することができるが、
+最終的にはグラフアルゴリズムに別々の引数として渡される。
+プロパティを格納する簡単な方法の一つは、頂点インデックスまたは辺インデックスで
+インデックスを付けられた配列を作成することである。
+ <tt>VertexList</tt> テンプレートパラメータに対して <tt>vecS</tt> を指定した
+ <tt>adjacency_list</tt> では、
+ <tt>vertex_index_t</tt> のプロパティマップにアクセスされるインデックスが自動的に頂点に割り当てられる。
+辺には自動的にインデックスが割り当てられることはないが、プロパティのメカニズムを用いてインデックスを付けることができる。
+このインデックスは他の外部格納プロパティをインデックスするのに利用できる。
+<!--
+<p>In the following example, we construct a graph and apply <a href="dijkstra_shortest_paths.html"><tt>dijkstra_shortest_paths()</tt></a>.
+The complete source code for the example is in <a href="../example/dijkstra-example.cpp"><tt>examples/dijkstra-example.cpp</tt></a>.
+Dijkstra's algorithm computes the shortest distance from the starting vertex to
+every other vertex in the graph.
+<p>Dijkstra's algorithm requires that a weight property is associated with each
+edge and a distance property with each vertex. Here we use an internal property
+for the weight and an external property for the distance. For the weight
+property we use the <tt>property</tt> class and specify <tt>int</tt> as the type
+used to represent weight values and <tt>edge_weight_t</tt> for the property tag
+(which is one of the BGL predefined property tags). The weight property is then
+used as a template argument for <tt>adjacency_list</tt>.
+-->
+<p>以下の例で、我々はグラフを構築し、 <a href="dijkstra_shortest_paths.html"><tt>dijkstra_shortest_paths()</tt></a> を適用する。
+この例の完全なソースコードは <a href="../example/dijkstra-example.cpp"><tt>examples/dijkstra-example.cpp</tt></a> にある。
+Dijkstra のアルゴリズムは出発する頂点からグラフの他の任意の頂点までの最短距離を求める。
+<p>Dijkstra のアルゴリズムは、各辺に重みプロパティを、
+各頂点に距離プロパティを関連づけられていることを要求する。
+ここで、重みについては内部プロパティを、距離については外部プロパティを用いることにする。
+重みプロパティには <tt>property</tt> クラスを用いて、重み値を表現する型として <tt>int</tt> を、
+プロパティタグに <tt>edge_weight_t</tt> (BGL で定義済みのプロパティタグの一つ) を用いる。
+重みプロパティは <tt>adjacency_list</tt> のテンプレート引数として使われる。
+<!--
+<p>The <tt>listS</tt> and <tt>vecS</tt> types are selectors that determine the
+data structure used inside the <tt>adjacency_list</tt> (see Section <a href="using_adjacency_list.html#sec:choosing-graph-type">Choosing
+the <tt>Edgelist</tt> and <tt>VertexList</tt></a>). The <tt>directedS</tt> type
+specifies that the graph should be directed (versus undirected). The following
+code shows the specification of the graph type and then the initialization of
+the graph. The edges and weights are passed to the graph constructor in the form
+of iterators (a pointer qualifies as a <a href="http://www.sgi.com/tech/stl/RandomAccessIterator.html">RandomAccessIterator</a>).
+<p>&nbsp;
+<pre>
+  typedef adjacency_list&lt;listS, vecS, directedS, 
+                         no_property, property&lt;edge_weight_t, int&gt; &gt; Graph;
+  typedef graph_traits&lt;Graph&gt;::vertex_descriptor Vertex;
+  typedef std::pair&lt;int,int&gt; E;
+
+  const int num_nodes = 5;
+  E edges[] = { E(0,2), 
+                E(1,1), E(1,3), E(1,4),
+                E(2,1), E(2,3), 
+                E(3,4),
+                E(4,0), E(4,1) };
+  int weights[] = { 1, 2, 1, 2, 7, 3, 1, 1, 1};
+
+  Graph G(num_nodes, edges, 
+          edges + sizeof(edges) / sizeof(E), weights);
+</pre>
+-->
+<p><tt>listS</tt> 型と <tt>vecS</tt> 型は <tt>adjacency_list</tt> の内部で使われるデータ構造を決定する選択子である
+(<a href="using_adjacency_list.html#sec:choosing-graph-type">Choosing the <tt>Edgelist</tt> and <tt>VertexList</tt></a> 節を参照) 。
+<tt>directedS</tt> 型はグラフが有向であることを指定する (でなければ無向である) 。
+以下のコードはグラフ型の指定とグラフの初期化を示す。
+辺と重みはイテレータ (<a href="http://www.sgi.com/tech/stl/RandomAccessIterator.html">RandomAccessIterator</a> で修飾された
+ポインタ) の形でグラフのコンストラクタに渡される。
+<p>&nbsp;
+<pre>
+  typedef adjacency_list&lt;listS, vecS, directedS, 
+                         no_property, property&lt;edge_weight_t, int&gt; &gt; Graph;
+  typedef graph_traits&lt;Graph&gt;::vertex_descriptor Vertex;
+  typedef std::pair&lt;int,int&gt; E;
+
+  const int num_nodes = 5;
+  E edges[] = { E(0,2), 
+                E(1,1), E(1,3), E(1,4),
+                E(2,1), E(2,3), 
+                E(3,4),
+                E(4,0), E(4,1) };
+  int weights[] = { 1, 2, 1, 2, 7, 3, 1, 1, 1};
+
+  Graph G(num_nodes, edges, 
+          edges + sizeof(edges) / sizeof(E), weights);
+</pre>
+<!--
+<p>For the external distance property we will use a <tt>std::vector</tt> for
+storage. BGL algorithms treat random access iterators as property maps, so we
+can just pass the beginning iterator of the distance vector to Dijkstra's
+algorithm. Continuing the above example, the following code shows the creation
+of the distance vector, the call to Dijkstra's algorithm (implicitly using the
+internal edge weight property), and then the output of the results.
+<p>&nbsp;
+<pre>
+  // vector for storing distance property
+  std::vector&lt;int&gt; d(num_vertices(G));
+
+  // get the first vertex
+  Vertex s = *(vertices(G).first);
+  // invoke variant 2 of Dijkstra's algorithm
+  dijkstra_shortest_paths(G, s, distance_map(&amp;d[0]));
+
+  std::cout &lt;&lt; &quot;distances from start vertex:&quot; &lt;&lt; std::endl;
+  graph_traits&lt;Graph&gt;::vertex_iterator vi;
+  for(vi = vertices(G).first; vi != vertices(G).second; ++vi)
+    std::cout &lt;&lt; &quot;distance(&quot; &lt;&lt; index(*vi) &lt;&lt; &quot;) = &quot; 
+              &lt;&lt; d[*vi] &lt;&lt; std::endl;
+  std::cout &lt;&lt; std::endl;
+</pre>
+The output is:
+<pre>
+  distances from start vertex:
+  distance(0) = 0
+  distance(1) = 6
+  distance(2) = 1
+  distance(3) = 4
+  distance(4) = 5
+</pre>
+<p>&nbsp;
+-->
+<p>外部の距離プロパティについては、記憶域として <tt>std::vector</tt> を用ることにしよう。
+BGL のアルゴリズムはランダムアクセスイテレータをプロパティマップとして処理する。
+そのため、単に頂点ベクタの始端イテレータを Dijkstra のアルゴリズムに渡すだけでよい。
+上述の例の続きで、以下のコードは距離ベクタを作成し、 Dijkstra のアルゴリズム
+(暗黙に内部の辺の重みプロパティを用いる）を呼び出し、そして結果の出力を示す。
+<p>&nbsp;
+<pre>
+  // 距離プロパティを保持するベクタ
+  std::vector&lt;int&gt; d(num_vertices(G));
+
+  // 最初の頂点を得る
+  Vertex s = *(vertices(G).first);
+  // Dijkstra のアルゴリズムの variant 2 を呼び出す
+  dijkstra_shortest_paths(G, s, distance_map(&amp;d[0]));
+
+  std::cout &lt;&lt; &quot;distances from start vertex:&quot; &lt;&lt; std::endl;
+  graph_traits&lt;Graph&gt;::vertex_iterator vi;
+  for(vi = vertices(G).first; vi != vertices(G).second; ++vi)
+    std::cout &lt;&lt; &quot;distance(&quot; &lt;&lt; index(*vi) &lt;&lt; &quot;) = &quot; 
+              &lt;&lt; d[*vi] &lt;&lt; std::endl;
+  std::cout &lt;&lt; std::endl;
+</pre>
+出力は以下の通り：
+<pre>
+  distances from start vertex:
+  distance(0) = 0
+  distance(1) = 6
+  distance(2) = 1
+  distance(3) = 4
+  distance(4) = 5
+</pre>
+<p>&nbsp;
+<!--
+<h2>Extending Algorithms with Visitors</h2>
+<p>Often times an algorithm in a library <i>almost</i> does what you need, but
+not quite. For example, in the previous section we used Dijkstra's algorithm to
+calculate the shortest distances to each vertex, but perhaps we also wanted to
+record the tree of shortest paths. One way to do this is to record the
+predecessor (parent) for each node in the shortest-paths tree.
+<p>It would be nice if we could avoid rewriting Dijkstra's algorithm, and just
+add that little bit extra needed to record the predecessors <a href="#1">[1]</a>. In the STL, this
+kind of extensibility is provided by functors, which are optional parameters to
+each algorithm. In the BGL this role is fulfilled by <i>visitors</i>.
+-->
+<h2>Extending Algorithms with Visitors</h2>
+<p>ライブラリのあるアルゴリズムは、あなたの求めるものと<i>ほとんど</i>一致するが、
+完全に、ではないことがしばしばある。
+例えば、前節で我々は各頂点の最短距離を求めるのに Dijkstra のアルゴリズムを用いた。しかしおそらく
+最短経路のツリーを記録したいとも思うだろう。
+これを行う一つの方法は、最短経路ツリーの各ノードについて先行点 (親) を記録することである。
+<p>もし我々が Dijkstra アルゴリズムの書き直しを回避できて、先行点を記録するのに必要な
+ほんのちょっとしたものを追加するだけでよいとしたら、素晴らしいだろう。
+STL では、この類の拡張性は各アルゴリズムの省略可能なパラメータであるファンクタによって提供されている。
+BGL では、この役割は<i>ビジター</i>によって実現されている。
+<!--
+<p>A visitor is like a functor, but instead of having just one &quot;apply&quot;
+method, it has several. Each of these methods get invoked at certain
+well-defined points within the algorithm. The visitor methods are explained in
+detail in Section <a href="visitor_concepts.html">Visitor Concepts</a>. The BGL
+provides a number of visitors for some common tasks including a predecessor
+recording visitor. The user is encouraged to write his or her own visitors as a
+way of extending the BGL. Here we will take a quick look at the implementation
+and use of the predecessor recorder. Since we will be using the <a href="dijkstra_shortest_paths.html">dijkstra_shortest_paths()</a>
+algorithm, the visitor we create must be a <a href="DijkstraVisitor.html">Dijkstra Visitor</a>.
+-->
+<p>ビジターはファンクタに似ているが、<font color="red">&quot;適用&quot;メソッド</font>を一つではなくいくつか持っている。
+それぞれのメソッドはアルゴリズム内部の特定の明確に定義された時点で呼び出される。
+ビジターメソッドは <a href="visitor_concepts.html">Visitor Concepts</a> 節で詳説されている。
+BGL は、先行点を記録するものを含めて、一般的なタスクのためのビジターをいくつか提供している。
+ユーザは BGL を拡張する方法として自分独自のビジターを書くことを推奨される。
+ここでは先行点を記録するビジターの実装と使い方を見ていこう。
+<a href="dijkstra_shortest_paths.html">dijkstra_shortest_paths()</a> アルゴリズムを使うのだから、
+我々が作るビジターは <a href="DijkstraVisitor.html">Dijkstra Visitor</a> でなければならない。
+<!--
+<p>The functionality of the <tt>record_predecessors</tt> visitor is separated
+into two parts. For the storage and access of the predecessor property, we will
+use a <a href="../../property_map/property_map.html">property map</a>. The
+predecessor visitor will then only be responsible for what parent to record. To
+implement this, we create a <tt>record_predecessors</tt> class and template it
+on the predecessor property map <tt>PredecessorMap</tt>. Since this visitor will
+only be filling in one of the visitor methods, we will inherit from <a href="dijkstra_visitor.html"><tt>dijkstra_visitor</tt></a>
+which will provide empty methods for the rest. The constructor of the <tt>predecessor_recorder</tt>
+will take the property map object and save it away in a data member.
+<p>&nbsp;
+<pre>
+  template &lt;class PredecessorMap&gt;
+  class record_predecessors : public dijkstra_visitor&lt;&gt;
+  {
+  public:
+    record_predecessors(PredecessorMap p)
+      : m_predecessor(p) { }
+
+    template &lt;class Edge, class Graph&gt;
+    void edge_relaxed(Edge e, Graph&amp; g) {
+      // set the parent of the target(e) to source(e)
+      put(m_predecessor, target(e, g), source(e, g));
+    }
+  protected:
+    PredecessorMap m_predecessor;
+  };
+</pre>
+-->
+<p> <tt>record_predecessors</tt> ビジターの機能は二つの部分に分けられる。
+先行点プロパティを格納しアクセスするために
+<a href="../../property_map/property_map.html">プロパティマップ</a>を用いる。
+先行点ビジターは、その後、どの親の記録するかにのみ責任を持つ。
+これを実装するために、
+ <tt>record_predecessors</tt> クラスを作成し、それを
+先行点プロパティマップ <tt>PredecessorMap</tt> についてテンプレート化する。
+このビジターはビジターメソッドの一つを埋めているだけなので、
+残りのために空のメソッドを提供してくれる
+ <a href="dijkstra_visitor.html"><tt>dijkstra_visitor</tt></a>
+を継承する。
+<tt>predecessor_recorder</tt>のコンストラクタはプロパティマップオブジェクトを
+受け取り、データメンバの中に保存する。
+<p>&nbsp;
+<pre>
+  template &lt;class PredecessorMap&gt;
+  class record_predecessors : public dijkstra_visitor&lt;&gt;
+  {
+  public:
+    record_predecessors(PredecessorMap p)
+      : m_predecessor(p) { }
+
+    template &lt;class Edge, class Graph&gt;
+    void edge_relaxed(Edge e, Graph&amp; g) {
+      // target(e) の親に source(e) をセット
+      put(m_predecessor, target(e, g), source(e, g));
+    }
+  protected:
+    PredecessorMap m_predecessor;
+  };
+</pre>
+<!--
+<p>The job of recording the predecessors is quite simple. When Dijkstra's
+algorithm relaxes an edge (potentially adding it to the shortest-paths tree) we
+record the source vertex as the predecessor of the target vertex. Later, if the
+edge is relaxed again the predecessor property will be overwritten by the new
+predecessor. Here we use the <tt>put()</tt> function associated with the
+property map to record the predecessor. The <tt>edge_filter</tt> of the visitor
+tells the algorithm when to invoke the <tt>explore()</tt> method. In this case
+we only want to be notified about edges in the shortest-paths tree so we specify
+<tt>tree_edge_tag</tt>.
+<p>As a finishing touch, we create a helper function to make it more convenient
+to create predecessor visitors. All BGL visitors have a helper function like
+this.
+<p>&nbsp;
+<pre>
+  template &lt;class PredecessorMap&gt;
+  record_predecessors&lt;PredecessorMap&gt;
+  make_predecessor_recorder(PredecessorMap p) {
+    return record_predecessors&lt;PredecessorMap&gt;(p);
+  }
+</pre>
+-->
+<p>先行点を記録する作業は非常に簡単である。
+Dijkstra のアルゴリズムが辺を<font color="red">relax</font>したとき (潜在的にそれを最短経路ツリーに追加する) 、
+その始点を終点の先行点として記録する。
+その後、もし辺が再び<font color="red">relax</font>されたら、先行点プロパティは新しい先行点によって上書きされる。
+ここで先行点を記録するためにプロパティマップに関連づけられた <tt>put()</tt> 関数を用いる。
+ビジターの <tt>edge_filter</tt> は、 <tt>explore()</tt> メソッドをいつ呼び出すかをアルゴリズムに伝える。
+この場合、最短経路ツリーの辺に関して通知したいだけなので、 <tt>tree_edge_tag</tt> を指定する。
+<p>最後に(as a finishing touch)、先行点ビジターの作成をより便利にするヘルパー関数を作成する。
+すべての BGL ビジターはこのようなヘルパー関数を持っている。
+<p>&nbsp;
+<pre>
+  template &lt;class PredecessorMap&gt;
+  record_predecessors&lt;PredecessorMap&gt;
+  make_predecessor_recorder(PredecessorMap p) {
+    return record_predecessors&lt;PredecessorMap&gt;(p);
+  }
+</pre>
+<!--
+<p>We are now ready to use the <tt>record_predecessors</tt> in
+Dijkstra's algorithm. Luckily, BGL's Dijkstra's algorithm is already
+equipped to handle visitors, so we just pass in our new visitor. In
+this example we only need to use one visitor, but the BGL is also
+equipped to handle the use of multiple visitors in the same algorithm
+(see Section <a href="visitor_concepts.html">Visitor Concepts</a>).
+<p>&nbsp;
+<pre>
+  using std::vector;
+  using std::cout;
+  using std::endl;
+  vector&lt;Vertex&gt; p(num_vertices(G)); //the predecessor array
+  dijkstra_shortest_paths(G, s, distance_map(&amp;d[0]). 
+                          visitor(make_predecessor_recorder(&amp;p[0])));
+
+  cout &lt;&lt; &quot;parents in the tree of shortest paths:&quot; &lt;&lt; endl;
+  for(vi = vertices(G).first; vi != vertices(G).second; ++vi) {
+    cout &lt;&lt; &quot;parent(&quot; &lt;&lt; *vi;
+    if (p[*vi] == Vertex())
+      cout &lt;&lt; &quot;) = no parent&quot; &lt;&lt; endl; 
+    else 
+      cout &lt;&lt; &quot;) = &quot; &lt;&lt; p[*vi] &lt;&lt; endl;
+  }
+</pre>
+The output is:
+<pre>
+  parents in the tree of shortest paths:
+  parent(0) = no parent
+  parent(1) = 4
+  parent(2) = 0
+  parent(3) = 2
+  parent(4) = 3
+</pre>
+-->
+<p>さて、 <tt>record_predecessors</tt> を Dijkstra のアルゴリズムで使う準備が整った。
+幸運なことに、 BGL の Dijkstra アルゴリズムは既にビジターを扱う機能を備えているので、
+我々の新しいビジターを渡すだけである。
+この例では一つのビジターを用いるだけでよいが、 BGL は一つのアルゴリズムで複数のビジターを
+用いる方法も用意している
+ (<a href="visitor_concepts.html">Visitor Concepts</a> 節を参照) 。
+<p>&nbsp;
+<pre>
+  using std::vector;
+  using std::cout;
+  using std::endl;
+  vector&lt;Vertex&gt; p(num_vertices(G)); //先行点の配列
+  dijkstra_shortest_paths(G, s, distance_map(&amp;d[0]). 
+                          visitor(make_predecessor_recorder(&amp;p[0])));
+
+  cout &lt;&lt; &quot;parents in the tree of shortest paths:&quot; &lt;&lt; endl;
+  for(vi = vertices(G).first; vi != vertices(G).second; ++vi) {
+    cout &lt;&lt; &quot;parent(&quot; &lt;&lt; *vi;
+    if (p[*vi] == Vertex())
+      cout &lt;&lt; &quot;) = no parent&quot; &lt;&lt; endl; 
+    else 
+      cout &lt;&lt; &quot;) = &quot; &lt;&lt; p[*vi] &lt;&lt; endl;
+  }
+</pre>
+出力は以下の通り：
+<pre>
+  parents in the tree of shortest paths:
+  parent(0) = no parent
+  parent(1) = 4
+  parent(2) = 0
+  parent(3) = 2
+  parent(4) = 3
+</pre>
+
+<br>
+
+<h3>Notes</h3>
+
+<!--
+<a name="1">[1]</a> The new version of Dijkstra's algorithm now includes
+a named parameter for recording predecessors, so a predecessor visitor
+is no long necessary, though this still makes for a good example.
+-->
+<a name="1">[1]</a> Dijkstra アルゴリズムの新しいバージョンでは
+先行点を記録するための名前付きパラメータが含まれている。
+そのため先行点ビジターはもはや必要ではないが、今でも優れた例として役に立っている。
+
+<br>
+<hr>
+<table>
+  <tr valign="top">
+    <td nowrap>Copyright &copy; 2000</td>
+    <td><a href="../../../people/jeremy_siek.htm">Jeremy Siek</a>,
+      Indiana University (<a href="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</a>)</td>
+  </tr>
+</table>
+
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:kn@mm.neweb.ne.jp">Kent.N</a><br> 
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+
+</body>
+
+</html>
+<!--  LocalWords:  STL BGL cpp vecS bidirectionalS directedS undirectedS hpp vp
+ -->
+<!--  LocalWords:  iostream namespace int const num sizeof map ID's gif typedef
+ -->
+<!--  LocalWords:  iter ei interoperability struct typename GraphTraits src ai
+ -->
+<!--  LocalWords:  targ PropertyGraph  Properties property iterator iterators
+ -->
+<!--  LocalWords:  VertexList dijkstra listS Edgelist RandomAccessIterator cout
+ -->
+<!--  LocalWords:  weightp  adjacency tradeoffs undirected MutableGraph indices
+ -->
+<!--  LocalWords:  VertexListGraph Dereferencing IndexMap EdgeListGraph functor
+ -->
+<!--  LocalWords:  functor's IncidenceGraph dereferencing BidirectionalGraph
+ -->
+<!--  LocalWords:  AdjacencyGraph Dijkstra's extensibility functors BGL's endl
+ -->
+<!--  LocalWords:  DijkstraVisitor PredecessorMap siek htm Univ Notre
+ -->

@@ -1,0 +1,521 @@
+<HTML>
+<!--
+  -- Copyright (c) Jeremy Siek 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  Jeremy Siek makes no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<Title>Boost Graph Library: Filtered Graph</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+
+
+<H1><A NAME="sec:filtered-graph-class"></A>
+<pre>
+filtered_graph&lt;Graph, EdgePredicate, VertexPredicate&gt;
+</pre>
+</H1>
+
+
+<P>
+<tt>filtered_graph</tt> クラス・テンプレートはグラフの濾過された眺めを
+作成するアダプタである。述語関数オブジェクトは元のグラフのどの辺と頂点が
+濾過グラフ (filtered graph) 中に現れるかを決定する。辺述語が辺のために
+<tt>true</tt> を
+返すならば、それは濾過グラフ中に現れ、もし述語が <tt>false</tt> を
+返すならば、辺は濾過グラフ中に現れない。頂点も同様である。
+<tt>filtered_graph</tt> クラスは元のグラフのコピーを作成しないが、元のグラフ
+へのリファレンスを使う。元のグラフの有効期間は濾過グラフの使用後まで
+引き延ばさなければならない。濾過グラフは元のグラフの構造を変更しない。
+もっとも元のグラフの頂点プロパティと辺プロパティは濾過グラフのプロパティ・
+マップを通して変更できるが。濾過グラフの頂点記述子と辺記述子は元のグラフの
+頂点記述子及び辺記述子と同じで、かつ交換可能である。
+<P>
+
+<H3>Example</H3>
+
+<P>
+この例中で辺の重みに基づいてグラフの辺を濾過してみよう。正の辺の重みを持つ
+全ての辺を保存するつもりである。最初に、述語関数オブジェクトを作成する。
+
+<PRE>
+template &lt;typename EdgeWeightMap&gt;
+struct positive_edge_weight {
+  positive_edge_weight() { }
+  positive_edge_weight(EdgeWeightMap weight) : m_weight(weight) { }
+  template &lt;typename Edge&gt;
+  bool operator()(const Edge& e) const {
+    return 0 &lt; get(m_weight, e);
+  }
+  EdgeWeightMap m_weight;
+};
+</PRE>
+
+さてグラフを作成し、濾過グラフをプリント・アウトする。
+<pre>
+int main()
+{
+  using namespace boost;
+  
+  typedef adjacency_list&lt;vecS, vecS, directedS,
+    no_property, property&lt;edge_weight_t, int&gt; &gt; Graph;
+  typedef property_map&lt;Graph, edge_weight_t&gt;::type EdgeWeightMap;
+
+  enum { A, B, C, D, E, N };
+  const char* name = "ABCDE";
+  Graph g(N);
+  add_edge(A, B, 2, g);
+  add_edge(A, C, 0, g);
+  add_edge(C, D, 1, g);
+  add_edge(C, E, 0, g);
+  add_edge(D, B, 3, g);
+  add_edge(E, C, 0, g);
+  
+  positive_edge_weight&lt;EdgeWeightMap&gt; filter(get(edge_weight, g));
+  filtered_graph&lt;Graph, positive_edge_weight&lt;EdgeWeightMap&gt; &gt;
+    fg(g, filter);
+
+  std::cout &lt;&lt; "filtered edge set: ";
+  print_edges(fg, name);
+
+  std::cout &lt;&lt; "filtered out-edges:" &lt;&lt; std::endl;
+  print_graph(fg, name);
+  
+  return 0;
+}
+</pre>
+出力は:
+<PRE>
+filtered edge set: (A,B) (C,D) (D,B) 
+filtered out-edges:
+A --> B 
+B --> 
+C --> D 
+D --> B 
+E --> 
+</PRE>
+
+<P>
+
+<H3>Template Parameters</H3>
+
+<P>
+<TABLE border>
+<TR>
+<th>パラメータ</th><th>説明</th><th>デフォルト</th>
+</tr>
+
+<TR><TD><TT>Graph</TT></TD>
+<TD>基礎にあるグラフの型。</TD>
+<TD>&nbsp;</TD>
+</TR>
+
+<TR>
+<TD><TT>EdgePredicate</TT></TD> <TD>
+元のグラフからどの辺が濾過グラフ中に現れるかを選ぶ関数オブジェクト。
+関数オブジェクトは <a
+href="http://www.sgi.com/tech/stl/Predicate.html">Predicate</a> を
+モデルとしなければならない。関数オブジェクトのための引数型はグラフの
+辺記述子でなければならない。さらに、述語は <a
+href="http://www.sgi.com/tech/stl/DefaultConstructible.html">Default Constructible</a> <a href="#1">[1]</a> でなければならない。
+</TD>
+<TD>&nbsp;</TD>
+</TR>
+
+<TR>
+<TD><TT>VertexPredicate</TT></TD>
+<TD>
+元のグラフからどの頂点が濾過グラフ中に現れるからを選ぶ関数オブジェクト。
+関数オブジェクトは <a
+href="http://www.sgi.com/tech/stl/Predicate.html">Predicate</a> を
+モデルとしなければならない。関数オブジェクトのための引数型はグラフの
+頂点記述子でなければならない。さらに、述語は <a
+href="http://www.sgi.com/tech/stl/DefaultConstructible.html">Default Constructible</a> <a href="#1">[1]</a> でなければならない。
+</TD>
+<TD><TT>keep_all</TT></TD>
+</TR>
+
+</TABLE>
+<P>
+
+<H3>Model of</H3>
+
+<P>
+これは基礎にあるグラフの型によって決まる。もし基礎にある <tt>Graph</tt> の型
+が <a
+href="./VertexAndEdgeListGraph.html">VertexAndEdgeListGraph</a> と <a
+href="./PropertyGraph.html">PropertyGraph</a> をモデルとするなら、濾過
+グラフもまたそうである。もし基礎にある <tt>Graph</tt> がこれらよりも小数で
+小さなコンセプトをモデルとするなら、濾過グラフも同様にそうである。
+<P>
+
+<H3>Where Defined</H3>
+
+<P>
+<a href="../../../boost/graph/filtered_graph.hpp"><TT>boost/graph/filtered_graph.hpp</TT></a>
+
+<P>
+
+<H2>Associated Types</H2>
+
+<hr>
+
+<tt>graph_traits&lt;filtered_graph&gt;::vertex_descriptor</tt>
+<br><br>
+<TT>filtered_graph</TT> に結びつけられた頂点記述子のための型で、
+それは元の <tt>Graph</tt> のための <tt>vertex_descriptor</tt> と同じ型である。
+
+<hr>
+
+<tt>graph_traits&lt;filtered_graph&gt;::edge_descriptor</tt><br>
+<br><br>
+<TT>filtered_graph</TT> に結びつけられた辺記述子のための型で、
+それは元の <tt>Graph</tt> のための <tt>edge_descriptor</tt> と同じ型である。
+
+<hr>
+
+<tt>graph_traits&lt;filtered_graph&gt;::vertex_iterator</tt>
+<br><br>
+<TT>vertices()</TT> によって返されるイテレータのための型。
+イテレータは <a
+href="../../utility/MultiPassInputIterator.html">MultiPassInputIterator</a>
+のモデルである。
+
+
+<hr>
+
+<tt>graph_traits&lt;filtered_graph&gt;::edge_iterator</tt>
+<br><br>
+<TT>edges()</TT> によって返されるイテレータのための型。
+イテレータは <a
+href="../../utility/MultiPassInputIterator.html">MultiPassInputIterator</a>
+のモデルである。
+
+<hr>
+
+
+<tt>graph_traits&lt;filtered_graph&gt;::out_edge_iterator</tt>
+<br><br>
+<TT>out_edges()</TT> によって返されるイテレータのための型。
+イテレータは <a
+href="../../utility/MultiPassInputIterator.html">MultiPassInputIterator</a>
+のモデルである。
+
+
+<hr>
+
+<tt>graph_traits&lt;filtered_graph&gt;::adjacency_iterator</tt>
+<br><br>
+<TT>adjacent_vertices()</TT> によって返されるイテレータのための型。
+<tt>adjacency_iterator</tt> は <tt>out_edge_iterator</tt> と同じ
+イテレータ・コンセプトをモデルとする。
+
+<hr>
+
+<tt>graph_traits&lt;filtered_graph&gt;::directed_category</tt><br>
+<br><br>
+グラフが有向 (<TT>directed_tag</TT>) か、無向 (<TT>undirected_tag</TT>) か
+についての情報を与える。
+
+<hr>
+
+<tt>graph_traits&lt;filtered_graph&gt;::edge_parallel_category</tt><br>
+<br><br>
+これはグラフ・クラスが多重辺 (同じ始点と終点を持つ辺) の挿入を許可しているか
+どうかを述べる。二つのタグは <TT>allow_parallel_edge_tag</TT> と
+<TT>disallow_parallel_edge_tag</TT> である。
+
+<hr>
+
+<tt>graph_traits&lt;filtered_graph&gt;::vertices_size_type</tt>
+<br><br>
+グラフ中の頂点数を扱うために使われる型。
+
+<hr>
+
+<tt>graph_traits&lt;filtered_graph&gt;::edge_size_type</tt>
+<br><br>
+グラフ中の辺数を扱うために使われる型。
+
+<hr>
+
+<tt>graph_traits&lt;filtered_graph&gt;::degree_size_type</tt>
+<br><br>
+グラフ中の頂点に接続する辺数を扱うために使われる型。
+
+<hr>
+
+<tt>property_map&lt;filtered_graph, Property&gt;::type</tt><br>
+と<br>
+<tt>property_map&lt;filtered_graph, Property&gt;::const_type</tt>
+<br><br>
+グラフ中の頂点プロパティまたは辺プロパティのためのプロパティ・マップ型。
+適合したグラフからの同じプロパティ・マップは濾過グラフ中で利用できる。
+
+<hr>
+
+<H2>Member Functions</H2>
+
+<hr>
+
+<pre>
+filtered_graph(Graph&amp;&nbsp;g, EdgePredicate&nbsp;ep, VertexPredicate&nbsp;vp)
+</pre>
+グラフ <i>g</i> と辺フィルタ <i>ep</i> と頂点フィルタ <i>vp</i> に基づく
+濾過グラフを作成する。
+
+<hr>
+
+<pre>
+filtered_graph(Graph&amp;&nbsp;g, EdgePredicate&nbsp;ep)
+</pre>
+グラフ <i>g</i> と辺フィルタ <i>ep</i> に基づく濾過グラフを作成する。
+元のグラフからの全ての頂点は保持される。
+
+<hr>
+
+filtered_graph(const&nbsp;filtered_graph&amp;&nbsp;x)
+</pre>
+これは <i>x</i> と同じ基礎にあるグラフのための濾過グラフを作成する。
+別の言葉では、これは浅いコピーである。
+
+<hr>
+
+<pre>
+filtered_graph&amp; operator=(const&nbsp;filtered_graph&amp;&nbsp;x)
+</pre>
+これは <i>x</i> と同じ基礎にあるグラフのための濾過グラフを作成する。
+別の言葉では、これは浅いコピーである。
+
+<hr>
+
+<P>
+
+<H2>Non-Member Functions</H2>
+
+<h4>Structure Access</h4>
+
+<hr>
+
+<pre>
+std::pair&lt;vertex_iterator,&nbsp;vertex_iterator&gt;
+vertices(const filtered_graph&amp; g)
+</pre>
+グラフ <tt>g</tt> の頂点集合へのアクセスを提供するイテレータ範囲を返す。
+
+<hr>
+
+<pre>
+std::pair&lt;edge_iterator,&nbsp;edge_iterator&gt;
+edges(const filtered_graph&amp; g)
+</pre>
+グラフ <tt>g</tt> の辺集合へのアクセスを提供するイテレータ範囲を返す。
+
+<hr>
+
+<pre>
+std::pair&lt;adjacency_iterator,&nbsp;adjacency_iterator&gt;
+adjacent_vertices(vertex_descriptor&nbsp;u, const&nbsp;filtered_graph&amp;&nbsp;g)
+</pre>
+グラフ <tt>g</tt> 中の頂点 <tt>u</tt> に隣接する頂点へのアクセスを提供する
+イテレータ範囲を返す。
+
+<hr>
+
+
+<pre>
+std::pair&lt;out_edge_iterator,&nbsp;out_edge_iterator&gt;
+out_edges(vertex_descriptor&nbsp;u, const&nbsp;filtered_graph&amp;&nbsp;g)
+</pre>
+グラフ <tt>g</tt> 中の頂点 <tt>u</tt> の出辺へのアクセスを提供する
+イテレータ範囲を返す。もしグラフが無向グラフなら、このイテレータ範囲は
+頂点 <tt>u</tt> の全ての接続辺へのアクセスを提供する。有向グラフと無向グラフ
+の両方のために、出辺 <tt>e</tt> にとって、<tt>v</tt> が <tt>u</tt> に
+隣接する頂点の場合
+<tt>source(e, g) == u</tt> かつ <tt>target(e, g) == v</tt> である。
+
+<hr>
+
+<pre>
+std::pair&lt;in_edge_iterator,&nbsp;in_edge_iterator&gt;
+in_edges(vertex_descriptor&nbsp;v, const&nbsp;filtered_graph&amp;&nbsp;g)
+</pre>
+グラフ <tt>g</tt> 中の頂点 <tt>v</tt> の入辺へのアクセスを提供する
+イテレータ範囲を返す。入辺 <tt>e</tt> にとって、
+グラフが有向グラフであろうと無向グラフであろうと
+<tt>v</tt> に隣接する同じ頂点 <tt>u</tt> について
+<tt>target(e, g) == v</tt> かつ <tt>source(e, g) == u</tt> である。
+
+<hr>
+
+<pre>
+vertex_descriptor
+source(edge_descriptor&nbsp;e, const&nbsp;filtered_graph&amp;&nbsp;g)
+</pre>
+辺 <tt>e</tt> の始点を返す。
+
+<hr>
+
+<pre>
+vertex_descriptor
+target(edge_descriptor&nbsp;e, const&nbsp;filtered_graph&amp;&nbsp;g)
+</pre>
+辺 <tt>e</tt> の終点を返す。
+
+<hr>
+
+<pre>
+degree_size_type
+out_degree(vertex_descriptor&nbsp;u, const&nbsp;filtered_graph&amp;&nbsp;g)
+</pre>
+頂点 <tt>u</tt> を出て行く辺数を返す。
+
+<hr>
+
+<pre>
+degree_size_type
+in_degree(vertex_descriptor&nbsp;u, const&nbsp;filtered_graph&amp;&nbsp;g)
+</pre>
+頂点 <tt>u</tt> に入ってくる辺数を返す。
+
+<hr>
+
+<pre>
+vertices_size_type
+num_vertices(const filtered_graph&amp; g)
+</pre>
+基礎にあるグラフ中の頂点数を返す <a href="#2">[2]</a>。
+
+<hr>
+
+<pre>
+edges_size_type
+num_edges(const filtered_graph&amp; g)
+</pre>
+グラフ <tt>g</tt> 中の辺数を返す。
+
+<hr>
+
+<pre>
+std::pair&lt;edge_descriptor, bool&gt;
+edge(vertex_descriptor&nbsp;u, vertex_descriptor&nbsp;v,
+     const&nbsp;filtered_graph&amp;&nbsp;g)
+</pre>
+グラフ <tt>g</tt> 中の頂点 <tt>u</tt> から頂点 <tt>v</tt> へと接続する
+辺を返す。
+
+<hr>
+
+<pre>
+template &lt;typename G, typename EP, typename VP&gt;
+std::pair&lt;out_edge_iterator, out_edge_iterator&gt;
+edge_range(vertex_descriptor u, vertex_descriptor v,
+	   const filtered_graph&amp; g)
+</pre>
+辺 <tt>u</tt> から辺 <tt>v</tt> への全ての多重辺のための範囲を与える
+出辺イテレータのペアを返す。この関数は基礎にあるグラフが <tt>edge_range</tt>
+をサポートする場合にのみ動作し、それが出辺を終点に従って並べ替え、かつ
+多重辺を許可している事を必要とする。<tt>OutEdgeList=multisetS</tt> である
+<tt>adjacency_list</tt> クラスがそのようなグラフの例である。
+
+
+<hr>
+
+<h4>Property Map Access</h4>
+
+<hr>
+
+<pre>
+template &lt;class <a href="./PropertyTag.html">PropertyTag</a>&gt;
+property_map&lt;filtered_graph, PropertyTag&gt;::type
+get(PropertyTag, filtered_graph&amp; g)
+
+template &lt;class <a href="./PropertyTag.html">PropertyTag</a>&gt;
+property_map&lt;filtered_graph, Tag&gt;::const_type
+get(PropertyTag, const filtered_graph&amp; g)
+</pre>
+<TT>PropertyTag</TT> によって指定される頂点プロパティのための
+プロパティ・マップ・オブジェクトを返す。<TT>PropertyTag</TT> は
+グラフの <TT>VertexProperty</TT> テンプレート引数中で指定されるプロパティの
+一つに一致しなければならない。
+
+<hr>
+
+<pre>
+template &lt;class <a href="./PropertyTag.html">PropertyTag</a>, class X&gt;
+typename property_traits&lt;property_map&lt;filtered_graph, PropertyTag&gt;::const_type&gt::value_type
+get(PropertyTag, const filtered_graph&amp; g, X x)
+</pre>
+これは <tt>x</tt> のためのプロパティ値を返し、ここで <tt>x</tt> は頂点
+記述子または辺記述子のどちらか一方である。
+<hr>
+
+<pre>
+template &lt;class <a href="./PropertyTag.html">PropertyTag</a>, class X, class Value&gt;
+void
+put(PropertyTag, const filtered_graph&amp; g, X x, const Value& value)
+</pre>
+これは <tt>x</tt> のためのプロパティ値を <tt>value</tt> にする。<tt>x</tt> は
+頂点記述子または辺記述子のどちらか一方である。<tt>Value</tt> は
+<tt>typename property_traits&lt;property_map&lt;filtered_graph, PropertyTag&gt;::type&gt::value_type</tt> に変更可能でなければならない。
+
+<hr>
+
+<h3>See Also</h3>
+
+<a href="./property_map.html"><tt>property_map</tt></a>,
+<a href="./graph_traits.html"><tt>graph_traits</tt></a>
+
+<h3>Notes</h3>
+
+<p>
+<a name="1">[1]</a>
+<tt>EdgePredicate</tt> と <tt>VertexPredicate</tt> 型の中で <a
+href="http://www.sgi.com/tech/stl/DefaultConstructible.html">Default
+Constructible</a> を必要とする理由は、これらの述語はフィルタ・
+イテレータ・アダプタ中で値によって (性能の理由のために) 格納され、
+イテレータは C++ 標準によってデフォルト・コンストラクタを持っていること
+(Default Constructible) が要求されるからである。
+
+<p>
+<a name="2">[2]</a>
+フィルタが適用された後に残存している頂点の数を返すことはより適切であろうが、
+これは二つの問題を持つ。一番目は計算するのに長い時間がかかるだろうこと、
+二番目に基礎にある頂点の添え字マッピングとまずく相互作用するだろうことで
+ある。添え字マッピングは多くのアルゴリズム中で仮定されている範囲
+<tt>[0,num_vertices(g))</tt> にはもはや整列しないだろう。
+アルゴリズムからその仮定を除去するような解決に取り組んでいる。
+
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000-2001</TD><TD>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>,
+Indiana University (<A
+HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)<br>
+<A HREF="../../../people/liequan_lee.htm">Lie-Quan Lee</A>, Indiana University (<A HREF="mailto:llee@cs.indiana.edu">llee@cs.indiana.edu</A>)<br>
+<A HREF=http://www.osl.iu.edu/~lums>Andrew Lumsdaine</A>,
+Indiana University (<A
+HREF="mailto:lums@osl.iu.edu">lums@osl.iu.edu</A>)
+</TD></TR></TABLE>
+
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:takashi-it@po6.nsk.ne.jp">Takashi Itou</a><br> 
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+
+<p>このドキュメントの対象: Boost Version 1.30.0<br>
+<a href="http://www.boost.org/libs/graph/doc/filtered_graph.html">最新版ドキュメント (英語)</a></p>
+</BODY>
+</HTML> 

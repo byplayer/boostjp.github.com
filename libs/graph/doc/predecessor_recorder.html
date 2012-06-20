@@ -1,0 +1,177 @@
+<HTML>
+<!--
+  -- Copyright (c) Jeremy Siek, Lie-Quan Lee, and Andrew Lumsdaine 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  We make no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<Meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<Title>Boost Graph Library: predecessor_recorder</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+<H1>
+<pre>
+predecessor_recorder&lt;PredecessorMap, EventTag&gt;
+</pre>
+</H1>
+
+これは頂点の先行点 (親) を先行点プロパティマップに記録する <a href="./EventVisitor.html">EventVisitor</a> である。これはグラフ探索アルゴリズムで特に有効だ。グラフ探索アルゴリズムで先行点を記録するのは、探索中にトラバースされた探索木を符号化する効果的な方法だからだ。 <tt>predecessor_recorder</tt> は <tt>on_tree_edge</tt> や <tt>on_relax_edge</tt> でよく使われる。頂点イベントには使用できない。
+
+<p>
+<a href="./bfs_visitor.html"><tt>bfs_visitor</tt></a> や <a href="./dfs_visitor.html"><tt>dfs_visitor</tt></a> などのアルゴリズム別のアダプタでラップする事で、 <tt>predecessor_recorder</tt> を グラフアルゴリズムで使えるようになる。また、<tt>std::pair</tt> を使って他のイベントビジタと結合して、 EventVisitorList を作れる。
+
+<p>
+Dijkstra のアルゴリズムや幅優先探索では、始点 (探索木の根) には先行点が代入されない。始点の先行点がそれ自身になるように初期化すると便利な事が多い。そうすれば自身を親とする唯一の頂点として始点を識別できるからだ。深さ優先探索のような森 (複数の探索木) を作るアルゴリズムを使う時は、ずべての頂点の先行点がそれ自身になるように初期化すると便利だ。そうすれば、全てのルートノードを識別できる。
+
+
+<h3>Example</h3>
+
+例は <a href="./bfs_visitor.html"><tt>bfs_visitor</tt></a> を参照。
+
+<h3>Model of</h3>
+
+<a href="./EventVisitor.html">EventVisitor</a>
+
+
+<H3>Where Defined</H3>
+
+<P>
+<a href="../../../boost/graph/visitors.hpp">
+<TT>boost/graph/visitors.hpp</TT></a>
+
+<H3>Template Parameters</H3>
+
+<P>
+<TABLE border>
+<TR>
+<th>パラメータ</th><th>説明</th><th>デフォルト</th>
+</tr>
+
+<TR><TD><TT>PredecessorMap</TT></TD>
+<TD>
+キーの型と値の型がグラフの頂点記述子型である <a
+href="../../property_map/WritablePropertyMap.html">WritablePropertyMap</a> 。
+</TD>
+<TD>&nbsp;</TD>
+</TR>
+
+<TR><TD><TT>EventTag</TT></TD>
+<TD>
+グラフアルゴリズム中、いつ <tt>predecessor_recorder</tt> が呼び出されるかを指定するタグ。 <tt>EventTag</tt> は辺イベントでなければならない。
+</TD>
+<TD>&nbsp;</TD>
+</TR>
+
+</table>
+
+<H2>Associated Types</H2>
+
+<table border>
+
+<tr>
+<th>型</th><th>説明</th>
+</tr>
+
+<tr>
+<td><tt>predecessor_recorder::event_filter</tt></td>
+<td>
+テンプレートパラメータ <tt>EventTag</tt> と同じ型。
+</td>
+</tr>
+
+</table>
+
+<h3>Member Functions</h3>
+
+<p>
+
+<table border>
+<tr>
+<th>メンバ</th><th>説明</th>
+</tr>
+
+<tr>
+<td><tt>
+predecessor_recorder(PredecessorMap pa);
+</tt></td>
+<td>
+先行点プロパティマップ <tt>pa</tt> を使って <tt>predecessor_recorder</tt> オブジェクトを構築する。
+</td>
+</tr>
+
+<tr>
+<td><tt>
+template &lt;class Edge, class Graph&gt;<br>
+void operator()(Edge e, const Graph& g);
+</tt></td>
+<td>
+辺 <i>e = (u,v)</i> を渡されると、 <i>u</i> を <i>v</i> の先行点 (親) として記録する。
+</td>
+</tr>
+
+</table>
+
+<h3>Non-Member Functions</h3>
+
+<table border>
+<tr>
+<th>関数</th><th>説明</th>
+</tr>
+
+<tr><td><tt>
+template &lt;class PredecessorMap, class Tag&gt;<br>
+predecessor_recorder&lt;PredecessorMap, Tag&gt; <br>
+record_predecessors(PredecessorMap pa, Tag);
+</tt></td><td>
+<tt>predecessor_recorder</tt> を作る便利な方法。
+</td></tr>
+
+</table>
+
+<h3>See Also</h3>
+
+<a href="./visitor_concepts.html">Visitor concepts</a>
+<p>
+イベントビジタ: <a
+<a href="./distance_recorder.html"><tt>distance_recorder</tt></a> 、
+<a href="./time_stamper.html"><tt>time_stamper</tt></a> 、
+<a href="./property_writer.html"><tt>property_writer</tt></a> 。
+
+
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000-2001</TD><TD>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>,
+Indiana University (<A
+HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)<br>
+<A HREF="../../../people/liequan_lee.htm">Lie-Quan Lee</A>, Indiana University (<A HREF="mailto:llee@cs.indiana.edu">llee@cs.indiana.edu</A>)<br>
+<A HREF=http://www.osl.iu.edu/~lums>Andrew Lumsdaine</A>,
+Indiana University (<A
+HREF="mailto:lums@osl.iu.edu">lums@osl.iu.edu</A>)
+</TD></TR></TABLE>
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:gimite@mx12.freecom.ne.jp">Hiroshi Ichikawa</a><br>
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+<p>このドキュメントの対象: Boost Version 1.30.0<br>
+<a href="http://www.boost.org/libs/graph/doc/predecessor_recorder.html">最新版ドキュメント (英語)</a></p>
+
+</BODY>
+</HTML> 
+<!--  LocalWords:  PredecessorMap EventTag EventVisitor map bfs dfs const
+ -->
+<!--  LocalWords:  EventVisitorList WritablePropertyMap Siek Univ Quan
+ -->
+<!--  LocalWords:  Lumsdaine
+ -->

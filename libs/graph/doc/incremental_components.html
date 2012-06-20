@@ -1,0 +1,425 @@
+<HTML>
+<!--
+  -- Copyright (c) Jeremy Siek, Lie-Quan Lee, and Andrew Lumsdaine 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  We make no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<Title>Boost Graph Library: Incremental Connected Components</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+<H1>Incremental Connected Components</H1>
+
+<P>
+この章は、無向グラフの連結成分を計算するために一緒に機能する関数とクラスの
+一群を記述する。ここで用いられているアルゴリズムは、グラフが増大
+(辺が付け加えられる) し、連結成分情報が繰り返し更新される必要がある
+ような状況に使うとよい方法である、素集合 (高速 union-find)
+データ構造&nbsp;[<A
+HREF="bibliography.html#clr90">8</A>,<A
+HREF="bibliography.html#tarjan83:_data_struct_network_algo">27</A>]
+に基づくものである。
+この方法はグラフに辺が追加され、かつグラフから辺が削除されるような状況を
+扱わない。それゆえ <b><i>incremental</i></b><a
+href="bibliography.html#eppstein97:dynamic_graph">[42]</a> (そして完全に
+動的ではない) と呼ばれる。素集合クラスは <A
+HREF="../../disjoint_sets/disjoint_sets.html">Disjoint Sets</A> 節の中で
+述べられている。
+
+<P>
+次に述べる 5つの操作は、連結成分を計算し、維持するために用いる主要な関数
+である。ここで使われているオブジェクトは、グラフ <TT>g</TT>、素集合構造
+<TT>ds</TT>、そして頂点 <TT>u</TT> と <TT>v</TT> である。
+
+<P>
+
+<UL>
+<LI><TT>initialize_incremental_components(g, ds)</TT> 
+<BR>
+素集合構造の基礎初期化。グラフ <TT>g</TT> 中の各頂点はそれ自身の集合の中に
+入る。
+</LI>
+<LI><TT>incremental_components(g, ds)</TT> 
+<BR>
+連結成分はグラフ <TT>g</TT> 中の辺に基づいて計算され、情報は <TT>ds</TT>
+に挿入される。
+</LI>
+<LI><TT>ds.find_set(v)</TT> 
+<BR>
+頂点 <TT>v</TT> の成分情報を素集合から取り出す。
+</LI>
+<LI><TT>ds.union_set(u, v)</TT> 
+<BR>
+辺 <i>(u,v)</i> がグラフに追加された時に素集合を更新する。
+
+</LI>
+</UL>
+
+<P>
+
+<H3>Complexity</H3>
+
+<P>
+全ての処理の時間複雑性は <i>E</i> が処理終了時のグラフ中の全辺数で、
+<i>V</i>が頂点数である時 <i>O(V + E alpha(E,V))</i> である。
+<i>alpha</i> は爆発的再帰的に指数的増加をするアッカーマン関数の逆関数である。
+それゆえこの逆関数は<I>とても</I>ゆっくり増加する。全ての現実的な目的にとって
+<i>alpha(m,n) <= 4</i> であり、これは時間複雑性が <i>O(V + E)</i> より
+わずかに大きいだけである事を意味する。
+
+<P>
+
+<H3>Example</H3>
+
+<P>
+素集合データ構造を使いながら辺を付け加える間、グラフの連結成分を維持する。
+これの完全なソース・コードは <a
+href="../example/incremental_components.cpp"><TT>examples/incremental_components.cpp</TT></a> にある。
+
+<P>
+<PRE>
+  // グラフを作成する
+  typedef adjacency_list &lt;vecS, vecS, undirectedS&gt; Graph;
+  typedef Graph::vertex_descriptor Vertex;
+  const int N = 6;
+  Graph G(N);
+  add_edge(0, 1, G);
+  add_edge(1, 4, G);
+
+  // 素集合構造を作成する。これはランクと、
+  // 親頂点プロパティを必要とする。
+  std::vector&lt;Vertex&gt; rank(num_vertices(G));
+  std::vector&lt;Vertex&gt; parent(num_vertices(G));
+  typedef std::vector&lt;Graph::size_type&gt;::iterator Rank;
+  typedef std::vector&lt;Vertex&gt;::iterator Parent;
+  disjoint_sets&lt;Rank, Parent&gt; ds(rank.begin(), parent.begin());
+
+  // 連結成分を決定する。
+  // 結果は素集合構造の中に挿入される。
+  initialize_incremental_components(G, ds);
+  incremental_components(G, ds);
+
+  Graph::edge_descriptor e;
+  bool flag;
+
+  // 2、3個の辺を付け加え、素集合を更新する。
+  tie(e,flag) = add_edge(4, 0, G);
+  ds.union_set(4,0);
+
+  tie(e,flag) = add_edge(2, 5, G);
+  ds.union_set(2,5);
+    
+  cout &lt;&lt; "An undirected graph:" &lt;&lt; endl;
+  print_graph(G, get(vertex_index, G));
+  cout &lt;&lt; endl;
+    
+  Graph::vertex_iterator i,end;
+  for (tie(i,end) = vertices(G); i != end; ++i)
+    cout &lt;&lt; "representative[" &lt;&lt; *i &lt;&lt; "] = " &lt;&lt; 
+      ds.find_set(*i) &lt;&lt; endl;;
+  cout &lt;&lt; endl;
+
+  typedef component_index&lt;int&gt; Components;
+  Components components(parent.begin(), parent.end());
+
+  for (Components::size_type i = 0; i &lt; components.size(); ++i) {
+    cout &lt;&lt; "component " &lt;&lt; i &lt;&lt; " contains: ";
+    Components::value_type::iterator
+      j = components[i].begin(),
+      jend = components[i].end();
+    for ( ; j != jend; ++j)
+      cout &lt;&lt; *j &lt;&lt; " ";
+    cout &lt;&lt; endl;
+  }
+</PRE>
+
+<P>
+<hr>
+<p>
+
+<H2><A NAME="sec:initialize-incremental-components"></A>
+<TT>initialize_incremental_components</TT>
+</H2>
+
+<P>
+<DIV ALIGN="left">
+<TABLE CELLPADDING=3 border>
+<TR><TH ALIGN="LEFT"><B>グラフ:</B></TH>
+<TD ALIGN="LEFT">無向</TD>
+</TR>
+<TR><TH ALIGN="LEFT"><B>プロパティ:</B></TH>
+<TD ALIGN="LEFT">ランク、親 (素集合中の)</TD>
+</TR>
+<TR><TH ALIGN="LEFT"><B>複雑性:</B></TH>
+<TD></TD>
+</TR>
+</TABLE>
+</DIV>
+
+<P>
+<PRE>
+template &lt;class VertexListGraph, class DisjointSets&gt; 
+void initialize_incremental_components(VertexListGraph&amp; G, DisjointSets&amp; ds)
+</PRE>
+
+<P>
+これはグラフ中の各頂点をそれ自身の成分または集合のメンバにする
+増分連結成分アルゴリズムのための素集合データ構造を用意する。
+
+<P>
+
+<H3>Where Defined</H3>
+
+<P>
+<a href="../../../boost/graph/incremental_components.hpp"><TT>boost/graph/incremental_components.hpp</TT></a>
+
+<p>
+<hr>
+<P>
+
+<H2><A NAME="sec:incremental-components"></A>
+<TT>incremental_components</TT>
+</H2>
+
+<P>
+<DIV ALIGN="left">
+<TABLE CELLPADDING=3 border>
+<TR><TH ALIGN="LEFT"><B>グラフ:</B></TH>
+<TD ALIGN="LEFT">無向</TD>
+</TR>
+<TR><TH ALIGN="LEFT"><B>プロパティ:</B></TH>
+<TD ALIGN="LEFT">ランク、親 (素集合中の)</TD>
+</TR>
+<TR><TH ALIGN="LEFT"><B>複雑性:</B></TH>
+<TD ALIGN="LEFT"><i>O(E)</i></TD>
+</TR>
+</TABLE>
+</DIV>
+
+<p>
+<PRE>
+template &lt;class EdgeListGraph, class DisjointSets&gt;
+void incremental_components(EdgeListGraph&amp; g, DisjointSets&amp; ds)
+</PRE>
+
+<P>
+この関数はグラフの連結成分を、結果を素集合データ構造の中に挿入しながら
+計算する。
+
+<P>
+
+<H3>Where Defined</H3>
+
+<P>
+<a href="../../../boost/graph/incremental_components.hpp"><TT>boost/graph/incremental_components.hpp</TT></a>
+
+<P>
+
+<H3>Requirements on Types</H3>
+
+<P>
+
+<UL>
+<LI>グラフの型は <a href="./EdgeListGraph.html">EdgeListGraph</a> のモデルで
+なければならない。
+</LI>
+</UL>
+
+<P>
+<hr>
+<p>
+
+<H2><A NAME="sec:same-component">
+<TT>same_component</TT></A>
+</H2>
+
+<P>
+<DIV ALIGN="left">
+<TABLE CELLPADDING=3 border>
+<TR><TH ALIGN="LEFT"><B>プロパティ:</B></TH>
+<TD ALIGN="LEFT">ランク、親 (素集合中の)</TD>
+</TR>
+<TR><TH ALIGN="LEFT"><B>複雑性:</B></TH>
+<TD ALIGN="LEFT"><i>O(alpha(E,V))</i></TD>
+</TR>
+</TABLE>
+</DIV>
+
+<P>
+<PRE>
+template &lt;class Vertex, class DisjointSet&gt;
+bool same_component(Vertex u, Vertex v, DisjointSet&amp; ds)
+</PRE>
+
+<P>
+この関数は  <TT>u</TT> と <TT>v</TT> が同じ成分中にあるかどうか決定する。
+
+<P>
+
+<H3>Where Defined</H3>
+
+<P>
+<a href="../../../boost/graph/incremental_components.hpp"><TT>boost/graph/incremental_components.hpp</TT></a>
+
+<P>
+
+<H3>Requirements on Types</H3>
+
+<P>
+
+<UL>
+<LI>
+<TT>Vertex</TT> はランク及び <TT>DisjointSets</TT> データ構造の親プロパティ・
+マップと互換性がなければならない。
+</LI>
+</UL>
+
+<P>
+<hr>
+<p>
+
+<H2><A NAME="sec:component-index"></A>
+<TT>component_index</TT>
+</H2>
+
+<p>
+<PRE>
+component_index&lt;Index&gt;
+</PRE>
+
+<P>
+これはグラフの成分に STL コンテナに似た外観を提供するクラスである。
+各成分はコンテナに似たオブジェクトで、<TT>component_index</TT> オブジェクトは
+<TT>operator[]</TT> による成分オブジェクトへのアクセスを提供する。
+<TT>component_index</TT> オブジェクトは <TT>incremental_components()</TT> 関数
+から計算される素集合中の親プロパティによって初期化される。
+
+<P>
+
+<H3>Where Defined</H3>
+
+<P>
+<a href="../../../boost/graph/incremental_components.hpp"><TT>boost/graph/incremental_components.hpp</TT></a>
+
+<P>
+
+<H3>Members</H3>
+
+<P>
+ 
+<table border>
+
+<tr>
+<th>メンバ</th> <th>説明</th>
+</tr>
+
+<tr>
+<td><tt>size_type</tt></td>
+<td>成分数を表現するための型。</td>
+</tr>
+
+
+<tr>
+<td><tt>value_type</tt></td>
+<td>
+成分オブジェクトのための型。成分の型は以下のメンバを持つ。
+</td>
+</tr>
+ 
+<tr>
+<td><tt>value_type::value_type</tt></td>
+<td>
+成分オブジェクトの値型は頂点IDである。
+</td>
+</tr>
+
+<tr>
+<td><tt>value_type::iterator</tt></td>
+<td>
+このイテレータは成分中の頂点の全てを一巡するのに使える。このイテレータは
+頂点IDを与える参照外しをする。
+</td>
+</tr>
+
+<tr>
+<td><tt>value_type::const_iterator</tt></td>
+<td>
+constイテレータ。
+</td>
+</tr>
+
+<tr>
+<td><tt>value_type::iterator value_type::begin() const</tt></td>
+<td>
+成分中の最初の頂点を指すイテレータを返す。
+</td>
+</tr>
+
+<tr>
+<td><tt>value_type::iterator value_type::end() const</tt></td>
+<td>
+成分中の最後の頂点の末尾の直後 (訳注: past-the-end) を指すイテレータを返す。
+</td>
+<tr>
+
+<tr>
+<td>
+<tt>
+template &lt;class ComponentsContainer&gt;
+component_index(const ComponentsContainer&amp; c)
+</tt>
+</td>
+<td>
+<TT>connected_components_on_edgelist</TT> の実行結果である成分コンテナ
+<TT>c</TT> からの情報を用いて <TT>component_index</TT> を構築する。
+</td>
+</tr>
+
+<tr>
+<td><tt>value_type operator[](size_type i)</tt></td>
+<td>
+グラフ中の <TT>i</TT> 番目の成分を返す。
+</td>
+</tr>
+
+<tr>
+<td><tt>size_type component_index::size()</tt></td>
+<td>
+グラフ中の成分数を返す。
+</td>
+
+</table> 
+
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000-2001</TD><TD>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>,
+Indiana University (<A
+HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)<br>
+<A HREF="../../../people/liequan_lee.htm">Lie-Quan Lee</A>, Indiana University (<A HREF="mailto:llee@cs.indiana.edu">llee@cs.indiana.edu</A>)<br>
+<A HREF=http://www.osl.iu.edu/~lums>Andrew Lumsdaine</A>,
+Indiana University (<A
+HREF="mailto:lums@osl.iu.edu">lums@osl.iu.edu</A>)
+</TD></TR></TABLE>
+
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:takashi-it@po6.nsk.ne.jp">Takashi Itou</a><br> 
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+
+<p>このドキュメントの対象: Boost Version 1.30.0<br>
+<a href="http://www.boost.org/libs/graph/doc/incremental_components.html">最新版ドキュメント (英語)</a></p>
+</BODY>
+</HTML> 

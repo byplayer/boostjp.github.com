@@ -1,0 +1,1006 @@
+<HTML>
+<!--
+  -- Copyright (c) Jeremy Siek 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  Jeremy Siek makes no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<Title>Boost Graph Library: Adjacency List</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+<H1><A NAME="sec:adjacency-list-class"></A>
+<pre>
+adjacency_list&lt;EdgeList, VertexList, Directed,
+               VertexProperties, EdgeProperties,
+               GraphProperties&gt;
+</pre>
+</H1>
+
+
+<P>
+<TT>adjacency_list</TT> クラスは一般化された隣接リストグラフ構造を実装する。
+テンプレート・パラメータは要求を最も満たすクラスのバージョンを選べるように
+多くの形態の選択肢を提供する。<a
+href="graph_theory_review.html#sec:adjacency-list-representation">adjacency-list</a> は基本的に二次元の構造で、ここで最初の次元の各要素は頂点を表し、頂点の
+各々はその辺リストの一次元構造を含んでいる。
+<a
+href="#fig:adj-list-graph">Figure 1</a> は有向グラフの隣接リスト表現を示す。
+
+<P></P>
+<DIV ALIGN="center"><A NAME="fig:adj-list-graph"></A><A NAME="1509"></A>
+<TABLE>
+<CAPTION ALIGN="BOTTOM"><STRONG>Figure 1:</STRONG>有向グラフの隣接リスト表現</CAPTION>
+<TR><TD><IMG SRC="./figs/adj-matrix-graph2.gif" width="386" height="284"></TD>
+<TD><IMG SRC="./figs/adj-list2.gif" width="62" height="122"></TD></TR>
+</TABLE>
+</DIV><P></P>
+
+<TT>adjacency_list</TT> クラスの <TT>VertexList</TT> テンプレート・パラメータ
+は外部の二次元コンテナを表すためにどんな種類のコンテナが使われるかを制御する。
+<TT>EdgeList</TT> テンプレート・パラメータは辺リストを表すためにどんな種類の
+コンテナが使われるかを制御する。<TT>EdgeList</TT> と <TT>VertexList</TT> の
+選択はグラフ構造の空間複雑性を決定するだろう、そして様々なグラフ操作の時間
+複雑性を決定するだろう。可能な選択とトレード・オフは章 <A
+HREF="./using_adjacency_list.html#sec:choosing-graph-type">Choosing
+the <TT>Edgelist</TT> and <TT>VertexList</TT></A> 中で論じられる。
+
+<P>
+<TT>Directed</TT> テンプレート・パラメータはグラフが有向か無向か、または
+入辺と出辺の両方にアクセスする (これを双方向性と呼ぶ) 有向かを制御する。
+双方向性グラフは各辺が出辺リストと入辺リストの両方に現れるため、辺当たり
+有向グラフの二倍の空間を取る。<a
+href="#fig:undir-adj-list-graph">Figure 2</a> は無向グラフの隣接リスト表現
+を示す。
+
+<P></P>
+<DIV ALIGN="center"><A NAME="fig:undir-adj-list-graph"></A><A NAME="1509"></A>
+<TABLE>
+<CAPTION ALIGN="BOTTOM"><STRONG>Figure 2:</STRONG>無向グラフの隣接リスト表現</CAPTION>
+<TR><TD><IMG SRC="./figs/undir-adj-matrix-graph2.gif" width="260" height="240"></TD>
+<TD><IMG SRC="./figs/undir-adj-list2.gif" width="62" height="122"></TD></TR>
+</TABLE>
+</DIV><P></P>
+
+<P>
+<TT>adjacency_list</TT> クラスの使い方のチュートリアルは章 <A
+HREF="./using_adjacency_list.html">Using
+<TT>adjacency_list</TT></A> にある。
+
+<P>
+
+<H3>Example</H3>
+
+<P>
+<a
+href="../example/family-tree-eg.cpp"><tt>examples/family-tree-eg.cpp</tt></a>
+中にある例は家族の木 (family tree) をグラフで表現する方法を示す。
+
+<H3>Template Parameters</H3>
+
+<P>
+<TABLE border>
+<TR>
+<th>パラメータ</th><th>説明</th><th>デフォルト</th>
+</tr>
+
+<TR><TD><TT>EdgeList</TT></TD>
+<TD>
+各々の頂点の辺リストを表わすために使われるコンテナのための選択子。
+</TD>
+<TD><TT>vecS</TT></TD>
+</TR>
+
+<TR>
+<TD><TT>VertexList</TT></TD>
+<TD>
+グラフの頂点リストを表すために使われるコンテナのための選択子。
+</TD>
+<TD><TT>vecS</TT></TD>
+</TR>
+
+<TR>
+<TD><TT>Directed</TT></TD>
+<TD>
+グラフが有向か、無向か、または双方向の辺アクセス (出辺と入辺の両方にアクセス
+する) の有向かを選ぶ選択子。選択肢は <TT>directedS</TT>、<TT>undirectedS</TT>、
+そして <TT>bidirectionalS</TT> である。
+</TD>
+<TD><TT>directedS</TT></TD>
+</TR>
+
+<TR>
+<TD><TT>VertexProperties</TT></TD>
+<TD>内部のプロパティの記憶領域を指定する。</TD>
+<TD><TT>no_property</TT></TD>
+</TR>
+
+<TR>
+<TD><TT>EdgeProperties</TT></TD>
+<TD>内部のプロパティの記憶領域を指定する。</TD>
+<TD><TT>no_property</TT></TD>
+</TR>
+
+<TR>
+<TD><TT>GraphProperties</TT></TD>
+<TD>グラフ・オブジェクトのためのプロパティの記憶領域を指定する。</TD>
+<TD><TT>no_property</TT></TD>
+</TR>
+
+</TABLE>
+<P>
+
+<H3>Model of</H3>
+
+<P>
+<a href="./VertexAndEdgeListGraph.html">VertexAndEdgeListGraph</a>, 
+<a href="./MutablePropertyGraph.html">MutablePropertyGraph</a>,
+<a href="../../utility/CopyConstructible.html">CopyConstructible</a>,
+and <a href="../../utility/Assignable.html">Assignable</a>.
+
+<P>
+
+<H3>Where Defined</H3>
+
+<P>
+<a href="../../../boost/graph/adjacency_list.hpp"><TT>boost/graph/adjacency_list.hpp</TT></a>
+
+<P>
+
+<H2>Vertex and Edge Properties</H2>
+
+<P>
+色、距離、重み、そしてユーザ定義のプロパティのようなプロパティは、プロパティ
+を用いてグラフの頂点と辺に結びつけることができる。プロパティの値はグラフに
+よって提供されるプロパティ・マップ経由で読み書きできる。プロパティ・マップ
+は <TT>get(property, g)</TT> 関数経由で得られる。プロパティの使い方は
+章 <A
+HREF="./using_adjacency_list.html#sec:adjacency-list-properties">Internal
+Properties </A> 内で述べられている。プロパティ・マップは章 <A
+HREF="../../property_map/property_map.html">Property Map
+Concepts</A> 内で定義されているインターフェースを実装するオブジェクトである。
+<TT>adjacency_list</TT> クラスから得られるプロパティ・マップは <a
+href="../../property_map/LvaluePropertyMap.html">Lvalue Property
+Map</a> コンセプトのモデルである。もし <TT>adjacency_list</TT> が const なら、
+プロパティ・マップは定数である。さもなくばプロパティ・マップは変更可能である。
+
+<P>
+もしグラフの <TT>VertexList</TT> が <TT>vecS</TT> なら、グラフは
+ <TT>vertex_index_t</TT> プロパティのためのプロパティ・マップを経由して
+アクセスされた組み込みの頂点の添え字を持っている。添え字は
+<TT>[0, num_vertices(g))</TT> の範囲内に整列し、連続している。頂点が
+削除される時、添え字はそれらのプロパティを持ち続けるよう調整される。
+これらの添え字を外部のプロパティの記憶領域にアクセスするために使う際には
+いくらか気をつけなければならない。
+頂点の添え字のためのプロパティ・マップは <a href="../../property_map/ReadablePropertyMap.html">Readable Property Map</a> のモデルである。
+
+<P>
+
+<h2>Iterator and Descriptor Stability/Invalidation</h2>
+
+辺の追加や削除によってグラフの構造を変更する時はいくらか注意しなければ
+ならない。<tt>adjacency_list</tt> の型と操作に依存して、グラフ内を指す
+イテレータや記述子オブジェクトのいくつかは無効になるかもしれない。
+例えば、次のコードは未定義の (悪い) 振る舞いの結果となるだろう:
+
+<pre>
+  typedef adjacency_list&lt;listS, vecS&gt; Graph; <b>// VertexList=vecS</b>
+  Graph G(N);
+  <b>// グラフに書き込む...</b>
+
+  <b>// 全ての頂点を削除しようとする試み。間違っている！</b>
+  graph_traits&lt;Graph&gt;::vertex_iterator vi, vi_end;
+  for (tie(vi, vi_end) = vertices(G); vi != vi_end; ++vi)
+    remove_vertex(*vi, G);
+
+  <b>// 全ての頂点を削除する。これでもまだ間違っている！</b>
+  graph_traits&lt;Graph&gt;::vertex_iterator vi, vi_end, next;
+  tie(vi, vi_end) = vertices(G);
+  for (next = vi; vi != vi_end; vi = next) {
+    ++next;
+    remove_vertex(*vi, G);
+  }
+</pre>
+これが問題である理由は <tt>remove_vertex()</tt> を呼び出しており、そして
+それが <tt>VertexList=vecS</tt> の <tt>adjacency_list</tt> と共に
+使われた時、グラフのための全てのイテレータと記述子 (例えば <tt>vi</tt> や
+ <tt>vi_end</tt>) を無効にするために、ループの次の繰り返し中に災難を引き起こす。
+<p>
+もし異なる種類の <tt>adjacency_list</tt> を使い、そして
+ <tt>VertexList=listS</tt> ならば、イテレータが削除された実際の頂点を指して
+なければ <tt>remove_vertex</tt> を呼ぶことによってイテレータは無効に
+ならない。次のコードはこれを説明する。
+
+
+<pre>
+  typedef adjacency_list&lt;listS, listS&gt; Graph; <b>// VertexList=listS</b>
+  Graph G(N);
+  <b>// グラフに書き込む...</b>
+
+  <b>// 全ての頂点を削除しようとする試み。間違っている！</b>
+  graph_traits&lt;Graph&gt;::vertex_iterator vi, vi_end;
+  for (tie(vi, vi_end) = vertices(G); vi != vi_end; ++vi)
+    remove_vertex(*vi, G);
+
+  <b>// 全ての頂点を削除する。これは大丈夫である</b>
+  graph_traits&lt;Graph&gt;::vertex_iterator vi, vi_end, next;
+  tie(vi, vi_end) = vertices(G);
+  for (next = vi; vi != vi_end; vi = next) {
+    ++next;
+    remove_vertex(*vi, G);
+  }
+</pre>
+
+<p>
+安定性の問題は更に頂点記述子と辺記述子に影響を及ぼす。例えば、最短経路木中
+の頂点の親 (または先行点) の過程を保持するために頂点記述子の vector を使った
+としよう (<a
+href="../example/dijkstra-example.cpp"><tt>examples/dijkstra-example.cpp</tt></a> を見よ)。<tt>dijkstra_shortest_paths()</tt> を呼んで親の vector を作成し、
+それからグラフから頂点を削除する。続いて親の vector を使おうと試みるが、
+全ての頂点記述子は無効になっているので、結果は正しくない。
+
+<pre>
+  std::vector&lt;Vertex&gt; parent(num_vertices(G));
+  std::vector&lt;Vertex&gt; distance(num_vertices(G));
+
+  dijkstra_shortest_paths(G, s, distance_map(&amp;distance[0]).
+    predecessor_map(&amp;parent[0]));
+
+  remove_vertex(s, G); <b>// まずい考えだ！親 vector 中の頂点記述子を無効にする
+</b>
+
+  <b>// 次は間違った結果を生じる</b>
+  for(tie(vi, vend) = vertices(G); vi != vend; ++vi)
+    std::cout << p[*vi] << " is the parent of " << *vi << std::endl;
+</pre>
+
+
+<p>
+この議論の中でイテレータと記述子の無効化は、操作によって<b>直接影響を受け
+ない</b>イテレータと記述子の無効化に携わっている事に注意しなさい。
+例えば、<tt>remove_edge(u, v, g)</tt> の実行は、<tt>adjacency_list</tt>
+ の種類に関係なく、いつも <i>(u,v)</i> のための
+どの辺記述子も、また<i>(u,v)</i> を指すどの辺記述子も無効にするだろう。
+このイテレータと記述子の無効化の議論中で、他の辺 (<i>(u,v)</i> ではない)
+ を指す辺記述子とイテレータにおける <tt>remove_edge(u, v, g)</tt> の影響
+にのみ携わっている。
+
+<p>
+一般的に頂点記述子と辺記述子を安定に (決して無効にならない) したければ、
+<tt>adjacency_list</tt> の <tt>VertexList</tt> と <tt>EdgeList</tt>
+ テンプレート・パラメータのために <tt>listS</tt> または <tt>setS</tt>
+を使いなさい。もし記述子とイテレータの安定性に気をもまないけれどもメモリの
+消費量とグラフの巡回速度をより心配するなら、<tt>VertexList</tt> かつ/または
+ <tt>EdgeList</tt> テンプレート・パラメータのために <tt>vecS</tt> を
+使いなさい。
+
+<p>
+下記の表はどの操作が記述子とイテレータを無効にする原因となるかを要約する。
+表中で、<tt>EL</tt> は <tt>EdgeList</tt> の省略形で <tt>VL</tt> は
+<tt>VertexList</tt> を意味する。<b>Adj Iter (隣接イテレータ)</b> カテゴリは
+<tt>out_edge_iterator</tt>、<tt>in_edge_iterator</tt>、そして
+ <tt>adjacency_iterator</tt> 型を含む。記述子とイテレータの無効化の
+より詳しい説明は各操作のドキュメント中で示されている。
+
+<p>
+
+<table border>
+<CAPTION ALIGN="BOTTOM"><STRONG>Table:</STRONG>
+記述子とイテレータの無効化の要約
+    </CAPTION>
+<tr> <th>関数</th> <th>頂点記述子</th> <th>辺記述子</th>
+<th>頂点イテレータ</th> <th>辺イテレータ</th> <th>隣接イテレータ</th> </tr>
+
+<tr>
+<td><tt>add_edge()</tt></td> <td align=center><tt>OK</tt></td><td
+align=center><tt>OK</tt></td><td align=center><tt>OK</tt></td><td
+align=center><tt>EL=vecS &amp;&amp;<br> Directed=directedS</tt></td><td align=center><tt>EL=vecS</tt></td>
+</tr>
+<tr>
+<td><tt>remove_edge()<br>remove_edge_if()<br>remove_out_edge_if()<br>remove_in_edge_if()<br>clear_vertex()</tt></td><td align=center><tt>OK</tt></td><td align=center><tt>OK</tt></td><td align=center><tt>OK</tt></td>
+<td align=center><tt>EL=vecS &amp;&amp;<br> Directed=directedS</tt></td><td align=center><tt>EL=vecS</tt></td>
+</tr>
+<tr>
+<td><tt>add_vertex()</tt></td><td align=center><tt>OK</tt></td><td
+align=center><tt>OK</tt></td><td align=center><tt>OK</tt></td><td
+align=center><tt>OK</tt></td><td align=center><tt>OK</tt></td>
+</tr>
+<tr>
+<td><tt>remove_vertex()</tt></td><td align=center><tt>VL=vecS</tt></td><td align=center><tt>VL=vecS</tt></td><td align=center><tt>VL=vecS</tt></td><td align=center><tt>VL=vecS</tt></td><td align=center><tt>VL=vecS</tt></td>
+</tr>
+
+</table>
+
+
+<H2>Associated Types</H2>
+
+<hr>
+
+<tt>graph_traits&lt;adjacency_list&gt;::vertex_descriptor</tt>
+<br>
+and
+<br>
+<tt>adjacency_list_traits&lt;EdgeList, VertexList, Directed&gt;::vertex_descriptor</tt>
+<br><br>
+<TT>adjacency_list</TT> と結びついた頂点記述子の型。
+
+<hr>
+
+<tt>graph_traits&lt;adjacency_list&gt;::edge_descriptor</tt><br>
+and<br>
+<tt>adjacency_list_traits&lt;EdgeList, VertexList, Directed&gt;::edge_descriptor</tt>
+<br><br>
+<TT>adjacency_list</TT> と結びついた辺記述子の型。
+
+<hr>
+
+<tt>graph_traits&lt;adjacency_list&gt;::vertex_iterator</tt>
+<br><br>
+<TT>vertices()</TT> によって返されるイテレータの型。
+
+もし <tt>VertexList=vecS</tt> なら <tt>vertex_iterator</tt> は <a
+href="http://www.sgi.com/tech/stl/RandomAccessIterator.html">RandomAccessIterator</a> をモデルとする。そうでなければ <tt>vertex_iterator</tt>
+ は <a
+href="http://www.sgi.com/tech/stl/BidirectionalIterator.html">BidirectionalIterator</a> をモデルとする。
+
+<hr>
+
+<tt>graph_traits&lt;adjacency_list&gt;::edge_iterator</tt>
+<br><br>
+<TT>edges()</TT> によって返されるイテレータの型。
+<tt>edge_iterator</tt> は <a
+href="http://www.sgi.com/tech/stl/BidirectionalIterator.html">BidirectionalIterator</a> をモデルとする。
+
+
+<hr>
+
+
+<tt>graph_traits&lt;adjacency_list&gt;::out_edge_iterator</tt>
+<br><br>
+<TT>out_edges()</TT> によって返されるイテレータの型。
+もし <tt>EdgeList=vecS</tt> なら <tt>out_edge_iterator</tt> は <a
+href="http://www.sgi.com/tech/stl/RandomAccessIterator.html">
+RandomAccessIterator</a> をモデルとする。そうでなければ
+ <tt>out_edge_iterator</tt> は <a
+href="http://www.sgi.com/tech/stl/BidirectionalIterator.html">
+BidirectionalIterator</a> をモデルとする。
+
+<hr>
+
+<tt>graph_traits&lt;adjacency_list&gt;::adjacency_iterator</tt>
+<br><br>
+<TT>adjacent_vertices()</TT> によって返されるイテレータの型。
+<tt>adjacency_iterator</tt> は <tt>out_edge_iterator</tt> と同じイテレータ・
+コンセプトをモデルとする。
+<hr>
+
+<tt>graph_traits&lt;adjacency_list&gt;::directed_category</tt><br>
+and<br>
+<tt>adjacency_list_traits&lt;EdgeList, VertexList, Directed&gt;::directed_category</tt>
+<br><br>
+グラフが有向 (<TT>directed_tag</TT>) か、無向 (<TT>undirected_tag</TT>) か
+についての情報を提供する。
+
+<hr>
+
+<tt>graph_traits&lt;adjacency_list&gt;::edge_parallel_category</tt><br>
+and<br>
+<tt>adjacency_list_traits&lt;EdgeList, VertexList, Directed&gt;::edge_parallel_category</tt>
+<br><br>
+これはグラフのクラスが多重辺 (同じ始点と終点を持つ辺) の挿入を許可するか
+どうかを述べる。二つのタグは <TT>allow_parallel_edge_tag</TT> と
+ <TT>disallow_parallel_edge_tag</TT> である。<TT>setS</TT> と
+ <TT>hash_setS</TT> の亜種は多重辺を許可しない一方で他の型は多重辺を許可する。
+
+<hr>
+
+<tt>graph_traits&lt;adjacency_list&gt;::vertices_size_type</tt>
+<br><br>
+グラフ中の頂点の数を扱うのに使われる型。
+
+<hr>
+
+<tt>graph_traits&lt;adjacency_list&gt;::edge_size_type</tt>
+<br><br>
+グラフ中の辺の数を扱うのに使われる型。
+
+<hr>
+
+<tt>graph_traits&lt;adjacency_list&gt;::degree_size_type</tt>
+<br><br>
+グラフ中の頂点に接続する辺の数を扱うのに使われる型。
+
+<hr>
+
+<tt>property_map&lt;adjacency_list, Property&gt;::type</tt><br>
+and<br>
+<tt>property_map&lt;adjacency_list, Property&gt;::const_type</tt>
+<br><br>
+グラフ中の頂点プロパティまたは辺プロパティのためのプロパティ・マップの型。
+具体的なプロパティは <TT>Property</TT> テンプレート引数で指定され、
+グラフのための <TT>VertexProperties</TT> もしくは <TT>EdgeProperties</TT>
+ で指定されたプロパティのどちらか一つと一致しなければならない。
+
+<hr>
+
+<tt>graph_property&lt;adjacency_list, Property&gt;::type</tt>
+<br><br>
+<tt>Property</tt> タグで指定されたグラフのプロパティのための
+プロパティの値型。
+
+<hr>
+
+<H2>Member Functions</H2>
+
+<hr>
+
+<pre>
+adjacency_list(const&nbsp;GraphProperty&amp;&nbsp;p = GraphProperty())
+</pre>
+デフォルト・コンストラクタ。0 個の頂点と0 個の辺からなる空のグラフ・
+オブジェクトを作成する。
+
+<hr>
+
+<pre>
+adjacency_list(const&nbsp;adjacency_list&amp;&nbsp;x)
+</pre>
+コピー・コンストラクタ。辺、頂点、そしてプロパティを含んでいる
+グラフ <tt>x</tt> のコピーである新しいグラフを作成する。
+
+<hr>
+
+<pre>
+adjacency_list&amp; operator=(const&nbsp;adjacency_list&amp;&nbsp;x)
+</pre>
+代入演算子。this に 辺、頂点、そしてプロパティを含んでいる
+グラフ <tt>x</tt> のコピーを入れる。
+
+<hr>
+
+<pre>
+adjacency_list(vertices_size_type&nbsp;n, 
+               const&nbsp;GraphProperty&amp;&nbsp;p = GraphProperty())
+</pre>
+<TT>n</TT> 個の頂点と 0 個の辺からなるグラフ・オブジェクトを作成する。
+
+<hr>
+
+<a name="sec:iterator-constructor">
+<pre>
+template &lt;class&nbsp;EdgeIterator&gt;
+adjacency_list(EdgeIterator&nbsp;first, EdgeIterator&nbsp;last,
+               vertices_size_type&nbsp;n, 
+               edges_size_type&nbsp;m = 0, 
+               const&nbsp;GraphProperty&amp;&nbsp;p&nbsp;=&nbsp;GraphProperty())
+</pre>
+<TT>n</TT> 個の頂点と、範囲 <TT>[first, last)</TT> で与えられた辺リストで
+指定された辺からなるグラフ・オブジェクトを作成する。
+<tt>EdgeIterator</tt> は <a
+href="http://www.sgi.com/tech/stl/InputIterator.html">InputIterator</a>
+のモデルでなければならない。<TT>EdgeIterator</TT> の値型は <TT>std::pair</TT>
+ でなければならず、そしてペア中の型は汎整数型である。整数は頂点に該当し、
+それらは <TT>[0, n)</TT> の範囲内に整列していなければならない。
+</a>
+
+<hr>
+
+<pre>
+template &lt;class&nbsp;EdgeIterator, class&nbsp;EdgePropertyIterator&gt;
+adjacency_list(EdgeIterator&nbsp;first, EdgeIterator&nbsp;last,
+               EdgePropertyIterator&nbsp;ep_iter,
+               vertices_size_type&nbsp;n,
+               vertices_size_type&nbsp;m = 0,
+               const&nbsp;GraphProperty&amp;&nbsp;p&nbsp;=&nbsp;GraphProperty())
+</pre>
+<TT>n</TT> 個の頂点と、範囲 <TT>[first, last)</TT> で与えられた辺リストで
+指定された辺からなるグラフ・オブジェクトを作成する。
+<tt>EdgeIterator</tt> と <tt>EdgePropertyIterator</tt> は <a
+href="http://www.sgi.com/tech/stl/InputIterator.html">InputIterator</a> の
+モデルでなければならない。<TT>EdgeIterator</TT> の値型は <TT>std::pair</TT>
+ でなければならず、そしてペア中の型は汎整数型である。整数は頂点に該当し、
+それらは <TT>[0, n)</TT> の範囲内に整列していなければならない。
+<TT>ep_iter</TT> の <TT>value_type</TT> は <TT>EdgeProperties</TT> で
+あるべきである。
+
+<hr>
+
+<pre>
+void clear()
+</pre>
+グラフから全ての辺と頂点を削除する。
+
+<hr>
+
+<pre>
+void swap(adjacency_list&amp; x)
+</pre>
+this のグラフの頂点、辺、そしてプロパティと、グラフ <tt>x</tt> の頂点、辺、
+そしてプロパティを交換する。
+<hr>
+ 
+<P>
+
+<H2>Non-Member Functions</H2>
+
+
+<h4>Structure Access</h4>
+
+<hr>
+
+<pre>
+std::pair&lt;vertex_iterator,&nbsp;vertex_iterator&gt;
+vertices(const adjacency_list&amp; g)
+</pre>
+グラフ <tt>g</tt> の頂点集合へのアクセスを提供するイテレータ範囲を返す。
+
+<hr>
+
+<pre>
+std::pair&lt;edge_iterator,&nbsp;edge_iterator&gt;
+edges(const adjacency_list&amp; g)
+</pre>
+グラフ <tt>g</tt> の辺集合へのアクセスを提供するイテレータ範囲を返す。
+
+<hr>
+
+<pre>
+std::pair&lt;adjacency_iterator,&nbsp;adjacency_iterator&gt;
+adjacent_vertices(vertex_descriptor&nbsp;u, const&nbsp;adjacency_list&amp;&nbsp;g)
+</pre>
+グラフ <tt>g</tt> 中の頂点 <tt>u</tt> に隣接する頂点へのアクセスを
+提供するイテレータ範囲を返す。
+
+<hr>
+
+
+<pre>
+std::pair&lt;out_edge_iterator,&nbsp;out_edge_iterator&gt;
+out_edges(vertex_descriptor&nbsp;u, const&nbsp;adjacency_list&amp;&nbsp;g)
+</pre>
+グラフ <tt>g</tt> 中の頂点 <tt>u</tt> の出辺へのアクセスを提供する
+イテレータ範囲を返す。もしグラフが無向グラフなら、このイテレータ範囲は
+頂点 <tt>u</tt> に接続する全ての辺へのアクセスを提供する。
+有向グラフと無向グラフの両方で、出辺 <tt>e</tt> にとって
+<tt>v</tt> が <tt>u</tt> に隣接する頂点の場合は
+ <tt>source(e, g) == u</tt> かつ <tt>target(e, g) == v</tt> である。
+
+<hr>
+
+<pre>
+std::pair&lt;in_edge_iterator,&nbsp;in_edge_iterator&gt;
+in_edges(vertex_descriptor&nbsp;v, const&nbsp;adjacency_list&amp;&nbsp;g)
+</pre>
+グラフ <tt>g</tt> 中の頂点 <tt>v</tt> の入辺へのアクセスを提供する
+イテレータ範囲を返す。この操作は <TT>Directed</TT> テンプレート・パラメータ
+に <TT>bidirectionalS</TT> が指定されている場合にのみ利用できる。
+入辺 <tt>e</tt> にとって <tt>v</tt> に隣接している何らかの頂点 <tt>u</tt>
+ に対して、グラフが有向であろうと無向であろうと、<tt>target(e, g) == v</tt>
+ かつ <tt>source(e, g) == u</tt> である。
+
+<hr>
+
+<pre>
+vertex_descriptor
+source(edge_descriptor&nbsp;e, const&nbsp;adjacency_list&amp;&nbsp;g)
+</pre>
+辺 <tt>e</tt> の始点を返す。
+
+<hr>
+
+<pre>
+vertex_descriptor
+target(edge_descriptor&nbsp;e, const&nbsp;adjacency_list&amp;&nbsp;g)
+</pre>
+辺 <tt>e</tt> の終点を返す。
+
+<hr>
+
+<pre>
+degree_size_type
+out_degree(vertex_descriptor&nbsp;u, const&nbsp;adjacency_list&amp;&nbsp;g)
+</pre>
+頂点 <tt>u</tt> を出て行く辺の数を返す。
+
+<hr>
+
+<pre>
+degree_size_type
+in_degree(vertex_descriptor&nbsp;u, const&nbsp;adjacency_list&amp;&nbsp;g)
+</pre>
+頂点 <tt>u</tt> に入ってくる辺の数を返す。この操作は <TT>Directed</TT>
+ テンプレート・パラメータに<TT>bidirectionalS</TT> が指定されている場合にのみ
+利用できる。
+
+<hr>
+
+<pre>
+vertices_size_type
+num_vertices(const adjacency_list&amp; g)
+</pre>
+グラフ <tt>g</tt> 中の頂点の数を返す。
+
+<hr>
+
+<pre>
+edges_size_type
+num_edges(const adjacency_list&amp; g)
+</pre>
+グラフ <tt>g</tt> 中の辺の数を返す。
+
+<hr>
+
+<pre>
+vertex_descriptor
+vertex(vertices_size_type&nbsp;n, const&nbsp;adjacency_list&amp;&nbsp;g)
+</pre>
+グラフの頂点リスト中の n 番目の頂点を返す。
+
+<hr>
+
+
+<pre>
+std::pair&lt;edge_descriptor, bool&gt;
+edge(vertex_descriptor&nbsp;u, vertex_descriptor&nbsp;v,
+     const&nbsp;adjacency_list&amp;&nbsp;g)
+</pre>
+グラフ <tt>g</tt> 中の頂点 <tt>u</tt> と頂点 <tt>v</tt> を結ぶ辺を
+返す。 
+
+<hr>
+
+<pre>
+std::pair&lt;out_edge_iterator, out_edge_iterator&gt;
+edge_range(vertex_descriptor&nbsp;u, vertex_descriptor&nbsp;v,
+           const&nbsp;adjacency_list&amp;&nbsp;g)
+</pre>
+<tt>u</tt> から <tt>v</tt> への全ての多重辺のための範囲を与える出辺
+イテレータのペアを返す。この関数は <tt>adjacency_list</tt> 用の
+ <tt>EdgeList</tt> が終点に従って出辺をソートし、かつ多重辺を考慮する
+コンテナである時にのみ動作する。<tt>multisetS</tt> 選択子はそのような
+コンテナを選択する。
+
+<hr>
+
+<h4>Structure Modification</h4>
+
+<hr>
+
+<pre>
+std::pair&lt;edge_descriptor, bool&gt;
+add_edge(vertex_descriptor&nbsp;u, vertex_descriptor&nbsp;v,
+         adjacency_list&amp; g)
+</pre>
+グラフに辺 <i>(u,v)</i> を付け加え、新しい辺のための辺記述子を返す。
+多重辺を許可しないグラフにとっては、もし辺が既にグラフ中にあるなら、
+二重には付け加えられず、<TT>bool</TT> フラグは
+ <TT>false</TT> になるだろう。同様に、もし <i>u</i> と <i>v</i> が
+同じ頂点のための記述子 (ループを作っている) でありかつグラフが無向グラフ
+ならば、辺は付け加えられずフラグは <TT>false</TT> になるだろう。
+フラグが <TT>false</TT> の時は、返された辺記述子は既に存在している辺を指す。
+
+<p>
+出辺リスト中の新しい辺の配置は一般に不定である。もっとも出辺リストの順序付け
+は <tt>EdgeList</tt> の選択を通じて成し遂げられるが。
+
+<p>
+もし <tt>VertexList</tt> の選択子が <tt>vecS</tt> でありかつ頂点記述子
+<tt>u</tt> または <tt>v</tt> (それは整数である) がグラフ中の現在の頂点の数
+より大きな値を持っているなら、頂点の数が <tt>std::max(u,v) + 1</tt> に
+なるようにグラフが拡大される。
+
+<p>
+もし <TT>EdgeList</TT> の選択子が <TT>vecS</TT> であれば、この操作によって
+頂点 <i>u</i> のためのどの <tt>out_edge_iterator</tt> も無効になるだろう。
+これはもし <TT>EdgeList</TT> が <TT>push(container, x)</TT> が呼び出された
+時にそのイテレータを無効にするようなユーザ定義のコンテナ (章 <A
+HREF="./using_adjacency_list.html#sec:custom-storage">Customizing the
+Adjacency List Storage</A> を見なさい) であれば同様にあてはまる。
+もしグラフが同様に双方向であれば、<i>v</i> のためのどの
+ <tt>in_edge_iterator</tt> もやはり無効にされる。もしその代わりに
+グラフが無向グラフならば <i>v</i> のためのどの <tt>out_edge_iterator</tt>
+ もやはり無効にされる。もしその代わりにグラフが有向グラフならば、
+ <tt>add_edge()</tt> は同様にどの <tt>edge_iterator</tt> も無効にする。
+
+<hr>
+
+<pre>
+std::pair&lt;edge_descriptor,&nbsp;bool&gt;
+add_edge(vertex_descriptor&nbsp;u, vertex_descriptor&nbsp;v,
+         const&nbsp;EdgeProperties&amp;&nbsp;p,
+         adjacency_list&amp;&nbsp;g)
+</pre>
+辺 <i>(u,v)</i> をグラフに付け加え、<TT>p</TT> を辺の内部のプロパティの
+記憶領域の値として添える。さらなる詳細のために前の <TT>add_edge()</TT>
+ メンバ関数も見なさい。<br><font color="#ff0000">[訳注: 前の
+ <tt>add_edge()</tt> とは直前の <tt>add_edge()</tt> を指すのではないかと
+思われる。だとすればこれは<b>非メンバ関数</b>である。]</font>
+
+<hr>
+
+<pre>
+void remove_edge(vertex_descriptor u, vertex_descriptor v,
+                 adjacency_list&amp; g)
+</pre>
+辺 <i>(u,v)</i> をグラフから取り除く。
+<p>
+この操作は辺 <i>(u,v)</i> を指すどの発行済みの辺記述子もイテレータも無効
+となる原因になる。加えて、もし <TT>EdgeList</TT> の選択子が <TT>vecS</TT>
+ ならば無向と双方向のグラフの場合この操作は頂点 <i>u</i> とまた頂点 <i>v</i>
+ のための辺リストを指すどのイテレータも無効にするだろう。さらに、有向グラフ
+にとってこれはどの <tt>edge_iterator</tt> も無効にする。
+
+<hr>
+
+<pre>
+void remove_edge(edge_descriptor e, adjacency_list&amp; g)
+</pre>
+辺 <tt>e</tt> をグラフから取り除く。これは多重グラフの場合
+ <tt>remove_edge(u, v, g)</tt> 関数とは違う。この <tt>remove_edge(e, g)</tt>
+ 関数は一つの辺だけを取り除くのに対して <tt>remove_edge(u, v, g)</tt> 関数は
+全ての辺 <i>(u,v)</i> を取り除く。
+
+<p>
+この操作は記述子 <tt>e</tt> が指す同じ辺のためのどの発行済みの辺記述子も
+イテレータも無効にする。加えて、この操作は <tt>target(e, g)</tt> のための
+辺リストを指すどのイテレータも無効にするだろう。さらに、有向グラフにとって
+これはグラフのためのどの <tt>edge_iterator</tt> も無効にする。
+
+<hr>
+
+<pre>
+void remove_edge(out_edge_iterator iter, adjacency_list&amp; g)
+</pre>
+これは <tt>remove_edge(*iter, g)</tt> と同じ効果を持つ。違いはこの関数は
+有向グラフの場合定数の時間複雑性を持つのに対し、<tt>remove_edge(e, g)</tt>
+ は <i>O(E/V)</i> の時間複雑性を持つ。
+
+<hr>
+
+<pre>
+template &lt;class <a href="http://www.sgi.com/tech/stl/Predicate.html">Predicate</a>&gt;
+void remove_out_edge_if(vertex_descriptor u, Predicate predicate,
+                        adjacency_list&amp; g)
+</pre>
+グラフから <tt>predicate</tt> を満たす全ての頂点 <i>u</i> の出辺を取り除く。
+すなわち、もし述語が辺記述子に適用された時 true を返すならば、辺が取り除か
+れる。
+<p>
+記述子とイテレータの持続性に対する作用は削除された各辺において
+ <tt>remove_edge()</tt> を呼び出す時のそれと同じである。
+
+<hr>
+
+<pre>
+template &lt;class <a
+href="http://www.sgi.com/tech/stl/Predicate.html">Predicate</a>&gt;
+void remove_in_edge_if(vertex_descriptor v, Predicate predicate,
+                       adjacency_list&amp; g)
+</pre>
+グラフから <tt>predicate</tt> を満たす全ての頂点 <i>v</i> の入辺を取り除く。
+すなわち、もし述語が辺記述子に適用された時 true を返すならば、辺が取り除か
+れる。
+<p>
+記述子とイテレータの持続性に対する作用は削除された各辺において
+ <tt>remove_edge()</tt> を呼び出す時のそれと同じである。
+<p>
+この操作は無向と双方向の <tt>adjacency_list</tt> グラフに利用できるが、
+有向グラフには利用できない。
+
+<hr>
+
+<pre>
+template &lt;class <a href="http://www.sgi.com/tech/stl/Predicate.html">Predicate</a>&gt;
+void remove_edge_if(Predicate predicate, adjacency_list&amp; g)
+</pre>
+グラフから <tt>predicate</tt> を満たす全ての辺を取り除く。すなわち、
+もし述語が辺記述子に適用された時 true を返すならば、辺が取り除かれる。
+<p>
+記述子とイテレータの持続性に対する作用は削除された各辺において
+ <tt>remove_edge()</tt> を呼び出す時のそれと同じである。
+
+<hr>
+
+<a name="sec:add-vertex">
+<pre>
+vertex_descriptor
+add_vertex(adjacency_list&amp; g)
+</pre>
+頂点をグラフに付け加え、新しい頂点のための頂点記述子を返す。
+</a>
+
+<hr>
+
+<pre>
+vertex_descriptor
+add_vertex(const&nbsp;VertexProperties&amp;&nbsp;p,
+           adjacency_list&amp; g)
+</pre>
+指定されたプロパティを持つ頂点をグラフに付け加える。新しい頂点のための
+頂点記述子を返す。
+</a>
+
+<hr>
+
+<pre>
+void clear_vertex(vertex_descriptor u, adjacency_list&amp; g)
+</pre>
+<i>u</i> への、そして <i>u</i> からの全ての辺を取り除く。頂点は依然として
+グラフの頂点集合中に現れる。
+<p>
+記述子とイテレータの持続性に対する作用は <tt>u</tt> を始点または終点として
+持つ全ての辺にとって
+ <tt>remove_edge()</tt> を呼び出す時のそれと同じである。
+
+<hr>
+
+<pre>
+void clear_out_edges(vertex_descriptor u, adjacency_list&amp; g)
+</pre>
+頂点 <i>u</i> からの全ての出辺を取り除く。頂点は依然としてグラフの
+頂点集合中に現れる。
+<p>
+記述子とイテレータの持続性に対する作用は <tt>u</tt> を始点として
+持つ全ての辺にとって
+ <tt>remove_edge()</tt> を呼び出す時のそれと同じである。
+<p>
+この操作は無向グラフには適用できない (代わりに
+ <tt>clear_vertex()</tt> を使いなさい)。
+
+<hr>
+
+<pre>
+void clear_in_edges(vertex_descriptor u, adjacency_list&amp; g)
+</pre>
+頂点 <i>u</i> からの全ての入辺を取り除く。頂点は依然としてグラフの
+頂点集合中に現れる。
+<p>
+<p>
+記述子とイテレータの持続性に対する作用は <tt>u</tt> を終点として
+持つ全ての辺にとって
+ <tt>remove_edge()</tt> を呼び出す時のそれと同じである。
+
+<p>
+この操作は双方向グラフにのみ適用できる。
+
+<hr>
+
+<pre>
+void remove_vertex(vertex_descriptor u, adjacency_list&amp; g)
+</pre>
+頂点 <i>u</i> をグラフの頂点集合から取り除く。頂点が削除される時、
+頂点 <i>u</i> への、また頂点 <i>u</i> への辺は存在しないものと仮定する。
+これを確実にする一つの手段はあらかじめ <TT>clear_vertex()</TT> を
+呼ぶ事である。
+<p>
+もし <TT>adjacency_list</TT> の <TT>VertexList</TT> テンプレート・パラメータが
+<TT>vecS</TT> なら、グラフのための全ての頂点記述子、辺記述子、そしてイテレータ
+はこの操作によって無効にされる。各頂点のための組み込みの
+ <tt>vertex_index_t</tt> プロパティは操作の後もなお頂点の添え字が連続した
+範囲 <TT>[0, num_vertices(g))</TT> に配列しているように番号が付け直される。
+もし組み込みの頂点の添え字に基づく外部のプロパティの記憶領域を使って
+いるなら、外部の記憶領域は調整される必要があるだろう。
+他の選択は組み込みの頂点の添え字を使用せずに独自の頂点の添え字
+プロパティを付け加えるためにプロパティを代わりに使う事である。
+もしたびたび <TT>remove_vertex()</TT> 関数を使用する必要があるなら、
+<TT>VertexList</TT> テンプレート・パラメータには <TT>listS</TT> 選択子が
+非常によい選択である。
+
+<hr>
+
+<h4><a name="property-map-accessors">Property Map Accessors</a></h4>
+
+<hr>
+
+<pre>
+template &lt;class <a href="./PropertyTag.html">PropertyTag</a>&gt;
+property_map&lt;adjacency_list, PropertyTag&gt;::type
+get(PropertyTag, adjacency_list&amp; g)
+
+template &lt;class <a href="./PropertyTag.html">PropertyTag</a>&gt;
+property_map&lt;adjacency_list, Tag&gt;::const_type
+get(PropertyTag, const adjacency_list&amp; g)
+</pre>
+<TT>PropertyTag</TT> で指定される頂点プロパティのためのプロパティ・マップ・
+オブジェクトを返す。<TT>PropertyTag</TT> はグラフの <TT>VertexProperty</TT>
+ テンプレート引数中に指定されたプロパティの一つに一致しなければならない。
+
+<hr>
+
+<pre>
+template &lt;class <a href="./PropertyTag.html">PropertyTag</a>, class X&gt;
+typename property_traits&lt;property_map&lt;adjacency_list, PropertyTag&gt;::const_type&gt::value_type
+get(PropertyTag, const adjacency_list&amp; g, X x)
+</pre>
+<tt>x</tt> が頂点記述子か辺記述子のどちらか一方である場合これは <tt>x</tt>
+ のためのプロパティ値を返す。
+<hr>
+
+<pre>
+template &lt;class <a href="./PropertyTag.html">PropertyTag</a>, class X, class Value&gt;
+void
+put(PropertyTag, const adjacency_list&amp; g, X x, const Value& value)
+</pre>
+これは <tt>x</tt> のためのプロパティ値を <tt>value</tt> にする。<tt>x</tt>
+ は頂点記述子か辺記述子のどちらか一方である。<tt>Value</tt> は
+ <tt>typename property_traits&lt;property_map&lt;adjacency_list, PropertyTag&gt;::type&gt::value_type</tt> と互換でなければならない。
+
+<hr>
+
+<pre>
+template &lt;class GraphProperties, class <a href="./PropertyTag.html#GraphPropertyTag">GraphPropertyTag</a>&gt;
+typename graph_property&lt;adjacency_list, GraphPropertyTag&gt;::type&amp;
+get_property(adjacency_list&amp; g, GraphPropertyTag);
+</pre>
+グラフ・オブジェクト <tt>g</tt> に結びつけられた <tt>GraphPropertyTag</tt>
+ で指定されたプロパティを返す。<tt>graph_property</tt> 特性クラスは <a
+href="../../../boost/graph/adjacency_list.hpp"><tt>boost/graph/adjacency_list.hpp</tt></a> 中で定義されている。
+
+<hr>
+
+<pre>
+template &lt;class GraphProperties, class <a href="./PropertyTag.html#GraphPropertyTag">GraphPropertyTag</a>&gt;
+const typename graph_property&lt;adjacency_list, GraphPropertyTag&gt;::type&amp;
+get_property(const adjacency_list&amp; g, GraphPropertyTag);
+</pre>
+グラフ・オブジェクト <tt>g</tt> に結びつけられた <tt>GraphPropertyTag</tt>
+ で指定されたプロパティを返す。<tt>graph_property</tt> 特性クラスは <a
+href="../../../boost/graph/adjacency_list.hpp"><tt>boost/graph/adjacency_list.hpp</tt></a> 中で定義されている。
+
+<hr>
+
+<!-- add the shortcut property functions -->
+
+
+<h3>See Also</h3>
+
+<a href="./adjacency_list_traits.html"><tt>adjacency_list_traits</tt></a>,
+<a href="./property_map.html"><tt>property_map</tt></a>,
+<a href="./graph_traits.html"><tt>graph_traits</tt></a>
+
+
+
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000-2001</TD><TD>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>,
+Indiana University (<A
+HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)<br>
+<A HREF="../../../people/liequan_lee.htm">Lie-Quan Lee</A>, Indiana University (<A HREF="mailto:llee@cs.indiana.edu">llee@cs.indiana.edu</A>)<br>
+<A HREF=http://www.osl.iu.edu/~lums>Andrew Lumsdaine</A>,
+Indiana University (<A
+HREF="mailto:lums@osl.iu.edu">lums@osl.iu.edu</A>)
+</TD></TR></TABLE>
+
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:takashi-it@po6.nsk.ne.jp">Takashi Itou</a><br> 
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+
+<p>このドキュメントの対象: Boost Version 1.30.0<br>
+<a href="http://www.boost.org/libs/graph/doc/adjacency_list.html">最新版ドキュメント (英語)</a></p>
+</BODY>
+</HTML> 
+<!--  LocalWords:  gif ALT EdgeList VertexList html VertexProperties EdgeProperties
+ -->
+<!--  LocalWords:  GraphPropertyTag cpp enum ai cout endl VertexAndEdgeListGraph
+ -->
+<!--  LocalWords:  MutablePropertyGraph hpp const ReadablePropertyMap listS num
+ -->
+<!--  LocalWords:  ReadWritePropertyMap vecS dijkstra ucs pre Adj Iter Desc ep
+ -->
+<!--  LocalWords:  EdgeIterator EdgePropertyIterator iter bool edge's IDs siek
+ -->
+<!--  LocalWords:  multigraph typename htm Univ Quan Lumsdaine
+ -->

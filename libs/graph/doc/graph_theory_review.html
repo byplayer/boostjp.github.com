@@ -1,0 +1,567 @@
+<HTML>
+<!--
+  -- Copyright (c) Jeremy Siek 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  Silicon Graphics makes no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<Title>Boost Graph Library: Graph Theory Review</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+<H1>Review of Elementary Graph Theory</H1>
+
+<P>
+
+<P>
+この章は、基本的なグラフ理論を思い出させることを意図している。
+読者があらかじめグラフアルゴリズムの知識があるのなら、始めるにあたりこの章は十分であろう。
+もし読者がグラフアルゴリズムの知識がないのならば、
+Cormen, Leiserson, Rivestの<a href="http://www.toc.lcs.mit.edu/~clr/">Introduction to Algorithms</a>
+のようなもっと詳しいものを薦める。
+
+<P>
+
+<H1>The Graph Abstraction</H1>
+
+<P>
+グラフは、多くの種類の問題を解くのに有効な数学的抽象化である。
+基本的には、グラフは頂点と辺から構成され、辺は二つの頂点を結ぶ。
+もっと正確には、
+<a name="def:graph"><I>グラフ(graph)</I></a>とは組<i>(V,E)</i>で表され、
+<i>V</i>は有限集合で、<i>E</i>は<i>V</i>の２項関係である。
+<i>V</i>は
+<a name="def:vertex-set"><I>頂点集合(vertex
+set)</I></a>
+と呼ばれ、その要素を
+<I>頂点(vertex)</I>
+と呼ぶ。
+<i>E</i>は辺の集合で、
+<a name="def:edge"><I>辺(edge)</I></a>
+とは<i>(u,v)</i>の組で<i>u,v</i>は<i>V</i>の要素である。
+<a name="def:directed-graph"><I>有向グラフ(directed graph)</I></a>においては、
+辺は順序付けられた組で、
+<a name="def:source"><I>始点(source)</I></a>を
+<a name="def:target"><I>終点(target)</I></a>へと接続する。
+<a name="def:undirected-graph"><I>無向グラフ(undirected graph)</I></a>においては、
+辺は順序付けされていない組で、２つの頂点を両方向につなぐ。
+つまり、無向グラフでは
+<i>(u,v)</i>と<i>(v,u)</i>は同じ辺の２通りの書き方である。
+
+<P>
+グラフのこの定義はいくつかの点であいまいである。
+辺や頂点が何を表現するかが述べられていない。
+グラフの例としては、連絡道路やハイパーリンク付きのウェブページなどを挙げることができる。
+これらの詳細がグラフの定義からは除外されているのは、大きな理由がある。
+それらの詳細はグラフの<I>抽象化</I>の中では必要な部分ではない。
+詳細を定義から除外することで再利用可能な理論を構築でき、
+そのことは多くの異なった種類の問題を解く際に役に立つのである。
+
+<P>
+定義にもどろう。グラフは頂点と辺の集合である。
+実際の様子を見せるため、頂点に文字のラベルがついたグラフを考え、辺を単純に文字の組としよう。
+ここで、有向グラフの例を次のように書くことができる。
+
+<P>
+<BR>
+<DIV ALIGN="center">
+<table><tr><td><tt>
+V = {v, b, x, z, a, y } <br>
+E = { (b,y), (b,y), (y,v), (z,a), (x,x), (b,x), (x,v), (a,z) } <br>
+G = (V, E)
+</tt></td></tr></table>
+</DIV>
+<BR CLEAR="ALL"><P></P>
+
+
+<P>
+このグラフを図示すると
+<A HREF="#fig:directed-graph">図1</A>
+のようになる。
+辺
+<i>(x,x)</i>
+は<a name="def:self-loop"><I>輪(self-loop)</I></a>と呼ばれる。
+<i>(b,y)</i>と
+<i>(b,y)</i>は<I>平行辺(parallel edges)</I>であり、これは
+<a name="def:multigraph"><I>マルチグラフ(multigraph)</I></a>
+でのみ許される(ただし、通常は有向グラフでも無向グラフでも許されない)。
+
+<P>
+
+<P></P>
+<DIV ALIGN="center"><A NAME="fig:directed-graph"></A><A NAME="1509"></A>
+<TABLE>
+<CAPTION ALIGN="BOTTOM"><STRONG>図1:</STRONG>
+有向グラフの例</CAPTION>
+<TR><TD><IMG SRC="./figs/digraph.gif" width="124" height="163"></TD></TR>
+</TABLE>
+</DIV><P></P>
+
+<P>
+次に似たようなグラフを示すが、今度は無向グラフである。
+これは<A HREF="#fig:undirected-graph">図2</A>に図示する。
+無向グラフでは輪は許されない。
+上記のグラフ(から平行辺<i>(b,y)</i>を除いたもの)の
+<a name="def:undirected-version"><I>無向版(undirected version)</i></a>である。
+それはつまり、同じ頂点をもち、同じ辺から方向を除いたものを持つことを意味し、
+<i>(a,z)</i>と<i>(z,a)</i>いう２つの辺は一つの辺に退化する。
+また、逆を考えることもできる。
+無向グラフの<a name="def:directed-version"><I>有向版(directed version)</i>は、
+すべての辺をそれぞれの方向を向く２つの辺で置き換えることで得られる。
+
+<P>
+<BR>
+<DIV ALIGN="CENTER">
+<table><tr><td><tt>
+V = {v, b, x, z, a, y }<br>
+E = { (b,y), (y,v), (z,a), (b,x), (x,v) }<br>
+G = (V, E)
+</tt></td></tr></table>
+</DIV>
+<BR CLEAR="ALL"><P></P>
+
+<P>
+
+<P></P>
+<DIV ALIGN="CENTER"><A NAME="fig:undirected-graph"></A><A NAME="1524"></A>
+<TABLE>
+<CAPTION ALIGN="BOTTOM"><STRONG>図2:</STRONG>
+無向グラフの例</CAPTION>
+<TR><TD><IMG SRC="./figs/undigraph.gif" width="103" height="163"></TD></TR>
+</TABLE>
+</DIV><P></P>
+
+<P>
+ここでさらにグラフの用語を定義する。
+辺<i>(u,v)</i>がグラフに含まれるとき、
+頂点<i>v</i>は頂点<i>u</i>について<a name="def:adjacent"><I>隣接している(adjacent)</I></a>と言う。
+有向グラフでは、辺<i>(u,v)</i>は
+頂点<i>u</i>の<a name="def:out-edge"><I>出辺(out-edge)</I></a>であり、
+頂点<i>v</i>の<a name="def:in-edge"><I>入辺(in-edge)</I></a>である。
+無向グラフでは、辺<i>(u,v)</i>は
+頂点<i>u</i>と<i>v</i>を
+<a name="def:incident-on"><I>接合している(incident on)</I></a>という。
+
+<P>
+<A HREF="#fig:directed-graph">図1</A>で、
+頂点<i>y</i>は頂点<i>b</i>に対して隣接している
+(ただし<i>b</i>は<i>y</i>に対して隣接していない)。
+辺<i>(b,y)</i>は<i>b</i>の出辺であり、<i>y</i>の入辺である。
+<A HREF="#fig:undirected-graph">図2</A>で、
+<i>y</i>は<i>b</i>に隣接していて、また逆も同様である。
+辺<i>(y,b)</i>は頂点<i>y</i>と<i>b</i>を接合している。
+
+<P>
+有向グラフにおいて、ある頂点の出辺の数は
+<a name="def:out-degree"><I>出次数(out-degree)</I></a>と呼ばれ、
+入辺の数は
+<a name="def:in-degree"><I>入次数(in-degree)</I></a>と呼ばれる。
+無向グラフにおいて、ある頂点に対して接合している辺の数は
+<a name="def:degree"><I>次数(degree)</I></a>と呼ばれる。
+<A HREF="#fig:directed-graph">図1</A>で、頂点<i>b</i>の出次数は3であり、
+入次数は0である。
+<A HREF="#fig:undirected-graph">図2</A>では単純に頂点<i>b</i>の次数は2である。
+
+<P>
+グラフの<a name="def:path"><i>路(path)</i></a>とは辺の列で、
+それぞれの辺の終点が次の辺の始点であるものである。
+
+頂点<i>u</i>から始まり頂点<i>v</i>で終わる路があれば、
+頂点<i>v</i>は<i>u</i>から<a name="def:reachable"><i>到達可能(reachable)</i></a>であるという。
+路が<a name="def:simple-path"><I>単純(simple)</I></a>であるとは、
+辺の列の中でどの頂点も繰り返し現れないことである。
+路&lt;(b,x), (x,v)&gt;は単純であるが、
+路&lt;(a,z), (z,a)&gt;は単純ではない。
+また、路&lt;(a,z), (z,a)&gt;は最初の頂点と最後の頂点が一致するので、
+<a name="def:cycle"><I>サイクル(cycle)</I></a>と呼ばれる。
+サイクルのないグラフは
+<a name="def:acyclic"><I>アサイクリック(acyclic)</I></a>と呼ばれる。
+
+<P>
+<a name="def:planar-graph"><I>planar graph</I></a>
+とは、すべての辺が交差しないように平面上に描けるグラフのことである。
+そのように描かれたものは<I>plane graph</I>と呼ばれる。
+plane graphの<a name="def:face"><I>面(face)</I></a>とは、辺に囲まれた連結成分のことである。
+planar graphの重要な特性は、
+面、辺、頂点の数がオイラーの定理：<i>|F| - |E| + |V| = 2</i>によって関係付けられることである。
+このことは、planar graphは最大でも<i>O(|V|)</i>個の辺しか持たないことを意味する。
+
+<P>
+
+<P>
+
+<H1>Graph Data Structures</H1>
+
+<P>
+データ構造を考えるときに最初に考えるべきグラフの属性は、<I>まばらさ(sparsity)</I>である。
+まばらさとは頂点に対する相対的な辺の数である。
+<i>E</i>が</i>V<sup>2</sup></i>に近いグラフは<I>密(dense)</I>であると呼ばれ、
+<i>E = alpha V</i>で<i>alpha</i>が<i>V</i>より十分に小さい場合は<I>まばらな(sparse)</I>グラフと呼ばれる。
+密なグラフについては、通常<I>隣接行列表現(adjacency-matrix representation)</I>が最良の選択であり、
+一方まばらなグラフについては<I>隣接リスト表現(adjacency-list representation)</I>が最良である。
+また、まばらなグラフについては<I>辺リスト表現(edge-list representation)</I>も適切な状況下では記憶効率面でよい選択である。
+
+<P>
+
+<H2>Adjacency Matrix Representation</H2>
+
+<P>
+グラフの隣接行列表現は<i>V x V</i>の２次元配列である。
+行列<i>a<sub>uv</sub></i>の要素は、辺<i>(u,v)</i>がグラフに含まれるかどうかを示すブーリアン値である。
+<A HREF="#fig:adj-matrix">図3</A>に<A HREF="#fig:directed-graph">図1</A>(から<i>(b,y)</i>を引いたもの)の隣接行列表現を表す。
+保存に必要な領域は<i>O(V<sup>2</sup>)</i>である。
+任意の辺について、アクセス、追加、除去にかかる時間は<i>O(1)</i>である。
+頂点の追加や除去は、再割り当てとすべてのグラフのコピーが必要になり、手順数は<i>O(V<sup>2</sup>)</i>になる。
+<a href="./adjacency_matrix.html"><tt>adjacency_matrix</tt></a>クラスは、
+隣接行列表現によってBGLグラフインターフェースを実装する。
+
+
+<P>
+
+<P></P>
+<DIV ALIGN="CENTER"><A NAME="fig:adj-matrix"></A><A NAME="1701"></A>
+<TABLE>
+<CAPTION ALIGN="BOTTOM"><STRONG>図3:</STRONG>
+隣接行列によるグラフの表現</CAPTION>
+<TR><TD><IMG SRC="./figs/adj_matrix.gif" width="136" height="135"></TD></TR>
+</TABLE>
+</DIV><P></P>
+
+<P>
+
+<H2><A NAME="sec:adjacency-list-representation"></A>
+Adjacency List Representation
+</H2>
+
+<P>
+グラフの隣接リスト表現では、すべての頂点に対して出辺の列を保存する。
+まばらなグラフでは、こうすることでメモリ領域を節約でき、必要な領域は<i>O(V + E)</i>だけになる。
+さらに、すべての頂点の出辺にはより効果的にアクセスできる。
+辺の挿入のコストは<i>O(1)</i>で、任意の辺へのアクセスは<i>O(alpha)</i>である。
+ここで、<i>alpha</i>は行列のまばらさ(グラフ中のすべての頂点についての出辺の数の最大値)である。
+<A HREF="#fig:adj-list">図4</A>は<A HREF="#fig:directed-graph">図1</A>のグラフの隣接リスト表現である。
+<a href="./adjacency_list.html"><TT>adjacency_list</TT></a>は隣接リスト表現の実装である。
+
+<P>
+
+<P></P>
+<DIV ALIGN="CENTER"><A NAME="fig:adj-list"></A><A NAME="1713"></A>
+<TABLE>
+<CAPTION ALIGN="BOTTOM"><STRONG>図4:</STRONG>
+隣接リストによるグラフ表現</CAPTION>
+<TR><TD><IMG SRC="./figs/adj_list.gif" width="108" height="122"></TD></TR>
+</TABLE>
+</DIV><P></P>
+
+<P>
+
+<H2>Edge List Representation</H2>
+
+<P>
+グラフの辺リスト表現は、単純に辺の列であり、辺は頂点のIDの組で表される。
+必要なメモリは<i>O(E)</i>だけである。
+辺挿入のコストは<i>O(1)</i>であり、特定の辺のアクセスするのは<i>O(E)</i>(あまり効果的でない)である。
+<A HREF="#fig:edge-list">図5</A>は<A HREF="#fig:directed-graph">図1</A>のグラフの辺リスト表現である。
+<a href="./edge_list.html"><TT>edge_list</TT></a>アダプタクラスは、辺リスト表現の実装を作るのに使うことができる。
+
+<P>
+
+<P></P>
+<DIV ALIGN="CENTER"><A NAME="fig:edge-list"></A><A NAME="1724"></A>
+<TABLE>
+<CAPTION ALIGN="BOTTOM"><STRONG>図5:</STRONG>
+辺リストによるグラフの表現</CAPTION>
+<TR><TD><IMG SRC="./figs/edge_list.gif" width="322" height="22"></TD></TR>
+</TABLE>
+</DIV><P></P>
+
+
+<P>
+
+<H1>Graph Algorithms</H1>
+
+<P>
+
+<H2>Graph Search Algorithms</H2>
+
+<P>
+<I>木辺(tree edge)</I>とは、グラフ探索アルゴリズムをグラフに適用することによって作られた探索木(またはフォレスト)の辺ことである。
+辺<i>(u,v)</i>は木辺であるのは、辺<i>(u,v)</i>の探索(<a href="./visitor_concepts.html">ビジタ</a>の<TT>explore()</TT>メソッドにあたる)をしているときに<i>v</i>が最初に見つかるときである。
+<I>後退辺(back edge)</I>とは探索木上で頂点を先祖につなぐ辺である。
+したがって、辺<i>(u,v)</i>では<i>v</i>は<i>u</i>の先祖である。
+輪は後退辺とみなされる。
+<I>先行辺(forward edge)</I>は木辺ではない辺<i>(u,v)</i>で、探索木上<i>u</i>を子孫<i>v</i>へとつなぐ。
+<I>交差辺(cross edge)</I>とは、以上の３つのカテゴリに含まれない辺のことである。
+
+<P>
+
+<H2><A NAME="sec:bfs-algorithm"></A>
+Breadth-First Search
+</H2>
+
+<P>
+広さ優先探索(Breadth-First Search, BFS)とは、グラフに対して横断的であり、特定の原点から到達可能な頂点をすべて探索する。
+また横断する順番については、頂点のすべての近傍を探索してから近傍の近傍の探索へと進む。
+広さ優先探索について考えるには、例えば水溜りに石を落としたときに波が放射状に広がるように拡散すると思えばよい。
+同じ「波」の中の頂点は原点から同じ距離にある。
+頂点は最初にアルゴリズムによって遭遇するときに<I>発見される(discovered)</I>と言う。
+頂点は、その近傍がすべて探索されたときに<I>完了した(finished)</I>と言われる。
+これらをわかりやすくする例がある。
+グラフを<A HREF="#fig:bfs-example">図6</A>に示し、そのBFSにおける発見と完了の順番をその下に示す。
+
+<P>
+
+<P></P>
+<DIV ALIGN="CENTER"><A NAME="fig:bfs-example"></A><A NAME="1826"></A>
+<TABLE>
+<CAPTION ALIGN="BOTTOM"><STRONG>図6:</STRONG>
+広さ優先探索がグラフに広がる様子</CAPTION>
+<TR><TD><IMG SRC="./figs/bfs_example.gif" width="242" height="143"></TD></TR>
+</TABLE>
+</DIV><P></P>
+
+<P>
+<PRE>
+  発見の順番: s r w v t x u y 
+  完了の順番: s r w v t x u y
+</PRE>
+
+<P>
+<I>s</I>から開始して、最初は<i>r</i>と<i>w</i>(<I>s</I>の近傍)にたどり着く。
+<I>s</I>の両方の希望に到達してから、
+<i>r</i>の近傍(頂点<i>v</i>)に到達し、<i>w</i>の近傍<i>t</i>と<i>x</i>に到達する
+(<i>r</i>と<i>w</i>の順序は意味を持たない)。
+最後に<i>t</i>と<i>x</i>の近傍、<i>u</i>と<i>y</i>に到達する。
+
+<P>
+今グラフ上のどこにいるか、次にどこの頂点に行くかをアルゴリズムが把握するために、
+BFSは頂点に色を塗る。塗る色を置く場所は、グラフの中でもよいし、アルゴリズムに引数として渡すこともできる。
+
+
+<P>
+
+<H2><A NAME="sec:dfs-algorithm"></A>
+Depth-First Search
+</H2>
+
+<P>
+A depth first search (DFS) visits all the vertices in a graph. When
+choosing which edge to explore next, this algorithm always chooses to
+go ``deeper'' into the graph. That is, it will pick the next adjacent
+unvisited vertex until reaching a vertex that has no unvisited
+adjacent vertices. The algorithm will then backtrack to the previous
+vertex and continue along any as-yet unexplored edges from that
+vertex. After DFS has visited all the reachable vertices from a
+particular source vertex, it chooses one of the remaining undiscovered
+vertices and continues the search. This process creates a set of
+<I>depth-first trees</I> which together form the <I>depth-first
+ forest</I>. A depth-first search categorizes the edges in the graph
+into three categories: tree-edges, back-edges, and forward or
+cross-edges (it does not specify which).  There are typically many
+valid depth-first forests for a given graph, and therefore many
+different (and equally valid) ways to categorize the edges.
+
+<P>
+One interesting property of depth-first search is that the discover
+and finish times for each vertex form a parenthesis structure.  If we
+use an open-parenthesis when a vertex is discovered, and a
+close-parenthesis when a vertex is finished, then the result is a
+properly nested set of parenthesis.  <A
+HREF="#fig:dfs-example">Figure 7</A> shows
+DFS applied to an undirected graph, with the edges labeled in the
+order they were explored.  Below we list the vertices of the graph
+ordered by discover and finish time, as well as show the parenthesis structure.  DFS is used as the kernel for several other graph
+algorithms, including topological sort and two of the connected
+component algorithms. It can also be used to detect cycles (see the <A
+HREF="file_dependency_example.html#sec:cycles">Cylic Dependencies </a>
+section of the File Dependency Example).
+
+<P>
+
+<P></P>
+<DIV ALIGN="CENTER"><A NAME="fig:dfs-example"></A><A NAME="1841"></A>
+<TABLE>
+<CAPTION ALIGN="BOTTOM"><STRONG>Figure 7:</STRONG>
+Depth-first search on an undirected graph.</CAPTION>
+<TR><TD><IMG SRC="./figs/dfs.gif" width="141" height="204"></TD></TR>
+</TABLE>
+</DIV><P></P>
+
+<P>
+<PRE>
+  order of discovery: a b e d c f g h i
+  order of finish: d f c e b a
+  parenthesis: (a (b (e (d d) (c (f f) c) e) b) a) (g (h (i i) h) g)
+</PRE>
+
+<P>
+
+<H2><a name="sec:minimum-spanning-tree">Minimum Spanning Tree Problem</a></H2>
+
+<P>
+The <I>minimum-spanning-tree problem</I> is defined as follows: find
+an acyclic subset <i>T</i> of <i>E</i> that connects all of the vertices
+in the graph and whose total weight is minimized, where the
+total weight is given by
+<P></P>
+<DIV ALIGN="left">
+<i>w(T)</i> = sum of <i>w(u,v)</i> over all <i>(u,v)</i> in <i>T</i>,
+where <i>w(u,v)</i> is the weight on the edge <i>(u,v)</i>
+</DIV>
+<BR CLEAR="ALL">
+<P></P>
+<i>T</i> is called the <I>spanning tree</I>.
+
+<!--
+<P>
+Kruskal's algorithm&nbsp;[<A
+ HREF="bibliography.html#kruskal56">18</A>]
+for solving the minimum spanning tree problem. This is a greedy
+algorithm to calculate the minimum spanning tree for an undirected
+graph with weighted edges. 
+
+<P>
+This is Prim's algorithm&nbsp;[<A
+ HREF="bibliography.html#prim57:_short">25</A>] for solving the
+ minimum spanning tree problem for an undirected graph with weighted
+ edges. The implementation is simply a call to <a
+ href="./dijkstra_shortest_paths.html"><TT>dijkstra_shortest_paths()</TT></a>
+ with the appropriate choice of comparison and combine functors.
+-->
+
+<P>
+
+<H2><a name="sec:shortest-paths-algorithms">Shortest-Paths Algorithms</a></H2>
+
+<P>
+One of the classic problems in graph theory is to find the shortest
+path between two vertices in a graph. Formally, a <I>path</I> is a
+sequence of vertices <i>&lt;v<sub>0</sub>,v<sub>1</sub>,...,v<sub>k</sub>&gt;</i>
+in a graph <i>G = (V, E)</i> such that each vertex is connected to the
+next vertex in the sequence (the edges
+<i>(v<sub>i</sub>,v<sub>i+1</sub>)</i> for <i>i=0,1,...,k-1</i> are in
+the edge set <i>E</i>). In the shortest-path problem, each edge is
+given a real-valued weight. We can therefore talk about the <I>weight
+of a path</I><BR>
+
+<p></p>
+<DIV ALIGN="left">
+<i>w(p) = sum from i=1..k of w(v<sub>i-1</sub>,v<sub>i</sub>)</i>
+</DIV>
+<BR CLEAR="ALL"><P></P>
+
+The <I>shortest path weight</I> from vertex <i>u</i> to <i>v</i> is then
+
+<BR>
+<p></p>
+<DIV ALIGN="left">
+<i>delta (u,v) = min { w(p) : u --> v }</i> if there is a path from
+<i>u</i> to <i>v</i> <br>
+<i>delta (u,v) = infinity</i> otherwise.
+</DIV>
+<BR CLEAR="ALL"><P></P>
+
+A <I>shortest path</I> is any path who's path weight is equal to the
+<I>shortest path weight</I>.
+
+<P>
+There are several variants of the shortest path problem. Above we
+defined the <I>single-pair</I> problem, but there is also the
+<I>single-source problem</I> (all shortest paths from one vertex to
+every other vertex in the graph), the equivalent
+<I>single-destination problem</I>, and the <I>all-pairs problem</I>.
+It turns out that there are no algorithms for solving the single-pair
+problem that are asymptotically faster than algorithms that solve the
+single-source problem.
+
+<P>
+A <I>shortest-paths tree</I> rooted at vertex in graph <i>G=(V,E)</i>
+is a directed subgraph <G'> where <i>V'</i> is a subset
+of <i>V</i> and <i>E'</i> is a subset of <i>E</i>, <i>V'</i> is the
+set of vertices reachable from , <i>G'</i> forms a rooted tree with
+root , and for all <i>v</i> in <i>V'</i> the unique simple path from
+to <i>v</i> in <i>G'</i> is a shortest path from to <i>v</i> in . The
+result of a single-source algorithm is a shortest-paths tree.
+
+<P>
+
+<H2><a name="sec:network-flow-algorithms">Network Flow Algorithms</H2>
+
+<p>
+A flow network is a directed graph <i>G=(V,E)</i> with a
+<b><i>source</i></b> vertex <i>s</i> and a <b><i>sink</i></b> vertex
+<i>t</i>. Each edge has a positive real valued <b><i>capacity</i></b>
+function <i>c</i> and there is a <b><i>flow</i></b> function <i>f</i>
+defined over every vertex pair. The flow function must satisfy three
+contraints:
+
+<p>
+<i>f(u,v) <= c(u,v) for all (u,v) in V x V</i> (Capacity constraint) <br>
+<i>f(u,v) = - f(v,u) for all (u,v) in V x V</i> (Skew symmetry)<br>
+<i>sum<sub>v in V</sub> f(u,v) = 0 for all u in V - {s,t}</i> (Flow conservation)
+
+<p>
+The <b><i>flow</i></b> of the network is the net flow entering the
+sink vertex <i>t</i> (which is equal to the net flow leaving the
+source vertex <i>s</i>).<p>
+
+<i>|f| = sum<sub>u in V</sub> f(u,t) = sum<sub>v in V</sub> f(s,v)</i>
+
+<p>
+The <b><i>residual capacity</i></b> of an edge is <i>r(u,v) = c(u,v) -
+f(u,v)</i>. The edges with <i>r(u,v) > 0</i> are residual edges
+<i>E<sub>f</sub></i> which induce the residual graph <i>G<sub>f</sub>
+= (V, E<sub>f</sub>)</i>. An edge with <i>r(u,v) = 0</i> is
+<b><i>saturated</i></b>.
+
+<p>
+The <b><i>maximum flow problem</i></b> is to determine the maximum
+possible value for <i>|f|</i> and the corresponding flow values for
+every vertex pair in the graph.
+
+<p>
+A flow network is shown in <a href="#fig:max-flow">Figure
+8</a>. Vertex <i>A</i> is the source vertex and <i>H</i> is the target
+vertex.
+
+<P></P>
+<DIV ALIGN="center"><A NAME="fig:max-flow"></A><A NAME="1509"></A>
+<TABLE>
+<CAPTION ALIGN="BOTTOM"><STRONG>Figure 8:</STRONG> A Maximum Flow
+Network.<br> Edges are labeled with the flow and capacity
+values.</CAPTION>
+<TR><TD><IMG SRC="./figs/max-flow.gif" width="578" height="240"></TD></TR>
+</TABLE>
+</DIV><P></P>
+
+<p>
+There is a long history of algorithms for solving the maximum flow
+problem, with the first algorithm due to <a
+href="./bibliography.html#ford56:_maxim">Ford and Fulkerson</a>. The
+best general purpose algorithm to date is the push-relabel algorithm
+of <a
+href="./bibliography.html#goldberg85:_new_max_flow_algor">Goldberg</a>
+which is based on the notion of a <b><i>preflow</i></b> introduced by
+<a href="./bibliography.html#karzanov74:_deter">Karzanov</a>.
+
+
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000-2001</TD><TD>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>, Indiana University (<A HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)
+</TD></TR></TABLE>
+
+</BODY>
+</HTML> 

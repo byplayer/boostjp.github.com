@@ -1,0 +1,588 @@
+<HTML>
+<!--
+  -- Copyright (c) Jeremy Siek 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  Silicon Graphics makes no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<Meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<Title>Using the Boost Graph Library</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+<H1><A NAME="SECTION00830000000000000000"></A>
+<A NAME="sec:using-adjacency-list"></A>
+<BR>
+Using <TT>adjacency_list</TT>
+</H1>
+
+この節では <tt>adjacency_list</tt> の使い方を詳しく説明する。この説明は以下の 3 つの話題に分かれている。
+
+<OL>
+<li><A href="#sec:choosing-graph-type">Choosing the <TT>Edgelist</TT> and <TT>VertexList</TT></A>
+<li><a href="#sec:directed-and-undirected">Directed and Undirected
+Adjacency Lists</a>
+<li><A href="#sec:adjacency-list-properties">Internal Properties</A>
+<li><A href="#sec:custom-storage">Customizing the Adjacency List Storage</A>
+</ol>
+
+<P>
+
+<H2><A NAME="SECTION00831000000000000000"></A>
+<A NAME="sec:choosing-graph-type"></A>
+<BR>
+Choosing the <TT>Edgelist</TT> and <TT>VertexList</TT>
+</H2>
+
+<P>
+この節では、様々な異なる状況で <a href="./adjacency_list.html"><TT>adjacency_list</TT></a> のどのバージョンを使うかに焦点を当てる。 <TT>adjacency_list</TT> はスイスアーミーナイフのように様々な設定が可能だ。この節で焦点を当てるパラメータは <TT>EdgeList</TT> と <TT>VertexList</TT> である。これらは、グラフを表すために使われる、裏に潜むデータ構造を制御するものだ。 <TT>EdgeList</TT> と <TT>VertexList</TT> の選択は、多くのグラフ操作の時間計算量と、グラフオブジェクトの空間計算量に影響する。
+
+<P>
+BGL では、頂点の集合とグラフの隣接構造 (入辺と出辺) を表すために STL コンテナ (<a href="http://www.sgi.com/tech/stl/Vector.html"><TT>std::vector</TT></a> 、 <a href="http://www.sgi.com/tech/stl/List.html"><TT>std::list</TT></a> 、 <a href="http://www.sgi.com/tech/stl/set.html"><TT>std::set</TT></a>) を使う。 <TT>EdgeList</TT> と <TT>VertexList</TT> 用のコンテナを選択するための選択子型がある。
+
+<P>
+
+<UL>
+<LI><TT>vecS</TT> は <TT>std::vector</TT> を選択する。 </LI>
+<LI><TT>listS</TT> は <TT>std::list</TT> を選択する。 </LI>
+<LI><TT>slistS</TT> は <TT>std::slist</TT> を選択する。 </LI>
+<LI><TT>setS</TT> は <TT>std::set</TT> を選択する。 </LI>
+<LI><TT>multisetS</TT> は <TT>std::multiset</TT> を選択する。 </LI>
+<LI><TT>hash_setS</TT> は <TT>std::hash_set</TT> を選択する。 </LI>
+</UL>
+
+<P>
+
+<H3>Choosing the <TT>VertexList</TT> type</A></H3>
+
+<P>
+<TT>VertexList</TT> パラメータによって、頂点リスト、又はグラフの二次元構造を表すのにどの種類のコンテナを使うのかが決まる。指定されるコンテナは <a href="http://www.sgi.com/tech/stl/Sequence.html">Sequence</a> か <a href="http://www.sgi.com/tech/stl/RandomAccessContainer.html">RandomAccessContainer</a> のモデルでなければならない。一般に、高速に頂点の追加、削除をする必要が有れば、 <TT>listS</TT> が良い選択だ。この選択の欠点は、 <TT>vecS</TT> に比べて余分な空間オーバヘッドが有る事だ。
+
+<P>
+
+<H4>Space Complexity</H4>
+
+<P>
+ <TT>std::list</TT> を使った場合の頂点あたりの空間オーバヘッドは <TT>std::vector</TT> より大きい。 1 頂点当たり 3 つの余分なポインタが必要だ。
+
+<P>
+
+<H4>Time Complexity</H4>
+
+<P>
+<TT>VertexList</TT> の選択は以下の操作の時間計算量に影響する。
+
+<ul>
+
+<li>
+<pre>
+add_vertex()
+</PRE>
+<TT>vecS</TT> 、 <TT>listS</TT> のどちらの場合も、この操作には償却定数時間がかかる (<TT>push_back()</TT> で実装されている) 。しかし、 <TT>VertexList</TT> 型が <TT>vecS</TT> の場合、この操作の所要時間は時々大きくなる。ベクタが再割り当てされてグラフ全体がコピーされるからだ。
+<P></p>
+
+<li>
+<PRE>
+remove_vertex()
+</PRE>
+この操作には <TT>listS</TT> では定数時間、 <TT>vecS</TT> では <i>O(V + E)</i> の時間がかかる。 <TT>vecS</TT> での時間計算量が大きいのは、グラフ全体の出辺の頂点記述子 (この場合は頂点リスト内での頂点の場所に対応したインデックス) を調整しなければならないからだ。
+<P></P>
+
+<li>
+<PRE>
+vertex()
+</PRE>
+この操作には、 <TT>vecS</TT> でも <TT>listS</TT> でも定数時間がかかる。
+
+</ul>
+
+ 
+<P>
+
+<H3><A NAME="SECTION00831200000000000000">
+Choosing the <TT>EdgeList</TT> type</A>
+</H3>
+
+<P>
+<TT>EdgeList</TT> パラメータによって、グラフ内の各頂点に出辺 (と場合によっては入辺) を格納するのに使うコンテナが決まる。辺リストに使うコンテナは <a href="http://www.sgi.com/tech/stl/Sequence.html">Sequence</a> か <a href="http://www.sgi.com/tech/stl/AssociativeContainer.html">AssociativeContainer</a> のどちらかの要求を満たす必要が有る。
+
+
+<P>
+<TT>EdgeList</TT> を選ぶ時にまず考えるべき事の 1 つが、 <TT>adjacency_list</TT> に多重辺が存在しない事を強制する (つまり、グラフが多重グラフにならない事を強制する) かどうかだ。これを強制したければ <TT>setS</TT> 選択子か <TT>hash_setS</TT> 選択子を使う。多重グラフを表現したいか、グラフに多重辺を挿入しない事が分かっている場合は、 <a
+href="http://www.sgi.com/tech/stl/Sequence.html">Sequence</a> 型の内 1 つ (<TT>vecS</TT> か <TT>listS</TT> か <TT>slistS</TT>) を選ぶ。様々なグラフ操作の時間計算量や空間計算量の違いも考慮に入れたい所だろう。以下で <i>V</i> はグラフ内の頂点の総数を、 <i>E</i> は辺の総数を表す。ここに記述されていない操作は定数時間だ。
+
+<P>
+
+<H4>Space Complexity</H4>
+
+<P>
+<TT>EdgeList</TT> の選択は、グラフオブジェクト内の辺当たりの空間オーバヘッドの量に影響する。空間が小さい方から順に選択子を並べると、 <TT>vecS</TT> 、 <TT>slistS</TT> 、 <TT>listS</TT> 、 <TT>setS</TT> である。
+
+<P>
+
+<H4>Time Complexity</H4>
+
+<P>
+以下の様々な操作の時間計算量の説明の中で、「大文字の O 」表記内の <i>E/V</i> は出辺のリストの長さを表す。これは厳密には正しくなく、 <i>E/V</i> はランダムなグラフ内の 1 頂点当たりの平均辺数を表すだけだ。 1 頂点からの出辺の最悪の場合の数は (多重グラフでなければ) <i>V</i> である。疎なグラフでは一般に <i>E/V</i> は <i>V</i> よりずっと小さく、定数とみなせる。
+
+<P>
+ 
+<P> <P>
+<UL>
+<LI>
+<PRE>
+add_edge()
+</PRE>
+<TT>EdgeList</TT> が <TT>std::set</TT> のような <a href="http://www.sgi.com/tech/stl/UniqueAssociativeContainer.html">UniqueAssociativeContainer</a> であれば、辺の追加時に多重辺が無いことが強制される。それに伴う余分な探索の時間計算量は <i>O(log(E/V))</i> だ。 <a href="http://www.sgi.com/tech/stl/Sequence.html">Sequence</a> をモデルとする <TT>EdgeList</TT> 型ではこのチェックは行われず、よって <TT>add_edge()</TT> にかかるのは償却定数時間だ。つまり、グラフが多重辺を持つかを気にしない場合や、グラフへの入力が多重辺を持たないと分かっている場合は、シーケンス準拠の <TT>EdgeList</TT> を使った方がいいという事だ。 シーケンス準拠の <TT>EdgeList</TT> の <TT>add_edge()</TT> は <TT>push_front()</TT> か <TT>push_back()</TT> で実装されている。しかし一般に、時々再割り当てして全要素をコピーする <TT>std::vector</TT> よりは、 <TT>std::list</TT> や <TT>std::slist</TT> の方が、この操作を高速に行える。
+<p></p>
+
+<li>
+<PRE>
+remove_edge()
+</PRE>
+
+シーケンス準拠の <TT>EdgeList</TT> 型では、この操作は <TT>std::remove_if()</TT> で実装されているため、平均時間は <i>E/V</i> だ。集合準拠の <TT>EdgeList</TT> 型では <TT>erase()</TT> メンバ関数で実装されているため、平均時間は <i>log(E/V)</i> だ。
+<p></p>
+
+<li>
+<PRE>
+edge()
+</PRE>
+この操作の時間計算量は、 <TT>EdgeList</TT> 型が <a href="http://www.sgi.com/tech/stl/Sequence.html">Sequence</a> であれば <i>O(E/V)</i> 、 <TT>EdgeList</TT> 型が <a href="http://www.sgi.com/tech/stl/AssociativeContainer.html">AssociativeContainer</a> であれば <i>O(log(E/V))</i> である。
+
+<p></p>
+
+<li>
+<PRE>
+clear_vertex()
+</PRE>
+シーケンス準拠の <TT>EdgeList</TT> 型の有向グラフでは、時間計算量は <i>O(V + E)</i> だ。連想コンテナ準拠の <TT>EdgeList</TT> 型ではそれより速く、時間計算量は <i>O(V log(E/V))</i> だ。無向グラフではこの操作は <i>O(E<sup>2</sup>/V<sup>2</sup>)</i> か <i>O(E/V log(E/V))</i> だ。
+<p></p>
+
+<li>
+<PRE>
+remove_vertex()
+</PRE>
+<TT>EdgeList</TT> 型に依らず、この操作の時間計算量は <i>O(V + E)</i> だ。
+<p></p>
+
+<li>
+<PRE>
+out_edge_iterator::operator++()
+</PRE>
+全ての <TT>OneD</TT> 型について、この操作は定数時間だ。しかし、型によって時間の定数項は大きく異なる。この操作は多くのグラフアルゴリズムで頻用されるので、この違いは重要だ。この操作の速さは、速い物から順に <TT>vecS</TT> 、 <TT>slistS</TT> 、 <TT>listS</TT> 、 <TT>setS</TT> 、 <TT>hash_setS</TT> だ。
+<p></p>
+
+<li>
+<PRE>
+in_edge_iterator::operator++()
+</PRE>
+この操作は定数時間だ。 <TT>EdgeList</TT> の選択に対するこの操作の速さの順序は、 <TT>out_edge_iterator</TT> の場合と同様だ。
+<p></p>
+
+<li>
+<PRE>
+vertex_iterator::operator++()
+</PRE>
+この操作は定数時間であり、高速だ (ポインタのインクリメントと同じ速さだ) 。 <TT>OneD</TT> の選択はこの操作の速さには影響しない。
+<p></p>
+
+<li>
+<PRE>
+edge_iterator::operator++()
+</PRE>
+この操作は定数時間だ。 <TT>EdgeList</TT> の選択に対するこの操作の速さの順序は、 <TT>out_edge_iterator</TT> の場合と同様だ。辺集合全体をトラバースする時間は <i>O(V + E)</i> だ。
+<p></p>
+
+<li>
+<PRE>
+adjacency_iterator::operator++()
+</PRE>
+この操作は定数時間だ。 <TT>EdgeList</TT> の選択に対するこの操作の速さの順序は、 <TT>out_edge_iterator</TT> の場合と同様だ。
+<p></p>
+
+</ul>
+
+<P>
+ 
+<P>
+
+<H2><a name="sec:directed-and-undirected">Directed and Undirected Adjacency Lists</H2>
+
+<P>
+<TT>adjacency_list</TT> クラスは、 <TT>Directed</TT> テンプレートパラメータに渡す引数によって、有向グラフにも無向グラフにも使える。有向グラフを選ぶには <TT>directedS</TT> か <TT>bidirectionalS</TT> を使い、無向グラフを選ぶには <TT>undirectedS</TT> を使う。 BGL での有向グラフと無向グラフの違いについては、節 <A HREF="graph_concepts.html#sec:undirected-graphs">Undirected Graphs</A> を参照。 <TT>bidirectealS</TT> 選択子を使うと、グラフには <TT>out_edges()</TT> 関数以外に <TT>in_edges()</TT> 関数も用意されるようになる。これによって 1 辺あたり 2 倍の空間が必要になるので、 <TT>in_edges()</TT> はオプションになっている。
+
+<P>
+
+<H2><A NAME="sec:adjacency-list-properties"></A>
+Internal Properties
+</H2>
+
+<P>
+プロパティインタフェースを使って、 <TT>adjacency_list</TT> グラフの頂点や辺にプロパティを付加できる。 <TT>adjacency_list</TT> クラスのテンプレートパラメータ <TT>VertexProperty</TT> と <TT>EdgeProperty</TT> にはプロパティクラスを指定する。プロパティクラスは以下のように宣言されている。
+
+<P>
+<PRE>
+template &lt;class PropertyTag, class T, class NextProperty = no_property&gt;
+struct property;
+</PRE>
+
+<P>
+<a href="./PropertyTag.html"><TT>PropertyTag</TT></a> テンプレートパラメータは、プロパティに唯一の名前を付けるためだけに存在するタグクラスだ。あらかじめいくつかのタグが定義されているし、タグを追加するのも簡単だ。
+
+<P>
+<PRE>
+  struct vertex_index_t { };
+  struct vertex_index1_t { };
+  struct vertex_index2_t { };
+  struct edge_index_t { };
+  struct graph_name_t { };
+  struct vertex_name_t { };
+  struct edge_name_t { };
+  struct edge_weight_t { };
+  struct edge_weight2_t { };
+  struct edge_capacity_t { };
+  struct edge_residual_capacity_t { };
+  struct edge_reverse_t { };
+  struct vertex_distance_t { };
+  struct vertex_root_t { };
+  struct vertex_all_t { };
+  struct edge_all_t { };
+  struct graph_all_t { };
+  struct vertex_color_t { };
+  struct vertex_rank_t { };
+  struct vertex_predecessor_t { };
+  struct vertex_isomorphism_t { };
+  struct vertex_invariant_t { };
+  struct vertex_invariant1_t { };
+  struct vertex_invariant2_t { };
+  struct vertex_degree_t { };
+  struct vertex_out_degree_t { };
+  struct vertex_in_degree_t { };
+  struct vertex_discover_time_t { };
+  struct vertex_finish_time_t { };
+</PRE>
+
+<P>
+<TT>property</TT> の <b><TT>T</TT></b> テンプレートパラメータはプロパティの値型を指定する。型 <tt>T</tt> は <a href="http://www.sgi.com/tech/stl/DefaultConstructible.html">Default Constructible</a> 、 <a href="../../utility/Assignable.html">Assignable</a> 、 <a href="../../utility/CopyConstructible.html">Copy Constructible</a> でなければならない。 C++ 標準ライブラリのコンテナのように、型 <tt>T</tt> のプロパティオブジェクトはグラフ内に値形式で保持される。
+
+<p>
+<b><TT>NextProperty</TT></b> パラメータを使えば、 <TT>property</TT> 型をネストさせる事ができる。これによって、同じグラフに任意の数のプロパティを付加できる。
+
+<P>
+頂点プロパティ型や辺プロパティ型をどうやって組み立て、グラフ型の作成に使うのかを、以下のコードで示す。ここでは、グラフの頂点に <TT>float</TT> 型の値を持つ距離プロパティと、 <TT>std::string</TT> 型の値を持つ名前プロパティを付加した。グラフの辺には <TT>float</TT> 型の値を持つ重みプロパティを付加した。
+
+<P>
+<PRE>
+  typedef property&lt;vertex_distance_t, float, 
+            property&lt;vertex_name_t, std::string&gt; &gt; VertexProperty;
+  typedef property&lt;edge_weight_t, float&gt; EdgeProperty;
+
+  typedef adjacency_list&lt;mapS, vecS, undirectedS, 
+                         VertexProperty, EdgeProperty&gt; Graph;
+
+  Graph g(num_vertices); // グラフオブジェクトを構築
+</PRE>
+
+<P>
+プロパティの値はプロパティマップを使って読み書きされる。グラフからプロパティマップを得る方法については節 <A HREF="#sec:interior-properties">Interior Properties</A> を、プロパティマップの使い方は節 <A HREF="./using_property_maps.html">Property Maps</A> を参照。
+
+<P>
+
+<H3><A NAME="sec:custom-edge-properties"></A>
+Custom Edge Properties
+</H3>
+
+<P>
+独自のプロパティ型やプロパティを作るのは簡単だ。新しいプロパティのためのタグクラスを定義するだけで良い。プロパティタグクラスには <tt>num</tt> と <tt>kind</tt> を定義しなければならない。 <tt>num</tt> は唯一の整数 ID 、 <tt>kind</tt> は <tt>edge_property_tag</tt> 、 <tt>vertex_property_tag</tt> 、 <tt>graph_property_tag</tt> のどれかである。
+
+<P>
+<PRE>
+struct flow_t {
+  typedef edge_property_tag kind;
+};
+
+struct capacity_t { 
+  typedef edge_property_tag kind;
+};
+</PRE>
+
+<p>
+タグ型を作るのに、 struct の代わりに enum を使う事もできる。まず、各プロパティについて列挙型を作る。列挙型の名前は <tt>edge_</tt> か <tt>vertex_</tt> か <tt>graph_</tt> で始まり、 <tt>_t</tt> で終わらなければならない。 enum の中で、列挙型の名前から <tt>_t</tt> を除いた名前を持つ値を定義する。そして <tt>BOOST_INSTALL_PROPERTY</tt> マクロを呼び出す。
+
+<pre>
+enum edge_myflow_t { edge_myflow };
+enum edge_mycapacity_t { edge_mycapacity };
+
+namespace boost {
+  BOOST_INSTALL_PROPERTY(edge, myflow);
+  BOOST_INSTALL_PROPERTY(edge, mycapacity);
+}
+</pre>
+
+<P>
+これでプロパティの定義の中で、組み込みのタグと同様に新しいプロパティタグを使える。
+
+<P>
+<PRE>
+  typedef property&lt;capacity_t, int&gt; Cap;
+  typedef property&lt;flow_t, int, Cap&gt; EdgeProperty;
+  typedef adjacency_list&lt;vecS, vecS, no_property, EdgeProperty&gt; Graph;
+</PRE>
+
+<P>
+前の例と同様、これらのプロパティ用のプロパティマップを <TT>get(Property, g)</TT> 関数を使って取得できる。
+
+<P>
+<PRE>
+  property_map&lt;Graph, capacity_t&gt;::type capacity
+    = get(capacity_t(), G);
+  property_map&lt;Graph, flow_t&gt;::type flow
+    = get(flow_t(), G);
+</PRE>
+
+<P>
+この例の完全なソースコードはファイル <TT>edge_property.cpp</TT> に有る。
+
+<P>
+
+<H3><A NAME="SECTION00833200000000000000"></A>
+<A NAME="sec:custom-vertex-properties"></A>
+<BR>
+Custom Vertex Properties
+</H3>
+
+<P>
+頂点に付加する独自のプロパティを作る事は、辺の場合と同じく簡単だ。ここでは、グラフの頂点に人の名前を付加したいとする。
+
+<P>
+<PRE>
+  struct first_vertex_name_t {
+    typedef vertex_property_tag kind;
+  };
+</PRE>
+
+<P>
+これで新しいタグを <TT>property</TT> クラスで使えるようになり、それをグラフ型の組み立てに使えるようになる。以下のコードではグラフ型とグラフオブジェクトを作っている。ここでは辺を書き込み、頂点に名前を割り当てている。辺は「誰が誰に借金をしているか」を表している。
+
+<P>
+<PRE>
+  typedef property&lt;first_vertex_name_t, std::string&gt; FirstNameProperty;
+  typedef adjacency_list&lt;vecS, vecS, directedS, 
+                         FirstNameProperty&gt; MyGraphType;
+
+  typedef pair&lt;int,int&gt; Pair;
+  Pair edge_array[11] = { Pair(0,1), Pair(0,2), Pair(0,3), 
+                          Pair(0,4), Pair(2,0), Pair(3,0), 
+                          Pair(2,4), Pair(3,1), Pair(3,4), 
+                          Pair(4,0), Pair(4,1) };
+    
+  MyGraphType G(5);
+  for (int i = 0; i &lt; 11; ++i)
+    add_edge(edge_array[i].first, edge_array[i].second, G);
+
+  property_map&lt;MyGraphType, first_vertex_name_t&gt;::type
+    name = get(first_vertex_name_t(), G);
+    
+  boost::put(name, 0, "Jeremy");
+  boost::put(name, 1, "Rich");
+  boost::put(name, 2, "Andrew");
+  boost::put(name, 3, "Jeff");
+  name[4] = "Kinis"; // operator[] も使える
+    
+  who_owes_who(edges(G).first, edges(G).second, G);
+</PRE>
+
+<P>
+この例のために書いた <TT>who_owes_who()</TT> 関数はジェネリックな形式で実装されている。入力がテンプレート化されているので、実際のグラフ型を知る必要がない。名前プロパティのプロパティマップ型を求めるためには、 <TT>property_map</TT> 特性クラスを使う必要が有る。グラフパラメータが const なので、 <TT>const_type</TT> を使う。プロパティマップ型が求まれば、 <TT>property_traits</TT> クラスを使ってプロパティの値型を推論できる。この例では、プロパティの値型が <TT>std::string</TT> である事が分かっているが、このようにジェネリック流に書く事で、 <TT>who_owes_who()</TT> 関数は他のプロパティ値型でも使えるようになる。
+
+<P>
+<PRE>
+  template &lt;class EdgeIter, class Graph&gt;
+  void who_owes_who(EdgeIter first, EdgeIter last, const Graph&amp; G)
+  {
+    // このグラフのプロパティアクセサ型にアクセス
+    typedef typename property_map&lt;Graph, 
+      first_vertex_name_t&gt;::const_type NameMap;
+    NameMap name = get(first_vertex_name, G);
+
+    typedef typename boost::property_traits&lt;NameMap&gt;
+      ::value_type NameType;
+
+    NameType src_name, targ_name;
+
+    while (first != last) {
+      src_name = boost::get(name, source(*first, G));
+      targ_name = boost::get(name, target(*first, G));
+      cout &lt;&lt; src_name &lt;&lt; " owes " 
+           &lt;&lt; targ_name &lt;&lt; " some money" &lt;&lt; endl;
+      ++first;
+    }
+</PRE>
+
+出力はこうなる。
+<PRE>
+Jeremy owes Rich some money
+Jeremy owes Andrew some money
+Jeremy owes Jeff some money
+Jeremy owes Kinis some money
+Andrew owes Jeremy some money
+Andrew owes Kinis some money
+Jeff owes Jeremy some money
+Jeff owes Rich some money
+Jeff owes Kinis some money
+Kinis owes Jeremy some money
+Kinis owes Rich some money
+</PRE>
+
+この例の完全なソースコードは <TT>interior_property_map.cpp</TT> に有る。
+
+<P>
+
+<H2><A NAME="sec:custom-storage"></A>
+Customizing the Adjacency List Storage
+</H2>
+
+<P>
+<TT>adjacency_list</TT> は 2 種類のコンテナによって構築される。グラフ内の全頂点を保持するコンテナ型と、各頂点の出辺リスト (と場合によっては入辺リスト) を保持するコンテナだ。 BGL では、 STL のいくつかのコンテナからユーザが選択できるように、選択子クラスが用意されている。独自のコンテナ型を使う事も可能だ。 <TT>VertexList</TT> をカスタマイズする時は、以下に説明されるコンテナジェネレータを定義する必要が有る。 <TT>EdgeList</TT> をカスタマイズする時は、コンテナジェネレータと並列辺特性を定義する必要が有る。 <TT>container_gen.cpp</TT> に、カスタム記憶域型の使い方の例が有る。
+
+<P>
+
+<H3><A NAME="SECTION00834100000000000000">
+Container Generator</A>
+</H3>
+
+<P>
+<TT>adjacency_list</TT> クラスは、 <TT>EdgeList</TT> 選択子と <TT>VertexList</TT> 選択子を、グラフの記憶域に使う実際のコンテナ型にマップするために、 <TT>container_gen</TT> という特性クラスを使う。この特性クラスのデフォルト版と、このクラスを <TT>listS</TT> 選択子用に特殊化する例を示す。
+
+<P>
+<PRE>
+namespace boost {
+  template &lt;class Selector, class ValueType&gt;
+  struct container_gen { };
+
+  template &lt;class ValueType&gt;
+  struct container_gen&lt;listS, ValueType&gt; {
+    typedef std::list&lt;ValueType&gt; type;
+  };
+}
+</PRE>
+
+<P>
+他のコンテナを使うには、選択子クラスを定義し、 <TT>container_gen</TT> を自分の選択子用に特殊化する。
+
+<P>
+<PRE>
+  struct custom_containerS { }; // 独自の選択子
+
+  namespace boost {
+    // 独自の選択子用の特殊化版
+    template &lt;class ValueType&gt;
+    struct container_gen&lt;custom_containerS, ValueType&gt; {
+      typedef custom_container&lt;ValueType&gt; type;
+    };
+  }
+</PRE>
+
+<P>
+<TT>ValueType</TT> 以外にもテンプレートパラメータを持つコンテナを使いたいという状況も有るだろう。例えば、アロケータ型を与えたい事も有るだろう。これを実現する 1 つの方法は、 <TT>container_gen</TT> の特殊化版の中で余分なパラメータを<font color="green">{直接与える/hard-code}</font>事だ。もっと柔軟にしたければ、選択子クラスにテンプレートパラメータを加えればよい。以下のコードで、 <TT>std::list</TT> に使うアロケータを指定できる選択子の作り方を示す。
+
+<P>
+<PRE>
+  template &lt;class Allocator&gt;
+  struct list_with_allocatorS { };
+
+  namespace boost {
+    template &lt;class Alloc, class ValueType&gt;
+    struct container_gen&lt;list_with_allocatorS&lt;Alloc&gt;, ValueType&gt;
+    {
+      typedef typename Alloc::template rebind&lt;ValueType&gt;::other Allocator;
+      typedef std::list&lt;ValueType, Allocator&gt; type;
+    };
+  }
+
+  // これで std::list と指定のアロケータを使うグラフを定義できる
+  typedef adjacency_list&lt; list_with_allocatorS&lt; std::allocator&lt;int&gt; &gt;, vecS, directedS&gt; MyGraph;
+</PRE>
+
+<P>
+
+<H3><A NAME="SECTION00834200000000000000">
+Parallel Edge Traits</A>
+</H3>
+
+<P>
+<TT>container_gen</TT> クラスの特殊化版に加えて、 <TT>parallel_edge_traits</TT> クラスの特殊化版も作る必要が有る。これはコンテナ型が並列辺を認める (そしてコンテナが <a
+href="http://www.sgi.com/tech/stl/Sequence.html">Sequence</a> である) か、コンテナ型が並列辺を認めない (そしてコンテナが <a
+href="http://www.sgi.com/tech/stl/AssociativeContainer.html">AssociativeContainer</a> である) かを指定する。
+
+<P>
+<PRE>
+  template &lt;class StorageSelector&gt;
+  struct parallel_edge_traits { };
+
+  template &lt;&gt;
+  struct parallel_edge_traits&lt;vecS&gt; { 
+    typedef allow_parallel_edge_tag type;
+  };
+  template &lt;&gt;
+  struct parallel_edge_traits&lt;setS&gt; { 
+    typedef disallow_parallel_edge_tag type;
+  };
+  ...
+</PRE>
+
+<P>
+
+<H3><A NAME="SECTION00834300000000000000">
+Push and Erase for the Edge List Container</A>
+</H3>
+
+<P>
+更に <TT>adjacency_list</TT> に、辺リストコンテナに辺を効率的に追加、削除する方法を教えなければならない。そのためには、カスタムコンテナ型の <TT>push()</TT> 関数と <TT>erase()</TT> 関数をオーバロードすれば良い。 <TT>push()</TT> 関数は、新しく挿入された要素を指すイテレータと、辺が挿入されたかを示す <TT>bool</TT> 型のフラグを返す必要が有る。全ての STL コンテナ型には、以下のようにデフォルトの <TT>push()</TT> 関数と <TT>erase()</TT> 関数が用意されている。 <TT>push_dispatch()</TT> 、 <TT>erase_dispatch()</TT> 関数オーバロード群では、標準コンテナに対する様々な挿入、削除の方法を使い分けている。
+
+<P>
+<PRE>
+  template &lt;class Container, class T&gt;
+  std::pair&lt;typename Container::iterator, bool&gt;
+  push(Container&amp; c, const T&amp; v)
+  {
+    return push_dispatch(c, v, container_category(c));
+  }
+
+  template &lt;class Container, class T&gt;
+  void erase(Container&amp; c, const T&amp; x)
+  {
+    erase_dispatch(c, x, container_category(c));
+  }
+</PRE>
+
+
+<!--
+Give an explanation based on ordered_out_edges.cpp
+-->
+
+
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000-2001</TD><TD>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>, Indiana University (<A HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)
+</TD></TR></TABLE>
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:gimite@mx12.freecom.ne.jp">Hiroshi Ichikawa</a><br>
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+<p>このドキュメントの対象: Boost Version 1.30.0<br>
+<a href="http://www.boost.org/libs/graph/doc/using_adjacency_list.html">最新版ドキュメント (英語)</a></p>
+</BODY>
+</HTML> 

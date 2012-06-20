@@ -1,0 +1,167 @@
+<HTML>
+<!--
+  -- Copyright (c) Jeremy Siek, Lie-Quan Lee, and Andrew Lumsdaine 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  We make no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<Title>Boost Graph Library: Graph Traits</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+<H1><A NAME=""></A>
+<pre>
+adjacency_list_traits&lt;EdgeList, VertexList, Directed&gt;
+</pre>
+</H1>
+
+このクラスは <tt>adjacency_list</tt> クラスに結びついた型のいくつかをアクセス
+する代替方法を提供する。このクラスの主な理由は値が頂点記述子または辺記述子
+であるグラフ・プロパティを時々作成したいと思うからである。もしこのために
+<tt>graph_traits</tt> を使おうと試みるならば、相互に再帰的な型の問題に
+ぶつかるだろう。この問題を避けるために <tt>adjacency_list_traits</tt>
+クラスが提供され、それはユーザにグラフのためのプロパティ型を提供する
+要求をすることなしにユーザが頂点記述子型または辺記述型にアクセスできるように
+する。
+
+<pre>
+  template &lt;class EdgeList, class VertexList, class Directed&gt;
+  struct adjacency_list_traits {
+    typedef ... vertex_descriptor;
+    typedef ... edge_descriptor;
+    typedef ... directed_category;
+    typedef ... edge_parallel_category;
+  };
+</pre>
+
+<h3>Where Defined</h3>
+
+<a href="../../../boost/graph/adjacency_list.hpp"><tt>boost/graph/adjacency_list.hpp</tt></a>
+
+<H3>Template Parameters</H3>
+
+<P>
+<TABLE border>
+<TR>
+<th>パラメータ</th><th>説明</th><th>デフォルト</th>
+</tr>
+
+<TR><TD><TT>EdgeList</TT></TD>
+<TD>
+辺コンテナの実装のための選択子型。
+</TD>
+<td><tt>vecS</tt></td>
+</TR>
+
+<TR><TD><TT>VertexList</TT></TD>
+<TD>
+頂点コンテナの実装のための選択子型。
+</TD>
+<td><tt>vecS</tt></td>
+</TR>
+
+<TR><TD><TT>Directed</TT></TD>
+<TD>
+グラフが有向であるか無向であるかの選択子型。
+</TD>
+<td><tt>directedS</tt></td>
+</TR>
+
+</table>
+
+<h3>Model of</h3>
+
+<a
+href="http://www.sgi.com/tech/stl/DefaultConstructible.html">DefaultConstructible</a> and
+<a href="http://www.sgi.com/tech/stl/Assignable.html">Assignable</a>
+
+<h3>Type Requirements</h3>
+
+工事中
+
+<H2>Members</H2>
+
+<p>
+
+<table border>
+<tr>
+<th>メンバ</th><th>説明</th>
+</tr>
+
+<tr>
+<td><tt>
+vertex_descriptor
+</tt></td>
+<td>
+グラフ中の頂点を識別するのに使われるオブジェクトのための型。
+</td>
+</tr>
+
+<tr>
+<td><tt>
+edge_descriptor
+</tt></td>
+<td>
+グラフ中の辺を識別するのに使われるオブジェクトのための型。
+</td>
+</tr>
+
+<tr>
+<td><tt>
+directed_category
+</tt></td>
+<td>
+これはグラフが無向 (<tt>undirected_tag</tt>) であるか有向
+ (<tt>directed_tag</tt>) であるかを述べる。
+</td>
+</tr>
+
+<tr>
+<td><tt>
+edge_parallel_category
+</tt></td>
+<td>
+これはグラフが多重辺の挿入を許可する (<tt>allow_parallel_edge_tag</tt>) か、
+または自動的に多重辺を取り除く (<tt>disallow_parallel_edge_tag</tt>) かを
+述べる。
+</td>
+</tr>
+
+</table>
+
+<h3>See Also</h3>
+
+<a href="./adjacency_list.html"><tt>adjacency_list</tt></a>
+
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000-2001</TD><TD>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>,
+Indiana University (<A
+HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)<br>
+<A HREF="../../../people/liequan_lee.htm">Lie-Quan Lee</A>, Indiana University (<A HREF="mailto:llee@cs.indiana.edu">llee@cs.indiana.edu</A>)<br>
+<A HREF=http://www.osl.iu.edu/~lums>Andrew Lumsdaine</A>,
+Indiana University (<A
+HREF="mailto:lums@osl.iu.edu">lums@osl.iu.edu</A>)
+</TD></TR></TABLE>
+
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:takashi-it@po6.nsk.ne.jp">Takashi Itou</a><br> 
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+
+<p>このドキュメントの対象: Boost Version 1.30.0<br>
+<a href="http://www.boost.org/libs/graph/doc/adjacency_list_traits.html">最新版ドキュメント (英語)</a></p>
+</BODY>
+</HTML> 

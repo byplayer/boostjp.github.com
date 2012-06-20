@@ -1,0 +1,305 @@
+<HTML>
+<!--
+  -- Copyright (c) Jeremy Siek 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  Silicon Graphics makes no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<Title>Kevin Bacon Example</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+<H1>Six Degrees of Kevin Bacon</H1>
+
+<P>
+人気のあるゲーム“Kevin Bacon の6次数”においてグラフ理論の愉快な応用
+を思いついた。ゲームのアイデアは俳優と Kevin Bacon を、映画で共演した
+俳優の道を通して結ぶというもので、それを6段階未満で行うものである。
+例えば、Theodore Hesburgh (ノートルダム大学の名誉会長) は映画“Ruby”中
+で俳優 Gerry Becker と共演し、彼は映画“Sleepers”で Kevin Bacon と
+共演している。なぜ Kevin Baconなのだろうか？いくつかの理由のために
+ゲームを考案した三人の学生 Mike Ginelli、Graig Fass、そして Brian Turtle
+ は Kevin Bacon を芸能界の中心であると決定した。Kevin Bacon ゲームは
+“世界の至るところで長年数学者の民俗学の一部だった” <a
+href="http://www.oakland.edu/~grossman/erdoshp.html">Erd&ouml;s
+Number</a> と実によく似ている。
+
+<P>
+“Kavin Bacon の6次数”ゲームは実際にはグラフの問題である。もし各俳優を
+頂点に割り当て、二人の俳優が映画で共演しているなら彼らの間に辺を付加
+すれば、このゲームのためのデータを表すグラフになる。それから Kavin Bacon
+ への俳優の道を見つける問題は、従来のグラフの問題になる。つまり二つの頂点間
+の <I>path</I> を見つける事である。6段階より短い道を見つけたいので、理論上
+頂点間の <I>shortest path</I> を見つける事になるだろう。この問題に
+Dijkstra の最短経路のアルゴリズムを適用する事を考えるかも知れないが、
+Dijkstra のアルゴリズムは各辺が関連した長さ (または重み) を持っていて、
+目的が最短の累積長さを発見するというような状況に向いているため過剰であろう。
+辺の数の見地から最短経路を見つけようと思うだけなので、幅優先探索
+アルゴリズムが (Dijkstra のアルゴリズムより少ない時間で) 問題を解くだろう。
+
+<P>
+
+<H2>Input File and Graph Setup</H2>
+
+<P>
+この例のために全ての映画と全ての俳優より遙かに小さいグラフを使う。
+この例の完全なソース・コードは <a
+href="../example/kevin-bacon.cpp"><TT>examples/kevin-bacon.cpp</TT></a>
+ にある。同じ映画で出演した俳優のペアのリストを含むファイル
+ <TT>kevin_bacon.dat</TT> を提供した。ファイルの各行は俳優の名前、映画、そして
+映画で出演した他の俳優を含む。“|”文字はセパレータとして使われる。ここに
+抜粋がある。
+
+<P>
+<PRE>
+Patrick Stewart|Prince of Egypt, The (1998)|Steve Martin
+</PRE>
+
+<P>
+最初の仕事はファイルを読み込み、それからグラフを作成する事だろう。
+ファイルを入力するために <TT>std::ifstream</TT> を使う。
+
+<P>
+<PRE>
+  std::ifstream datafile("./kevin_bacon.dat");
+  if (!datafile) {
+    cerr &lt;&lt; "No ./kevin_bacon.dat file" &lt;&lt; endl;
+    return -1;
+  }
+</PRE>
+
+<P>
+俳優の名前をグラフ中の頂点に、そして映画の名前を辺に結びつけたい。
+これらの頂点と辺のプロパティのグラフへの付加を具体的にするために
+ <TT>property</TT> クラスを使う。無向グラフを使う事を選択した。というのは
+映画中で共演した俳優の関係は対称的だからである。
+
+<P>
+<PRE>
+  using namespace boost;
+  typedef adjacency_list&lt;vecS, vecS, undirectedS, 
+    property&lt;vertex_name_t, string&gt;,
+    property&lt;edge_name_t, string, property&lt;edge_weight_t, int&gt; &gt;
+  &gt; Graph;
+</PRE>
+
+<P>
+プロパティにアクセスするために、グラフからプロパティ・マップ・オブジェクトを
+得る必要がある。次のコードはこれがどのように行われたか示す。
+
+<P>
+<PRE>
+  boost::property_map&lt;Graph, vertex_name_t&gt;::type actor_name = get(vertex_name, g);
+  boost::property_map&lt;Graph, edge_name_t&gt;::type connecting_movie = get(edge_name, g);
+  boost::property_map&lt;Graph, edge_weight_t&gt;::type weight = get(edge_weight, g);
+</PRE>
+
+<P>
+次に各行をトークンのリストに構文分析しながらファイルを通してループを開始
+できる。<TT>stringtok</TT> は古い <TT>strtok</TT> 標準 C 関数の C++ バージョン
+である。
+
+<P>
+<PRE>
+  std::string line;
+  while (std::getline(datafile,line)) {
+    std::list&lt;std::string&gt; line_toks;
+    boost::stringtok(line_toks, line, "|");
+    ...
+  }
+</PRE>
+
+<P>
+入力の各行は辺に接続した頂点として二人の俳優を伴いグラフの辺に対応し、
+映画の名前は辺に結びついたプロパティとなるだろう。
+入力のこの書式からグラフを作成する際の一つの問題は、辺が俳優の名前のペアで
+指定されている事である。グラフに頂点を追加する時に、同じ俳優 (違う辺の上で)
+ が後で出現してもグラフ中の正しい頂点につなげられるように、俳優の名前から
+それらの頂点へのマップを作成する必要があるだろう。
+<a
+href="http://www.sgi.com/tech/stl/Map.html"><TT>std::map</TT></a>
+ がこのマッピングを実装するのに使える。
+
+<P>
+<PRE>
+  typedef graph_traits&lt;Graph&gt;::vertex_descriptor Vertex;
+  typedef std::map&lt;string, Vertex&gt; NameVertexMap;
+  NameVertexMap actors;
+</PRE>
+
+<P>
+一番目のトークンは俳優の名前になるだろう。もし俳優が既に俳優のマップ中にない
+なら、頂点をグラフに付加し、頂点の名前プロパティを置き、頂点記述子をマップ中に
+記録するだろう。もし俳優が既にグラフ中にあれば、頂点記述子をマップの
+ <TT>pos</TT> イテレータから取ってくるだろう。
+
+<P>
+<PRE>
+  NameVertexMap::iterator pos; 
+  bool inserted;
+  Vertex u, v;
+
+  std::list&lt;std::string&gt;::iterator i = line_toks.begin();
+
+  boost::tie(pos, inserted) = actors.insert(make_pair(*i, Vertex()));
+  if (inserted) {
+    u = add_vertex(g);
+    actor_name[u] = *i;
+    pos-&gt;second = u;
+  } else
+    u = pos-&gt;second;
+  ++i;
+</PRE>
+
+<P>
+二番目のトークンは映画の名前で、三番目のトークンは他の俳優である。
+二番目の俳優をグラフ中に挿入するために上述と同じ手法を使う。
+
+<P>
+<PRE>
+  std::string movie_name = *i++;
+      
+  boost::tie(pos, inserted) = actors.insert(make_pair(*i, Vertex()));
+  if (inserted) {
+    v = add_vertex(g);
+    actor_name[v] = *i;
+    pos-&gt;second = v;
+  } else
+    v = pos-&gt;second;
+</PRE>
+
+<P>
+最後の段階は二人の俳優を結ぶ辺を付加し、それを結ぶ映画の名前を記録する事で
+ある。
+さらに辺の重みを 1 と置く。<TT>adjacency_list</TT> の <TT>EdgeList</TT> 型
+のために <TT>setS</TT> を選択したので、入力中のどの多重辺もグラフ中に挿入
+されないだろう。
+
+<P>
+<PRE>
+  Edge e;
+  boost::tie(e, inserted) = add_edge(u, v, g);
+  if (inserted) {
+    connecting_movie[e] = movie_name;
+    weight[e] = 1;
+  }
+</PRE>
+
+<P>
+
+<H2>Applying Breadth-First Search</H2>
+
+<P>
+<A
+HREF="./breadth_first_search.html"><tt>breadth_first_search()</tt></a>
+ アルゴリズムの文書は色と頂点IDをプロパティ・マップに供給する必要が
+あるだろうという事を示している。それに加え、先行点と距離のためのプロパティ・
+マップを同様に必要とするため、これらを記録するためにビジタを使うだろう。
+距離は、各俳優からアルゴリズムによって計算された Kevin Bacon までの最短距離
+になるだろう。この距離はさらに、どれくらいの出版が数学者を Paul Erdos から
+分けたかに従い数学者を分類するのに使われた“Erdos Number”を記念して“Bacon
+ Number”と呼ばれた。bacon 番号を格納するために vector を使い、BFS アルゴリズム
+によって必要とされるカラー・プロパティをしまうために別の vector を使うだろう。
+ <TT>predecessor</TT> vector は各俳優から Kevin までの最短距離を記録するのに
+使われるだろう。各頂点のために <TT>predecessor</TT> vector が Kevin Bacon
+ への最短経路の上の次の頂点へのポインタを含むだろう。
+
+<P>
+<PRE>
+  std::vector&lt;int&gt; bacon_number(num_vertices(g));
+  std::vector&lt;int&gt; color(num_vertices(g));
+  std::vector&lt;Vertex&gt; predecessor(num_vertices(g));
+</PRE>
+
+<P>
+さらに BFS アルゴリズムは入力として始点を必要とする。もちろんこれは Kavin
+ Bacon だろう。グラフ、始点、プロパティ・マップ、そして先行点と距離の
+レコーダから構成されたビジタを渡して、今 BGL BFS を呼ぶ。
+先行点を記録するために <a
+href="./predecessor_recorder.html"><TT>predecessor_recorder</TT></a>
+ を、そして距離を記録するために <a
+href="./distance_recorder.html"><tt>distance_recorder</tt></a> を使う。
+
+<P>
+<PRE>
+    Vertex src = actors["Kevin Bacon"];
+    
+    breadth_first_search
+      (g, src, 
+       visitor(make_bfs_visitor
+	       (make_list(record_predecessors(&amp;predecessor[0], 
+					      on_examine_edge()),
+			  record_distances(&amp;bacon_number[0],
+					   on_examine_edge()))))
+       );
+</PRE>
+
+<P>
+単にグラフ中の全ての頂点を通してループし、それらを <TT>bacon_number</TT>
+ vector 中に添え字を付けるために用いる事によって、各俳優のための
+ bacon 番号を出力できる。
+
+<P>
+<PRE>
+    graph_traits&lt;Graph&gt;::vertex_iterator i, end;
+    for (boost::tie(i, end) = vertices(g); i != end; ++i)
+      std::cout &lt;&lt; actor_name[*i] &lt;&lt; "'s bacon number is " 
+                &lt;&lt; bacon_number[*i] &lt;&lt; std::endl;
+</PRE>
+
+<P>
+<TT>bacon_number</TT> のような vector または配列が添え字として頂点記述子
+オブジェクトを必ずしも使うことができるとは限らないことに注意しなさい。これは
+<TT>VertexList=vecS</TT> の状態の <TT>adjacency_list</TT> クラスに有効で、
+他の状態の <TT>adjacency_list</TT> は有効でない。
+頂点に基づき添え字を付ける、より一般的な方法は <A
+HREF="../../property_map/iterator_property_map.html"><TT>iterator_property_map</TT></a> と連携して ID プロパティ・マップ (<TT>vertex_index_t</TT>) を使う
+事である。
+
+<P>
+ここれにプログラムの出力からの抜粋がある。
+<br>
+<font color="#FF0000">[訳注: excepts は excerpts の間違いであろうと判断しそう訳した]
+</font>
+<PRE>
+William Shatner was in Loaded Weapon 1 (1993) with Denise Richards
+Denise Richards was in Wild Things (1998) with Kevin Bacon
+Patrick Stewart was in Prince of Egypt, The (1998) with Steve Martin
+...
+William Shatner's bacon number is 2
+Denise Richards's bacon number is 1
+Kevin Bacon's bacon number is 0
+Patrick Stewart's bacon number is 2
+Steve Martin's bacon number is 1    
+...
+</PRE>
+
+
+
+
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000-2001</TD><TD>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>, Indiana University (<A HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)
+</TD></TR></TABLE>
+
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:takashi-it@po6.nsk.ne.jp">Takashi Itou</a><br> 
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+
+<p>このドキュメントの対象: Boost Version 1.30.0<br>
+<a href="http://www.boost.org/libs/graph/doc/kevin_bacon.html">最新版ドキュメント (英語)</a></p>
+</BODY>
+</HTML> 

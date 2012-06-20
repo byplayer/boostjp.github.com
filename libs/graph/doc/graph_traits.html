@@ -1,0 +1,250 @@
+<HTML>
+<!--
+  -- Copyright (c) Jeremy Siek, Lie-Quan Lee, and Andrew Lumsdaine 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  We make no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<Title>Boost Graph Library: Graph Traits</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+<H1><A NAME=""></A>
+<pre>
+graph_traits&lt;<a href="./Graph.html">Graph</a>&gt;
+</pre>
+</H1>
+
+丁度 STL の<a
+href="http://www.sgi.com/tech/stl/iterator_traits.html">
+イテレータ</a>のように、グラフは<b>関連型</b>を持っている。様々な<a
+ href="./graph_concepts.html">グラフ・コンセプト</a>の中で述べてあるが、
+一つのグラフはとても少数の関連型 (<tt>vertex_descriptor</tt>,
+<tt>edge_descriptor</tt>, <tt>out_edge_iterator</tt>等) を持つ。どの特定の
+グラフ・コンセプトも、下記の定義された関連型のすべては必要でない。
+一つまたはそれ以上のグラフ・コンセプトにぴったりと合う (fullfits) クラスを実装
+する際には、コンセプトが必要としない関連型は、グラフ・クラスの内側でネス
+トした typedef が使われている時は型として <tt>void</tt> を用いてもよいし、また
+はグラフ・クラスのための <tt>graph_traits</tt> 特殊化版から typedef を取り除い
+てもよい。
+
+<pre>
+  template &lt;typename Graph&gt;
+  struct graph_traits {
+    typedef typename Graph::vertex_descriptor      vertex_descriptor;
+    typedef typename Graph::edge_descriptor        edge_descriptor;
+    typedef typename Graph::adjacency_iterator     adjacency_iterator;
+    typedef typename Graph::out_edge_iterator      out_edge_iterator;
+    typedef typename Graph::in_edge_iterator       in_edge_iterator;
+    typedef typename Graph::vertex_iterator        vertex_iterator;
+    typedef typename Graph::edge_iterator          edge_iterator;
+
+    typedef typename Graph::directed_category      directed_category;
+    typedef typename Graph::edge_parallel_category edge_parallel_category;
+    typedef typename Graph::traversal_category     traversal_category;
+
+    typedef typename Graph::vertices_size_type     vertices_size_type;
+    typedef typename Graph::edges_size_type        edges_size_type;
+    typedef typename Graph::degree_size_type       degree_size_type;
+  };
+</pre>
+
+<h3>Where Defined</h3>
+
+<a href="../../../boost/graph/graph_traits.hpp"><tt>boost/graph/graph_traits.hpp</tt></a>
+
+<H3>Template Parameters</H3>
+
+<P>
+<TABLE border>
+<TR>
+<th>パラメータ</th><th>説明</th>
+</tr>
+
+<TR><TD><TT>Graph</TT></TD>
+<TD>
+関連した型がアクセスされるグラフ型。
+</TD>
+</TR>
+
+</table>
+
+<h3>Model of</h3>
+
+<a
+href="http://www.sgi.com/tech/stl/DefaultConstructible.html">DefaultConstructible</a> and
+<a href="http://www.sgi.com/tech/stl/Assignable.html">Assignable</a>
+
+<h3>Type Requirements</h3>
+
+<ul>
+  <li><tt>Graph</tt> は<a href="./graph_concepts.html">グラフ・コンセプト</a>の一つをモデルとする。
+</ul>
+
+<H2>Members</H2>
+
+<p>
+
+<table border>
+<tr>
+<th>メンバ</th><th>説明</th>
+</tr>
+
+<tr>
+<td><tt>
+vertex_descriptor
+</tt></td>
+<td>
+頂点を表すオブジェクトへの型。
+</td>
+</tr>
+
+<tr>
+<td><tt>
+edge_descriptor
+</tt></td>
+<td>
+辺を表すオブジェクトへの型。
+</td>
+</tr>
+
+<tr>
+<td><tt>
+adjacency_iterator
+</tt></td>
+<td>
+隣接する頂点へのイテレータ。
+</td>
+</tr>
+
+<tr>
+<td><tt>
+out_edge_iterator
+</tt></td>
+<td>
+出辺へのイテレータ。
+</td>
+</tr>
+
+<tr>
+<td><tt>
+in_edge_iterator
+</tt></td>
+<td>
+入辺へのイテレータ。
+</td>
+</tr>
+
+<tr>
+<td><tt>
+vertex_iterator
+</tt></td>
+<td>
+グラフの頂点集合へのイテレータ。
+</td>
+</tr>
+
+<tr>
+<td><tt>
+edge_iterator
+</tt></td>
+<td>
+グラフの辺集合へのイテレータ。
+</td>
+</tr>
+
+<tr>
+<td><tt>
+directed_category
+</tt></td>
+<td>
+グラフが無向であるか (<tt>undirected_tag</tt>)
+有向であるか (<tt>directed_tag</tt>)。
+</td>
+</tr>
+
+<tr>
+<td><tt>
+edge_parallel_category
+</tt></td>
+<td>
+グラフが多重辺を許可するか (<tt>allow_parallel_edge_tag</tt>)
+多重辺を自動的に削除するか (<tt>disallow_parallel_edge_tag</tt>)。
+</td>
+</tr>
+
+<tr>
+<td><tt>
+traversal_category
+</tt></td>
+<td>
+グラフ上の頂点と辺を訪れることのできる方法。
+traversal category tag は、<tt>incidence_graph_tag, adjacency_graph_tag,
+bidirectional_graph_tag, vertex_list_graph_tag,
+edge_list_graph_tag, vertex_and_edge_list_graph_tag,
+adjacency_matrix_tag</tt> である。
+この内の一つを継承した独自の tag も作成可能である。
+</td>
+</tr>
+
+<tr>
+<td><tt>
+vertices_size_type
+</tt></td>
+<td>
+グラフの頂点数を表す符号無し汎整数型。
+</td>
+</tr>
+
+<tr>
+<td><tt>
+edge_size_type
+</tt></td>
+<td>
+グラフの辺数を表す符号無し汎整数型。
+</td>
+</tr>
+
+<tr>
+<td><tt>
+degree_size_type
+</tt></td>
+<td>
+辺の次数を表す汎整数型。
+</td>
+</tr>
+
+</table>
+
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000-2001</TD><TD>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>,
+Indiana University (<A
+HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)<br>
+<A HREF="../../../people/liequan_lee.htm">Lie-Quan Lee</A>, Indiana University (<A HREF="mailto:llee@cs.indiana.edu">llee@cs.indiana.edu</A>)<br>
+<A HREF=http://www.osl.iu.edu/~lums>Andrew Lumsdaine</A>,
+Indiana University (<A
+HREF="mailto:lums@osl.iu.edu">lums@osl.iu.edu</A>)
+</TD></TR></TABLE>
+
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:takashi-it@po6.nsk.ne.jp">Takashi Itou</a><br> 
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+
+<p>このドキュメントの対象: Boost Version 1.30.0<br>
+<a href="http://www.boost.org/libs/graph/doc/graph_traits.html">最新版ドキュメント (英語)</a></p>
+</BODY>
+</HTML> 

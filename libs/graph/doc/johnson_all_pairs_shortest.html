@@ -1,0 +1,199 @@
+<HTML>
+<!--
+  -- Copyright (c) Jeremy Siek 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  Silicon Graphics makes no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<Title>Johnson All Pairs Shortest Paths</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+<H1><A NAME="sec:johnson">
+<TT>johnson_all_pairs_shortest_paths</TT>
+</H1>
+
+<PRE>
+<i>// 名前付きパラメータバージョン</i>
+template &lt;typename Graph, typename DistanceMatrix, typename P, typename T, typename R&gt;
+bool johnson_all_pairs_shortest_paths(Graph&amp; g, DistanceMatrix&amp; D,
+  const bgl_named_params&lt;P, T, R&gt;&amp; params = <i>all defaults</i>)
+
+<i>// 名前無しパラメータバージョン</i>
+template &lt;typename Graph, typename DistanceMatrix,
+          typename VertexIndex, typename WeightMap, typename DT&gt;
+bool
+johnson_all_pairs_shortest_paths(VertexAndEdgeListGraph&amp; g1, 
+  DistanceMatrix&amp; D,
+  VertexIndex id1, Weight w1, DT zero)
+</PRE>
+
+<P>
+このアルゴリズムはグラフ中の全ての頂点のペア間の最短距離を発見する。
+アルゴリズムはもしグラフ中に負の重みの閉路が存在する場合は false を返し、
+そうでなければ true を返す。各頂点のペア間の距離は距離行列 <TT>D</TT>に
+しまわれる。これは <i>O(V E log V)</i> の時間複雑性を持つ持つより徹底的な時間がかかるグラフ・アルゴリズムの一つである。
+<P>
+
+<H3>Where Defined</H3>
+
+<P>
+<a href="../../../boost/graph/johnson_all_pairs_shortest.hpp"><TT>boost/graph/johnson_all_pairs_shortest.hpp</TT></a>
+
+
+<h3>Parameters</h3>
+
+IN: <tt>Graph&amp; g</tt>
+<blockquote>
+有向グラフまたは無向グラフ。グラフの型は <a
+href="VertexListGraph.html">Vertex List Graph</a>、<a
+href="EdgeListGraph.html">Edge List Graph</a>、そして <a
+href="IncidenceGraph.html">Incidence Graph</a> のモデルでなければならない。
+</blockquote>
+
+OUT: <tt>DistanceMatrix&amp; D</tt>
+<blockquote>
+グラフ中の各頂点 <i>u,v</i> のペア間の最短経路の長さは <tt>D[u][v]</tt>
+ 中にしまわれる。型が {<tt>DistanceMatrix, vertex_descriptor, D</tt>} の
+集合は <tt>D</tt> が <tt>DistanceMap</tt> の値型である <a
+href="BasicMatrix.html">BasicMatrix</a> のモデルでなければならない。
+</blockquote>
+
+
+<h3>Named Parameters</h3>
+
+IN: <tt>weight_map(WeightMap w_map)</tt>   
+<blockquote>
+グラフ中の各辺の重みまたは“長さ”。<tt>WeightMap</tt> の型は <a
+href="../../property_map/ReadablePropertyMap.html">Readable Property Map</a>
+ のモデルでなければならない。グラフの辺記述子型は重みマップのキー型と
+して使用できる必要がある。マップの値型は距離マップの値型を伴った
+ <i>Addable</i> でなければならない。 
+<br>
+<b>デフォルト:</b>  <tt>get(edge_weight, g)</tt>
+</blockquote>
+
+UTIL: <tt>weight_map2(WeightMap2 w2_map)</tt>   
+<blockquote>
+このパラメータはもはや必要とされず、無視されるだろう。
+</blockquote>
+
+IN: <tt>vertex_index_map(VertexIndexMap i_map)</tt> 
+<blockquote>
+これは各頂点を <tt>[0, num_vertices(g))</tt> の範囲において整数にマップする。
+これは Dijkstra のアルゴリズムの内部の呼び出し中に、ヒープ・データ構造を効率
+よく更新するのに必要である。<tt>VertexIndexMap</tt> は <a
+href="../../property_map/ReadablePropertyMap.html">Readable Property Map</a>
+ のモデルでなければならない。マップの値型は汎整数型でなければならない。
+グラフの頂点記述子型はマップのキー型として使用できる必要がある。
+<br>
+<b>デフォルト:</b> <tt>get(vertex_index, g)</tt>
+</blockquote>
+
+
+UTIL: <tt>distance_map(DistanceMap d_map)</tt> 
+<blockquote>
+このパラメータはもはや必要とされず、無視されるだろう。
+</blockquote>
+
+IN: <tt>distance_compare(CompareFunction cmp)</tt> 
+<blockquote>
+この関数はどの頂点が始点により近いか決定するために距離を比較するのに使われる。
+<tt>CompareFunction</tt> の型は <a
+ href="http://www.sgi.com/tech/stl/BinaryPredicate.html">Binary
+ Predicate</a> のモデルでなければならず、<tt>DistanceMap</tt> プロパティ・
+マップの値型に一致する引数型を持たなければならない。<br>
+<b>デフォルト:</b> <tt>std::less&lt;DT&gt;</tt> ここに
+  <tt>DT=typename&nbsp;property_traits&lt;WeightMap&gt;::value_type</tt>
+</blockquote>
+
+IN: <tt>distance_combine(CombineFunction cmb)</tt> 
+<blockquote>
+この関数は道の距離を計算するために、距離を結合するのに使われる。
+<tt>CombineFunction</tt> の型は <a
+ href="http://www.sgi.com/tech/stl/BinaryFunction.html">Binary
+ Function</a> のモデルでなければならない。二項関数の第一引数の型は
+ <tt>DistanceMap</tt> プロパティ・マップの値型に一致していなければならず、
+第二引数の型は <tt>WeightMap</tt> プロパティ・マップの値型に一致していなければ
+ならない。結果型は距離の値型と同じでなければならない。
+<br>
+<b>デフォルト:</b> <tt>std::plus&lt;DT&gt;</tt> ここに
+   <tt>DT=typename&nbsp;property_traits&lt;WeightMap&gt;::value_type</tt>
+</blockquote>
+
+IN: <tt>distance_inf(DT inf)</tt> 
+<blockquote>
+この値はアルゴリズムの開始前に各頂点のための距離を初期化するのに使われる。
+型 <tt>DT</tt> は <tt>WeightMap</tt> の値型でなければならない。
+<br>
+<b>デフォルト:</b> <tt>std::numeric_limits::max()</tt>
+</blockquote>
+
+IN: <tt>distance_zero(DT zero)</tt> 
+<blockquote>
+この値はアルゴリズムの開始前に始点のための距離を初期化するのに使われる。
+型 <tt>DT</tt> は <tt>WeightMap</tt> の値型でなければならない。
+<br>
+<b>デフォルト:</b> <tt>0</tt>
+</blockquote>
+
+UTIL/OUT: <tt>color_map(ColorMap c_map)</tt> 
+<blockquote>
+これは頂点に印をつけるためにアルゴリズムの実行の間使われる。頂点は白色から
+始めて、それがキュー中に挿入された時に灰色になる。それからそれがキューから
+取り除かれた時に黒色になる。アルゴリズムの終了時に、始点から到達可能な頂点は
+黒色に色づけされている。その他の全ての頂点は白色のままである。
+<tt>ColorMap</tt> の型は <a
+href="../../property_map/ReadWritePropertyMap.html">Read/Write
+ Property Map</a> のモデルでなければならない。頂点記述子はマップのキー型として
+使用できる必要があり、マップの値型は <a
+href="./ColorValue.html">Color Value</a> のモデルでなければならない。 
+<br>
+<b>デフォルト:</b> <tt>サイズ num_vertices(g)</tt> の
+ <tt>default_color_type</tt> の <tt>std::vector</tt> から作られた <a
+ href="../../property_map/iterator_property_map.html">
+ <tt>iterator_property_map</tt></a> で、添え字マップには
+ <tt>i_map</tt> を用いる。
+</blockquote>
+
+
+<h3>Complexity</h3>
+
+時間複雑性は <i>O(V E log V)</i> である。
+
+
+
+<H3>Example</H3>
+
+<P>
+ファイル <a
+href="../example/johnson-eg.cpp"><tt>example/johnson-eg.cpp</tt></a> 
+は CLR&nbsp;[<A
+HREF="bibliography.html#clr90">8</A>] の 568ページからの例のグラフに
+全てのペアの最短経路のための Johnson のアルゴリズムを適用している。
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000-2001</TD><TD>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>, Indiana University (<A HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)
+</TD></TR></TABLE>
+
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:takashi-it@po6.nsk.ne.jp">Takashi Itou</a><br> 
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+
+<p>このドキュメントの対象: Boost Version 1.30.0<br>
+<a href="http://www.boost.org/libs/graph/doc/johnson_all_pairs_shortest.html">最新版ドキュメント (英語)</a></p>
+</BODY>
+</HTML> 

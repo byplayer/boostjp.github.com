@@ -1,0 +1,119 @@
+<!-- saved from url=(0022)http://internet.e-mail -->
+<HTML>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<!--
+  -- Copyright (c) Jeremy Siek 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  Silicon Graphics makes no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+	<Head>
+		<Title>Graph</Title>
+		<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" ALINK="#ff0000">
+			<IMG SRC="../../../c++boost.gif" ALT="C++ Boost" width="277" height="86">
+			<BR Clear>
+			<H2><A NAME="concept:Graph"></A> Graph
+			</H2>
+			<P>
+				グラフ・コンセプトは全てのグラフの概念に共通する要求をある程度含んでいる。 これらは <tt>vertex_descriptor</tt> や <tt>edge_descriptor</tt>
+				等、 そして <tt>num_vertices()</tt>関数と <tt>num_edges()</tt>関数 に関連する型をいくつか含んでいる。 
+				注目すべきは、 グラフのモデルは、<a href="http://www.sgi.com/tech/stl/Assignable.html">Assignable</a>
+				のモデルである必要は<B>ない</B>
+			ということである。 なぜなら、アルゴリズムはグラフのオブジェクトを参照で渡すべきだからである。
+			<P>
+				<h3>Notation</h3>
+				<Table>
+					<TR>
+						<TD><tt>G</tt></TD>
+						<TD>グラフのモデルであるところの型。</TD>
+					</TR>
+					<TR>
+						<TD><tt>g</tt></TD>
+						<TD>型 <tt>G</tt> のオブジェクト。</TD>
+					</TR>
+				</Table>
+				<H3>Associated Types</H3>
+				<table border>
+					<tr>
+						<td><pre>boost::graph_traits&lt;G&gt;::vertex_descriptor</pre>
+							頂点記述子は抽象的なグラフのインスタンスにおける個々の頂点に対応している。 頂点記述子は <a href="http://www.sgi.com/tech/stl/DefaultConstructible.html">
+								Default Constructible</a>で、 <a href="http://www.sgi.com/tech/stl/Assignable.html">
+								Assignable</a>で、 <a href="http://www.sgi.com/tech/stl/EqualityComparable.html">Equality 
+								Comparable</a> でなければならない。
+						</td>
+					</tr>
+					<tr>
+						<td><pre>boost::graph_traits&lt;G&gt;::edge_descriptor</pre>
+							辺記述子はグラフにおける個々の辺 <i>(u,v)</i> に対応している。 辺記述子は <a href="http://www.sgi.com/tech/stl/DefaultConstructible.html">
+								Default Constructible</a>で、 <a href="http://www.sgi.com/tech/stl/Assignable.html">
+								Assignable</a>で、 <a href="http://www.sgi.com/tech/stl/EqualityComparable.html">Equality 
+								Comparable</a> でなければならない。
+						</td>
+					</tr>
+					<tr>
+						<td><pre>boost::graph_traits&lt;G&gt;::directed_category</pre>
+							<TT>directed_tag</TT> と <TT>undirected_tag</TT> から選択する。
+						</td>
+					</tr>
+					<tr>
+						<td><pre>boost::graph_traits&lt;G&gt;::edge_parallel_category</pre>
+							グラフのクラスが多重辺(始点と終点が同じ辺)の挿入を許可するかどうかを示す。 2つのタグがあり、 <TT>allow_parallel_edge_tag</TT>
+							と <TT>disallow_parallel_edge_tag</TT> である。
+						</td>
+					</tr>
+					<tr>
+						<td><pre>boost::graph_traits&lt;G&gt;::traversal_category</pre>
+							グラフ上の頂点、辺を巡回するための方法を示す。 <TT>incidence_graph_tag</TT>、 <TT>adjacency_graph_tag</TT>、<TT>bidirectional_graph_tag</TT>、
+							<TT>vertex_list_graph_tag</TT>、<TT>edge_list_graph_tag</TT>、そして <TT>adjacency_matrix_tag</TT>
+							から選択する。
+						</td>
+					</tr>
+				</table>
+				<H3>Valid Expressions</H3>
+				要求しない。
+				<H3>Concept Checking Class</H3>
+				<PRE>
+  template &lt;class G&gt;
+  struct GraphConcept
+  {
+    typedef typename boost::graph_traits&lt;G&gt;::vertex_descriptor vertex_descriptor;
+    typedef typename boost::graph_traits&lt;G&gt;::edge_descriptor edge_descriptor;
+    typedef typename boost::graph_traits&lt;G&gt;::directed_category directed_category;
+    typedef typename boost::graph_traits&lt;G&gt;::edge_parallel_category edge_parallel_category;
+    typedef typename boost::graph_traits&lt;G&gt;::traversal_category traversal_category;
+
+    void constraints() {
+      function_requires&lt; DefaultConstructibleConcept&lt;vertex_descriptor&gt; &gt;();
+      function_requires&lt; EqualityComparableConcept&lt;vertex_descriptor&gt; &gt;();
+      function_requires&lt; AssignableConcept&lt;vertex_descriptor&gt; &gt;();
+      function_requires&lt; DefaultConstructibleConcept&lt;edge_descriptor&gt; &gt;();
+      function_requires&lt; EqualityComparableConcept&lt;edge_descriptor&gt; &gt;();
+      function_requires&lt; AssignableConcept&lt;edge_descriptor&gt; &gt;();
+    }
+    G g;
+  };
+</PRE>
+				<H3>See Also</H3>
+				<a href="./graph_concepts.html">Graph concepts</a>
+				<br>
+				<HR>
+				<TABLE>
+					<TR valign="top">
+						<TD nowrap>Copyright &copy 2000-2001</TD>
+						<TD>
+							<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>, Indiana University (<A HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)
+						</TD>
+					</TR>
+				</TABLE>
+			<P>Japanese Translation Copyright (C) 2003&nbsp;KANAHORI&nbsp;Toshihiro &lt;<A href="mailto:kanahori@k.tsukuba-tech.ac.jp">kanahori@k.tsukuba-tech.ac.jp</A>&gt;
+				<BR>
+				<SMALL>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。
+				</SMALL>
+			</P>
+		</BODY>
+</HTML>

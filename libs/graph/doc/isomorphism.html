@@ -1,0 +1,168 @@
+<HTML>
+<!--
+  -- Copyright (c) Jeremy Siek 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  Silicon Graphics makes no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<Title>Boost Graph Library: Isomorphism</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+<H1><A NAME="sec:bfs">
+<TT>isomorphism</TT>
+</H1>
+
+
+<PRE>
+<i>// 名前付きパラメータバージョン</i>
+template &lt;class Graph1, class Graph2, class P, class T, class R&gt;
+bool isomorphism(const Graph1&amp; g1, const Graph2&amp; g2,
+                 const bgl_named_params&lt;P,T,R&gt;&amp; params = <i>all defaults</i>)
+
+<i>// 名前無しパラメータバージョン</i>
+template &lt;typename Graph1, typename Graph2, 
+	  typename IndexMapping, typename VertexInvariant,
+	  typename V1Map, typename V2Map&gt;
+bool isomorphism(const Graph1&amp; g1, const Graph2&amp; g2,
+		 IsoMap f, VertexInvariant invariant,
+		 VertexIndex1Map i1_map, VertexIndex2Map i2_map)
+</pre>
+
+<p>
+<b><i>isomorphism (同型写像)</i></b> は、隣接が保存されているような、一つのグラフ中の
+頂点から他のグラフの頂点への一対一の写像である。別の言葉で言えば、
+与えられたグラフ <i>G<sub>1</sub> =
+(V<sub>1</sub>,E<sub>1</sub>)</i> と <i>G<sub>2</sub> =
+(V<sub>2</sub>,E<sub>2</sub>)</i> に対し、同型写像は
+<i>V<sub>1</sub></i> 中の全ての頂点のペア <i>a,b</i> にとって、
+辺 <i>(f(a),f(b))</i> が <i>E<sub>2</sub></i> 中にあれば、そしてありさえすれ
+ば、辺 <i>(a,b)</i> が <i>E<sub>1</sub></i> 中にあるような関数である。
+</p>
+
+<p>
+この関数はグラフ 1 とグラフ 2 の間に同型写像が存在すれば <tt>true</tt> を
+返し、そうでなければ <tt>false</tt> を返す。さらに、もし同型写像マップの
+名前付きパラメータが提供されれば、同型写像はマップ中に記録される。
+</p>
+
+<p>
+現在の実装は [<a
+href="./bibliography.html#fortin96:_graph_iso_prob">46</a>,<a
+href="./bibliography.html#reingold77:_combin_algo">48</a>] 中にある
+バックトラック・アルゴリズムの記述に基づいている。ファイル <a
+href="./isomorphism-impl.pdf">isomorphism-impl.pdf</a> は実装の“博学の”
+記述を含む。使われているアルゴリズムは単純だが遅い。もっと効率的な (そして
+もっと複雑な) アルゴリズムは [<a
+href="./bibliography.html#mckay81:_pract_graph_iso">47</a>] 中に記述されて
+いる。このアルゴリズムのバージョンが BGL インターフェースに入れられる時
+(そしてもしそうであれば)、現在のアルゴリズムをそれと入れ換えるべきである。
+</p>
+
+<H3>Where Defined</H3>
+
+<a href="../../../boost/graph/isomorphism.hpp"><TT>boost/graph/isomorphism.hpp</TT></a>
+
+<h3>Parameters</h3>
+
+IN: <tt>const Graph1&amp; g1</tt>
+<blockquote>
+有向グラフまたは無向グラフ。グラフの型は <a
+href="./VertexListGraph.html">Vertex List Graph</a> と <a
+href="./EdgeListGraph.html">Edge List Graph</a> のモデルでなければならない。
+</blockquote>
+
+IN: <tt>const Graph2&amp; g2</tt>
+<blockquote>
+有向グラフまたは無向グラフ。グラフの型は <a
+href="./BidirectionalGraph.html">Bidirectional Graph</a> と <a
+href="./VertexListGraph.html">Vertex List Graph</a> のモデルでなければなら
+ない。
+</blockquote>
+
+<h3>Named Parameters</h3>
+
+OUT: <tt>isomorphism_map(IsoMap f)</tt>
+<blockquote>
+グラフ 1 中の頂点からグラフ 2 中の頂点への写像。これは <a
+href="../../property_map/ReadWritePropertyMap.html">Read/Write
+Property Map</a> でなければならない。
+<br>
+<b>デフォルト:</b> グラフ 2 の頂点記述子型の <tt>std::vector</tt> から構成
+された <a
+href="../../property_map/iterator_property_map.html"><tt>iterator_property_map</tt></a> で、グラフ 1 のために頂点の添え字マップを使う。
+</blockquote>
+
+IN: <tt>vertex_invariant(VertexInvariant i)</tt>
+<blockquote>
+もし <i>v</i> を <i>v'</i> にマップするいくつかの同型写像が存在するならば、
+<i>i(v) == i(v')</i> であるような、頂点から整数への写像 <i>i</i>。
+<tt>VertexInvariant</tt> の型は第一引数が頂点記述子、第二引数がグラフ、
+そして結果型が整数である <a
+href="http://www.sgi.com/tech/stl/BinaryFunction.html">BinaryFunction</a> で
+なければならない。
+頂点の不変量はグラフ 1 とグラフ 2 の両方の型を扱わなければならず、それゆえ
+テンプレート化された <tt>operator()</tt> を持つ必要があるかもしれない。
+<br>
+<b>デフォルト:</b> <tt>degree_vertex_invariant</tt>
+</blockquote>
+
+IN: <tt>vertex_index1_map(VertexIndex1Map i1_map)</tt>
+<blockquote>
+これは各頂点を <tt>[0, num_vertices(g))</tt> の範囲において整数にマップする。
+これは辺がリラックスされた (減らされた) 時、ヒープ・データ構造を効率よく更新
+するのに必要である。<tt>VertexIndex1Map</tt> は <a
+href="../../property_map/ReadablePropertyMap.html">Readable Property
+Map</a> のモデルでなければならない。マップの値型は汎整数型でなければならない。
+グラフ 1 の頂点記述子型はマップのキー型として使用できる必要がある。
+<br>
+<b>デフォルト:</b> <tt>get(vertex_index, g1)</tt>
+</blockquote>
+
+IN: <tt>vertex_index2_map(VertexIndex2Map i2_map)</tt>
+<blockquote>
+これは各頂点を <tt>[0, num_vertices(g))</tt> の範囲において整数にマップする。
+これは辺がリラックスされた (減らされた) 時、ヒープ・データ構造を効率よく更新
+するのに必要である。<tt>VertexIndex2Map</tt> は <a
+href="../../property_map/ReadablePropertyMap.html">Readable Property
+Map</a> のモデルでなければならない。マップの値型は汎整数型でなければならない。
+グラフ 2 の頂点記述子型はマップのキー型として使用できる必要がある。
+<br>
+<b>デフォルト:</b> <tt>get(vertex_index, g2)</tt>
+</blockquote>
+
+
+<h3>Complexity</h3>
+
+最悪のケースの時間複雑性は <i>O(|V|!)</i> である。
+
+<h3>Example</h3>
+
+<a href="../example/isomorphism.cpp"><tt>libs/graph/example/isomorphism.cpp</tt></a> を見よ。
+
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000-2001</TD><TD>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>, Indiana University (<A HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)
+</TD></TR></TABLE>
+
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:takashi-it@po6.nsk.ne.jp">Takashi Itou</a><br> 
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+
+<p>このドキュメントの対象: Boost Version 1.30.0<br>
+<a href="http://www.boost.org/libs/graph/doc/isomorphism.html">最新版ドキュメント (英語)</a></p>
+</BODY>
+</HTML> 

@@ -1,0 +1,205 @@
+<HTML>
+<!--
+  -- Copyright (c) Jeremy Siek 2001
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  Silicon Graphics makes no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<Title>Boost Graph Library: Transitive Closure</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+<H1><A NAME="sec:transitive_closure">
+<TT>transitive_closure</TT>
+</H1>
+
+<P>
+<PRE>
+template &lt;typename Graph, typename GraphTC,
+  typename P, typename T, typename R&gt;
+void transitive_closure(const Graph&amp; g, GraphTC&amp; tc,
+  const bgl_named_params&lt;P, T, R&gt;&amp; params = <i>all defaults</i>)
+
+template &lt;typename Graph, typename GraphTC,
+  typename G_to_TC_VertexMap, typename VertexIndexMap&gt;
+void transitive_closure(const Graph&amp; g, GraphTC&amp; tc,
+                        G_to_TC_VertexMap g_to_tc_map, VertexIndexMap index_map)
+</PRE>
+グラフ <i>G = (V,E)</i> の推移閉包は、<i>G</i>が <i>u</i> から <i>v</i>への<a
+href="graph_theory_review.html#def:path">道</a> (少なくとも一つの辺の) を含んでいれば、そして含んでさえいれば、
+<i>E*</i> が辺 <i>(u,v)</i> を含むようなグラフ
+<i>G* = (V,E*)</i> である。
+<tt>transitive_closure()</tt> 関数は入力されたグラフ <tt>g</tt> を
+推移閉包グラフ <tt>tc</tt> に変形する。
+
+<p>
+このアルゴリズムの実装のために Vladimir Prus に感謝する。
+
+
+<H3>Where Defined</H3>
+
+<P>
+<a href="../../../boost/graph/transitive_closure.hpp"><TT>boost/graph/transitive_closure.hpp</TT></a>
+
+<h3>Parameters</h3>
+
+IN: <tt>const Graph&amp; g</tt>
+<blockquote>
+有向グラフで、ここに <tt>Graph</tt> の型は <a
+href="./VertexListGraph.html">Vertex List Graph</a> でかつ <a
+href="./AdjacencyGraph.html">Adjacency Graph</a> のコンセプトのモデルでなければならない。
+</blockquote>
+
+OUT: <tt>GraphTC&amp; tc</tt>
+<blockquote>
+有向グラフで、ここに <tt>GraphTC</tt> の型は <a
+href="./VertexMutableGraph.html">Vertex Mutable Graph</a> でかつ <a
+href="./EdgeMutableGraph.html">Edge Mutable Graph</a> のコンセプトのモデルでなければならない。
+</blockquote>
+
+<h3>Named Parameters</h3>
+
+UTIL/OUT: <tt>orig_to_copy(G_to_TC_VertexMap g_to_tc_map)</tt>
+<blockquote>
+これは入力されたグラフの各頂点を出力の推移閉包グラフ中の新しい相応
+する頂点にマップする。
+</blockquote>
+
+IN: <tt>vertex_index_map(VertexIndexMap&amp; index_map)</tt>
+<blockquote>
+これは各頂点を <tt>[0, num_vertices(g))</tt> の範囲において整数にマップする。
+このパラメータはデフォルトのカラー・プロパティ・マップが使われた時にのみ
+必要である。<tt>VertexIndexMap</tt> の型は <a
+href="../../property_map/ReadablePropertyMap.html">Readable Property
+Map</a> のモデルでなければならない。マップの値型は汎整数型でなければならない。
+グラフの頂点記述子型はマップのキー型として使用できる必要がある。<br>
+
+  <b>デフォルト:</b> <tt>get(vertex_index, g)</tt>
+</blockquote>
+
+
+<h3>Complexity</h3>
+
+時間複雑性 (最悪の場合) は <i>O(|V||E|)</i> である。
+
+<h3>Example</h3>
+
+次は例 <tt><a
+href="../example/transitive_closure.cpp">example/transitive_closure.cpp</a></tt> からと、アルゴリズムによって計算された推移閉包のグラフである。
+
+<table>
+  <tr>
+    <td><img src="tc.gif" width="173" height="264" ></td>
+    <td><img src="tc-out.gif" width="200" height="360"></td>
+  </tr>
+</table>
+
+
+<h3>Implementation Notes</h3>
+
+<p>
+<tt>transitive_closure()</tt> 関数を実装するのに使われているアルゴリズムは
+強成分の検出 [<a
+href="bibliography.html#nuutila95">50</a>, <a
+href="bibliography.html#purdom70">53</a>] に基づいている。
+次の議論はアルゴリズムと、いくつかの関連がある背景理論を述べている。
+
+<p>
+<a name="def:successor-set">頂点 <i>v</i> の<i><b>後継集合</b></i>
+(<i>Succ(v)</i>によって示す)は、頂点 <i>v</i> から<a
+href="graph_theory_review.html#def:reachable">到達可能</a>な頂点の
+集合である。推移閉包 <i>G*</i> 中の <i>v</i> に隣接している頂点の集合は、
+元のグラフ <i>G</i>中の <i>v</i> の後継集合に等しい。推移閉包を計算する事は、
+<i>G</i> 中の各頂点の後継集合を計算する事と等価である。
+
+<p>
+同じ強成分中の全ての頂点は、同じ後継集合を持つ。 (というのは、各頂点は成分中の
+他の全ての頂点から到達可能だからである。) それゆえ、強成分中の全ての頂点
+の後継集合を計算するのは冗長な事である。成分毎にただ一つの頂点の後継集合
+を計算すれば十分である。
+
+<p>
+以下はアルゴリズムの概要である:
+
+<ol>
+<li>
+グラフの<a
+href="strong_components.html#def:strongly-connected-component">強連結成分</a>を
+計算する。
+
+<li>
+凝縮グラフを構築する。<a
+name="def:condensation-graph"><i><b>凝縮グラフ</b></i></a>とは、
+グラフ <i>G=(V,E)</i> に基づくグラフ <i>G'=(V',E')</i> で、
+<i>V'</i> 中の各頂点が <i>G</i> 中の強連結成分に対応し、かつ
+<i>u</i> の成分中のどれかの頂点が <i>v</i> の成分中のどれかの頂点へと接続する
+辺<i>E</i> が存在すれば、そして存在しさえすれば、
+辺 <i>(u,v)</i> が <i>E'</i> 中にあるようなグラフである。
+
+<li>
+凝縮グラフの推移閉包を計算する。次のアルゴリズムを用いて終了する:
+<pre>
+ for each vertex u in G' in reverse topological order
+   for each vertex v in Adj[u]
+     if (v not in Succ(u))
+       Succ(u) = Succ(u) U { v } U Succ(v)   // &quot;U&quot; は集合和を意味する
+</pre>
+頂点 <i>u</i> の後継集合を計算する際に、<i>Adj[u]</i> 中の各頂点の後継集合
+が既に計算されていることを保証するために、頂点は逆トポロジカル順序にあると
+見なされる。
+
+<p>集合和操作の最適化された実装はアルゴリズムのパフォーマンスを改善する。
+それゆえこの実装は <a name="def:chain-decomposition"><i><b>chain
+decomposition</b></i></a>
+ [<a
+href="bibliography.html#goral79">51</a>,<a
+href="bibliography.html#simon86">52</a>] を使用する。
+<i>G</i>の頂点は連鎖 <i>Z<sub>1</sub>, ..., Z<sub>k</sub></i> に分割される。
+ここで各連鎖 <i>Z<sub>i</sub></i> は <i>G</i> 中の道であり、連鎖中の頂点は
+増加していくトポロジカル番号を持つ。後継集合 <i>S</i> はその時連鎖による
+交差の集合によって表される。すなわち<i>S =
+U<sub>i=1...k</sub> (Z<sub>i</sub> &amp; S)</i> である。
+各交差は <i>S</i> 中にもある道 <i>Z<sub>i</sub></i> 中の最初の頂点によって
+表すことができる。なぜなら残りの道も同様に <i>S</i> 中にある事が保証されている
+からである。ベクトルの i 番目の要素が <i>S</i> の交差中の最初の頂点を
+<i>Z<sub>i</sub></i> によって蓄えている時、交差の集合はそれゆえ長さ <i>k</i>
+のベクトルとして表される。
+
+<p>二つの後継集合の和を計算する事、つまり <i>S<sub>3</sub> =
+S<sub>1</sub> U S<sub>2</sub></i> は、その後次の操作によって時間 <i>O(k)</i> の
+内に計算され得る:
+<pre>
+  for i = 0...k
+    S3[i] = min(S1[i], S2[i]) // min は頂点のトポロジカル番号を比較する
+</pre>
+
+<li>凝縮グラフ <i>G'*</i> の推移閉包に基づくグラフ <i>G*</i> を作成する。
+
+</ol>
+
+<br>
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2001</TD><TD>
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>, Indiana Univ.(<A HREF="mailto:jsiek@cs.indiana.edu">jsiek@cs.indiana.edu</A>)
+</TD></TR></TABLE>
+
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:takashi-it@po6.nsk.ne.jp">Takashi Itou</a><br> 
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+
+<p>このドキュメントの対象: Boost Version 1.30.0<br>
+<a href="http://www.boost.org/libs/graph/doc/transitive_closure.html">最新版ドキュメント (英語)</a></p>
+</BODY>
+</HTML> 

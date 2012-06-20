@@ -1,0 +1,120 @@
+<HTML>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<!--
+  -- Copyright (c) Jeremy Siek, Lie-Quan Lee, and Andrew Lumsdaine 2000
+  --
+  -- Permission to use, copy, modify, distribute and sell this software
+  -- and its documentation for any purpose is hereby granted without fee,
+  -- provided that the above copyright notice appears in all copies and
+  -- that both that copyright notice and this permission notice appear
+  -- in supporting documentation.  We make no
+  -- representations about the suitability of this software for any
+  -- purpose.  It is provided "as is" without express or implied warranty.
+  -->
+<Title>Boost Graph Library: Property</Title>
+<BODY BGCOLOR="#ffffff" LINK="#0000ee" TEXT="#000000" VLINK="#551a8b" 
+        ALINK="#ff0000"> 
+<IMG SRC="../../../c++boost.gif" 
+     ALT="C++ Boost" width="277" height="86"> 
+
+<BR Clear>
+
+<H1><A NAME="sec:property"></A>
+<TT>property&lt;PropertyTag, T, NextProperty&gt;</TT>     
+</H1>
+
+このクラスは、グラフの頂点や辺に対してどのような種類のプロパティを付加するかを明示するために <a     
+href="./adjacency_list.html"><tt>adjacency_list</tt></a> もしくは <a    
+href="./adjacency_matrix.html"><tt>adjacency_matrix</tt></a>  
+クラスと同時に使用することができ、それら自身をグラフ・オブジェクトとすることができる。    
+
+<h3>Template Parameters</h3>    
+
+
+<P>
+<TABLE border>
+<TR>
+<th>パラメータ</th><th>説明</th><th>デフォルト</th>
+</tr>
+
+<tr>
+<td><tt>PropertyTag</tt></td>
+
+<td>プロパティを識別するための型（ユニークなプロパティ名を与える目的で使用される）。既に     
+  いくらかの事前定義されたタグがあり、また、タグを付け加える事も簡単にできる。便宜上     
+  BGL では、これらを必要としている関数（例えば <tt>adjacency_list</tt>     
+  の <a    
+href="./adjacency_list.html#property-map-accessors">property map 
+accessor</a>  
+  関数）に対する引数として使用できるように、事前定義されたタグの型オブジェクト（＝列挙値）を提供している。 </td>    
+
+<td>&nbsp;</td>
+</tr>
+
+<tr>
+<td><tt>T</tt></td>
+<td> この型は、プロパティ値の型を明示する。 </td>
+<td>&nbsp;</td>
+</tr>
+
+<tr>
+<td><tt>NextProperty</tt></td>
+<td>このパラメータを与えれば、プロパティの型をネストすることができる。よって、同一のグラフに対して任意の数のプロパティを付加することができる。</td>   
+<td><tt>no_property</tt></td>
+</tr>
+</table>
+
+<h3>Where Defined</h3>
+
+<a href="../../../boost/pending/property.hpp"><tt>boost/pending/property.hpp</tt></a>
+
+<h3>Property Tags</h3>
+
+以下の PropertyTag は <tt>boost/graph/properties.hpp</tt>     
+で定義されている。    
+
+<pre>
+  namespace boost {
+    enum edge_name_t { edge_name }; 
+    enum edge_weight_t { edge_weight }; 
+    enum edge_index_t { edge_index };
+    enum edge_capacity_t { edge_capacity }; 
+    enum edge_residual_capacity_t { edge_residual_capacity }; 
+    enum edge_reverse_t { edge_reverse }; 
+    enum vertex_name_t { vertex_name }; 
+    enum vertex_distance_t { vertex_distance }; 
+    enum vertex_index_t { vertex_index };
+    enum vertex_color_t { vertex_color }; 
+    enum vertex_degree_t { vertex_degree }; 
+    enum vertex_out_degree_t { vertex_out_degree }; 
+    enum vertex_in_degree_t { vertex_in_degree }; 
+    enum vertex_discover_time_t { vertex_discover_time }; 
+    enum vertex_finish_time_t { vertex_finish_time }; 
+    enum graph_name_t { graph_name };
+
+    BOOST_INSTALL_PROPERTY(vertex, index);
+    BOOST_INSTALL_PROPERTY(edge, index);
+    // ...
+  }
+</pre>
+
+　
+<HR>
+<TABLE>
+<TR valign=top>
+<TD nowrap>Copyright &copy 2000-2001</TD><TD>   
+<A HREF="../../../people/jeremy_siek.htm">Jeremy Siek</A>,
+Indiana University (<A
+HREF="mailto:jsiek@osl.iu.edu">jsiek@osl.iu.edu</A>)<br>
+<A HREF="../../../people/liequan_lee.htm">Lie-Quan Lee</A>, Indiana University (<A HREF="mailto:llee@cs.indiana.edu">llee@cs.indiana.edu</A>)<br>
+<A HREF=http://www.osl.iu.edu/~lums>Andrew Lumsdaine</A>,
+Indiana University (<A
+HREF="mailto:lums@osl.iu.edu">lums@osl.iu.edu</A>)
+</TD></TR></TABLE>
+
+<p>Japanese Translation Copyright (C) 2003 <a href="mailto:oki_miyuki&#64cppll.jp">OKI   
+Miyuki</a><br>
+<small>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</small></p>
+
+</BODY>
+</HTML>
