@@ -1,0 +1,795 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html>
+
+<head>
+<meta http-equiv="Content-Type"
+content="text/html; charset=euc-jp">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<title>Boost Libraries</title>
+</head>
+
+<body bgcolor="#FFFFFF" text="#000000">
+
+<table border="1" cellpadding="2" bgcolor="#007F7F">
+    <tr>
+        <td bgcolor="#FFFFFF">
+        <img src="../c++boost.gif"
+        alt="c++boost.gif (8819 bytes)" width="277" height="86"></td>
+        <td><a href="../index.htm"><font color="#FFFFFF" size="4"
+        face="Arial">Home</font></a></td>
+        <td><a href="libraries.htm"><font color="#FFFFFF"
+        size="4" face="Arial">Libraries</font></a></td>
+        <td><a href="../people/people.htm"><font color="#FFFFFF"
+        size="4" face="Arial">People</font></a></td>
+        <td><a href="../more/faq.htm"><font color="#FFFFFF"
+        size="4" face="Arial">FAQ</font></a></td>
+        <td><a href="../more/index.htm"><font color="#FFFFFF"
+        size="4" face="Arial">More</font></a></td>
+    </tr>
+</table>
+
+<h1>Boost Libraries</h1>
+<p>
+<!--<a href="#Alphabetically">Libraries Listed Alphabetically</a><br>
+<a href="#Category">Libraries Listed by Category<br>
+</a>&nbsp;&nbsp;&nbsp;&nbsp; <a href="#String">String and text processing<br>
+</a>&nbsp;&nbsp;&nbsp;&nbsp; <a href="#Containers">Containers<br>
+</a>&nbsp;&nbsp;&nbsp;&nbsp; <a href="#Iterators">Iterators<br>
+</a>&nbsp;&nbsp;&nbsp;&nbsp; <a href="#Algorithms">Algorithms<br>
+</a>&nbsp;&nbsp;&nbsp;&nbsp; <a href="#Function-objects">Function Objects and
+higher-order programming<br>
+</a>&nbsp;&nbsp;&nbsp;&nbsp; <a href="#Generic">Generic Programming</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp; <a href="#Generic">Template
+Metaprogramming</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp; <a href="#Preprocessor">Preprocessor Metaprogramming</a><a href="#Generic"><br>
+</a>&nbsp;&nbsp;&nbsp;&nbsp; <a href="#Concurrent">Concurrent Programming</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp; <a href="#Math">Math and numerics<br>
+</a>&nbsp;&nbsp;&nbsp;&nbsp; <a href="#Correctness">Correctness and testing<br>
+</a>&nbsp;&nbsp;&nbsp;&nbsp; <a href="#Data">Data structures<br>
+</a>&nbsp;&nbsp;&nbsp;&nbsp; <a href="#IO">Input/Output</a><a href="#Memory"><br>
+</a>&nbsp;&nbsp;&nbsp;&nbsp; <a href="#Inter-language">Inter-language support</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp; <a href="#Memory">Memory</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp; <a href="#Parsing">Parsing</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp; <a href="#Miscellaneous">Miscellaneous</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp; <a href="#workarounds">Broken compiler workarounds</a><br>
+<a href="#Obsolete">Obsolete Libraries</a><br>
+<a href="#Beta">Beta Libraries</a></p>-->
+<a href="#Alphabetically">アルファベット順ライブラリリスト</a><br>
+<a href="#Category">カテゴリ別ライブラリリスト<br>
+</a>&nbsp;&nbsp;&nbsp;&nbsp; <a href="#String">文字列とテキスト処理<br>
+</a>&nbsp;&nbsp;&nbsp;&nbsp; <a href="#Containers">コンテナ<br>
+</a>&nbsp;&nbsp;&nbsp;&nbsp; <a href="#Iterators">イテレータ<br>
+</a>&nbsp;&nbsp;&nbsp;&nbsp; <a href="#Algorithms">アルゴリズム<br>
+</a>&nbsp;&nbsp;&nbsp;&nbsp; <a href="#Function-objects">関数オブジェクトとより高位のプログラミング<br>
+</a>&nbsp;&nbsp;&nbsp;&nbsp; <a href="#Generic">ジェネリックプログラミング</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp; <a href="#Generic">テンプレートメタプログラミング</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp; <a href="#Preprocessor">プリプロセッサメタプログラミング</a><a href="#Generic"><br>
+</a>&nbsp;&nbsp;&nbsp;&nbsp; <a href="#Concurrent">並列プログラミング</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp; <a href="#Math">数学と計算<br>
+</a>&nbsp;&nbsp;&nbsp;&nbsp; <a href="#Correctness">正当性とテスト<br>
+</a>&nbsp;&nbsp;&nbsp;&nbsp; <a href="#Data">データ構造<br>
+</a>&nbsp;&nbsp;&nbsp;&nbsp; <a href="#IO">入出力</a><a href="#Memory"><br>
+</a>&nbsp;&nbsp;&nbsp;&nbsp; <a href="#Inter-language">言語間サポート</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp; <a href="#Memory">メモリ</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp; <a href="#Parsing">構文解析</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp; <a href="#Miscellaneous">その他</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp; <a href="#workarounds">不完全なコンパイラの回避手段</a><br>
+<a href="#Obsolete">古いライブラリ</a><br>
+<a href="#Beta">ベータライブラリ</a></p>
+
+
+<!--<p>See <a href="../status/compiler_status.html">Compiler Status</a>
+ page to find out what library works with which compiler.<br>
+See <a href="hdr_depend.html">Header Dependencies</a>  page to find
+out what other headers each boost header includes.<br>
+See <a href="../more/download.html">Download and Installation</a>  page to find out
+how to download and install the libraries.<br>
+See <a href="../tools/build/index.html">Building Boost Libraries</a>  page to find
+out how to build object libraries, when needed.</p>-->
+<p>どのライブラリがどのコンパイラで動くかを理解するには
+<a href="../status/compiler_status.html">Compiler Status</a> のページを見よ。<br>
+どのヘッダが他のどの boost のヘッダをインクルードしているかを理解するには
+<a href="hdr_depend.html">Header Dependencies</a>  のページを見よ。<br>
+ライブラリのダウンロードとインストールについて理解するには、
+ <a href="../more/download.html">Download and Installation</a> のページを見よ。<br>
+必要なら、ライブラリのオブジェクトファイルをビルドする方法を理解するために、
+ <a href="../tools/build/index.html">Building Boost Libraries</a> のページを見よ。</p>
+
+<!--<p>Documentation for some Boost libraries is available in alternative formats:</p>
+<ul>
+  <li>PDF [<a href="http://boost.sourceforge.net/release/boost_1_30_doc_pdf.zip">zip</a>] [<a href="http://boost.sourceforge.net/release/boost_1_30_doc_pdf.tar.gz">tar.gz</a>] [<a href="http://boost.sourceforge.net/release/boost_1_30_doc_pdf.tar.bz2">tar.bz2</a>]</li>
+  <li>Unix man pages [<a href="http://boost.sourceforge.net/release/boost_1_30_doc_man.tar.gz">tar.gz</a>] [<a href="http://boost.sourceforge.net/release/boost_1_30_doc_man.tar.bz2">tar.bz2</a>]</li>
+</ul>-->
+<p>いくつかの Boost ライブラリのドキュメントは、別の形式でも利用できる:</p>
+<ul>
+  <li>PDF [<a href="http://boost.sourceforge.net/release/boost_1_30_doc_pdf.zip">zip</a>] [<a href="http://boost.sourceforge.net/release/boost_1_30_doc_pdf.tar.gz">tar.gz</a>] [<a href="http://boost.sourceforge.net/release/boost_1_30_doc_pdf.tar.bz2">tar.bz2</a>]</li>
+  <li>Unix man pages [<a href="http://boost.sourceforge.net/release/boost_1_30_doc_man.tar.gz">tar.gz</a>] [<a href="http://boost.sourceforge.net/release/boost_1_30_doc_man.tar.bz2">tar.bz2</a>]</li>
+</ul>
+
+<hr>
+
+<!--<h2>Libraries Listed <a name="Alphabetically">Alphabetically</a></h2>-->
+<h2>アルファベット順ライブラリリスト<a name="Alphabetically"></a></h2>
+
+<ul>
+<!--    <li><a href="any/index.html">any</a> - Safe, generic container for single
+      values of different value types, from Kevlin Henney.&nbsp;</li>-->
+    <li><a href="any/index.html">any</a> - 異なる型のひとつの値を格納できる、安全で汎用的な入れ物。Kevlin Henney 作&nbsp;</li>
+<!--    <li><a href="array/index.htm">array</a> - STL compliant
+        container wrapper for arrays of constant size, from
+        Nicolai Josuttis.</li>-->
+    <li><a href="array/index.htm">array</a> - STL に準拠した定数サイズの配列のラッパコンテナ。Nicolai Josuttis 作</li>
+<!--    <li><a href="bind/bind.html">bind</a> and <a href="bind/mem_fn.html"> mem_fn</a> - Generalized binders for function/object/pointers and member functions, from Peter
+      Dimov.</li>-->
+    <li><a href="bind/bind.html">bind</a> and <a href="bind/mem_fn.html"> mem_fn</a> - 
+    関数、オブジェクト、ポインタ、メンバ関数のための汎用的なバインダ。 Peter Dimov 作</li>
+<!--    <li><a href="utility/call_traits.htm">call_traits</a> -
+        Defines types for passing parameters, from John Maddock,
+        Howard Hinnant, et al.</li>-->
+    <li><a href="utility/call_traits.htm">call_traits</a> -
+        関数の引数、戻り値のための適切な型を定義する。John Maddock, Howard Hinnant, et al 作</li>
+<!--    <li><a href="compatibility/index.html">compatibility</a> - Help for
+      non-conforming standard libraries, from Ralf Grosse-Kunstleve and Jens
+      Maurer.</li>-->
+    <li><a href="compatibility/index.html">compatibility</a> - 
+    標準に準拠しないプラットフォームでのライブラリの利用に役立つ。Ralf Grosse-Kunstleve and Jens Maurer 作</li>
+<!--    <li><a href="compose/index.htm">compose</a> - Functional
+        composition adapters for the STL, from Nicolai Josuttis.</li>-->
+    <li><a href="compose/index.htm">compose</a> - 
+    STL の為の関数合成アダプタ Nicolai Josuttis 作</li>
+<!--    <li><a href="utility/compressed_pair.htm">compressed_pair</a>
+        - Empty member optimization, from John Maddock, Howard
+        Hinnant, et al.</li>-->
+    <li><a href="utility/compressed_pair.htm">compressed_pair</a>
+        - 空メンバを最適化する std::pair の拡張。John Maddock, Howard Hinnant, et al 作</li>
+<!--    <li><a href="concept_check/concept_check.htm">concept check</a>
+        - Tools for generic programming, from Jeremy Siek.</li>-->
+    <li><a href="concept_check/concept_check.htm">concept check</a>
+        - ジェネリックプログラミングのためのツール群。 Jeremy Siek 作</li>
+<!--    <li><a href="config/config.htm">config</a> - Helps boost
+        library developers adapt to compiler idiosyncrasies; not
+        intended for library users.</li>-->
+    <li><a href="config/config.htm">config</a> - 
+    boost ライブラリの開発者がコンパイラの特質に適応するのを助ける。
+    ライブラリのユーザのためのものではない。</li>
+<!--    <li><a href="conversion/index.htm">conversion</a> - Numeric,
+        polymorphic, and lexical casts, from Dave Abrahams and
+        Kevlin Henney.</li>-->
+    <li><a href="conversion/index.htm">conversion</a> - 
+    数学的、多相的、辞書的キャスト Dave Abrahams and Kevlin Henney 作</li>
+<!--    <li><a href="crc/index.html">crc</a> - Cyclic Redundancy Code, from Daryle
+      Walker.</li>-->
+    <li><a href="crc/index.html">crc</a> - CRC(巡回冗長コード) Daryle Walker 作</li>
+<!--    <li><a href="date_time/doc/index.html">date_time</a> - Date-Time library from Jeff Garland.</li>-->
+    <li><a href="date_time/doc/index.html">date_time</a> - 日付/時間ライブラリ Jeff Garland 作</li>
+<!--    <li><a href="dynamic_bitset/dynamic_bitset.html">dynamic_bitset</a>
+ - A runtime sized version of <tt>std::bitset</tt> from Jeremy Siek and Chuck Allison.</li>-->
+    <li><a href="dynamic_bitset/dynamic_bitset.html">dynamic_bitset</a> - 
+    <tt>std::bitset</tt> の動的サイズ版。 Jeremy Siek and Chuck Allison 作</li>
+<!--    <li><a href="filesystem/doc/index.htm">filesystem</a> - Portable paths, 
+    iteration over directories, and other useful filesystem operations, from 
+    Beman Dawes.</li>-->
+    <li><a href="filesystem/doc/index.htm">filesystem</a> - 移植性のあるパス、
+    ディレクトリに対する繰り返し操作、その他の役立つファイルシステム操作。
+    Beman Dawes 作</li>
+<!--    <li><a href="format/index.htm">format</a> - Type-safe 'printf-like' format 
+    operations, from Samuel Krempp.</li>-->
+    <li><a href="format/index.htm">format</a> - 型安全な printf 風の書式化操作。Samuel Krempp 作</li>
+<!--    <li><a href="function/index.html">function</a> - Function object wrappers
+      for deferred calls or callbacks, from Doug Gregor.</li>-->
+    <li><a href="function/index.html">function</a> - 遅延呼び出し及びコールバックのための関数オブジェクトラッパ。
+     Doug Gregor 作</li>
+<!--    <li><a href="functional/index.html">functional</a> - Enhanced
+        function object adaptors, from Mark Rodgers.</li>-->
+    <li><a href="functional/index.html">functional</a> - 機能強化されたファンクションオブジェクトアダプタ。
+         Mark Rodgers 作</li>
+<!--    <li><a href="graph/doc/table_of_contents.html">graph</a> -
+        Generic graph components and algorithms, from Jeremy Siek
+        and a University of Notre Dame team.</li>-->
+    <li><a href="graph/doc/table_of_contents.html">graph</a> -
+    汎用グラフコンポーネント及びアルゴリズム。 Jeremy Siek and a University of Notre Dame team 作</li>
+<!--    <li><a href="integer/index.htm">integer</a> - Headers to ease
+        dealing with integral types.</li>-->
+    <li><a href="integer/index.htm">integer</a> - 汎整数型を簡単に扱うためのヘッダ。</li>
+<!--    <li><a href="numeric/interval/doc/interval.htm">interval </a>- Extends the 
+    usual arithmetic functions to mathematical intervals, from Guillaume 
+    Melquiond, Herv&eacute; Br&ouml;nnimann and Sylvain Pion.</li>-->
+    <li><a href="numeric/interval/doc/interval.htm">interval </a>- 
+    数字の範囲に対する通常の数学関数の拡張。Guillaume 
+    Melquiond, Herv&eacute; Br&ouml;nnimann, Sylvain Pion 作</li>
+<!--    <li><a href="io/doc/ios_state.html">io state savers</a> - Save I/O state to 
+    prevent jumbled data, from Daryle Walker.</li>-->
+    <li><a href="io/doc/ios_state.html">io state savers</a> - 
+    入出力の状態を保存して、データが化けるのを防ぐ。 Daryle Walker 作</li>
+<!--    <li><a href="utility/iterator_adaptors.htm">iterator adaptors</a>
+        - Adapt a base type into a standard conforming iterator,
+        and more, from Dave Abrahams, Jeremy Siek, and John
+        Potter.</li>-->
+    <li><a href="utility/iterator_adaptors.htm">iterator adaptors</a>
+        - 標準に準拠したイテレータの定義を手助けしたり、拡張したりする。 Dave Abrahams, Jeremy Siek, and John Potter 作</li>
+<!--    <li><a href="lambda/doc/index.html">lambda</a> - Define small unnamed 
+    function objects at the actual call site, and more, from Jaakko J&auml;vi and 
+    Gary Powell.</li>-->
+    <li><a href="lambda/doc/index.html">lambda</a> - 
+    実際の呼び出し時の、小さな無名関数オブジェクトの定義。, from Jaakko J&auml;vi and 
+    Gary Powell.</li>
+<!--    <li><a href="math/doc/index.html">math</a> - Several contributions in the 
+    domain of mathematics, from various authors.</li>-->
+    <li><a href="math/doc/index.html">math</a> - 数学の領域での多くの貢献。様々な作者による。</li>
+<!--    <li><a href="math/doc/common_factor.html">math/common_factor</a> - Greatest 
+    common divisor and least common multiple, from Daryle Walker.</li>-->
+    <li><a href="math/doc/common_factor.html">math/common_factor</a> - 
+    最大公約数と最小公倍数。 Daryle Walker 作</li>
+<!--    <li><a href="math/octonion/index.html">math/octonion</a> -
+        Octonions, from Hubert Holin.</li>-->
+    <li><a href="math/octonion/index.html">math/octonion</a> -
+        八元数。 Hubert Holin 作</li>
+<!--    <li><a href="math/quaternion/index.html">math/quaterion</a> -
+        Quaterions, from Hubert Holin.</li>-->
+    <li><a href="math/quaternion/index.html">math/quaterion</a> -
+        四元数。 Hubert Holin 作</li>
+<!--    <li><a href="math/special_functions/index.html">math/special_functions</a> -
+        Mathematical special functions such as atanh, sinc, and sinhc,-->
+    <li><a href="math/special_functions/index.html">math/special_functions</a> -
+    特殊な数学関数。atanh, sinc, sinhc など。 Hubert Holin 作</li>
+<!--    <li><a href="mpl/doc/index.html">mpl</a> - Template metaprogramming 
+    framework of compile-time algorithms, sequences and metafunction classes, 
+    from Aleksey Gurtovoy.</li>-->
+<li><a href="mpl/doc/index.html">mpl</a> - テンプレートメタプログラミングのフレームワーク。
+    コンパイル時アルゴリズム、シーケンス、メタ関数クラス。
+     Aleksey Gurtovoy 作</li>    
+<!--    <li><a href="multi_array/doc/index.html">multi_array</a> - Multidimensional 
+    containers and adaptors for arrays of contiguous data, from Ron Garcia.</li>-->
+    <li><a href="multi_array/doc/index.html">multi_array</a> - 
+    メモリ上で連続したデータの配列のための多次元コンテナとアダプタ。 Ron Garcia 作</li>
+<!--    <li><a href="utility/operators.htm">operators</a> - Templates
+        ease arithmetic classes and iterators, from Dave Abrahams
+        and Jeremy Siek.</li>-->
+    <li><a href="utility/operators.htm">operators</a> - 
+    算術クラスやイテレータに適切な演算子を簡単に定義できる要にするテンプレート。 Dave Abrahams and Jeremy Siek 作</li>
+<!--    <li><a href="optional/doc/optional.html">optional</a> - Discriminated-union 
+    wrapper for optional values, from Fernando Cacciola.</li>-->
+    <li><a href="optional/doc/optional.html">optional</a> - 追加の値のための、識別された union のラッパ。
+    Fernando Cacciola 作</li>
+<!--    <li><a href="pool/doc/index.html">pool</a> - Memory pool management, from
+      Steve Cleary.</li>-->
+    <li><a href="pool/doc/index.html">pool</a> - メモリプールの管理。Steve Cleary 作</li>
+<!--    <li><a href="preprocessor/doc/index.html">preprocessor</a> - Preprocessor 
+    metaprogramming tools including repetition and recursion, from Vesa Karvonen.</li>-->
+    <li><a href="preprocessor/doc/index.html">preprocessor</a> - 
+    繰り返しと再帰を含むプリプロセッサメタプログラミングツール群。 Vesa Karvonen 作</li>
+<!--    <li><a href="property_map/property_map.html">property map</a>
+        - Concepts defining interfaces which map key objects to
+        value objects, from Jeremy Siek.</li>-->
+    <li><a href="property_map/property_map.html">property map</a>
+        - キーオブジェクトを値オブジェクトにマップする、コンセプトにより定義されたインタフェース。
+	 Jeremy Siek 作</li>
+<!--    <li><a href="python/doc/index.html">python</a> - Reflects C++
+        classes and functions into <a
+        href="http://www.python.org">Python</a>, from Dave
+        Abrahams.</li>-->
+    <li><a href="python/doc/index.html">python</a> - 
+     C++ クラスと関数を <a href="http://www.python.org">Python</a> に反映する。Dave Abrahams 作</li>
+<!--    <li><a href="random/index.html">random</a> - A complete
+        system for random number generation, from Jens Maurer.</li>-->
+    <li><a href="random/index.html">random</a> - 乱数生成のためのシステム一式。 Jens Maurer 作</li>
+<!--    <li><a href="rational/index.html">rational</a> - A rational
+        number class, from Paul Moore.</li>-->
+    <li><a href="rational/index.html">rational</a> - 有理数クラス。 Paul Moore 作</li>
+<!--    <li><a href="bind/ref.html">ref</a> - A utility library for
+    passing references to generic functions, from Jaako J&auml;rvi,
+    Peter Dimov, Doug Gregor, and Dave Abrahams.</li>-->
+    <li><a href="bind/ref.html">ref</a> - 参照を汎用関数に渡すためのユーティリティライブラリ。
+    Jaako J&auml;rvi, Peter Dimov, Doug Gregor, and Dave Abrahams 作</li>
+<!--    <li><a href="regex/index.htm">regex</a> - Regular expression
+        library, from John Maddock.</li>-->
+    <li><a href="regex/index.htm">regex</a> - 正規表現ライブラリ。 John Maddock 作</li>
+<!--    <li><a href="signals/doc/index.html">signals</a> - managed signals &amp;
+         slots callback implementation, from Doug Gregor.</li>-->
+    <li><a href="signals/doc/index.html">signals</a> - 管理されたシグナルとスロットのコールバックでの実装。
+     Doug Gregor 作</li>
+<!--    <li><a href="smart_ptr/index.htm">smart_ptr</a> - Five smart
+        pointer class templates, from Greg Colvin, Beman Dawes,
+        Peter Dimov, and Darin Adler.</li>-->
+    <li><a href="smart_ptr/index.htm">smart_ptr</a> - 
+    5つのスマートポインタクラステンプレート Greg Colvin, Beman Dawes, Peter Dimov, and Darin Adler 作</li>
+<!--    <li><a href="static_assert/static_assert.htm">static_assert</a>
+        - Static assertions (compile time assertions), from John
+        Maddock.</li>-->
+    <li><a href="static_assert/static_assert.htm">static_assert</a>
+        - 静的アサート(コンパイル時アサート)。 John Maddock 作</li>
+<!--    <li><a href="spirit/index.html">spirit</a> - LL parser framework&nbsp; 
+    represents parsers directly as EBNF grammars in inlined C++, from Joel de 
+    Guzman and team.</li>-->
+    <li><a href="spirit/index.html">spirit</a> - LL 構文解析器のフレームワーク。
+    インラインの C++ で EBNF の文法を直接解析する。 Joel de Guzman and team 作</li>
+<!--    <li><a href="test/doc/index.htm">test</a> - Support for simple program testing, 
+    full unit testing, and for program
+      execution monitoring, from Gennadiy Rozental.</li>-->
+    <li><a href="test/doc/index.htm">test</a> - 
+    単純なプログラムテスト、完全なユニットテスト、プログラム実行のモニタのサポート。 Gennadiy Rozental 作</li>
+<!--    <li><a href="thread/doc/index.html">thread</a> - Portable C++
+      multi-threading, from William Kempf.</li>-->
+    <li><a href="thread/doc/index.html">thread</a> - 移植性のある C++ マルチスレッド。 William Kempf 作</li>
+<!--    <li><a href="timer/index.htm">timer</a> - Event timer,
+        progress timer, and progress display classes, from Beman
+        Dawes.</li>-->
+    <li><a href="timer/index.htm">timer</a> - イベントタイマ、プログラムタイマ、
+    進行表示クラス。 Beman Dawes 作</li>
+<!--    <li><a href="tokenizer/index.htm">tokenizer</a> - Break of a string or other
+      character sequence into a series of tokens, from John Bandela.</li>-->
+    <li><a href="tokenizer/index.htm">tokenizer</a> - 
+    文字列や他の文字シーケンスを、一連のトークンに分割。 John Bandela 作</li>
+<!--    <li><a href="tuple/doc/tuple_users_guide.html">tuple</a> - Ease definition of functions returning multiple values, and more,
+    from Jaakko J&auml;vi.</li>-->
+    <li><a href="tuple/doc/tuple_users_guide.html">tuple</a> - 
+    複数の値を返す関数の簡単な定義など。 Jaakko J&auml;vi 作</li>
+<!--    <li><a href="type_traits/index.htm">type_traits</a> -
+        Templates for fundamental properties of types, from John
+        Maddock, Steve Cleary, et al.</li>-->
+    <li><a href="type_traits/index.htm">type_traits</a> -
+        型の基本的な特徴のためのテンプレート。 John Maddock, Steve Cleary, et al 作</li>
+<!--    <li><a href="numeric/ublas/doc/index.htm">uBLAS</a> - Basic linear algebra 
+    for dense, packed and sparse matrices, from Joerg Walter and Mathias Koch.</li>-->
+    <li><a href="numeric/ublas/doc/index.htm">uBLAS</a> - 
+    密行列、疎行列、圧縮された行列のための基本的な線形代数。
+     Joerg Walter and Mathias Koch 作</li>
+<!--    <li><a href="utility/utility.htm">utility</a> - Class <b>noncopyable</b>
+        plus <b>checked_delete()</b>, <b>checked_array_delete()</b>, <b>next(),</b>&nbsp;
+      <b>prior()</b>
+        function templates, plus <b>base-from-member idiom</b>, from Dave Abrahams and others. </li>-->
+    <li><a href="utility/utility.htm">utility</a> - クラス <b>noncopyable</b> と
+     <b>checked_delete()</b>, <b>checked_array_delete()</b>, <b>next(),</b>, <b>prior()</b>
+     関数テンプレートと、<b>成句: base-from-member</b>。Dave Abrahams and others 作 </li>
+</ul>
+
+<hr>
+
+<!--<h2>Libraries Listed by <a name="Category">Category</a></h2>-->
+<h2><a name="Category">カテゴリ別ライブラリリスト</a></h2>
+
+<!--<h3><a name="String">String</a> and text processing</h3>-->
+<h3><a name="String">文字列</a>とテキスト処理</h3>
+
+<ul>
+<!--    <li><a href="conversion/lexical_cast.htm">conversion/lexical_cast</a> - <tt>lexical_cast</tt>
+      class template, from Kevlin Henney.</li>
+    <li><a href="format/index.htm">format</a> - Type-safe 'printf-like' format 
+    operations, from Samuel Krempp.</li>
+    <li><a href="regex/index.htm">regex</a> - Regular expression
+        library, from John Maddock</li>
+    <li><a href="tokenizer/index.htm">tokenizer</a> - Break of a string or other
+      character sequence into a series of tokens, from John Bandela.</li>-->
+    <li><a href="conversion/index.htm">conversion</a> - 
+    数学的、多相的、辞書的キャスト Dave Abrahams and Kevlin Henney 作</li>
+    <li><a href="format/index.htm">format</a> - 型安全な printf 風の書式化操作。Samuel Krempp 作</li>
+    <li><a href="regex/index.htm">regex</a> - 正規表現ライブラリ。 John Maddock 作</li>
+    <li><a href="spirit/index.html">spirit</a> - LL 構文解析器のフレームワーク。
+    インラインの C++ で EBNF の文法を直接解析する。 Joel de Guzman and team 作</li>
+    <li><a href="tokenizer/index.htm">tokenizer</a> - 
+    文字列や他の文字シーケンスを、一連のトークンに分割。 John Bandela 作</li>
+</ul>
+
+<!--<h3><a name="Containers">Containers</a></h3>-->
+<h3><a name="Containers">コンテナ</a></h3>
+
+<ul>
+<!--    <li><a href="array/index.htm">array</a> - STL compliant
+        container wrapper for arrays of constant size, from
+        Nicolai Josuttis.</li>
+    <li><a href="dynamic_bitset/dynamic_bitset.html">dynamic_bitset</a> - A runtime sized version of <tt>std::bitset</tt> from Jeremy Siek and Chuck Allison.</li>
+    <li><a href="graph/doc/table_of_contents.html">graph</a> -
+        Generic graph components and algorithms, from Jeremy Siek
+        and a University of Notre Dame team.</li>
+    <li><a href="multi_array/doc/index.html">multi_array</a> - Multidimensional 
+    containers and adaptors for arrays of contiguous data, from Ron Garcia.</li>
+    <li><a href="property_map/property_map.html">property map</a>
+        - Concepts defining interfaces which map key objects to
+        value objects, from Jeremy Siek.</li>-->
+    <li><a href="array/index.htm">array</a> - STL に準拠した定数サイズの配列のラッパコンテナ。Nicolai Josuttis 作</li>
+    <li><a href="dynamic_bitset/dynamic_bitset.html">dynamic_bitset</a> - 
+    <li><a href="graph/doc/table_of_contents.html">graph</a> -
+    汎用グラフコンポーネント及びアルゴリズム。 Jeremy Siek and a University of Notre Dame team 作</li>
+    <tt>std::bitset</tt> の動的サイズ版。 Jeremy Siek and Chuck Allison 作</li>
+    <li><a href="multi_array/doc/index.html">multi_array</a> - 
+    メモリ上で連続したデータの配列のための多次元コンテナとアダプタ。 Ron Garcia 作</li>
+    <li><a href="property_map/property_map.html">property map</a>
+        - キーオブジェクトを値オブジェクトにマップする、コンセプトにより定義されたインタフェース。
+	 Jeremy Siek 作</li>
+</ul>
+
+<!--<h3><a name="Iterators">Iterators</a></h3>-->
+<h3><a name="Iterators">イテレータ</a></h3>
+
+<ul>
+<!--    <li><a href="graph/doc/table_of_contents.html">graph</a> -
+        Generic graph components and algorithms, from Jeremy Siek
+        and a University of Notre Dame team.</li>
+    <li><a href="utility/iterator_adaptors.htm">iterator adaptors</a>
+        - Adapt a base type into a standard conforming iterator,
+        and more, from Dave Abrahams, Jeremy Siek, and John
+        Potter.</li>
+    <li><a href="utility/operators.htm">operators</a> - Templates
+        ease arithmetic classes and iterators, from Dave Abrahams
+        and Jeremy Siek.</li>
+    <li><a href="tokenizer/index.htm">tokenizer</a> - Break of a string or other
+      character sequence into a series of tokens, from John Bandela.</li>-->
+    <li><a href="graph/doc/table_of_contents.html">graph</a> -
+    汎用グラフコンポーネント及びアルゴリズム。 Jeremy Siek and a University of Notre Dame team 作</li>
+    <li><a href="utility/iterator_adaptors.htm">iterator adaptors</a>
+        - 標準に準拠したイテレータの定義を手助けしたり、拡張したりする。 Dave Abrahams, Jeremy Siek, and John Potter 作</li>
+    <li><a href="utility/operators.htm">operators</a> - 
+    算術クラスやイテレータに適切な演算子を簡単に定義できる要にするテンプレート。 Dave Abrahams and Jeremy Siek 作</li>
+    <li><a href="tokenizer/index.htm">tokenizer</a> - 
+    文字列や他の文字シーケンスを、一連のトークンに分割。 John Bandela 作</li>
+</ul>
+
+<!--<h3><a name="Algorithms">Algorithms</a></h3>-->
+<h3><a name="Algorithms">アルゴリズム</a></h3>
+
+<ul>
+<!--    <li><a href="graph/doc/table_of_contents.html">graph</a> -
+        Generic graph components and algorithms, from Jeremy Siek
+        and a University of Notre Dame team.</li>
+    <li><a href="utility/utility.htm">utility</a> - Class <b>next(),</b>&nbsp; <b>prior()</b>
+      function templates, from Dave Abrahams and others. </li>-->
+    <li><a href="graph/doc/table_of_contents.html">graph</a> -
+    汎用グラフコンポーネント及びアルゴリズム。 Jeremy Siek and a University of Notre Dame team 作</li>
+    <li><a href="utility/utility.htm">utility</a> - クラス <b>noncopyable</b> と
+     <b>checked_delete()</b>, <b>checked_array_delete()</b>, <b>next(),</b>, <b>prior()</b>
+     関数テンプレートと、<b>成句: base-from-member</b>。Dave Abrahams and others 作 </li>
+</ul>
+
+<!--<h3><a name="Function-objects">Function objects</a> and higher-order programming</h3>-->
+<h3><a name="Function-objects">関数オブジェクト</a>とより高位のプログラミング</h3>
+
+<ul>
+<!--    <li><a href="bind/bind.html">bind</a> and <a href="bind/mem_fn.html"> mem_fn</a> - Generalized binders for function/object/pointers and member functions, from Peter Dimov.</li>
+
+    <li><a href="compose/index.htm">compose</a> - Functional
+        composition adapters for the STL, from Nicolai Josuttis.</li>
+    <li><a href="function/index.html">function</a> - Function object wrappers
+      for deferred calls or callbacks, from Doug Gregor.</li>
+    <li><a href="functional/index.html">functional</a> - Enhanced
+        function object adaptors, from Mark Rodgers.</li>
+    <li><a href="lambda/doc/index.html">lambda</a> - Define small unnamed 
+    function objects at the actual call site, and more, from Jaakko J舐vi and 
+    Gary Powell.</li>
+    <li><a href="bind/ref.html">ref</a> - A utility library for
+    passing references to generic functions, from Jaako J&auml;rvi,
+    Peter Dimov, Doug Gregor, and Dave Abrahams.</li>
+    <li><a href="signals/doc/index.html">signals</a> - managed signals &amp;
+         slots callback implementation, from Doug Gregor.</li>-->
+    <li><a href="bind/bind.html">bind</a> and <a href="bind/mem_fn.html"> mem_fn</a> - 
+    関数、オブジェクト、ポインタ、メンバ関数のための汎用的なバインダ。 Peter Dimov 作</li>
+    <li><a href="function/index.html">function</a> - 遅延呼び出し及びコールバックのための関数オブジェクトラッパ。
+     Doug Gregor 作</li>
+    <li><a href="functional/index.html">functional</a> - 機能強化されたファンクションオブジェクトアダプタ。
+         Mark Rodgers 作</li>
+    <li><a href="lambda/doc/index.html">lambda</a> - 
+    実際の呼び出し時の、小さな無名関数オブジェクトの定義。, from Jaakko J&auml;vi and 
+    Gary Powell.</li>
+    <li><a href="bind/ref.html">ref</a> - 参照を汎用関数に渡すためのユーティリティライブラリ。
+    Jaako J&auml;rvi, Peter Dimov, Doug Gregor, and Dave Abrahams 作</li>
+    <li><a href="signals/doc/index.html">signals</a> - 管理されたシグナルとスロットのコールバックでの実装。
+     Doug Gregor 作</li>
+</ul>
+
+<!--<h3><a name="Generic">Generic</a> Programming</h3>-->
+<h3><a name="Generic">ジェネリック</a>プログラミング</h3>
+
+<ul>
+<!--    <li><a href="utility/call_traits.htm">call_traits</a> -
+        Defines types for passing parameters, from John Maddock,
+        Howard Hinnant, et al.</li>
+    <li><a href="concept_check/concept_check.htm">concept check</a>
+        - Tools for generic programming, from Jeremy Siek.</li>
+    <li><a href="utility/operators.htm">operators</a> - Templates
+        ease arithmetic classes and iterators, from Dave Abrahams
+        and Jeremy Siek.</li>
+    <li><a href="property_map/property_map.html">property map</a>
+        - Concepts defining interfaces which map key objects to
+        value objects, from Jeremy Siek.</li>
+    <li><a href="static_assert/static_assert.htm">static_assert</a>
+        - Static assertions (compile time assertions), from John
+        Maddock.</li>
+    <li><a href="type_traits/index.htm">type_traits</a> -
+        Templates for fundamental properties of types, from John
+        Maddock, Steve Cleary, et al.</li>-->
+    <li><a href="utility/call_traits.htm">call_traits</a> -
+        関数の引数、戻り値のための適切な型を定義する。John Maddock, Howard Hinnant, et al 作</li>
+    <li><a href="concept_check/concept_check.htm">concept check</a>
+        - ジェネリックプログラミングのためのツール群。 Jeremy Siek 作</li>
+    <li><a href="utility/operators.htm">operators</a> - 
+    算術クラスやイテレータに適切な演算子を簡単に定義できる要にするテンプレート。 Dave Abrahams and Jeremy Siek 作</li>
+    <li><a href="property_map/property_map.html">property map</a>
+        - キーオブジェクトを値オブジェクトにマップする、コンセプトにより定義されたインタフェース。
+	 Jeremy Siek 作</li>
+    <li><a href="static_assert/static_assert.htm">static_assert</a>
+        - 静的アサート(コンパイル時アサート)。 John Maddock 作</li>
+    <li><a href="type_traits/index.htm">type_traits</a> -
+        型の基本的な特徴のためのテンプレート。 John Maddock, Steve Cleary, et al 作</li>
+</ul>
+
+<!--<h3>Template <a name="Metaprogramming"> Metaprogramming</a></h3>-->
+<h3>テンプレート<a name="Metaprogramming">メタプログラミング</a></h3>
+
+<ul>
+<!--    <li><a href="static_assert/static_assert.htm">static_assert</a>
+        - Static assertions (compile time assertions), from John
+        Maddock.</li>
+    <li><a href="type_traits/index.htm">type_traits</a> -
+        Templates for fundamental properties of types, from John
+        Maddock, Steve Cleary, et al.</li>-->
+<li><a href="mpl/doc/index.html">mpl</a> - テンプレートメタプログラミングのフレームワーク。
+    コンパイル時アルゴリズム、シーケンス、メタ関数クラス。
+     Aleksey Gurtovoy 作</li>    
+    <li><a href="static_assert/static_assert.htm">static_assert</a>
+        - 静的アサート(コンパイル時アサート)。 John Maddock 作</li>
+    <li><a href="type_traits/index.htm">type_traits</a> -
+        型の基本的な特徴のためのテンプレート。 John Maddock, Steve Cleary, et al 作</li>
+</ul>
+
+<!--<h3><a name="Preprocessor">Preprocessor</a> Metaprogramming</h3>-->
+<h3><a name="Preprocessor">プリプロセッサ</a>メタプログラミング</h3>
+
+<ul>
+<!--    <li><a href="preprocessor/doc/index.html">preprocessor</a> - Preprocessor 
+    metaprogramming tools including repetition and recursion, from Vesa Karvonen.</li>-->
+    <li><a href="preprocessor/doc/index.html">preprocessor</a> - 
+    繰り返しと再帰を含むプリプロセッサメタプログラミングツール群。 Vesa Karvonen 作</li>
+</ul>
+
+<!--<h3><a name="Concurrent">Concurrent</a> Programming</h3>-->
+<h3><a name="Concurrent">並列</a>プログラミング</h3>
+
+<ul>
+<!--    <li><a href="thread/doc/index.html">thread</a> - Portable C++
+      multi-threading, from William Kempf.</li>-->
+    <li><a href="thread/doc/index.html">thread</a> - 移植性のある C++ マルチスレッド。 William Kempf 作</li>
+</ul>
+
+<!--<h3><a name="Math">Math</a> and numerics</h3>-->
+<h3><a name="Math">数学</a>と計算</h3>
+
+<ul>
+<!--    <li><a href="math/doc/index.html">math</a> - Several contributions in the 
+    domain of mathematics, from various authors.</li>
+    <li><a href="conversion/cast.htm">conversion/numeric_cast</a> - <tt>numeric_cast</tt>
+      class template, from Kevlin Henney.</li>
+    <li><a href="integer/index.htm">integer</a> - Headers to ease
+        dealing with integral types.</li>
+    <li><a href="math/doc/common_factor.html">math/common_factor</a> - Greatest 
+    common divisor and least common multiple, from Daryle Walker.</li>
+    <li><a href="math/octonion/index.html">math/octonion</a> -
+      Octonions, from Hubert Holin.</li>
+    <li><a href="math/quaternion/index.html">math/quaterion</a> -
+      Quaterions, from Hubert Holin.</li>
+    <li><a href="math/special_functions/index.html">math/special_functions</a> -
+        Mathematical special functions such as atanh, sinc, and sinhc,
+        from Hubert Holin.</li>
+    <li><a href="multi_array/doc/index.html">multi_array</a> - Multidimensional 
+    containers and adaptors for arrays of contiguous data, from Ron Garcia.</li>
+    <li><a href="utility/operators.htm">operators</a> - Templates
+        ease arithmetic classes and iterators, from Dave Abrahams
+        and Jeremy Siek.</li>
+    <li><a href="random/index.html">random</a> - A complete
+        system for random number generation, from Jens Maurer.</li>
+    <li><a href="rational/index.html">rational</a> - A rational
+        number class, from Paul Moore.</li>
+    <li><a href="numeric/ublas/doc/index.htm">uBLAS</a> - Basic linear algebra 
+    for dense, packed and sparse matrices, from Joerg Walter and Mathias Koch.</li>-->
+    <li><a href="math/doc/index.html">math</a> - 数学の領域での多くの貢献。様々な作者による。</li>
+    <li><a href="conversion/index.htm">conversion</a> - 
+    数学的、多相的、辞書的キャスト Dave Abrahams and Kevlin Henney 作</li>
+    <li><a href="numeric/interval/doc/interval.htm">interval </a>- 
+    数字の範囲に対する通常の数学関数の拡張。Guillaume 
+    Melquiond, Herv&eacute; Br&ouml;nnimann, Sylvain Pion 作</li>
+    <li><a href="integer/index.htm">integer</a> - 汎整数型を簡単に扱うためのヘッダ。</li>
+    <li><a href="math/doc/common_factor.html">math/common_factor</a> - 
+    最大公約数と最小公倍数。 Daryle Walker 作</li>
+    <li><a href="math/octonion/index.html">math/octonion</a> -
+        八元数。 Hubert Holin 作</li>
+    <li><a href="math/quaternion/index.html">math/quaterion</a> -
+        四元数。 Hubert Holin 作</li>
+    <li><a href="math/special_functions/index.html">math/special_functions</a> -
+    特殊な数学関数。atanh, sinc, sinhc など。 Hubert Holin 作</li>
+    <li><a href="multi_array/doc/index.html">multi_array</a> - 
+    メモリ上で連続したデータの配列のための多次元コンテナとアダプタ。 Ron Garcia 作</li>
+    <li><a href="utility/operators.htm">operators</a> - 
+    算術クラスやイテレータに適切な演算子を簡単に定義できる要にするテンプレート。 Dave Abrahams and Jeremy Siek 作</li>
+
+    <li><a href="random/index.html">random</a> - 乱数生成のためのシステム一式。 Jens Maurer 作</li>
+    <li><a href="rational/index.html">rational</a> - 有理数クラス。 Paul Moore 作</li>
+    <li><a href="numeric/ublas/doc/index.htm">uBLAS</a> - 
+    密行列、疎行列、圧縮された行列のための基本的な線形代数。
+     Joerg Walter and Mathias Koch 作</li>
+</ul>
+
+<!--<h3><a name="Correctness">Correctness</a> and testing</h3>-->
+<h3><a name="Correctness">正当性</a>とテスト</h3>
+
+<ul>
+<!--    <li><a href="concept_check/concept_check.htm">concept check</a>
+        - Tools for generic programming, from Jeremy Siek.</li>
+    <li><a href="static_assert/static_assert.htm">static_assert</a>
+        - Static assertions (compile time assertions), from John
+        Maddock.</li>
+    <li><a href="test/doc/index.htm">test</a> - Support for simple program testing, 
+    full unit testing, and for program
+      execution monitoring, from Gennadiy Rozental.</li>-->
+    <li><a href="concept_check/concept_check.htm">concept check</a>
+        - ジェネリックプログラミングのためのツール群。 Jeremy Siek 作</li>
+    <li><a href="static_assert/static_assert.htm">static_assert</a>
+        - 静的アサート(コンパイル時アサート)。 John Maddock 作</li>
+    <li><a href="test/doc/index.htm">test</a> - 
+    単純なプログラムテスト、完全なユニットテスト、プログラム実行のモニタのサポート。 Gennadiy Rozental 作</li>
+</ul>
+
+<!--<h3><a name="Data">Data</a> structures</h3>-->
+<h3><a name="Data">データ</a>構造</h3>
+
+<ul>
+<!--    <li><a href="any/index.html">any</a> - Safe, generic container for single
+      values of different value types, from Kevlin Henney.</li>
+    <li><a href="utility/compressed_pair.htm">compressed_pair</a>
+        - Empty member optimization, from John Maddock, Howard
+        Hinnant, et al.</li>
+    <li><a href="tuple/doc/tuple_users_guide.html">tuple</a> - Ease definition of functions returning multiple values, and more,
+    from Jaakko J舐vi.</li>-->
+    <li><a href="any/index.html">any</a> - 異なる型のひとつの値を格納できる、安全で汎用的な入れ物。Kevlin Henney 作&nbsp;</li>
+    <li><a href="utility/compressed_pair.htm">compressed_pair</a>
+        - 空メンバを最適化する std::pair の拡張。John Maddock, Howard Hinnant, et al 作</li>
+    <li><a href="tuple/doc/tuple_users_guide.html">tuple</a> - 
+    複数の値を返す関数の簡単な定義など。 Jaakko J&auml;vi 作</li>
+</ul>
+
+<!--<h3><a name="IO">Input/Output</a></h3>-->
+<h3><a name="IO">入出力</a></h3>
+<ul>
+<!--  <li><a href="format/index.htm">format</a> - Type-safe 'printf-like' format 
+  operations, from Samuel Krempp.</li>
+  <li><a href="io/doc/ios_state.html">io state savers</a> - Save I/O state to 
+  prevent jumbled data, from Daryle Walker.</li>-->
+    <li><a href="format/index.htm">format</a> - 型安全な printf 風の書式化操作。Samuel Krempp 作</li>
+    <li><a href="io/doc/ios_state.html">io state savers</a> - 
+    入出力の状態を保存して、データが化けるのを防ぐ。 Daryle Walker 作</li>
+</ul>
+
+<!--<h3><a name="Inter-language">Inter-language</a> support</h3>-->
+<h3><a name="Inter-language">言語間</a> サポート</h3>
+
+<ul>
+<!--    <li><a href="python/doc/index.html">python</a> - Reflects C++
+        classes and functions into <a
+        href="http://www.python.org">Python</a>, from Dave
+        Abrahams.</li>-->
+    <li><a href="python/doc/index.html">python</a> - 
+     C++ クラスと関数を <a href="http://www.python.org">Python</a> に反映する。Dave Abrahams 作</li>
+</ul>
+
+<!--<h3><a name="Memory">Memory</a></h3>-->
+<h3><a name="Memory">メモリ</a></h3>
+
+<ul>
+<!--    <li><a href="pool/doc/index.html">pool</a> - Memory pool management, from
+      Steve Cleary.</li>
+    <li><a href="smart_ptr/index.htm">smart_ptr</a> - Five smart
+        pointer class templates, from Greg Colvin, Beman Dawes,
+        Peter Dimov, and Darin Adler.</li>
+    <li><a href="utility/utility.htm">utility</a> - Class <b>noncopyable</b>
+        plus <b>checked_delete()</b>, <b>checked_array_delete()</b>, <b>next(),</b>&nbsp;
+      <b>prior()</b>
+        function templates, plus <b>base-from-member idiom</b>, from Dave Abrahams and others. </li>-->
+    <li><a href="pool/doc/index.html">pool</a> - メモリプールの管理。Steve Cleary 作</li>
+    <li><a href="smart_ptr/index.htm">smart_ptr</a> - 
+    5つのスマートポインタクラステンプレート Greg Colvin, Beman Dawes, Peter Dimov, and Darin Adler 作</li>
+    <li><a href="utility/utility.htm">utility</a> - クラス <b>noncopyable</b> と
+     <b>checked_delete()</b>, <b>checked_array_delete()</b>, <b>next(),</b>, <b>prior()</b>
+     関数テンプレートと、<b>成句: base-from-member</b>。Dave Abrahams and others 作 </li>
+</ul>
+
+<!--<h3><a name="Parsing">Parsing</a></h3>-->
+<h3><a name="Parsing">構文解析</a></h3>
+
+<ul>
+<!--  <li><a href="spirit/index.html">spirit</a> - LL parser framework&nbsp; 
+  represents parsers directly as EBNF grammars in inlined C++, from Joel de 
+  Guzman and team.</li>-->
+    <li><a href="spirit/index.html">spirit</a> - LL 構文解析器のフレームワーク。
+    インラインの C++ で EBNF の文法を直接解析する。 Joel de Guzman and team 作</li>
+</ul>
+
+<!--<h3><a name="Miscellaneous">Miscellaneous</a></h3>-->
+<h3><a name="Miscellaneous">その他</a></h3>
+
+<ul>
+<!--    <li><a href="utility/base_from_member.html">base-from-member</a> - Idiom to 
+    initialize a base class with a member, from Daryle Walker.</li>-->
+<li><a href="utility/base_from_member.html">base-from-member</a> - 基底クラスをメンバと共に初期化するためのイディオム。
+ Daryle Walker 作</li>
+<!--    <li><a href="utility/compressed_pair.htm">compressed_pair</a>
+        - Empty member optimization, from John Maddock, Howard
+        Hinnant, et al.</li>
+    <li><a href="conversion/index.htm">conversion</a> - Numeric,
+        polymorphic, and lexical casts, from Dave Abrahams and
+        Kevlin Henney.</li>
+    <li><a href="crc/index.html">crc</a> - Cyclic Redundancy Code, from Daryle
+      Walker.</li>
+    <li><a href="date_time/doc/index.html">date_time</a> - Date-Time library from Jeff Garland.</li>
+    <li><a href="timer/index.htm">timer</a> - Event timer,
+        progress timer, and progress display classes, from Beman
+        Dawes.</li>
+    <li><a href="utility/utility.htm">utility</a> - Class <b>noncopyable</b>
+        plus <b>checked_delete()</b>, <b>checked_array_delete()</b>, <b>next(),</b>&nbsp;
+      <b>prior()</b>
+        function templates, plus <b>base-from-member idiom</b>, from Dave Abrahams and others. </li>-->
+    <li><a href="utility/compressed_pair.htm">compressed_pair</a>
+        - 空メンバを最適化する std::pair の拡張。John Maddock, Howard Hinnant, et al 作</li>
+    <li><a href="conversion/index.htm">conversion</a> - 
+    数学的、多相的、辞書的キャスト Dave Abrahams and Kevlin Henney 作</li>
+    <li><a href="crc/index.html">crc</a> - CRC(巡回冗長コード) Daryle Walker 作</li>
+    <li><a href="date_time/doc/index.html">date_time</a> - 日付/時間ライブラリ Jeff Garland 作</li>
+    <li><a href="filesystem/doc/index.htm">filesystem</a> - 移植性のあるパス、
+    ディレクトリに対する繰り返し操作、その他の役立つファイルシステム操作。
+    Beman Dawes 作</li>
+    <li><a href="optional/doc/optional.html">optional</a> - 追加の値のための、識別された union のラッパ。
+    Fernando Cacciola 作</li>
+    <li><a href="timer/index.htm">timer</a> - イベントタイマ、プログラムタイマ、
+    進行表示クラス。 Beman Dawes 作</li>
+    <li><a href="utility/utility.htm">utility</a> - クラス <b>noncopyable</b> と
+     <b>checked_delete()</b>, <b>checked_array_delete()</b>, <b>next(),</b>, <b>prior()</b>
+     関数テンプレートと、<b>成句: base-from-member</b>。Dave Abrahams and others 作 </li>
+</ul>
+
+<!--<h3>Broken compiler <a name="workarounds">workarounds</a></h3>-->
+<h3>不完全なコンパイラの<a name="workarounds">回避手段</a></h3>
+
+<ul>
+<!--    <li><a href="compatibility/index.html">compatibility</a> - Help for
+      non-conforming standard libraries, from Ralf Grosse-Kunstleve and Jens
+      Maurer.</li>
+    <li><a href="config/config.htm">config</a> - Helps boost
+        library developers adapt to compiler idiosyncrasies; not
+        intended for library users.</li>-->
+    <li><a href="compatibility/index.html">compatibility</a> - 
+    標準に準拠しないプラットフォームでのライブラリの利用に役立つ。Ralf Grosse-Kunstleve and Jens Maurer 作</li>
+    <li><a href="config/config.htm">config</a> - 
+    boost ライブラリの開発者がコンパイラの特質に適応するのを助ける。
+    ライブラリのユーザのためのものではない。</li>
+</ul>
+
+<p>[Category suggestions from Aleksey Gurtovoy and Beman Dawes]</p>
+
+<hr>
+
+<!--<h2><a name="Obsolete">Obsolete</a> Libraries</h2>-->
+<h2><a name="Obsolete">古い</a>ライブラリ</h2>
+
+<ul>
+<!--    <li><a href="min_rand/index.htm">min_rand</a> - a random
+        number generator class from Beman Dawes. Replaced by <a
+        href="random/index.html">random</a>.</li>-->
+    <li><a href="min_rand/index.htm">min_rand</a> - 
+    乱数生成クラス。 Beman Dawes 作。
+     <a href="random/index.html">random</a> に代わっている。</li>
+
+</ul>
+
+<hr>
+
+<p>Revised <!--webbot bot="Timestamp" s-type="EDITED"
+s-format="%d %b %Y" startspan -->16 Sep 2002<!--webbot bot="Timestamp" i-checksum="14941" endspan --></p>
+<hr align="left">
+<p>
+<p><i>Japanese Translation Copyright (C) 2003 <a href="mailto:kohske@msc.biglobe.ne.jp">Kohske Takahashi</a></i></p>
+<p>
+オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の
+複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」
+に提供されており、いかなる明示的、暗黙的保証も行わない。また、
+いかなる目的に対しても、その利用が適していることを関知しない。
+</p>
+</body>
+</html>
