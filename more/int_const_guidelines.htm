@@ -1,0 +1,311 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="Template"
+content="C:\PROGRAM FILES\MICROSOFT OFFICE\OFFICE\html.dot">
+<meta name="GENERATOR" content="Microsoft FrontPage Express 2.0">
+<title></title>
+</head>
+
+<body bgcolor="#FFFFFF" link="#0000FF" vlink="#800080">
+
+<h2 align="center">Coding Guidelines for Integral Constant
+Expressions</h2>
+
+<p>汎整数定数式は C++ の多くの場面で用いられる。配列のサイズや、
+bit-field (※訳語データベースへ？) 、列挙値の初期化や、型でないテンプ
+レートパラメータ (※訳語データベースへ？) の引数として。しかしながら多
+くのコンパイラは汎整数定数式の扱いに問題を抱えている。つまりこの結果と
+して、特に型でないテンプレートパラメータを使ったプログラミングは、困難
+に満ちたものになりうる。そしてしばしば、特定のコンパイラでは型でないテ
+ンプレートパラメータはサポートされていない、という間違った推論に陥いら
+せる。この短い記事は、これに従えば、汎整数定数式を Boost に正しくサポー
+トされている全てのコンパイラでポータブルな作法で用いることができるよう
+になるガイドラインと回避方法を提供するようにデザインされている。この記
+事は主に Boost ライブラリの作者に向けられたものであるが、何故 Boost の
+コードがそのような方法で書かれているのかを理解することや、自身でポータ
+ブルなコードを書くことを欲するユーザにとっても役に立つものであろう。
+</p>
+
+<h3>汎整数定数式とは何か？</h3>
+
+<p>汎整数定数式は標準のセクション 5.19 で述べられている。そしてしばし
+ば「コンパイル時定数」と呼ばれる。汎整数定数式は下記のいずれかになりう
+る:</p>
+
+<ol>
+    <li>汎整数定数、例えば 0u や 3L。</li>
+    <li>列挙の値。</li>
+    <li>グローバルな汎整数定数、例えば: <br>
+	<code>const int my_INTEGRAL_CONSTANT = 3;</code></li>
+    <li>静的メンバの定数、例えば: <br>
+        <code>struct myclass<br>
+        { static const int value = 0; };</code></li>
+    <li>メンバの列挙の値、例えば:<br>
+        <code>struct myclass<br>
+        { enum{ value = 0 }; };</code></li>
+    <li>整数型や列挙型の型でないテンプレートパラメータ。</li>
+    <li><code>sizeof</code> 式の結果、例えば:<br>
+        <code>sizeof(foo(a, b, c))</code></li>
+    <li>対象の型が整数型か列挙型で、かつ引数がその他の汎整数定数式のい
+        ずれかであるか浮動小数定数である場合の
+        <code>static_cast</code> の結果。</li>
+    <li>二つの汎整数定数式に二項演算子を適用した結果: <br>
+        <code>INTEGRAL_CONSTANT1 op INTEGRAL_CONSTANT2</code> <br>
+		演算子が除算演算子やコンマ演算子で無い場合に提供される。</li>
+    <li>汎整数定数式に単項演算子を適用した結果:<br>
+        <code>op INTEGRAL_CONSTANT1</code><br>
+		演算子がインクリメントやデクリメント演算子で無い場合に提供され
+		る。</li>
+</ol>
+
+<p>&nbsp;</p>
+
+<h3>コーディングガイドライン</h3>
+
+<p>以下のガイドラインは特別な順番で並んでいるわけではない (言い換えれ
+ば、申し訳無いが、あなたはこれら全てに従う必要があるということだ)。そ
+して不完全でもあるかもしれない、コンパイラの変更やさらなる問題との遭遇
+のために、さらにガイドラインが加わるかもしれない。</p>
+
+<p><b><i>クラスメンバの定数を宣言するときは必ず BOOST_STATIC_CONSTANT
+マクロを使う。</i></b></p>
+
+<pre>template &lt;class T&gt;
+struct myclass
+{
+   BOOST_STATIC_CONSTANT(int, value = sizeof(T));
+};</pre>
+
+<p>Rationale: メンバ定数のインライン初期化をサポートしていないコンパイ
+ラもある。メンバの列挙をうまく扱えないコンパイラもある (それらは必ずし
+も汎整数定数式として扱わない)。BOOST_STATIC_CONSTANT マクロは問題のコ
+ンパイラで最も適切な方法を使用する。</p>
+
+<p><b><i>int より大きな型の汎整数定数式を宣言しない。</i></b></p>
+
+<p>Rationale: 理論上は全ての汎整数型を汎整数定数式の中で使用できるが、
+実際問題として、大くのコンパイラは汎整数定数式を <b>int</b> より大きく
+ない型に制限する。</p>
+
+<p><b><i>論理演算子を汎整数定数式に対して使わない。代わりにテンプレー
+トメタプログラミングを使う。</i></b></p>
+
+<p>&lt;boost/type_traits/ice.hpp&gt; ヘッダはたくさんの回避方法のテン
+プレートを含んでいる。それは論理演算子の役割りを成し遂げる。例えば以下
+のように書く代わりに:</p>
+
+<p><code>INTEGRAL_CONSTANT1 || INTEGRAL_CONSTANT2</code></p>
+
+<p>以下を使いなさい:</p>
+
+<p><code>::boost::type_traits::ice_or&lt;INTEGRAL_CONSTANT1,INTEGRAL_CONSTANT2&gt;::value</code></p>
+
+<p>Rationale: 多くのコンパイラ)(特に Borland と Microsoft のコンパイラ)
+は論理演算子を含む汎整数定数式を真の汎整数定数式として認識しない傾向が
+ある。この問題は通常、汎整数定数式がテンプレートのコードの内部の奥深く
+にあって、複写して診断することが難しい場合にのみ現れる。</p>
+
+<p><b>型でないテンプレート引数として使われる汎整数定数式の中でいかなる
+演算子も使うな。</b></p>
+
+<p>以下よりも:</p>
+
+<p><code>typedef myclass&lt;INTEGRAL_CONSTANT1 ==
+INTEGRAL_CONSTANT2&gt; mytypedef;</code></p>
+
+<p>以下を使いなさい:</p>
+
+<p><code>typedef myclass&lt; some_symbol&gt; mytypedef;</code></p>
+
+<p>ただし、<code>some_symbol</code> はその値が <code>(INTEGRAL_CONSTANT1
+== INTEGRAL_CONSTANT2)</code> となる汎整数定数式に与えられた名前である。</p>
+
+<p>Rationale: 古い EDG ベースのコンパイラ (それがそのプラットフォーム
+で最新のバージョンである場合もある。) は、演算子を含む式を型でないテン
+プレートパラメータであると認識しない。たとえそのような式が汎整数定数式
+としてどこか他の場所で使うことができるとしても。</p>
+
+<p><b><i>汎整数定数式を参照するために、常に完全に修飾された名前を使い
+なさい。</i></b></p>
+
+<p>例えば:</p>
+
+<pre><code>typedef</code> myclass&lt; ::boost::is_integral&lt;some_type&gt;::value&gt; mytypedef;</pre>
+
+<p>Rationale: 少なくとも一つのコンパイラ (Borland のもの) は名前が完全
+に修飾されていなければ (完全に修飾されているとは、:: で始まっているこ
+とを指す)、汎整数定数式の名前を認識しない。</p>
+
+<p><b><i>'&lt;' と '::' の間には常に空白を入れなさい。</i></b></p>
+
+<p>例えば:</p>
+
+<pre><code>typedef</code> myclass&lt; ::boost::is_integral&lt;some_type&gt;::value&gt; mytypedef;
+                ^
+                ここにスペースがあることを確認しなさい!</pre>
+
+<p>Rationale: &lt;: はそれ自身で合法的な二重字であって、それゆえ
+&lt;:: は [: と同様に解釈される。</p>
+
+<p><b><i>汎整数定数式としてローカルな名前を使うな。</i></b></p>
+
+<p>Example:</p>
+
+<pre>template &lt;class T&gt;
+struct foobar
+{
+   BOOST_STATIC_CONSTANT(int, temp = computed_value);
+   typedef myclass&lt;temp&gt; mytypedef;  // error
+};</pre>
+
+<p>Rationale: 少なくとも一つのコンパイラ (Borland のもの) はこれを受け
+入れない。</p>
+
+<p>しかしながら、以下を使うことによってこれを修正することができる:</p>
+
+<pre>template &lt;class T&gt;
+struct foobar
+{
+   BOOST_STATIC_CONSTANT(int, temp = computed_value);
+   typedef foobar self_type;
+   typedef myclass&lt;(self_type::temp)&gt; mytypedef;  // OK
+};</pre>
+
+<p>これは少なくとも一つのコンパイラ (VC6) で通らない。汎整数定数式を別
+の特性クラスに移す方がより良い。</p>
+
+<pre>template &lt;class T&gt;
+struct foobar_helper
+{
+   BOOST_STATIC_CONSTANT(int, temp = computed_value);
+};
+
+template &lt;class T&gt;
+struct foobar
+{
+   typedef myclass&lt; ::foobar_helper&lt;T&gt;::value&gt; mytypedef;  // OK
+};</pre>
+
+<p><b><i>型で無いテンプレートパラメータのために他に依存する値を使うな。
+</i></b></p>
+
+<p>例えば:</p>
+
+<pre>template &lt;class T, int I = ::boost::is_integral&lt;T&gt;::value&gt;  // Error can't deduce value of I in some cases.
+struct foobar;</pre>
+
+<p>Rationale: この種の使い方は Borland C++ で失敗する。これはデフォル
+ト値が前のテンプレートパラメータに依存している場合のみの問題であること
+に注意しなさい。例えば、以下は問題無い:</p>
+
+<pre>template &lt;class T, int I = 3&gt;  // OK, default value is not dependent
+struct foobar;</pre>
+
+<p>&nbsp;</p>
+
+<h3>未解決の問題</h3>
+
+<p>以下の問題は解決していないか、コンパイラ毎の解決があるか、一つ以上
+のコーディングガイドラインを破るかのどれかである。</p>
+
+<p><b><i>numeric_limits に気をつけなさい</i></b></p>
+
+<p>ここには三つの問題がある:</p>
+
+<ol>
+    <li>&lt;limits&gt; ヘッダが無いかもしれない。&lt;limits&gt; を決して
+		直接インクルードせず、代わりに &lt;boost/pending/limits.hpp&gt;
+		を使うことが推奨される。このヘッダはもしそれがあるなら、『本当の』
+		&lt;limits&gt; ヘッダをインクルードする。もし無ければ自身の
+		std::numeric_limits の定義を提供する。Boost は &lt;limits&gt; ヘッ
+		ダが無ければ、BOOST_NO_LIMITS マクロも定義する。</li>
+    <li>std::numeric_limits の実装はその静的定数メンバが汎整数定数式とし
+		て使うことができない方法で定義されるかもしれない。これは非標準で
+		あるが、少なくとも二つの標準ライブラリベンダに影響するバグである
+		ようだ。Boost はこの場合、&lt;boost/config.hpp&gt; の中で
+		BOOST_NO_LIMITS_COMPILE_TIME_CONSTANTS を定義する。</li>
+    <li>VC6 には std::numeric_limits のメンバがテンプレートのコードの中
+		で『早まって評価』されうるという奇妙なバグがある。例えば:</li>
+</ol>
+
+<pre>template &lt;class T&gt;
+struct limits_test
+{
+   BOOST_STATIC_ASSERT(::std::numeric_limits&lt;T&gt;::is_specialized);
+};</pre>
+
+<p>このコードはたとえテンプレートがインスタンス化されなくても VC6 でコン
+パイルに失敗する。いくつかの奇怪な理由のために
+<code>::std::numeric_limits&lt;T&gt;::is_specialized</code> はテンプレー
+トパラメータ T が何であろうと常に偽と評価される。この問題は
+std::numeric_limits に依存する式に限定されるようである: 例えば、もし
+<code>::std::numeric_limits&lt;T&gt;::is_specialized</code> を
+<code>::boost::is_arithmetic&lt;T&gt;::value</code> に置換すれば、全てう
+まくいく。以下の回避方法もうまく働くが、コーディングガイドラインに抵触す
+る:</p>
+
+<pre>template &lt;class T&gt;
+struct limits_test
+{
+   BOOST_STATIC_CONSTANT(bool, check = ::std::numeric_limits&lt;T&gt;::is_specialized);
+   BOOST_STATIC_ASSERT(check);
+};</pre>
+
+<p>だから、以下のようなものが多分最上の手段である:</p>
+
+<pre>template &lt;class T&gt;
+struct limits_test
+{
+#ifdef BOOST_MSVC
+   BOOST_STATIC_CONSTANT(bool, check = ::std::numeric_limits&lt;T&gt;::is_specialized);
+   BOOST_STATIC_ASSERT(check);
+#else
+   BOOST_STATIC_ASSERT(::std::numeric_limits&lt;T&gt;::is_specialized);
+#endif
+};</pre>
+
+<p><b><i>sizeof 演算子の使い方に気をつけなさい。</i></b></p>
+
+<p>私の知る限り、全てのコンパイラはその引数が型の名前 (やテンプレートの
+識別子) である場合 sizeof 式を正しく扱うようだ。しかしながら以下のような
+場合問題が起こりうる:</p>
+
+<ol>
+    <li>引数がメンバ変数やローカル変数の名前である場合 (コードは VC6 で
+		はコンパイルされないだろう)。</li>
+    <li>引数が一時変数の生成を含む式である場合 (コードは Borland C++ で
+		コンパイルされないだろう)。</li>
+    <li>引数がオーバーロードされた関数呼出しを含む場合 (コードは
+		Metroworks C++ ではコンパイルされるが、結果は間違った値になる)。
+		</li>
+</ol>
+
+<p><b><i>必要無ければ boost::is_convertible を使うな</i></b></p>
+
+<p>is_convertible は sizeof 演算子を用いて実装されているので、Metroworks
+のコンパイラと使う場合は常に間違った値を返し、Borland のコンパイラではコ
+ンパイルされないかもしれない。(テンプレート引数が使われるかどうかに依る)。
+</p>
+
+<hr>
+
+<p>Copyright Dr John Maddock 2001, all rights reserved.</p>
+
+<hr>
+
+<p>
+Japanese Translation Copyright (C) 2003 shinichiro.h
+&lt;g940455@mail.ecc.u-tokyo.ac.jp&gt;.
+</p>
+
+<p>
+オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の
+複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」
+に提供されており、いかなる明示的、暗黙的保証も行わない。また、
+いかなる目的に対しても、その利用が適していることを関知しない。
+</p>
+
+</body>
+</html>

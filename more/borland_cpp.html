@@ -1,0 +1,335 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Portability Hints: Borland C++ 5.5.1</title>
+</head>
+
+<body bgcolor="#FFFFFF" text="#000000">
+
+<table border="1" bgcolor="#007F7F" cellpadding="2">
+  <tr>
+    <td bgcolor="#FFFFFF"><img src="../c++boost.gif" alt="c++boost.gif (8819 bytes)" width="277" height="86"></td>
+    <td><a href="../index.htm"><font face="Arial,Helvetica" color="#FFFFFF"><big>Home</big></font></a></td>
+    <td><a href="../libs/libraries.htm"><font face="Arial,Helvetica" color="#FFFFFF"><big>Libraries</big></font></a></td>
+    <td><a href="../people/people.htm"><font face="Arial,Helvetica" color="#FFFFFF"><big>People</big></font></a></td>
+    <td><a href="faq.htm"><font face="Arial,Helvetica" color="#FFFFFF"><big>FAQ</big></font></a></td>
+    <td><a href="index.htm"><font face="Arial,Helvetica" color="#FFFFFF"><big>More</big></font></a></td>
+  </tr>
+</table>
+
+<p>
+
+<h1>Portability Hints: Borland C++ 5.5.1</h1>
+
+Boost ライブラリにとって、<a href="lib_guide.htm#Portability">移植性</a>は普遍的な目標である。この目標を達成する第 1 の方法は、 ISO C++ 標準を厳守する事だ。しかし、 ISO C++ は広く複雑な標準であり、ほとんどのコンパイラはまだ ISO C++ に完全には準拠していない。この制限を考慮して移植性を達成するには、一部のコンパイラがまだ完全に実装していない言語機能を熟知するのが賢明だろう。
+<p>
+
+このページには Borland C++ version 5.5.1 コンパイラの言語機能についての、移植性のヒントが書かれている。更に、 Appendix には Borland C++ version 5.5 の追加の問題点が書かれている。 Borland
+C++ 5.5.1 は Win32 用のフリーのコマンドラインコンパイラであり、 <a href="http://www.borland.com/">http://www.borland.com/</a> から入手できる。
+<p>
+
+以下のリストの各項目では個々の問題を説明し、その作用を示すサンプルソースコードを付けている。ここのサンプルコードのほとんどは、 gcc 2.95.2 と Comeau C++ 4.2.44 でコンパイルできる事を確認している。
+
+
+<h2>Preprocessor symbol</h2>
+
+全ての Borland C++ コンパイラで、プリプロセッサシンボル <code>__BORLANDC__</code> が定義されている。このシンボルの値は、コンパイラのバージョン番号の 16 進表記になっている。以下の表に、判明している値を示す。
+<p>
+
+<table border="1">
+<tr>
+<th>Compiler</th>
+<th><code>__BORLANDC__</code> value</th>
+</tr>
+
+<tr>
+<td>Borland C++ Builder 4</td>
+<td>0x0540</td>
+</tr>
+
+<tr>
+<td>Borland C++ Builder 5</td>
+<td>0x0550</td>
+</tr>
+
+<tr>
+<td>Borland C++ 5.5</td>
+<td>0x0550</td>
+</tr>
+
+<tr>
+<td>Borland C++ 5.5.1</td>
+<td>0x0551</td>
+</tr>
+
+<tr>
+<td>Borland C++ Builder 6</td>
+<td>0x0560</td>
+</tr>
+
+</table>
+
+<h2>Core Language</h2>
+
+<h3>[using-directive] <code>using</code> 指令と <code>using</code> 宣言の混在</h3>
+
+<code>using</code> 指令 (名前空間全体が対象) と名前空間レベルの <code>using</code> 宣言 (別の名前空間に属する個々の識別子が対象) を混合して使うと、実際には存在しない曖昧さが生じる。以下が、これを示すコードの一部である。<small><a href="#tnote1">[訳注1]</a></small>
+
+<pre>
+namespace N {
+  int x();
+}
+
+using N::x;
+using namespace N;
+
+int main()
+{
+  &amp;x;     // 曖昧なオーバロード
+}
+</pre>
+
+
+<h3>[using template] クラステンプレートに対する <code>using</code> 宣言</h3>
+
+クラステンプレートの識別子は、他の識別子と同様、 <code>using</code> 宣言の引数として使える。しかし、以下のコードは Borland C++ でコンパイルできない。<small><a href="#tnote1">[訳注1]</a></small>
+
+<pre>
+template&lt;class T&gt;
+class X { };
+
+namespace N
+{
+  // "特化パラメータを使用しないとテンプレート 'X&lt;T&gt;' を使えない"
+  using ::X;
+};
+</pre>
+
+
+<h3>[template const arg] 関数テンプレートの const 引数の型推論</h3>
+
+テンプレート関数の型推論では、最上位の const を削除すべきである。しかし、以下に示すコードの一部によって、 "f&lt;const int&gt;(int)" が実体化されてしまう。
+
+<pre>
+template&lt;class T&gt;
+void f(T x)
+{
+        x = 1;  // 大丈夫
+        (void) &amp;x;
+        T y = 17;
+        y = 20;  // "const オブジェクトは変更できない(関数 f&lt;const int&gt;(int) )"
+        (void) &amp;y;
+}
+
+int main()
+{
+        const int i = 17;
+        f(i);
+}
+</pre>
+
+boost/rational.hpp ヘッダの gcd() 関数関連で、これが問題になる。
+
+
+<h3>[function address] オーバロードされた関数のアドレスの解決</h3>
+
+オーバロードされた関数のアドレスは、一部の文脈で正しく解決されない (std:13.4 [over.over]) 。小さな例を示す。<small><a href="#tnote2">[訳注2]</a></small>
+<pre>
+template&lt;class Arg&gt;
+void f( void(*g)(Arg) );
+
+void h(int);
+void h(double);
+
+template&lt;class T&gt;
+void h2(T);
+
+int main()
+{
+  void (*p)(int) = h;            // これは通る (std:13.4-1.1)
+  void (*p2)(unsigned char) = h2;    // これも通る (std:13.4-1.1)
+  f&lt;int&gt;(h2);  // これも通る (std:13.4-1.3)
+
+  // "h(int) からテンプレート特化を生成できない",
+  // "f&lt;Arg&gt;(void (*)(int)) に一致するものが見つからない"
+  f&lt;double&gt;(h);   // 通るべき (std:13.4-1.3)
+
+  f( (void(*)(double))h);  // C 形式のキャストは通る (std:13.4-1.6 with 5.4)
+
+  // "このコンテキストではオーバロード 'h' が曖昧"
+  f(static_cast&lt;void(*)(double)&gt;(h)); // 通るべき (std:13.4-1.6 with 5.2.9)
+}
+</pre>
+
+<strong>回避手段:</strong> オーバロードされた (されうる) 関数のアドレスの決定には、常に C 形式のキャストを使う。
+
+<h3>[string conversion] <code>const char *</code> から <code>std::string</code> への変換</h3>
+
+テンプレート関数を明示的に実体化する時、引数の <code>const char *</code> 型から <code>std::string</code> 型への暗黙の型変換が失敗する。 (ただし、普通のケースでは成功する) <small><a href="#tnote1">[訳注1]</a></small>
+
+<pre>
+#include &lt;string&gt;
+
+template&lt;class T&gt;
+void f(const std::string &amp; s)
+{}
+
+int main()
+{
+  f&lt;double&gt;("hello");  // "f&lt;T&gt;(char *) に一致するものが見つからない"
+}
+
+</pre>
+
+<strong>回避手段:</strong> テンプレート関数の明示的な実体化 (これには Microsoft Visual
+C++ で重大な問題がある) を避け、該当する型のデフォルトコンストラクトされた使用しないダミー引数を渡すようにする。明示的な実体化を使い続けたいならば、代わりに <code>std::string</code> への明示的な型変換を使うか、 <code>const char *</code> 型の引数を取るテンプレート関数を宣言する。
+
+
+<h3>[template value defaults] テンプレート値パラメータに対する依存したデフォルト引数</h3>
+
+前のテンプレート引数に依存する式をデフォルトとするテンプレート値パラメータは使えない。<small><a href="#tnote1">[訳注1]</a></small>
+
+<pre>
+template&lt;class T&gt;
+struct A
+{
+  static const bool value = true;
+};
+
+// "テンプレートはクラスまたは関数でなければならない", "宣言の構文エラー"
+template&lt;class T, bool v = A&lt;T&gt;::value&gt;
+struct B {};
+
+int main()
+{
+  B&lt;int&gt; x;
+}
+
+</pre>
+
+
+<strong>回避手段:</strong> 関連する非型テンプレート引数が実装の詳細のものなら、継承と完全に限定された識別子を使う (例えば、 ::N::A&lt;T&gt;::value) 。
+
+
+<h3>[function partial ordering] 関数テンプレートの半順序</h3>
+
+std:14.5.5.2 [temp.func.order] に記述されている、関数テンプレートの半順序が働かない。
+
+<pre>
+#include &lt;iostream&gt;
+
+template&lt;class T&gt; struct A {};
+
+template&lt;class T1&gt;
+void f(const A&lt;T1&gt; &)
+{
+  std::cout &lt;&lt; "f(const A&lt;T1&gt;&)\n";
+}
+
+template&lt;class T&gt;
+void f(T)
+{
+  std::cout &lt;&lt; "f(T)\n";
+}
+
+int main()
+{
+  A&lt;double&gt; a;
+  f(a);   // 出力: f(T)  (誤)
+  f(1);   // 出力: f(T)  (正)
+}
+</pre>
+
+<strong>回避手段:</strong> そのような関数全てを一律に、値の引数をとるか参照の引数をとるか、どちらか一方で宣言する。
+
+
+<h3>[instantiate memfun ptr] メンバ関数ポインタによる実体化</h3>
+
+何らかのテンプレート引数に依存する一部のメンバ関数ポインタでテンプレートを実体化しようとすると、コンパイラが処理できない。<small><a href="#tnote1">[訳注1]</a></small>
+<pre>
+template&lt;class U&gt; class C { };
+template&lt;class T&gt;
+class A
+{
+  static const int v = C&lt;void (T::*)()&gt;::value;
+};
+</pre>
+
+<strong>回避手段:</strong> 仲立ちとして <code>typedef</code> を使う。
+
+<pre>
+template&lt;class U&gt; class C { };
+template&lt;class T&gt;
+class A
+{
+  typedef void (T::*my_type)();
+  static const int v = C&lt;my_type&gt;::value;
+};
+</pre>
+
+(David Abrahams 、 Fernando Cacciola 、 Peter Dimov と交換したメールから抜き出したものだ。実際には試していない。)
+
+
+<h2>Library</h2>
+
+
+<h3>[cmath.abs] 関数 <code>double std::abs(double)</code> が無い</h3>
+
+関数 <code>double std::abs(double)</code> が定義されているべきだが (std:26.5-5 [lib.c.math]) 、定義されていない。<small><a href="#tnote1">[訳注1]</a></small>
+
+<pre>
+#include &lt;cmath&gt;
+
+int main()
+{
+  double (*p)(double) = std::abs;  // エラー
+}
+</pre>
+
+<code>std::abs(5.1)</code> と書くと、警告無しで <code>int std::abs(int)</code> が使われるので注意する事。
+<p>
+同じような注意事項が、全ての標準数学関数にも当てはまるようだ。 Borland C++ では、全ての標準数学関数の <code>float</code> と <code>long double</code> のオーバロードが提供されていない。
+<p>
+<strong>回避手段:</strong> 型のジェネリック性が必要ないなら、 <code>std::fabs</code> を使う。
+
+<h2>Appendix: Additional issues with Borland C++ version 5.5</h2>
+
+以下の問題を文書化するのは、主に歴史的な理由による。まだ Borland C++ version 5.5 を使っているならば、 version 5.5.1 にアップグレードする事を強く勧める。 version 5.5.1 では、この項に書かれた問題が修正されている。
+
+<h3>[inline friend] テンプレートクラス内のインラインフレンド関数</h3>
+
+あるクラスのフレンド関数が、フレンド関数宣言より前に宣言されていない時、その関数はクラス定義を囲む名前空間で宣言される。以下に示したコードの一部 (クラステンプレートとフレンド関数のインライン定義の組み合わせ) によって、クラス N::A&lt;int&gt; のフレンドの非テンプレート関数  "bool N::f(int,int)" が宣言 (そして定義) されるべきだ。しかし Borland C++ v5.5 では、関数 f がそれ以前に宣言されている事が求められてしまう。
+
+<pre>
+namespace N {
+template&lt;class T&gt;
+class A
+{
+  // "f は 'N' のメンバではない(関数 main() )"
+  friend bool f(T x, T y) { return x &lt; y; }
+};
+}
+
+int main()
+{
+  N::A&lt;int&gt; a;
+}
+</pre>
+
+このテクニックは boost/operators.hpp で広く使われている。このケースではコンパイラの要求に従ってもうまくいかない。その結果、「 1 つのテンプレートを実体化する事で、たくさんのヘルパ関数を名前空間スコープで宣言する」方法が使えなくなるからだ。 BOOST_NO_OPERATORS_IN_NAMESPACE (BOOST_NO_INLINE_FRIENDS_IN_CLASS_TEMPLATES の方がこのケースに合っているかもしれない) を定義すると、この問題の回避手段がとられるが、それはまた別の問題を引き起こす。 [using-template] を参照。
+
+<p>
+
+<hr>
+<p><a name="tnote1">[訳注1]</a> Borland C++ 5.6 (Borland C++ Builder 6) では修正されているようだ。<br>
+<a name="tnote2">[訳注2]</a> <code>f&lt;double&gt;(h)</code> の問題は Borland C++ 5.6 で修正されているようだ。</p>
+<hr>
+
+2000-09-30 <a href="../people/jens_maurer.htm">Jens Maurer</a>
+<p>Japanese Translation Copyright &copy; 2003 <a href="mailto:gimite@mx12.freecom.ne.jp">Hiroshi Ichikawa</a><br>
+<small><i>オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。</i></small></p>
+<p>このドキュメントの対象: Boost Version 1.30.0<br>
+<a href="http://www.boost.org/more/borland_cpp.html">最新版ドキュメント (英語)</a></p>
+</body>
+</html>

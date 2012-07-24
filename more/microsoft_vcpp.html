@@ -1,0 +1,288 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Portability Hints: Microsoft Visual C++ 6.0 SP4</title>
+</head>
+
+<body bgcolor="#FFFFFF" text="#000000">
+
+<p>
+原文：
+<a href="http://www.boost.org/more/microsoft_vcpp.html">
+http://www.boost.org/more/microsoft_vcpp.html
+</a>
+<br>
+</p>
+
+<table border="1" bgcolor="#007F7F" cellpadding="2">
+  <tr>
+    <td bgcolor="#FFFFFF"><img src="../c++boost.gif" alt="c++boost.gif (8819 bytes)" width="277" height="86"></td>
+    <td><a href="../index.htm"><font face="Arial,Helvetica" color="#FFFFFF"><big>Home</big></font></a></td>
+    <td><a href="../libs/libraries.htm"><font face="Arial,Helvetica" color="#FFFFFF"><big>Libraries</big></font></a></td>
+    <td><a href="../people/people.htm"><font face="Arial,Helvetica" color="#FFFFFF"><big>People</big></font></a></td>
+    <td><a href="faq.htm"><font face="Arial,Helvetica" color="#FFFFFF"><big>FAQ</big></font></a></td>
+    <td><a href="index.htm"><font face="Arial,Helvetica" color="#FFFFFF"><big>More</big></font></a></td>
+  </tr>
+</table>
+
+<p>
+
+<h1>Portability Hints: Microsoft Visual C++ 6.0 SP4</h1>
+
+このページは、<a href="borland_cpp.html">portability hints for Borland C++</a> と同様に、Microsoft Visual C++ version 6.0 service pack 4 コンパイラの特徴についてのヒントを提供する。
+
+広く認められた欠陥のリストは、<a href="http://support.microsoft.com/support/kb/articles/q243/4/51.asp">Microsoft のサポート サイト</a>で見ることができる。
+<p>
+
+次のリスト中の各見出しは、結果を実証するサンプル ソース コードで完結する個々の問題点に関して述べている。
+ここにあるほとんどのサンプル コードは、gcc 2.95.2 と Comeau C++ 4.2.44 でのコンパイルが確認されている。
+
+<h2>Preprocessor symbol</h2>
+
+全ての Microsoft C++ コンパイラで、<code>_MSC_VER</code> というプリプロセッサのシンボルが定義されている。その値は、コンパイラの内部的なバージョン番号の十進表記になっている。他のいくつかのコンパイラもこのシンボルを定義しているため、boost は、 もしコンパイラが本当に Microsoft Visual C++ であるときに限り、_MSC_VER の値として <a href="http://www.boost.org/boost/config.hpp">boost/config.hpp</a> の中で定義されるシンボル <code>BOOST_MSVC</code> を用意している。
+
+以下の一覧表に判明している値を示す。
+<p>
+
+<table border="1">
+<tr>
+<th>コンパイラ</th>
+<th><code>BOOST_MSVC</code> の値</th>
+</tr>
+
+<tr>
+<td>Microsoft Visual C++ 6.0 (SP4 まで)</td>
+<td>1200</td>
+</tr>
+
+</table>
+
+
+<h2>Core Language</h2>
+
+<h3>[chained using] Chaining <code>using</code>-declarations</h3>
+
+連鎖した <code>using</code> 宣言が機能しない。
+<pre>
+void f();
+
+namespace N {
+  using ::f;
+}
+
+void g()
+{
+  using N::f;  // C2873: 'f': シンボルを using 宣言の中で使用することはできません。
+}
+</pre>
+
+
+<h3>[explicit-instantiation] Explicit function template
+instantiation</h3>
+
+関数テンプレートを明示的にインスタンス化しようとして、暗黙的に呼ばれる間違った関数を導いてしまう。
+
+<pre>
+#include &lt;stdio.h&gt;
+
+template&lt;class T&gt;
+void f()
+{
+  printf(&quot;%d\n&quot;, sizeof(T));
+}
+
+int main()
+{
+  f&lt;double&gt;();      // 出力: &quot;1&quot;
+  f&lt;char&gt;();        // 出力: &quot;1&quot;
+  return 0;
+}
+</pre>
+
+
+<h3>[for-scoping] Scopes of definitions in for-loops</h3>
+
+<code>for</code> ループ内における変数定義のスコープは、ループの内部だけのローカルなものであるべきなのに、そうでなく一つ外側のブロックでローカルになっている。
+
+
+<pre>
+int main()
+{
+  for(int i = 0; i &lt; 5; ++i)
+   ;
+  for(int i = 0; i &lt; 5; ++i)  // C2374: 'i': 再定義されています。2 回以上初期化されています。
+   ;
+  return 0;
+}
+</pre>
+
+<strong>回避手段:</strong> 問題となる <code>for</code> ループをもう一つの別の一組の中括弧で囲う.
+<p>
+もう一つの可能な回避手段 (Vesa Karvonen が気付かせてくれた) は次のようなものである。
+<pre>
+#ifndef for
+#define for if (0) {} else for
+#endif
+</pre>
+
+インクルードされたヘッダー内のプラットフォーム依存のインライン関数が、古い形式の <code>for</code> のスコープに依存するかも知れないことに注意。
+
+
+<h3>[inclass-member-init] In-class member initialization</h3>
+
+標準として承認されている <code>std::numeric_limits</code> テンプレートの実装に必要な、クラス内でのメンバーの初期化がうまく機能しない。
+
+<pre>
+struct A
+{
+  static const int i = 5;      // &quot;純粋仮想関数の宣言に構文上の誤りがあります。&quot;
+};
+</pre>
+
+<strong>回避手段:</strong> enum (正しい型とは言えないがコンパイル時に使用できる定数式) を使用するか、またはクラスの外側 (正しい型を使えるがコンパイル時の定数式として使うことは禁止) で定義する。boost ライブラリ中で、どうやって移植性の高いやり方でメンバーとして定数を定義するかのガイドラインを知るには、<a href="int_const_guidelines.htm">Coding Guidelines for Integral Constant Expressions</a> を見ること。
+
+
+<h3>[koenig-lookup] Argument-dependent lookup</h3>
+
+Koenig の自動参照とも呼ばれている引数依存の参照が、オーバーロードされた演算子のでは機能するが普通の関数では機能しない。引数の型によって引き起こされた付加的な名前空間が考慮されているように見えない。
+
+<pre>
+namespace N {
+  struct A {};
+  void f(A);
+}
+
+void g()
+{
+  N::A a;
+  f(a);     // 'f': 定義されていない識別子です。
+}
+</pre>
+
+
+<h3>[template-friend] Templates as friends</h3>
+
+クラスの friend としてテンプレートを定義できない。
+
+<pre>
+template&lt;class T&gt;
+struct A {};
+
+struct B
+{
+  template&lt;class T&gt;
+  friend struct A;     // &quot;構文エラー&quot;
+};
+</pre>
+
+
+<h3>[member-template-outofline] Out-of-line definitions of member
+templates</h3>
+
+メンバーのテンプレートを属するクラスの外で定義するとうまく機能しない。
+
+<pre>
+template&lt;class T&gt;
+struct A
+{
+  template&lt;class U&gt;
+  void f();
+};
+
+template&lt;class T&gt;
+template&lt;class U&gt;   // &quot;構文エラー&quot;
+void A&lt;T&gt;::f()      // &quot;T: 定義されていない識別子です。&quot;
+{
+}
+</pre>
+
+<strong>回避手段:</strong> メンバーのテンプレートを属するクラス内にインラインで定義する。
+
+
+<h3>[partial-spec] Partial specialization</h3>
+
+クラス テンプレートの部分的な特殊化版が機能しない。
+
+<pre>
+template&lt;class T&gt;
+struct A {};
+
+template&lt;class T&gt;
+struct B {};
+
+template&lt;class T&gt;
+struct A&lt;B&lt;T&gt; &gt; {};  // このテンプレート クラスはすでに非テンプレート クラスとして定義されています。
+</pre>
+
+<strong>回避手段:</strong> インタフェイスが重要でない状況では、クラスのメンバーのテンプレートが部分的な特殊化版をシミュレートできることがある。
+
+
+<h3>[template-value] Dependent template value parameters</h3>
+
+既存のテンプレートのパラメータに依存するテンプレート値パラメータは、もし (typename と共に) 正しい文法が使われていても、内部的なコンパイル エラーを引き起こす。
+
+<pre>
+template&lt;class T, typename T::result_type&gt; // C1001: 内部コンパイラ エラー: msc1.cpp, line 1794
+struct B {};
+ // (omit &quot;typename&quot; and it compiles)
+
+</pre>
+
+<strong>回避手段:</strong> &quot;typename&quot; キーワードを使うのを止める。しかしながら、こうすることでそのプログラムは正当であることが保障されなくなる。
+
+
+<h3>[wchar_t] <code>wchar_t</code> is not built-in</h3>
+
+The type <code>wchar_t</code> が組み込み型ではない。
+
+<pre>
+wchar_t x;  // &quot;識別名を宣言するのに、型が指定されていません。&quot;
+</pre>
+
+<strong>回避手段:</strong> Microsoft Visual C++ を使うときには、 <a href="http://www.boost.org/boost/config.hpp">boost/config.hpp</a> ヘッダーは、wchar_t を unsigned short として typedef する形で定義している <code>&lt;cstddef&gt;</code> をインクルードする。特記しておくと、このことは、コンパイラが <code>wchar_t</code> と <code>unsigned short</code> を、標準では別々の型であることが要求されるのに、別々の型とはみなさず、それゆえ <code>wchar_t</code> を使ってオーバーロードを行った場合には曖昧さが生じる、ということを意味するのである。この状況のときは <code>BOOST_NO_INTRINSIC_WCHAR_T</code> マクロが定義される。
+
+
+<h3>[delete-const-pointer] Deleting <code>const X *</code> does not work</h3>
+
+const や volatile で修飾された型へのポインタを delete しようとするとエラーになる。
+
+<pre>
+void f()
+{
+  const int *p = new int(5);
+  delete p;        // C2664: 'const int *' から 'void *' に変換できません。
+}
+</pre>
+
+<strong>回避手段:</strong> 以下のような関数を定義する。
+<pre>
+inline void operator delete(const void *p) throw()
+{ operator delete(const_cast&lt;void*>(p)); }
+</pre>
+それから、operator delete[] 等、<code>std::nothrow</code> な const や volatile 修飾子との結合のための同様の関数。
+
+
+<h2>Standard Library</h2>
+
+<h3>[clib-namespace] C library names in global namespace instead of std</h3>
+<p>&lt;c...&gt; ヘッダーのライブラリの名前は、std 名前空間ではなくグローバルな名前空間におかれている。<p><b>回避手段:</b> <a href="../libs/config/config.htm">boost/config.hpp</a> ヘッダーでは BOOST_NO_STDC_NAMESPACE を定義する。それは次のように使うことができる。
+<pre># ifdef BOOST_NO_STDC_NAMESPACE
+    namespace std { using ::abs; using ::fabs; }
+# endif</pre>
+<p>std::size_t と std::ptrdiff_t は余りに一般的に使われるので、これらのための回避手段は既に boost/config.hpp の中に用意されている。<p>
+<hr>
+
+2001-05-04 <a href="../people/jens_maurer.htm">Jens Maurer</a>
+
+<hr>
+
+<div>
+<i>Japanese Translation Copyright &copy; 2003
+<a href="mailto:f_kojima@fukuicompu.co.jp">Fujio Kojima</a></i>
+<p>
+オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。
+</p>
+</div>
+
+</body>
+</html>

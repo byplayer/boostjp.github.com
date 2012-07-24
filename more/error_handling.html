@@ -1,0 +1,147 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2//EN">
+    <meta name="generator" content="HTML Tidy, see www.w3.org">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <title>Error and Exception Handling</title>
+
+    <h1>Error and Exception Handling</h1>
+
+    <h2>References</h2>
+
+<!--    <p>The following paper is a good introduction to some of the issues of
+    writing robust generic components:-->
+    <p>次の文書はロバストで汎用的なコンポーネントを書くときのいくつかの問題に対する、
+    良い手引きである。
+
+    <blockquote>
+      <a href="generic_exception_safety.html">D. Abrahams: ``Exception Safety
+      in Generic Components''</a>, originally published in <a href=
+      "http://www.springer.de/cgi-bin/search_book.pl?isbn=3-540-41090-2">M.
+      Jazayeri, R. Loos, D. Musser (eds.): Generic Programming, Proc. of a
+      Dagstuhl Seminar, Lecture Notes on Computer Science 1766</a>
+    </blockquote>
+
+    <h2>Guidelines</h2>
+
+<!--    <h3>When should I use exceptions?</h3>-->
+    <h3>いつ例外を使うべきか?</h3>
+
+<!--    <p>The simple answer is: ``whenever the semantic and performance
+    characteristics of exceptions are appropriate.''-->
+    <p>単純な答えは: ``例外のセマンティクスとパフォーマンスの性質が適していればいつでも''</p>
+
+<!--    <p>An oft-cited guideline is to ask yourself the question ``is this an
+    exceptional (or unexpected) situation?'' This guideline has an attractive
+    ring to it, but is usually a mistake. The problem is that one person's
+    ``exceptional'' is another's ``expected'': when you really look at the
+    terms carefully, the distinction evaporates and you're left with no
+    guideline. After all, if you check for an error condition, then in some
+    sense you expect it to happen, or the check is wasted code.-->
+    <p>よく引用されるガイドラインは ``これは例外的な(或いは期待されていない)状況なのか?''
+    とあなた自身に問うことである。このガイドラインはその問題に対して、
+    魅力的な響きがするが、通常間違っている。問題はある人間の``例外的''
+    が、別の人間の ``期待通り'' である、ということである: 
+    その述語をあなたが本当に注意深く見るとき、例外的と期待通りの間の区別は消えて無くなり、
+    ガイドラインはもはやあなたのもとには残らない。
+    結局、もしエラーの状態をチェックするなら、ある意味であなたはそれが起こるのを期待しているか、
+    そうでなければそのチェックは全く無駄なコードなのである。</p>
+
+<!--    <p>A more appropriate question to ask is: ``do we want stack unwinding
+    here?'' Because actually handling an exception is likely to be
+    significantly slower than executing mainline code, you should also ask:
+    ``Can I afford stack unwinding here?'' For example, a desktop application
+    performing a long computation might periodically check to see whether the
+    user had pressed a cancel button. Throwing an exception could allow the
+    operation to be cancelled gracefully. On the other hand, it would probably
+    be inappropriate to throw and <i>handle</i> exceptions in the inner loop of
+    this computation because that would have a significant performance impact.-->
+    <p>この問題により相応しい問いは: ``ここでスタックを巻き戻したいか?''
+    ということである。実際に例外を扱うことは、コードの主流を実行するより
+    かなり遅いと考えられるので、あなたは更にこう問うべきである:
+    ``私はここでスタックを巻き戻す余裕があるのか?''
+    例えば長い計算を行っているデスクトップアプリケーションは、ユーザがキャンセルボタンを押したかどうか、
+    定期的にチェックするだろう。例外を投げれば、キャンセルは美しく行われる。
+    一方、この計算の内側のループで例外を投げ、 <i>扱う</i> ことはおそらく適していない。
+    パフォーマンスにおおいに影響するからである。</p>
+
+<!--    <h3>What About Programmer Errors?</h3>-->
+<h3>プログラマのエラーについては?</h3>
+
+<!--    <p>As a developer, if I have violated a precondition of a library I'm
+    using, I don't want stack unwinding. What I want is a core dump or the
+    equivalent - a way to inspect the state of the program at the exact point
+    where the problem was detected. That usually means <tt>assert()</tt> or
+    something like it.-->
+    <p>開発者として、もし私が自分の使っているライブラリの事前条件を違反したなら、
+    私はスタックを巻き戻したくはない。私が行いたいことは、コアダンプを吐くか、
+    それと同等のことである。つまり、問題が発見された実際の場所で、
+    プログラムの状態を調べる方法が欲しいのである。
+    これは通常、 <tt>assert()</tt> などである。</p>
+
+<!--    <p>Sometimes it is neccessary to have resilient APIs which can stand up to
+    nearly any kind of client abuse, but there is usually a significant cost to
+    this approach. For example, it usually requires that each object used by a
+    client be tracked so that it can be checked for validity. If you need that
+    sort of protection, it can usually be provided as a layer on top of a
+    simpler API. Beware half-measures, though. An API which promises resilience
+    against some, but not all abuse is an invitation to disaster. Clients will
+    begin to rely on the protection and their expectations will grow to cover
+    unprotected parts of the interface.-->
+    <p>ほとんどの種類の、クライアントの誤用に耐えうる、
+    回復力のある API が必要なときもあるだろう。
+    しかし、このアプローチには通常、大きなコストが伴う。
+    例えば、これは通常、クライアントが使うオブジェクトそれぞれについて追跡することで、
+    その妥当性をチェックすることが出来るだろう。
+    もしその種の保護を行う必要があるなら、通常、単純な API の最も上の層として
+    提供することができる。もっともこれは、中途半端な方法だということに気づかなければならない。
+    多くの誤用に - しかし全てではない - 対する回復を約束する API は災いを招く。
+    クライアントはその保護に頼り、その期待はインタフェースが守らない部分にまでふくらむだろう。</p>
+
+<!--    <p><b>Note for Windows developers</b>: unfortunately, the native
+    exception-handling used by most Windows compilers actually throws an
+    exception when you use <tt>assert()</tt>. Actually, this is true of other
+    programmer errors such as segmentation faults and divide-by-zero errors.
+    One problem with this is that if you use JIT (Just In Time) debugging,
+    there will be collateral exception-unwinding before the debugger comes up.
+    Fortunately, there is a simple but little-known workaround, which is to use
+    the following incantation:-->
+    <p><b>Windows 開発者のための注意</b>: 
+    不幸にも、多くの Windows コンパイラに寄って使われるネイティブの例外操作は、
+    あなたが <tt>assert()</tt> を使ったときに、実際に例外を投げる。
+    実際、これはセグメンテーション違反や、ゼロ除算などの他のプログラマのエラーについては正しい。
+    これに関するひとつの問題は、もしあなたが JIT(Just In Time) デバッグを行えば、
+    デバッガが動く前に対応する例外巻き戻しが起こってしまうということである。
+    幸運にも、単純だが余り知られていない回避手段がある。それは、
+    次の決まり文句を使うことである:</p>
+    
+
+    <blockquote>
+<pre>
+extern "C" void straight_to_debugger(unsigned int, EXCEPTION_POINTERS*)
+{
+    throw;
+}
+extern "C" void (*old_translator)(unsigned, EXCEPTION_POINTERS*)
+         = _set_se_translator(straight_to_debugger);
+</pre>
+    </blockquote>
+    <hr>
+
+    <p>&copy; Copyright David Abrahams 2001. Permission to copy, use, modify,
+    sell and distribute this document is granted provided this copyright notice
+    appears in all copies. This document is provided "as is" without express or
+    implied warranty, and with no claim as to its suitability for any purpose. 
+
+    <p>Revised 
+    <!--webbot bot="Timestamp" s-type="EDITED" s-format="%d %B, %Y" startspan -->19 August, 2001<!--webbot bot="Timestamp" endspan i-checksum="34359" -->
+<hr align="left">
+<p>
+<p><i>Japanese Translation Copyright (C) 2003 <a href="mailto:k_takahashi@cppll.jp">Kohske Takahashi</a></i></p>
+<p>
+オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の
+複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」
+に提供されており、いかなる明示的、暗黙的保証も行わない。また、
+いかなる目的に対しても、その利用が適していることを関知しない。
+</p>
+</body>
+</html>

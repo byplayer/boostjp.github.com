@@ -1,0 +1,124 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Boost Download and Installation</title>
+</head>
+
+<body bgcolor="#FFFFFF" text="#000000">
+
+<p>
+原文：
+<a href="http://www.boost.org/more/download.html">
+http://www.boost.org/more/download.html
+</a>
+<br>
+</p>
+
+<table border="1" bgcolor="#007F7F" cellpadding="2">
+  <tr>
+    <td bgcolor="#FFFFFF"><img src="../c++boost.gif" alt="c++boost.gif (8819 bytes)" width="277" height="86"></td>
+    <td><a href="../index.htm"><font face="Arial,Helvetica" color="#FFFFFF"><big>Home</big></font></a></td>
+    <td><a href="../libs/libraries.htm"><font face="Arial,Helvetica" color="#FFFFFF"><big>Libraries</big></font></a></td>
+    <td><a href="../people/people.htm"><font face="Arial,Helvetica" color="#FFFFFF"><big>People</big></font></a></td>
+    <td><a href="faq.htm"><font face="Arial,Helvetica" color="#FFFFFF"><big>FAQ</big></font></a></td>
+    <td><a href="index.htm"><font face="Arial,Helvetica" color="#FFFFFF"><big>More</big></font></a></td>
+  </tr>
+</table>
+
+<h1>Boost Download and Installation</h1>
+
+boost ライブラリでは、易しくダウンロードでき、そして易しく<a href="#Installation">インストール</a>できることを目指している。多くのライブラリは、ダウンロードして解凍しさえすれば、使えるようになっているし、全てのドキュメントも含んでいる。また、もしオブジェクト ライブラリを作ることが必要なら、<a href="../tools/build/index.html">Building Boost Libraries</a> に情報がある。
+
+<h2>Download</h2>
+boost ライブラリは、以下のように様々なフォーマットのものが用意されている。
+<ul>
+  <li><a href="http://boost.sourceforge.net/release/">HTTP ダウンロード</a>:  Boost の全てを単独のアーカイブ ファイルとしたもの (<a href="#.zip">.zip</a> ファイルまたは <a href="#.tar.gz">.tar.gz</a> ファイル) の我々の SourceForge HTTP サイトからのダウンロード。より古いバージョンも利用可能。 (この選択肢は、我々のウェブサイトのホストの月々の料金に不利にならないので、最初に提案される。)</li>
+</ul>
+<ul>
+  <li><a href="http://www.boost.org/boost_all.zip">ZIP ダウンロード</a>: Boost の全てを単独のアーカイブ ファイルとしたものの我々のウェブサイトからのダウンロード。</li>
+</ul>
+<ul>
+  <li><a href="http://www.boost.org/boost_all.tar.gz">TAR.GZ ダウンロード</a> : Boost の全てを単独のアーカイブ ファイルとしたものの我々のウェブサイトからのダウンロード。</li>
+</ul>
+<ul>
+  <li><a href="#CVS">コマンドライン, GUI</a>, または <a href="#Browser">ブラウザ</a> による Boost の <a href="http://sourceforge.net/cvs/?group_id=7586">CVS レポジトリ</a>へのアクセス。</li>
+</ul>
+<ul>
+  <li>このウェブサイト上の各ドキュメントにあるリンクから個々のファイルをダウンロード: 多数のファイルが関連し合っていることや、<a href="../libs/hdr_depend.html">ヘッダー間の依存関係</a>から、この選択肢は通常余り有効とは言えない。</li>
+</ul>
+
+<h3><a name=".zip">.zip</a> file</h3>
+
+.zip フォーマットは、フリーの解凍ツールと商品としての圧縮・解凍ツールの両方で広くサポートされている。もし .zip ファイル用の解凍ツールを持っていない場合は、様々なオペレーティング システムのためのバージョンが供給されている <a href="http://www.info-zip.org/">Info-ZIP</a> のウェブサイトからダウンロードすること。
+<p>
+.zip ファイル内のテキスト ファイルの行末は、それぞれのライブラリの開発者によって供給されたままの状態になっている。これはウィンドウズではうまく機能するが、Unix/Linux 向きではない。.tar.gz ファイルの方は Unix/Linux 向きの行末になっている。
+</p>
+
+<h3><a name=".tar.gz">.tar.gz</a> file</h3>
+
+.tar.gz フォーマットは、Unix/Linux プラットフォームにおいて広くサポートされている。一部のウィンドウズ用の圧縮・解凍ツールはこのフォーマットを読み込むことができる。gzip フォーマットは、各ファイルを個別に圧縮するのではなく、まとめて一つのファイルとして圧縮するため、.zip ファイルよりも小さいのである。
+<p>.tar.gz ファイル内のテキスト ファイルの行末は、Unix/Linux プラットフォームで使い易いように LF に変換されている。</p>
+
+<h2>Boost <a name="CVS">CVS</a> Repository</h2>
+
+<p>ウェブ サイトの HTML を含む全部の配布を含む全ての Boost のファイルは、CVS のレポジトリでメンテナンスされる。</p>
+
+<h3>Boost CVS access via command line or graphical clients</h3>
+
+CVS のクライアントがインストール済みの人達のために、ライブラリは公開された <a href="http://sourceforge.net/cvs/?group_id=7586">Boost CVS レポジトリ</a>からも使えるようになっている。 フリーのコマンドラインのクライアント (Linux/Unix システムでは大抵インストール済み) として <a href="http://www.cvshome.org/">CVS ホームページ</a>に有るものが利用できるし、ウィンドウズ用や Mac 用、その他のシステム用のフリーの GUI のクライアントも <a href="http://www.cvsgui.org/">CvsGui.org</a> に有るものが利用できる。
+<p>コマンドラインのクライアントでの一般的なやり方はこんな感じである。</p>
+<blockquote>
+<code>
+cvs -d:pserver:anonymous@cvs.boost.sourceforge.net:/cvsroot/boost login
+</code>
+<br>
+[Hit &lt;return&gt; when it asks for a password]
+<br>
+<code>
+cvs -z3 -d:pserver:anonymous@cvs.boost.sourceforge.net:/cvsroot/boost checkout boost
+<br>
+cvs -d:pserver:anonymous@cvs.boost.sourceforge.net:/cvsroot/boost logout
+</code>
+</blockquote>
+
+もっと詳しく知りたければ、使っている CVS クライアントのマニュアルを読んでほしい。
+<p>
+このアクセスはリードオンリーである。もしあなたがライブラリの作者で CVS の書き込みをしたいのなら、<a href="mailto:boost-owner@yahoogroups.com">モデレータ</a>の一人に連絡をとってほしい。
+
+
+<h3>Boost CVS access via web <a name="Browser">Browser</a></h3>
+
+最近のウェブ ブラウザから CVS のアーカイブにアクセスするため、<a href="http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/boost/boost/">ウェブ ブラウズ用インタフェイス</a>も使うことができる。時間が経つにつれてどのようにファイルが変わってきたかを見るために color diff のどれかを試してみてほしい。
+
+
+
+<h2><a name="Installation">Installation</a></h2>
+
+Boost には、まだ標準化されたインストールの手順が無い。開発中のもので興味を引くものが有る。これを書いている時点で <a href="../people/william_kempf.htm">Bill Kempf</a> が一元化の作業をボランティアでやってきていて、ボランティアを募っている。もしあなたがこの分野の専門的な知識 (特にクロス プラットフォームに関する専門的な知識) が有って貢献してもらえるのであれば、<a href="http://lists.boost.org/mailman/listinfo.cgi/boost-install">Boost Install</a> メーリングリストで知らせてほしい。
+<p>
+
+とは言うものの、開発プロジェクトで Boost を使うために準備しておくことは、比較的容易である。ほとんどの boost ライブラリは、ヘッダー ファイルの中で完全に実装されている。使うための準備は、boost のルート ディレクトリをあなたのコンパイラの <code>#include&lt;...&gt;</code> の検索パスのリストに加えるだけである。例えば、Windows 2000 を使っている場合, もし boost_all.zip から C ドライブの一番上の位置に 1.28.0 のリリース解凍しているとすると、ほとんどのコンパイラで使用可能なコマンドラインにおいて '-Ic:/boost_1_28_0' を追加する。
+
+<p>
+<a href="../libs/python/doc/index.html">Python</a> と  <a href="../libs/regex/index.htm">Regex</a>、そして <a href="../libs/thread/doc/index.html">Threads</a> ライブラリは、別々に分かれたソース ファイルとして実装されており、それゆえ使う前にコンパイルが必要である。そのようなライブラリを準備するための自動的なツールについて知りたければ、<a href="../tools/build/index.html">Building Boost Libraries</a> を見ること。全てのライブラリがそうであれば良いのであるが、個々のライブラリの内のいくつかは様々なコンパイラのための make ファイルやプロジェクト ファイルも含んでいる。
+<p>
+
+<hr>
+
+Revised <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%d %B, %Y" startspan -->06 August, 2002<!--webbot bot="Timestamp" endspan i-checksum="34416" -->
+<p>Written by&nbsp; <a href="../people/jens_maurer.htm">Jens Maurer</a>
+2001-02-11</p>
+
+<hr>
+
+<div>
+<i>Japanese Translation Copyright &copy; 2003
+<a href="mailto:f_kojima@fukuicompu.co.jp">Fujio Kojima</a></i>
+<p>
+オリジナルの、及びこの著作権表示が全ての複製の中に現れる限り、この文書の複製、利用、変更、販売そして配布を認める。このドキュメントは「あるがまま」に提供されており、いかなる明示的、暗黙的保証も行わない。また、いかなる目的に対しても、その利用が適していることを関知しない。
+</p>
+</div>
+
+</body>
+</html>
